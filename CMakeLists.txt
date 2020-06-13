@@ -60,7 +60,6 @@ if(MSVC)
 else()
   set(Boost_ARCHITECTURE "-x64")
   find_package(Boost MODULE COMPONENTS system thread)
-#  find_package(Boost )
 endif()
 
 message("Boost_INCLUDE_DIRS: " ${Boost_INCLUDE_DIRS})

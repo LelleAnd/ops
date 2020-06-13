@@ -20,10 +20,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: list environment
-        run: env
-      - name: cmake version
-        run: cmake --version
+      #- name: list environment
+      #  run: env
+      #- name: cmake version
+      #  run: cmake --version
       #- name: GTest Get
       #  run: git clone https://github.com/google/googletest/ $HOME/gtest
       #- name: GTest Build
@@ -36,6 +36,10 @@ jobs:
       #  run: sudo apt-get install cppcheck
       - name: Set BOOST_HOME
         run: echo "::set-env name=BOOST_HOME::$BOOST_ROOT_1_72_0"
+      - name: debug
+        run: ls -al $BOOST_HOME
+      - name: debug2
+        run: ls -al $BOOST_HOME/lib
       - name: Build
         run: make bootstrap
       #  env:

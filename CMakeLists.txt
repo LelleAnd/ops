@@ -116,12 +116,11 @@ find_jar(SWINGLAYOUT_JAR swing-layout
 # set path to where jars should be installed
 set(OPS_JAR_REL_INSTALL_PATH lib/ops)
 
-if(NOT CMAKE_BUILD_TYPE MATCHES "Bootstrap")
   # Use opsc script from Bootstrap phase, will be used in all subdirs under this one
   if(WIN32)
-    find_file(OPSC_COMPILER NAMES opsc.bat PATHS ${CMAKE_INSTALL_PREFIX}/lib/ops NO_DEFAULT_PATH)
+    SET(OPSC_COMPILER ${PROJECT_BINARY_DIR}/bin/opsc.bat)
   else()
-    find_file(OPSC_COMPILER NAMES opsc.sh PATHS ${CMAKE_INSTALL_PREFIX}/lib/ops NO_DEFAULT_PATH)
+    SET(OPSC_COMPILER ${PROJECT_BINARY_DIR}/bin/opsc.sh)
   endif()
   message(">>>> OPSC_COMPILER= " ${OPSC_COMPILER})
 
@@ -132,7 +131,6 @@ if(NOT CMAKE_BUILD_TYPE MATCHES "Bootstrap")
   message(">>>> OPSJLIB_JAR= " ${OPSJLIB_JAR})
   find_jar(CONFIGURATIONLIB_JAR ConfigurationLib PATHS ${OPSJAR_PATH})
   message(">>>> CONFIGURATIONLIB_JAR= " ${CONFIGURATIONLIB_JAR})
-endif()
 
 ################################################################################
 # User Options
@@ -162,11 +160,6 @@ endif()
 
   add_subdirectory(CSharp)
 
-if(CMAKE_BUILD_TYPE MATCHES "Bootstrap")
-  # Need to add the install of C++ headers, which is independent on Debug or Opt builds
-  add_subdirectory(Cpp)
-
-else()
   # add the C++ source, only if Boost is loaded
   if(Boost_FOUND)
     add_subdirectory(Cpp)
@@ -179,15 +172,6 @@ else()
   else()
     message(WARNING "install Boost to build OPS C++ libraries")
   endif()
-
-  ################################################################################
-  # Build Examples
-  # We need the opsc compiler from the Bootstrap phase to generate code for the examples
-    option(OPS_BUILD_EXAMPLES "Enable to build the example applications" ON)
-    if(OPS_BUILD_EXAMPLES AND CMAKE_BUILD_TYPE MATCHES "Debug")
-      add_subdirectory(Examples)
-  endif()
-endif()
 
 ################################################################################
 # present the packaging option only if we have the cpack command defined (effectively >= 2.6.0)

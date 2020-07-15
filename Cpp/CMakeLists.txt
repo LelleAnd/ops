@@ -1,5 +1,3 @@
-
-if(CMAKE_BUILD_TYPE MATCHES "Bootstrap")
   ## Define constants when using fixed length strings internally and in OPS interface
   ## Max name length for: DomainId, ParticipantId, TopicName, PublisherName, SubscriberName, ...
   ## If you use ops::utilities::nnn() the length need to be able to handle Domain::TopicName
@@ -39,7 +37,6 @@ if(CMAKE_BUILD_TYPE MATCHES "Bootstrap")
 
   ## Configure C++ include file with the constant values
   configure_file(OPSStringLengths.h.in ${CMAKE_CURRENT_SOURCE_DIR}/include/OPSStringLengths.h)
-endif()
 
 # Make the headers visible to everything (below this location)
 include_directories(
@@ -66,7 +63,6 @@ endif()
 # add the source
 add_subdirectory(source)
 
-if(NOT CMAKE_BUILD_TYPE MATCHES "Bootstrap")
 ################################################################################
 # Documentation
 
@@ -87,5 +83,4 @@ if(BUILD_DOCUMENTATION AND DOXYGEN)
     DESTINATION doc/ops
     COMPONENT ops_doc
   )
-endif()
 endif()

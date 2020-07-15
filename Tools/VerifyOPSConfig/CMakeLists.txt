@@ -1,7 +1,7 @@
 
 # We are going to need the OPS headers
 include_directories(
-  ${CMAKE_SOURCE_DIR}/Cpp/include
+  ${PROJECT_SOURCE_DIR}/Cpp/include
 )
 
 # We are going to need the boost headers

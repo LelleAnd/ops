@@ -1,8 +1,8 @@
 
 # We are going to need the OPS headers
 include_directories(
-  ${CMAKE_SOURCE_DIR}/Cpp/include
-  ${CMAKE_SOURCE_DIR}/Common/idl/Generated/Cpp
+  ${PROJECT_SOURCE_DIR}/Cpp/include
+  ${PROJECT_SOURCE_DIR}/Common/idl/Generated/Cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/idl/Generated/Cpp
 )
 

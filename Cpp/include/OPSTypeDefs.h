@@ -109,7 +109,7 @@
 //#define REPLACE_OPS_LOCKABLE      // Removes Lockable() implementation from library so you can use your own
 
 
-#define OPS_ENABLE_DEBUG_HANDLER	// Adds some debug functionality
+//#define OPS_ENABLE_DEBUG_HANDLER	// Adds some debug functionality
 
 // -----------------------------------------------------------------------------
 // Configure the fixed length string implementation to NOT have std::string support members.

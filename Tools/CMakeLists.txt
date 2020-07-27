@@ -1,28 +1,13 @@
-
-if(CMAKE_BUILD_TYPE MATCHES "Bootstrap")
-
-  # We only build Java during the Bootstrap phase, since it is needed during
-  # bootstrap and there isn't any difference between debug and opt builds
   add_subdirectory(OPSCompilerLib)
   add_subdirectory(IDLParser)
   add_subdirectory(OPSReflectionLib)
   add_subdirectory(opsc)
-
-else()
-
-  # Tools written in C++ is compiled for both debug and opt builds
-  add_subdirectory(OPSListener)
+  #add_subdirectory(OPSListener)
   add_subdirectory(VerifyOPSConfig)
-  add_subdirectory(DebugConsole)
+  #add_subdirectory(DebugConsole)
   add_subdirectory(OPSBridge)
 
-endif()
-
 # Install the latest template files
-# Only during the Bootstrap phase, since it is needed during
-# bootstrap and there isn't any difference between debug and opt builds
-if(CMAKE_BUILD_TYPE MATCHES "Bootstrap")
-
   set(TMPL_PATH NBOPSIDLSupport/src/ops/netbeansmodules/idlsupport/templates)
   set(OPS_TEMPLATE_FILES
     ${TMPL_PATH}/adabodyenumtemplate.tpl
@@ -89,7 +74,7 @@ if(CMAKE_BUILD_TYPE MATCHES "Bootstrap")
 
   add_jar(IDLTemplates ${OPS_TEMPLATE_FILES}
     VERSION ${OPS_VERSION}
-    OUTPUT_DIR ${CMAKE_BINARY_DIR}/bin
+    OUTPUT_DIR ${PROJECT_BINARY_DIR}/bin
   )
 
   # in cmake-3.1 (at least) the install_jar is broken for Windows
@@ -97,8 +82,7 @@ if(CMAKE_BUILD_TYPE MATCHES "Bootstrap")
     install_jar(IDLTemplates ${OPS_JAR_REL_INSTALL_PATH})
   else()
     # install manually
-    set(JAR_OUTPUT ${CMAKE_BINARY_DIR}/bin/IDLTemplates-${OPS_VERSION}.jar)
+    set(JAR_OUTPUT ${PROJECT_BINARY_DIR}/bin/IDLTemplates-${OPS_VERSION}.jar)
     install(FILES ${JAR_OUTPUT} DESTINATION ${OPS_JAR_REL_INSTALL_PATH})
     install(FILES ${JAR_OUTPUT} DESTINATION ${OPS_JAR_REL_INSTALL_PATH} RENAME IDLTemplates.jar)
   endif()
-endif()

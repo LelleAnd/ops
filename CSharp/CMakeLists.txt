@@ -1,6 +1,3 @@
-
-if(NOT CMAKE_BUILD_TYPE MATCHES "Bootstrap")
-
   if(MINGW)
     message(STATUS "No support for CSharp when building with MinGW toolchain yet")
     return()
@@ -32,5 +29,3 @@ if(NOT CMAKE_BUILD_TYPE MATCHES "Bootstrap")
   else()
     message(STATUS "CSharp compiler not found...")
   endif()
-
-endif()

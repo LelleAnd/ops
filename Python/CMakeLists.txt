@@ -1,6 +1,3 @@
-
-if(CMAKE_BUILD_TYPE MATCHES "Bootstrap")
-
   # We only handle Python during the Bootstrap phase, since there isn't any
   # difference between debug and opt builds
   # Build python source distribution of ops
@@ -40,5 +37,3 @@ if(CMAKE_BUILD_TYPE MATCHES "Bootstrap")
   add_custom_target(target ALL DEPENDS ${OUTPUT})
 
   install(FILES ${OUTPUT} DESTINATION lib)
-
-endif()

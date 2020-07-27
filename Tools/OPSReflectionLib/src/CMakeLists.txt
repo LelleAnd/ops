@@ -9,7 +9,7 @@ set(OPSREFLECTIONLIB_SRC
 add_jar(OPSReflectionLib ${OPSREFLECTIONLIB_SRC}
   INCLUDE_JARS ConfigurationLib JarSearch OPSCompilerLib OPSJLib
   VERSION ${OPS_VERSION}
-  OUTPUT_DIR ${CMAKE_BINARY_DIR}/bin
+  OUTPUT_DIR ${PROJECT_BINARY_DIR}/bin
 )
 
 
@@ -18,7 +18,7 @@ if(UNIX)
   install_jar(OPSReflectionLib ${OPS_JAR_REL_INSTALL_PATH})
 else()
   # install manually
-  set(JAR_OUTPUT ${CMAKE_BINARY_DIR}/bin/OPSReflectionLib-${OPS_VERSION}.jar)
+  set(JAR_OUTPUT ${PROJECT_BINARY_DIR}/bin/OPSReflectionLib-${OPS_VERSION}.jar)
   install(FILES ${JAR_OUTPUT} DESTINATION ${OPS_JAR_REL_INSTALL_PATH})
   install(FILES ${JAR_OUTPUT} DESTINATION ${OPS_JAR_REL_INSTALL_PATH} RENAME OPSReflectionLib.jar)
 endif()

@@ -17,8 +17,8 @@ endif()
 include_directories(${Boost_INCLUDE_DIRS})
 # The ops C++ headers are at:
 include_directories(
-  ${CMAKE_SOURCE_DIR}/Cpp/include
-  ${CMAKE_SOURCE_DIR}/Common/idl/Generated/Cpp
+  ${PROJECT_SOURCE_DIR}/Cpp/include
+  ${PROJECT_SOURCE_DIR}/Common/idl/Generated/Cpp
 )
 # The Gtest headers are at:
 include_directories(${GTEST_INCLUDE_DIRS})

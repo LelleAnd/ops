@@ -100,6 +100,7 @@ public class FileParser implements IDLFileParser
             public void onEvent(IDLField eventData, ParserEvent e)
             {
                 eventData.setComment(pendingComment);
+                eventData.setDirective(pendingDirective);
                 idlClass.addIDLField(eventData);
                 pendingComment = "";
                 pendingDirective = "";

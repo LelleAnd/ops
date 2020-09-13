@@ -11,23 +11,23 @@ public interface IDLParserConstants {
   /** End of File. */
   int EOF = 0;
   /** RegularExpression Id. */
-  int ID = 34;
+  int ID = 35;
   /** RegularExpression Id. */
-  int OCTALINT = 35;
+  int OCTALINT = 36;
   /** RegularExpression Id. */
-  int DECIMALINT = 36;
+  int DECIMALINT = 37;
   /** RegularExpression Id. */
-  int HEXADECIMALINT = 37;
+  int HEXADECIMALINT = 38;
   /** RegularExpression Id. */
-  int FLOATONE = 38;
+  int FLOATONE = 39;
   /** RegularExpression Id. */
-  int FLOATTWO = 39;
+  int FLOATTWO = 40;
   /** RegularExpression Id. */
-  int CHARACTER = 40;
+  int CHARACTER = 41;
   /** RegularExpression Id. */
-  int STRING = 41;
+  int STRING = 42;
   /** RegularExpression Id. */
-  int ANOTATION = 42;
+  int ANOTATION = 43;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -45,6 +45,7 @@ public interface IDLParserConstants {
     "\";\"",
     "\"//@\"",
     "\"=\"",
+    "\"..\"",
     "\".\"",
     "\"class\"",
     "\"enum\"",

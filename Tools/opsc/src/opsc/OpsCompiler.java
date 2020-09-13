@@ -682,6 +682,7 @@ public class OpsCompiler
             System.out.println("    field.getType()               : " + field.getType());
             System.out.println("    field.getFullyQualifiedType() : " + field.getFullyQualifiedType());
             System.out.println("    field.getComment()            : " + field.getComment());
+            System.out.println("    field.getDirective()          : " + field.getDirective());
             System.out.println("    field.getValue()              : " + field.getValue());
             System.out.println("    field.isIdlType()             : " + field.isIdlType());
             System.out.println("    field.isEnumType()            : " + field.isEnumType());

@@ -30,6 +30,7 @@ import java.net.URL;
 import parsing.IDLClass;
 import parsing.IDLField;
 import parsing.IDLEnumType;
+import opsc.CompilerSupport;
 
 /**
  *
@@ -626,6 +627,7 @@ public class OpsCompiler
     protected void secondStage()
     {
       for (IDLClass idlClass : _parser._idlClasses) {
+        int version = -1;
         for (IDLField field : idlClass.getFields()) {
           // Parser only set enumType for our locally defined enums
           // Set first enum value as init value for enum fields
@@ -644,7 +646,11 @@ public class OpsCompiler
           if (field.isIdlType()) {
             lookupType(idlClass, field);
           }
+          // Check if any field specified the version directive and if so save the highest version found
+          int v = CompilerSupport.highestVersion(idlClass.getClassName() + "." + field.getName(), field.getDirective());
+          if (version < v) { version = v; }
         }
+        idlClass.setVersion(version);
       }
     }
 
@@ -658,6 +664,7 @@ public class OpsCompiler
         System.out.println("idlClass.getClassName()     : " + idlClass.getClassName());
         System.out.println("idlClass.getBaseClassName() : " + idlClass.getBaseClassName());
         System.out.println("idlClass.getDirective()     : " + idlClass.getDirective());
+        System.out.println("idlClass.getVersion()       : " + Integer.toString(idlClass.getVersion()));
         System.out.println("idlClass.getComment()       : " + idlClass.getComment());
 
         if (idlClass.getType() == IDLClass.ENUM_TYPE) {

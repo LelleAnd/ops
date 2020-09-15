@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Vector;
+import java.util.Comparator;
 import parsing.AbstractTemplateBasedIDLCompiler;
 import parsing.IDLClass;
 import parsing.IDLField;
@@ -177,11 +178,12 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
         }
     }
 
+    ////////////////////////////////////////////////////////////////////////////
     // Directive helpers
     // -----------------
 
-    // Returns true if class is a toplevel class
-    protected boolean isTopLevel(IDLClass idlClass)
+    // Returns true if class is a 'toplevel' class
+    public static boolean isTopLevel(IDLClass idlClass)
     {
         String s = idlClass.getDirective();
         if (s == null) return false;
@@ -202,8 +204,8 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
         return true;  //default
     }
 
-    // Returns true if class is an onlydefinition class
-    protected boolean isOnlyDefinition(IDLClass idlClass)
+    // Returns true if class is an 'onlydefinition' class
+    public static boolean isOnlyDefinition(IDLClass idlClass)
     {
         String s = idlClass.getDirective();
         if (s == null) return false;
@@ -216,8 +218,8 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
         return false;  //default
     }
 
-    // Returns true if class is a nofactory class
-    protected boolean isNoFactory(IDLClass idlClass)
+    // Returns true if class is a 'nofactory' class
+    public static boolean isNoFactory(IDLClass idlClass)
     {
         String s = idlClass.getDirective();
         if (s == null) return false;
@@ -228,6 +230,111 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
             return true;
         }
         return false;  //default
+    }
+
+    //
+    public static int validateVersion(String msg, String verStr)
+    {
+        int v = Integer.parseInt(verStr);
+        if ((v < 0) || (v > 255)) {
+            System.out.println("Error: " + msg + ". //@version spec invalid (must be within 0..255): '" + verStr + "'");
+            System.exit(99);
+        }
+        return v;
+    }
+
+    public static class VersionEntry
+    {
+        public int start = -1;
+        public int stop = -1;
+    }
+
+    public static class VersionEntryComparator implements Comparator<VersionEntry>
+    {
+        public int compare(VersionEntry o1, VersionEntry o2)
+        {
+            if (o1.start == o2.start) {
+                if (o1.stop < 0) return -1;
+                if (o2.stop < 0) return 1;
+                return o1.stop - o2.stop;
+            }
+            return o1.start - o2.start;
+        }
+    }
+
+    public static Vector<VersionEntry> getVersions(String msg, String directiveStr)
+    {
+        Vector<VersionEntry> vec = null;
+        while (directiveStr != null) {
+            int idx = directiveStr.indexOf("version = ");
+            if (idx == -1) break;
+            int idx2 = directiveStr.indexOf(",", idx);
+            idx += 10;
+            String sub, sub2;
+            if (idx2 == -1) {
+                sub = directiveStr.substring(idx);
+                directiveStr = null;
+            } else {
+                sub = directiveStr.substring(idx, idx2);
+                directiveStr = directiveStr.substring(idx2+1);
+            }
+            //System.out.println("Info: version, '" + sub + "', for field: " + msg);
+            if (vec == null) { vec = new Vector<VersionEntry>(); }
+            VersionEntry ent = new VersionEntry();
+            int idx3 = sub.indexOf("..");
+            if (idx3 != -1) {
+                sub2 = sub.substring(idx3+2);
+                sub = sub.substring(0, idx3);
+                ent.stop = validateVersion(msg, sub2);
+            }
+            ent.start = validateVersion(msg, sub);
+            if ((ent.stop != -1) && (ent.stop < ent.start)) {
+                System.out.println("Error: " + msg + ". //@version range invalid : '" + ent.start + ".." + ent.stop + "'");
+                System.exit(99);
+            }
+            vec.add(ent);
+        }
+        return vec;
+    }
+
+    public static Vector<VersionEntry> getReducedVersions(String msg, String directiveStr)
+    {
+        Vector<VersionEntry> vec = getVersions(msg, directiveStr);
+        if (vec != null) {
+            // Sort entries
+            vec.sort(new VersionEntryComparator());
+            // Remove not needed constraints
+            // Find the lowest single value, we can remove all above since a single means 'this and up'
+            int lastIdx = -1;
+            for (int i = 0; i < vec.size(); i++) {
+                if (vec.elementAt(i).stop == -1) {
+                    lastIdx = i;
+                    break;
+                }
+            }
+            if (lastIdx >= 0) {
+                while (vec.size() > (lastIdx+1)) { vec.remove(vec.size()-1); }
+            }
+            ///TODO Check for overlaping ranges, these can be combined
+
+            //for (VersionEntry ent : vec) {
+            //    System.out.println("Info: version, '" + ent.start + " .. " + ent.stop + "', for field: " + msg);
+            //}
+        }
+        return vec;
+    }
+
+    public static int highestVersion(String msg, String directiveStr)
+    {
+        int version = -1;
+        Vector<VersionEntry> vec = getVersions(msg, directiveStr);
+        if (vec != null) {
+            for (VersionEntry ent : vec) {
+                if (version < ent.start) version = ent.start;
+                if (version < ent.stop) version = ent.stop;
+            }
+        }
+        return version;
     }
 
 }

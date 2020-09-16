@@ -1,34 +1,41 @@
 @rem NOTE requires CMAKE and a MSBUILD command shell to work
 
-@rem define build directories
-@set DBG_DIR=%~dp0\build.debug-x64
-@set OPT_DIR=%~dp0\build.opt-x64
-@set BOOTSTRAP_DIR=%~dp0\build.bootstrap-x64
-@set INSTALL_PREFIX=%~dp0\deploy-x64
+@SETLOCAL
+
+@rem define build directories if not already defined
+@IF NOT DEFINED OPS_BUILD_BOOTSTRAP_DIR set OPS_BUILD_BOOTSTRAP_DIR=%~dp0\build.bootstrap-x64
+@IF NOT DEFINED OPS_BUILD_DBG_DIR set OPS_BUILD_DBG_DIR=%~dp0\build.debug-x64
+@IF NOT DEFINED OPS_BUILD_OPT_DIR set OPS_BUILD_OPT_DIR=%~dp0\build.opt-x64
+@IF NOT DEFINED OPS_INSTALL_PREFIX set OPS_INSTALL_PREFIX=%~dp0\deploy-x64
+
+@echo Using OPS_BUILD_BOOTSTRAP_DIR = %OPS_BUILD_BOOTSTRAP_DIR%
+@echo Using OPS_BUILD_DBG_DIR = %OPS_BUILD_DBG_DIR%
+@echo Using OPS_BUILD_OPT_DIR = %OPS_BUILD_OPT_DIR%
+@echo Using OPS_INSTALL_PREFIX = %OPS_INSTALL_PREFIX%
 
 @rem Perform the bootstrap process that generates source files neded by the other targets
 @pushd %~dp0
-@IF NOT EXIST %BOOTSTRAP_DIR% mkdir %BOOTSTRAP_DIR%
-@cd %BOOTSTRAP_DIR%
-cmake -DCMAKE_BUILD_TYPE=Bootstrap -DCMAKE_INSTALL_PREFIX=%INSTALL_PREFIX% -A x64 ..
+@IF NOT EXIST %OPS_BUILD_BOOTSTRAP_DIR% mkdir %OPS_BUILD_BOOTSTRAP_DIR%
+@cd %OPS_BUILD_BOOTSTRAP_DIR%
+cmake -DCMAKE_BUILD_TYPE=Bootstrap -DCMAKE_INSTALL_PREFIX=%OPS_INSTALL_PREFIX% -A x64 %~dp0
 cmake --build . --target ALL_BUILD --config Debug
-cmake -DBUILD_TYPE=Bootstrap -DCMAKE_INSTALL_PREFIX=%INSTALL_PREFIX% -P cmake_install.cmake
+cmake -DBUILD_TYPE=Bootstrap -DCMAKE_INSTALL_PREFIX=%OPS_INSTALL_PREFIX% -P cmake_install.cmake
 @popd
 
 @rem build and install Debug
 @pushd %~dp0
-@IF NOT EXIST %DBG_DIR% mkdir %DBG_DIR%
-@cd %DBG_DIR%
-cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%INSTALL_PREFIX% -DOPS_BUILD_UNITTESTS=NO -A x64 ..
+@IF NOT EXIST %OPS_BUILD_DBG_DIR% mkdir %OPS_BUILD_DBG_DIR%
+@cd %OPS_BUILD_DBG_DIR%
+cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%OPS_INSTALL_PREFIX% -DOPS_BUILD_UNITTESTS=NO -A x64 %~dp0
 cmake --build . --target ALL_BUILD --config Debug
-cmake -DBUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%INSTALL_PREFIX% -P cmake_install.cmake
+cmake -DBUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%OPS_INSTALL_PREFIX% -P cmake_install.cmake
 @popd
 
 @rem build and install Release
 @pushd %~dp0
-@IF NOT EXIST %OPT_DIR% mkdir %OPT_DIR%
-@cd %OPT_DIR%
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=%INSTALL_PREFIX% -A x64 ..
+@IF NOT EXIST %OPS_BUILD_OPT_DIR% mkdir %OPS_BUILD_OPT_DIR%
+@cd %OPS_BUILD_OPT_DIR%
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=%OPS_INSTALL_PREFIX% -A x64 %~dp0
 cmake --build . --target ALL_BUILD --config Release
-cmake -DBUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=%INSTALL_PREFIX% -P cmake_install.cmake
+cmake -DBUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=%OPS_INSTALL_PREFIX% -P cmake_install.cmake
 @popd

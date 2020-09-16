@@ -1,34 +1,41 @@
 @rem NOTE requires CMAKE and a MSBUILD command shell to work
 
-@rem define build directories
-@set DBG_DIR=%~dp0\build.debug
-@set OPT_DIR=%~dp0\build.opt
-@set BOOTSTRAP_DIR=%~dp0\build.bootstrap
-@set INSTALL_PREFIX=%~dp0\deploy
+@SETLOCAL
+
+@rem define build directories if not already defined
+@IF NOT DEFINED OPS_BUILD_BOOTSTRAP_DIR set OPS_BUILD_BOOTSTRAP_DIR=%~dp0\build.bootstrap
+@IF NOT DEFINED OPS_BUILD_DBG_DIR set OPS_BUILD_DBG_DIR=%~dp0\build.debug
+@IF NOT DEFINED OPS_BUILD_OPT_DIR set OPS_BUILD_OPT_DIR=%~dp0\build.opt
+@IF NOT DEFINED OPS_INSTALL_PREFIX set OPS_INSTALL_PREFIX=%~dp0\deploy
+
+@echo Using OPS_BUILD_BOOTSTRAP_DIR = %OPS_BUILD_BOOTSTRAP_DIR%
+@echo Using OPS_BUILD_DBG_DIR = %OPS_BUILD_DBG_DIR%
+@echo Using OPS_BUILD_OPT_DIR = %OPS_BUILD_OPT_DIR%
+@echo Using OPS_INSTALL_PREFIX = %OPS_INSTALL_PREFIX%
 
 @rem Perform the bootstrap process that generates source files needed by the other targets
 @pushd %~dp0
-@IF NOT EXIST %BOOTSTRAP_DIR% mkdir %BOOTSTRAP_DIR%
-@cd %BOOTSTRAP_DIR%
-cmake -DCMAKE_BUILD_TYPE=Bootstrap -DCMAKE_INSTALL_PREFIX=%INSTALL_PREFIX% ..
+@IF NOT EXIST %OPS_BUILD_BOOTSTRAP_DIR% mkdir %OPS_BUILD_BOOTSTRAP_DIR%
+@cd %OPS_BUILD_BOOTSTRAP_DIR%
+cmake -DCMAKE_BUILD_TYPE=Bootstrap -DCMAKE_INSTALL_PREFIX=%OPS_INSTALL_PREFIX% %~dp0
 cmake --build . --target ALL_BUILD --config Debug
-cmake -DBUILD_TYPE=Bootstrap -DCMAKE_INSTALL_PREFIX=%INSTALL_PREFIX% -P cmake_install.cmake
+cmake -DBUILD_TYPE=Bootstrap -DCMAKE_INSTALL_PREFIX=%OPS_INSTALL_PREFIX% -P cmake_install.cmake
 @popd
 
 @rem build and install Debug
 @pushd %~dp0
-@IF NOT EXIST %DBG_DIR% mkdir %DBG_DIR%
-@cd %DBG_DIR%
-cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%INSTALL_PREFIX% ..
+@IF NOT EXIST %OPS_BUILD_DBG_DIR% mkdir %OPS_BUILD_DBG_DIR%
+@cd %OPS_BUILD_DBG_DIR%
+cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%OPS_INSTALL_PREFIX% %~dp0
 cmake --build . --target ALL_BUILD --config Debug
-cmake -DBUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%INSTALL_PREFIX% -P cmake_install.cmake
+cmake -DBUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%OPS_INSTALL_PREFIX% -P cmake_install.cmake
 @popd
 
 @rem build and install Release
 @pushd %~dp0
-@IF NOT EXIST %OPT_DIR% mkdir %OPT_DIR%
-@cd %OPT_DIR%
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=%INSTALL_PREFIX% ..
+@IF NOT EXIST %OPS_BUILD_OPT_DIR% mkdir %OPS_BUILD_OPT_DIR%
+@cd %OPS_BUILD_OPT_DIR%
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=%OPS_INSTALL_PREFIX% %~dp0
 cmake --build . --target ALL_BUILD --config Release
-cmake -DBUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=%INSTALL_PREFIX% -P cmake_install.cmake
+cmake -DBUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=%OPS_INSTALL_PREFIX% -P cmake_install.cmake
 @popd

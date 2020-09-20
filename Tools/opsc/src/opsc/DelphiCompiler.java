@@ -292,6 +292,12 @@ public class DelphiCompiler extends opsc.Compiler
     protected String getConstructorBody(IDLClass idlClass)
     {
       String ret = "";
+      int version = idlClass.getVersion();
+      if (version < 0) { version = 0; }
+      if (version > 0) {
+          ret += tab(1) + "idlVersionMask := idlVersionMask or 1; // Some value <> 0" + endl();
+      }
+      ret += tab(1) + getClassName(idlClass) + "_version := " + version + ";" + endl();
       for (IDLField field : idlClass.getFields()) {
           if (field.isStatic()) continue;
           String fieldName = getFieldName(field);
@@ -362,6 +368,7 @@ public class DelphiCompiler extends opsc.Compiler
     private String getFillCloneBody(IDLClass idlClass)
     {
         String ret = "";
+        ret += tab(2) + getClassName(idlClass) + "_version := Self." + getClassName(idlClass) + "_version;" + endl();
         for (IDLField field : idlClass.getFields()) {
             if (field.isStatic()) continue;
             String fieldName = getFieldName(field);
@@ -462,6 +469,14 @@ public class DelphiCompiler extends opsc.Compiler
     protected String getDeclarations(IDLClass idlClass)
     {
         String ret = "";
+
+        if (!isOnlyDefinition(idlClass)) {
+            int version = idlClass.getVersion();
+            if (version < 0) { version = 0; }
+            // Need an implicit version field that should be [de]serialized
+            ret += tab(2) + getClassName(idlClass) + "_version : Byte; " + endl();
+        }
+
         for (IDLField field : idlClass.getFields()) {
             if (field.isStatic()) continue;
             String fieldName = getFieldName(field);
@@ -632,13 +647,45 @@ public class DelphiCompiler extends opsc.Compiler
         return ret;
     }
 
+    private String getFieldGuard(String versionName, IDLField field)
+    {
+        String ret = "";
+        Vector<VersionEntry> vec = getReducedVersions(field.getName(), field.getDirective());
+        if (vec != null) {
+            for (VersionEntry ent : vec) {
+                String cond = "(" + versionName + " >= " + ent.start + ")";
+                if (ent.stop != -1) {
+                    cond = "(" + cond + " and (" + versionName + " <= " + ent.stop + "))";
+                }
+                if (ret.length() > 0) {
+                    ret += " or ";
+                }
+                ret += cond;
+            }
+        }
+        return ret;
+    }
+
     protected String getSerialize(IDLClass idlClass)
     {
         String ret = "";
+        String versionName = getClassName(idlClass) + "_version";
+        // Need an implicit version field that may be [de]serialized
+        ret += tab(1) + "if idlVersionMask <> 0 then begin" + endl();
+        ret += tab(2) + "archiver.Inout('" + versionName + "', " + versionName + ");" + endl();
+        ret += tab(1) + "end else begin" + endl();
+        ret += tab(2) + versionName + " := 0;" + endl();
+        ret += tab(1) + "end;" + endl();
         for (IDLField field : idlClass.getFields()) {
             if (field.isStatic()) continue;
             String fieldName = getFieldName(field);
-            ret += tab(1);
+            String fieldGuard = getFieldGuard(versionName, field);
+            int tabCnt = 1;
+            if (fieldGuard.length() > 0) {
+                ret += tab(tabCnt) + "if " + fieldGuard + " then begin" + endl();
+                tabCnt += 1;
+            }
+            ret += tab(tabCnt);
             if (field.isIdlType()) {
                 if (!field.isArray()) {
                   if (field.isAbstract()) {
@@ -703,6 +750,10 @@ public class DelphiCompiler extends opsc.Compiler
                 } else {
                   ret += "archiver.Inout('" + field.getName() + "', " + fieldName + ");" + endl();
                 }
+            }
+            if (fieldGuard.length() > 0) {
+                tabCnt -= 1;
+                ret += tab(tabCnt) + "end;" + endl();
             }
         }
         return ret;

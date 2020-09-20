@@ -2,7 +2,7 @@ unit uOps.Topic;
 
 (**
 *
-* Copyright (C) 2016-2019 Lennart Andersson.
+* Copyright (C) 2016-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -35,6 +35,7 @@ type
       TRANSPORT_UDP = 'udp';
 
   private
+    FTopic_version : Byte;
     FName : AnsiString;
 		FPort : Integer;
 		FTimeToLive : Integer;
@@ -66,6 +67,7 @@ type
 		// Fills the parameter obj with all values from this object.
 		procedure FillClone(var obj : TOPSObject); override;
 
+    property Topic_version : Byte read FTopic_version write FTopic_version;
     property Name : AnsiString read FName;
     property TypeID : AnsiString read FTypeID;
     property DomainID : string read FDomainID write FDomainID;
@@ -88,6 +90,7 @@ uses uOps.Exceptions;
 constructor TTopic.Create(namee : AnsiString; portt : Integer; typeIDd : AnsiString; domainAddresss : AnsiString);
 begin
   inherited Create;
+  FTopic_version := 0;
   FName := namee;
   FPort := portt;
   FTypeID := typeIDd;
@@ -107,6 +110,7 @@ end;
 constructor TTopic.Create;
 begin
   inherited;
+  FTopic_version := 0;
   FParticipantID := 'DEFAULT_PARTICIPANT';
 	//reliable(false),
   FSampleMaxSize := uOps.Types.PACKET_MAX_SIZE;
@@ -133,6 +137,11 @@ var
   tSampleMaxSize : Integer;
 begin
   inherited Serialize(archiver);
+  if FIdlVersionMask <> 0 then begin
+    archiver.inout('Topic_version', FTopic_version);
+  end else begin
+    FTopic_version := 0;
+  end;
 
   archiver.inout('name', FName);
   archiver.inout('dataType', FTypeID);
@@ -168,6 +177,7 @@ procedure TTopic.FillClone(var obj : TOPSObject);
 begin
 	inherited FillClone(obj);
   with obj as TTopic do begin
+    FTopic_version := Self.FTopic_version;
     FName := Self.FName;
 		FPort := Self.FPort;
 		FTypeID := Self.FTypeID;

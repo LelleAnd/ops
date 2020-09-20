@@ -2,7 +2,7 @@ unit uOps.TopicInfoData;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -32,6 +32,7 @@ type
 	/// NOTE. Must be kept in sync with other OPS language implementations
   TTopicInfoData = class(TOPSObject)
   public
+    TopicInfoData_version : Byte;
     Name : AnsiString;
     DataType : AnsiString;
     Transport : AnsiString;
@@ -58,6 +59,7 @@ implementation
 constructor TTopicInfoData.Create;
 begin
   inherited;
+  TopicInfoData_version := 0;
   AppendType('TopicInfoData');
 end;
 
@@ -69,6 +71,7 @@ end;
 constructor TTopicInfoData.Create(top : TTopic);
 begin
   inherited Create;
+  TopicInfoData_version := 0;
   AppendType('TopicInfoData');
   Name := top.Name;
   DataType := top.TypeID;
@@ -81,6 +84,11 @@ end;
 procedure TTopicInfoData.Serialize(archiver : TArchiverInOut);
 begin
 	inherited Serialize(archiver);
+  if FIdlVersionMask <> 0 then begin
+    archiver.inout('TopicInfoData_version', TopicInfoData_version);
+  end else begin
+    TopicInfoData_version := 0;
+  end;
   archiver.inout('name', Name);
   archiver.inout('type', DataType);
   archiver.inout('transport', Transport);
@@ -102,6 +110,7 @@ procedure TTopicInfoData.FillClone(var obj : TOPSObject);
 begin
 	inherited FillClone(obj);
   with obj as TTopicInfoData do begin
+    TopicInfoData_version := Self.TopicInfoData_version;
     Name := Self.Name;
     DataType := Self.DataType;
     Transport := Self.Transport;

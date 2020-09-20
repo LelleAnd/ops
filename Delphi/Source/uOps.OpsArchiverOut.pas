@@ -2,7 +2,7 @@ unit uOps.OpsArchiverOut;
 
 (**
 *
-* Copyright (C) 2016-2019 Lennart Andersson.
+* Copyright (C) 2016-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -138,10 +138,12 @@ procedure TOPSArchiverOut.inout(const name : String; var value : TSerializable);
 var
   typeS : AnsiString;
 begin
-  if FOptNonVirt then begin
-    typeS := '';
-  end else begin
-    typeS := (value as TOPSObject).TypesString;
+  typeS := '';
+  if (value as TOPSObject).IdlVersionMask <> 0 then begin
+    typeS := '0 ';
+  end;
+  if not FOptNonVirt then begin
+    typeS := typeS + (value as TOPSObject).TypesString;
   end;
   Fbuf.WriteString(typeS);
   value.serialize(Self);
@@ -151,10 +153,12 @@ procedure TOPSArchiverOut.inout(const name : String; var value : TSerializable; 
 var
   typeS : AnsiString;
 begin
-  if FOptNonVirt then begin
-    typeS := '';
-  end else begin
-    typeS := (value as TOPSObject).TypesString;
+  typeS := '';
+  if (value as TOPSObject).IdlVersionMask <> 0 then begin
+    typeS := '0 ';
+  end;
+  if not FOptNonVirt then begin
+    typeS := typeS + (value as TOPSObject).TypesString;
   end;
   Fbuf.WriteString(typeS);
   value.serialize(Self);
@@ -169,7 +173,11 @@ function TOPSArchiverOut.inout2(const name : String; var value : TSerializable) 
 var
   typeS : AnsiString;
 begin
-  typeS := (value as TOPSObject).TypesString;
+  typeS := '';
+  if (value as TOPSObject).IdlVersionMask <> 0 then begin
+    typeS := '0 ';
+  end;
+  typeS := typeS + (value as TOPSObject).TypesString;
   Fbuf.WriteString(AnsiString(typeS));
   value.serialize(Self);
   Result := value;
@@ -179,7 +187,11 @@ function TOPSArchiverOut.inout2(const name : String; var value : TSerializable; 
 var
   typeS : AnsiString;
 begin
-  typeS := (value as TOPSObject).TypesString;
+  typeS := '';
+  if (value as TOPSObject).IdlVersionMask <> 0 then begin
+    typeS := '0 ';
+  end;
+  typeS := typeS + (value as TOPSObject).TypesString;
   Fbuf.WriteString(AnsiString(typeS));
   value.serialize(Self);
   Result := value;

@@ -2,7 +2,7 @@ unit uOps.OPSConfig;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -35,6 +35,7 @@ type
     type
       TDynDomainArray = array of TDomain;
 	protected
+    FOPSConfig_version : Byte;
     FDomains : TDynDomainArray;
 
 	public
@@ -68,6 +69,8 @@ type
 
 		// Fills the parameter obj with all values from this object.
 		procedure FillClone(var obj : TOPSObject); override;
+
+    property OPSConfig_version : Byte read FOPSConfig_version write FOPSConfig_version;
 	end;
 
   TDefaultOPSConfigImpl = class(TOPSConfig)
@@ -88,6 +91,7 @@ uses Classes,
 constructor TOPSConfig.Create;
 begin
   inherited Create;
+  FOPSConfig_version := 0;
 end;
 
 destructor TOPSConfig.Destroy;
@@ -120,6 +124,11 @@ end;
 procedure TOPSConfig.Serialize(archiver : TArchiverInOut);
 begin
   inherited Serialize(archiver);
+  if FIdlVersionMask <> 0 then begin
+    archiver.inout('OPSConfig_version', FOPSConfig_version);
+  end else begin
+    FOPSConfig_version := 0;
+  end;
 
 	archiver.inout('domains', TDynSerializableArray(FDomains));
 end;
@@ -138,6 +147,7 @@ var
 begin
 	inherited FillClone(obj);
   with obj as TOPSConfig do begin
+    FOPSConfig_version := Self.FOPSConfig_version;
     SetLength(FDomains, Length(Self.FDomains));
     for i := 0 to High(Self.FDomains) do begin
       FDomains[i] := Self.FDomains[i].Clone as TDomain;

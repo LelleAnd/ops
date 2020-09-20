@@ -2,7 +2,7 @@ unit uOps.ParticipantInfoData;
 
 (**
 *
-* Copyright (C) 2016-2019 Lennart Andersson.
+* Copyright (C) 2016-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -37,6 +37,7 @@ type
       TDynTopicInfoDataArray = array of TTopicInfoData;
 
 	public
+    ParticipantInfoData_version : Byte;
 		Name                   : AnsiString;
 		Id                     : AnsiString;
 		Domain                 : AnsiString;
@@ -78,6 +79,7 @@ constructor TParticipantInfoData.Create;
 begin
   inherited Create;
   AppendType('ops.ParticipantInfoData');
+  ParticipantInfoData_version := 0;
 end;
 
 destructor TParticipantInfoData.Destroy;
@@ -96,6 +98,11 @@ end;
 procedure TParticipantInfoData.Serialize(archiver : TArchiverInOut);
 begin
 	inherited Serialize(archiver);
+  if FIdlVersionMask <> 0 then begin
+    archiver.inout('ParticipantInfoData_version', ParticipantInfoData_version);
+  end else begin
+    ParticipantInfoData_version := 0;
+  end;
   archiver.inout('name', name);
   archiver.inout('domain', domain);
   archiver.inout('id', id);
@@ -123,6 +130,7 @@ var
 begin
 	inherited FillClone(obj);
   with obj as TParticipantInfoData do begin
+    ParticipantInfoData_version := Self.ParticipantInfoData_version;
 		Name := Self.Name;
 		Id := Self.Id;
 		Domain := Self.Domain;

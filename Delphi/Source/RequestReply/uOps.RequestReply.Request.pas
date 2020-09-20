@@ -2,7 +2,7 @@ unit uOps.RequestReply.Request;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -28,6 +28,7 @@ uses uOps.ArchiverInOut,
 type
   TRequest = class(TOPSObject)
   public
+    Request_version : Byte;
     requestId : AnsiString;
 
     procedure Serialize(archiver : TArchiverInOut); override;
@@ -44,6 +45,11 @@ implementation
 procedure TRequest.Serialize(archiver : TArchiverInOut);
 begin
   inherited Serialize(archiver);
+  if FIdlVersionMask <> 0 then begin
+    archiver.inout('Request_version', Request_version);
+  end else begin
+    Request_version := 0;
+  end;
   archiver.inout('requestId', requestId);
 end;
 
@@ -58,6 +64,7 @@ procedure TRequest.FillClone(var obj : TOPSObject);
 begin
 	inherited FillClone(obj);
   with obj as TRequest do begin
+    Request_version := Self.Request_version;
 		requestId := Self.requestId;
 	end;
 end;

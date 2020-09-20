@@ -2,7 +2,7 @@ unit uOps.RequestReply.Reply;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -28,6 +28,7 @@ uses uOps.ArchiverInOut,
 type
   TReply = class(TOPSObject)
   public
+    Reply_version : Byte;
     requestId : AnsiString;
     requestAccepted : Boolean;
     mess : AnsiString;
@@ -46,6 +47,11 @@ implementation
 procedure TReply.Serialize(archiver : TArchiverInOut);
 begin
   inherited Serialize(archiver);
+  if FIdlVersionMask <> 0 then begin
+    archiver.inout('Reply_version', Reply_version);
+  end else begin
+    Reply_version := 0;
+  end;
   archiver.inout('requestId', requestId);
   archiver.inout('requestAccepted', requestAccepted);
   archiver.inout('message', mess);
@@ -62,6 +68,7 @@ procedure TReply.FillClone(var obj : TOPSObject);
 begin
 	inherited FillClone(obj);
   with obj as TReply do begin
+    Reply_version := Self.Reply_version;
     requestId := Self.requestId;
     requestAccepted := Self.requestAccepted;
     mess := Self.mess;

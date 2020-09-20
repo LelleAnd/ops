@@ -2,7 +2,7 @@ unit uOps.OpsMessage;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -29,6 +29,7 @@ uses uOps.Types,
 type
   TOPSMessage = class(TOPSObject)
   private
+    FOPSMessage_version : Byte;
     FMessageType : Byte;          // Serialized (not used, always 0)
     //FEndianness : Byte;         //            (not used)
     FPublisherPriority : Byte;    // Serialized (not used, always 0)
@@ -76,6 +77,7 @@ type
     property NrOfReservations : Integer read FNrOfReservations;
 
     //
+    property OPSMessage_Version : Byte read FOPSMessage_version write FOPSMessage_version;
     property DataOwner : Boolean read FDataOwner write FDataOwner;
     property PublicationID : Int64 read FPublicationID write FPublicationID;
     property PublisherName : AnsiString read FPublisherName write FPublisherName;
@@ -96,6 +98,7 @@ constructor TOPSMessage.Create;
 begin
   inherited;
   TInterlocked.Increment(gNumObjects);
+  FOPSMessage_version := 0;
   FDataOwner := True;
   AppendType('ops.protocol.OPSMessage');
 end;
@@ -148,8 +151,12 @@ end;
 procedure TOPSMessage.Serialize(archiver : TArchiverInOut);
 begin
   inherited Serialize(archiver);
+  if FIdlVersionMask <> 0 then begin
+    archiver.inout('OPSMessage_version', FOPSMessage_version);
+  end else begin
+    FOPSMessage_version := 0;
+  end;
 
-  // Can't change/addto these without breaking compatibility
   archiver.inout('messageType', FMessageType);
   archiver.inout('publisherPriority', FPublisherPriority);
   archiver.inout('publicationID', FPublicationID);
@@ -172,6 +179,7 @@ procedure TOPSMessage.FillClone(var obj : TOPSObject);
 begin
 	inherited FillClone(obj);
   with obj as TOPSMessage do begin
+    FOPSMessage_version := Self.FOPSMessage_version;
     FMessageType := Self.FMessageType;
     FPublisherPriority := Self.FPublisherPriority;
     FDataOwner := True;

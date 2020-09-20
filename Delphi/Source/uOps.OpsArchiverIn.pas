@@ -2,7 +2,7 @@ unit uOps.OpsArchiverIn;
 
 (**
 *
-* Copyright (C) 2016-2019 Lennart Andersson.
+* Copyright (C) 2016-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -144,38 +144,71 @@ end;
 procedure TOPSArchiverIn.inout(const name : String; var value : TSerializable);
 var
   types : string;
+  verMask : Int32;
 begin
   types := string(Fbuf.ReadString);
+  verMask := 0;
+  if Length(types) > 0 then begin
+    if types[1] = '0' then begin
+      verMask := 1; // Just some value <> 0
+    end;
+  end;
+  (value as TOPSObject).IdlVersionMask := verMask;
   value.Serialize(Self);
 end;
 
 procedure TOPSArchiverIn.inout(const name : String; var value : TSerializable; element : Integer);
 var
   types : string;
+  verMask : Int32;
 begin
   types := string(Fbuf.ReadString);
+  verMask := 0;
+  if Length(types) > 0 then begin
+    if types[1] = '0' then begin
+      verMask := 1; // Just some value <> 0
+    end;
+  end;
+  (value as TOPSObject).IdlVersionMask := verMask;
   value.Serialize(Self);
 end;
 
 function TOPSArchiverIn.inout2(const name : String; var value : TSerializable; element : Integer) : TSerializable;
 var
   types : string;
+  verMask : Int32;
 begin
   types := string(Fbuf.ReadString);
+  verMask := 0;
+  if Length(types) > 0 then begin
+    if types[1] = '0' then begin
+      verMask := 1; // Just some value <> 0
+      types := types.Substring(2);
+    end;
+  end;
   Result := FFactory.Make(types);
   if Assigned(Result) then begin
+    (Result as TOPSObject).IdlVersionMask := verMask;
     Result.Serialize(Self);
   end;
 end;
 
 function TOPSArchiverIn.inout2(const name : String; var value : TSerializable) : TSerializable;
 var
-  types : AnsiString;
+  types : string;
+  verMask : Int32;
 begin
   if Assigned(value) then begin
     FreeAndNil(value);
   end;
-  types := Fbuf.ReadString;
+  types := string(Fbuf.ReadString);
+  verMask := 0;
+  if Length(types) > 0 then begin
+    if types[1] = '0' then begin
+      verMask := 1; // Just some value <> 0
+      types := types.Substring(2);
+    end;
+  end;
   Result := FFactory.Make(string(types));
   if Assigned(Result) then begin
     // We need to preserve the type information since the factory only can create
@@ -183,6 +216,7 @@ begin
     // than the actual one. The rest of the bytes will be placed in the spareBytes member.
     SetTypesString(Result, types);
 
+    (Result as TOPSObject).IdlVersionMask := verMask;
     Result.Serialize(Self);
   end;
 end;

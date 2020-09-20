@@ -13,6 +13,8 @@ class OPS_Object(object):
 	"""docstring for OPS_Object"""
 	def __init__(self):
 		super(OPS_Object, self).__init__()
+		self.idlVersionMask = 0
+		self.OPSObject_version = 0
 		self.key = ""
 		self.typesString = ""
 		self.spareBytes = None
@@ -21,6 +23,10 @@ class OPS_Object(object):
 		return "OPS_Object:\n  key=%s\n  typesString=%s" % (self.key,self.typesString)
 
 	def serialize(self,dataBuffer):
+		if self.idlVersionMask != 0:
+			self.OPSObject_version = dataBuffer.Int8("OPSObject_version",self.OPSObject_version)
+		else:
+			self.OPSObject_version = 0
 		self.key = dataBuffer.String("key",self.key)
 
 	def validate(self):
@@ -36,6 +42,7 @@ class Message(OPS_Object):
 		super(Message,self).__init__()
 		self.appendType("ops.protocol.OPSMessage")
 
+		self.OPSMessage_version = 0
 		self.messageType=0
 		self.publisherPriority=0
 		self.publicationID=0
@@ -58,6 +65,10 @@ class Message(OPS_Object):
 
 	def serialize(self,dataBuffer):
 		super(Message,self).serialize(dataBuffer)
+		if self.idlVersionMask != 0:
+			self.OPSMessage_version = dataBuffer.Int8("OPSMessage_version",self.OPSMessage_version)
+		else:
+			self.OPSMessage_version = 0
 		self.messageType = dataBuffer.Int8("messageType",self.messageType)
 		self.publisherPriority = dataBuffer.Int8("publisherPriority",self.publisherPriority)
 		self.publicationID = dataBuffer.Int64("publicationID",self.publicationID)
@@ -98,6 +109,7 @@ class Topic(OPS_Object):
 	"""docstring for Topic"""
 	def __init__(self):
 		super(Topic,self).__init__()
+		self.Topic_version = 0
 		self.appendType("Topic");
 		self.name=""
 		self.typeID=""
@@ -132,6 +144,10 @@ class Topic(OPS_Object):
 
 	def serialize(self,archiver):
 		super(Topic,self).serialize(archiver)
+		if self.idlVersionMask != 0:
+			self.Topic_version = dataBuffer.Int8("Topic_version",self.Topic_version)
+		else:
+			self.Topic_version = 0
 		self.name = archiver.String("name",self.name)
 		self.typeID = archiver.String("dataType",self.typeID)
 		self.port = archiver.Int32("port",self.port)
@@ -174,6 +190,7 @@ class Channel(OPS_Object):
 	"""docstring for Channel"""
 	def __init__(self):
 		super(Channel,self).__init__()
+		self.Channel_version = 0
 		self.appendType("Channel")
 		self.channelID=""
 		self.linktype=""
@@ -198,6 +215,10 @@ class Channel(OPS_Object):
 
 	def serialize(self,archiver):
 		super(Channel,self).serialize(archiver)
+		if self.idlVersionMask != 0:
+			self.Channel_version = dataBuffer.Int8("Channel_version",self.Channel_version)
+		else:
+			self.Channel_version = 0
 		self.channelID = archiver.String("name",self.channelID)
 		self.linktype = archiver.String("linktype",self.linktype)
 		self.localInterface = archiver.String("localInterface",self.localInterface)
@@ -243,6 +264,7 @@ class Transport(OPS_Object):
 	"""docstring for Transport"""
 	def __init__(self):
 		super(Transport,self).__init__()
+		self.Transport_version = 0
 		self.appendType("Transport")
 		self.channelID=""
 		self.topics=[]
@@ -257,6 +279,10 @@ class Transport(OPS_Object):
 
 	def serialize(self,archiver):
 		super(Transport,self).serialize(archiver)
+		if self.idlVersionMask != 0:
+			self.Transport_version = dataBuffer.Int8("Transport_version",self.Transport_version)
+		else:
+			self.Transport_version = 0
 		self.channelID = archiver.String("channelID",self.channelID)
 		archiver.StringVector("topics", self.topics)
 
@@ -275,6 +301,7 @@ class Domain(OPS_Object):
 	"""docstring for Domain"""
 	def __init__(self):
 		super(Domain,self).__init__()
+		self.Domain_version = 0
 		self.appendType("Domain")
 		self.domainAddress=""
 		self.timeToLive = 1
@@ -309,6 +336,10 @@ class Domain(OPS_Object):
 
 	def serialize(self,archiver):
 		super(Domain,self).serialize(archiver)
+		if self.idlVersionMask != 0:
+			self.Domain_version = dataBuffer.Int8("Domain_version",self.Domain_version)
+		else:
+			self.Domain_version = 0
 		self.domainID = archiver.String("domainID",self.domainID)
 		archiver.OpsVector("topics",self.topics,Topic)
 		self.domainAddress = archiver.String("domainAddress",self.domainAddress)
@@ -406,6 +437,7 @@ import ops.Factory
 class Config(OPS_Object):
 	def __init__(self):
 		super(Config, self).__init__()
+		self.OPSConfig_version = 0
 		self.domains=[]
 
 	def __str__(self):
@@ -431,6 +463,10 @@ class Config(OPS_Object):
 
 	def serialize(self,dataBuffer):
 		super(Config,self).serialize(dataBuffer)
+		if self.idlVersionMask != 0:
+			self.OPSConfig_version = dataBuffer.Int8("OPSConfig_version",self.OPSConfig_version)
+		else:
+			self.OPSConfig_version = 0
 		dataBuffer.OpsVector("domains",self.domains,Domain)
 
 	def validate(self):

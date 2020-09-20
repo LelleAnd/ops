@@ -4,6 +4,7 @@ class TopicInfoData(OPS_Object):
 	def __init__(self,topic=None,addr=None):
 		super(TopicInfoData, self).__init__()
 		self.appendType("TopicInfoData")
+		self.TopicInfoData_version = 0
 		if topic is not None:
 			self.name = topic.name
 			self.type = topic.typeID
@@ -24,6 +25,10 @@ class TopicInfoData(OPS_Object):
 
 	def serialize(self,archiver):
 		super(TopicInfoData,self).serialize(archiver)
+		if self.idlVersionMask != 0:
+			self.TopicInfoData_version = dataBuffer.Int8("TopicInfoData_version",self.TopicInfoData_version)
+		else:
+			self.TopicInfoData_version = 0
 		self.name = archiver.String("name", self.name)
 		self.type = archiver.String("type", self.type)
 		self.transport = archiver.String("transport", self.transport)
@@ -34,6 +39,7 @@ class TopicInfoData(OPS_Object):
 class ParticipantInfoData(OPS_Object):
 	def __init__(self):
 		super(ParticipantInfoData, self).__init__()
+		self.ParticipantInfoData_version = 0
 		self.appendType("ops.ParticipantInfoData")
 
 		self.name = ""
@@ -51,6 +57,10 @@ class ParticipantInfoData(OPS_Object):
 
 	def serialize(self,archiver):
 		super(ParticipantInfoData,self).serialize(archiver)
+		if self.idlVersionMask != 0:
+			self.ParticipantInfoData_version = dataBuffer.Int8("ParticipantInfoData_version",self.ParticipantInfoData_version)
+		else:
+			self.ParticipantInfoData_version = 0
 
 		self.name                   = archiver.String("name", self.name)
 		self.domain                 = archiver.String("domain", self.domain)

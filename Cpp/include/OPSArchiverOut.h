@@ -96,7 +96,7 @@ namespace ops
 			buf.WriteInt(size);
 			buf.WriteChars(value, size);
 		}
-
+		
 		void inout(InoutName_T, char* buffer, int bufferSize) override
         {
             buf.WriteChars(buffer, bufferSize);
@@ -104,10 +104,14 @@ namespace ops
 
         void inout(InoutName_T, Serializable& value) override
         {
-			// For non-virtual objects type can be sent as a null string
 			TypeId_T typeS;
-			if (!optNonVirt) {
-				typeS = ((OPSObject&)value).getTypeString();
+            // Add the special marker that we have an implicit version byte first in each idl class
+            if (((OPSObject&)value).idlVersionMask != 0) {
+                typeS += "0 ";
+            }
+            // For non-virtual objects type can be sent as a null string
+            if (!optNonVirt) {
+				typeS += ((OPSObject&)value).getTypeString();
 			}
             buf.WriteString(typeS);
             value.serialize(this);
@@ -115,7 +119,12 @@ namespace ops
 
         Serializable* inout(InoutName_T, Serializable* value, int /*element*/) override
         {
-            TypeId_T typeS = ((OPSObject*) value)->getTypeString();
+            TypeId_T typeS;
+            // Add the special marker that we have an implicit version byte first in each idl class
+            if (((OPSObject*)value)->idlVersionMask != 0) {
+                typeS += "0 ";
+            }
+            typeS += ((OPSObject*)value)->getTypeString();
             buf.WriteString(typeS);
             value->serialize(this);
             return value;
@@ -123,7 +132,12 @@ namespace ops
 
         Serializable* inout(InoutName_T, Serializable* value) override
         {
-            const TypeId_T typeS = ((OPSObject*) value)->getTypeString();
+            TypeId_T typeS;
+            // Add the special marker that we have an implicit version byte first in each idl class
+            if (((OPSObject*)value)->idlVersionMask != 0) {
+                typeS += "0 ";
+            }
+            typeS += ((OPSObject*)value)->getTypeString();
             buf.WriteString(typeS);
             value->serialize(this);
             return value;

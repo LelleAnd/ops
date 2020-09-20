@@ -106,35 +106,51 @@ namespace ops
 
 		void inout(InoutName_T, Serializable& value) override
         {
-            buf.ReadString();  // For non-virtual objects we can always skip the string, may be sent as a null string
+            TypeId_T types;
+            buf.ReadString(types);  // For non-virtual objects we can always skip the string, may be sent as a null string
+            if ((types.size() > 0) && (types[0] == '0')) {
+                //Set version mask indicator
+                ((OPSObject&)value).idlVersionMask = MaxVersionMask;
+            }
             value.serialize(this);
         }
 
-    Serializable* inout(InoutName_T, Serializable* value, int /*element*/) override
+        Serializable* inout(InoutName_T, Serializable* value, int /*element*/) override
         {
-            if (value) delete value;
+            if (value != nullptr) { delete value; }
 			TypeId_T types;
 			buf.ReadString(types);
+            VersionMask_T verMask = 0;
+            if ((types.size() > 0) && (types[0] == '0')) {
+                verMask = MaxVersionMask;
+                types[0] = ' ';
+            }
             Serializable* newSer = factory->create(types);
             if (newSer != nullptr) {
+                //Set version mask indicator
+                ((OPSObject*)newSer)->idlVersionMask = verMask;
                 newSer->serialize(this);
             }
             return newSer;
         }
 
-    Serializable* inout(InoutName_T, Serializable* value) override
+        Serializable* inout(InoutName_T, Serializable* value) override
         {
-            if (value != nullptr)//Either we do this or we initialize object to nullptr in generated code.
-            {
-                delete value;
-            }
+            if (value != nullptr) { delete value; }
 			TypeId_T types;
 			buf.ReadString(types);
+            VersionMask_T verMask = 0;
+            if ((types.size() > 0) && (types[0] == '0')) {
+                verMask = MaxVersionMask;
+                types[0] = ' ';
+            }
             Serializable* newSer = factory->create(types);
             if (newSer != nullptr) {
                 //Do this to preserve type information even if slicing has occured.
                 ((OPSObject*) newSer)->typesString = types;
 
+                //Set version mask indicator
+                ((OPSObject*)newSer)->idlVersionMask = verMask;
                 newSer->serialize(this);
             }
             return newSer;

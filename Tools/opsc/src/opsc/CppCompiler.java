@@ -363,6 +363,7 @@ public class CppCompiler extends opsc.Compiler
         } else {
             ret += tab(2) + "ops::OPSObject::fillClone(obj);" + endl();
         }
+        ret += tab(2) + "obj->" + getClassName(idlClass) + "_version = " + getClassName(idlClass) + "_version;" + endl();
         for (IDLField field : idlClass.getFields()) {
             if (field.isStatic()) continue;
             String fieldName = getFieldName(field);
@@ -419,6 +420,9 @@ public class CppCompiler extends opsc.Compiler
     protected String getConstructorBody(IDLClass idlClass)
     {
         String ret = "";
+        if (idlClass.getVersion() > 0) {
+            ret += tab(2) + "idlVersionMask |= " + getClassName(idlClass) + "_Level_Mask;" + endl();
+        }
         for (IDLField field : idlClass.getFields()) {
             String fieldName = getFieldName(field);
             if (field.isIdlType() && !field.isArray() && field.isAbstract()) {
@@ -499,6 +503,14 @@ public class CppCompiler extends opsc.Compiler
     protected String getDeclarations(IDLClass idlClass)
     {
         String ret = getEnumTypeDeclarations(idlClass);
+
+        if (!isOnlyDefinition(idlClass)) {
+            int version = idlClass.getVersion();
+            if (version < 0) { version = 0; }
+            // Need an implicit version field that should be [de]serialized
+            ret += tab(1) + "char " + getClassName(idlClass) + "_version = " + version + ";" + endl() + endl();
+        }
+
         for (IDLField field : idlClass.getFields()) {
             String fieldName = getFieldName(field);
             if (!field.getComment().equals("")) {
@@ -689,10 +701,29 @@ public class CppCompiler extends opsc.Compiler
         return ret;
     }
 
-    private CharSequence getPackageDeclaration(String packageName)
+    private String getPackageDeclaration(String packageName)
     {
         String ret = "namespace " + packageName.replaceAll("\\.", " { namespace ");
         ret += " {";
+        return ret;
+    }
+
+    private String getFieldGuard(String versionName, IDLField field)
+    {
+        String ret = "";
+        Vector<VersionEntry> vec = getReducedVersions(field.getName(), field.getDirective());
+        if (vec != null) {
+            for (VersionEntry ent : vec) {
+                String cond = "(" + versionName + " >= " + ent.start + ")";
+                if (ent.stop != -1) {
+                    cond = "(" + cond + " && (" + versionName + " <= " + ent.stop + "))";
+                }
+                if (ret.length() > 0) {
+                    ret += " || ";
+                }
+                ret += cond;
+            }
+        }
         return ret;
     }
 
@@ -704,10 +735,23 @@ public class CppCompiler extends opsc.Compiler
         } else {
             ret += "ops::OPSObject::serialize(archive);" + endl();
         }
+        String versionName = getClassName(idlClass) + "_version";
+        // Need an implicit version field that may be [de]serialized
+        ret += tab(2) + "if (idlVersionMask != 0) {" + endl();
+        ret += tab(3) + "archive->inout(\"" + versionName + "\", " + versionName + ");" + endl();
+        ret += tab(2) + "} else {" + endl();
+        ret += tab(3) + versionName + " = 0;" + endl();
+        ret += tab(2) + "}" + endl();
         for (IDLField field : idlClass.getFields()) {
             if (field.isStatic()) continue;
             String fieldName = getFieldName(field);
-            ret += tab(2);
+            String fieldGuard = getFieldGuard(versionName, field);
+            int tabCnt = 2;
+            if (fieldGuard.length() > 0) {
+                ret += tab(tabCnt) + "if (" + fieldGuard + ") {" + endl();
+                tabCnt += 1;
+            }
+            ret += tab(tabCnt);
             if (field.isIdlType()) {
                 if (!field.isArray()) {
                     if (field.isAbstract()) {
@@ -765,6 +809,10 @@ public class CppCompiler extends opsc.Compiler
                 } else {
                     ret += "archive->inout(\"" + field.getName() + "\", " + fieldName + ");" + endl();
                 }
+            }
+            if (fieldGuard.length() > 0) {
+                tabCnt -= 1;
+                ret += tab(tabCnt) + "}" + endl();
             }
         }
         return ret;

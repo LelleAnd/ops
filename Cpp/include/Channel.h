@@ -28,10 +28,14 @@
 
 namespace ops
 {
+    constexpr VersionMask_T Channel_Level_Mask = OPSObject_Level_Mask << 1;
+
     class OPS_EXPORT Channel : public OPSObject
     {
     public:
-		ChannelId_T channelID;
+        char Channel_version = 0;
+
+        ChannelId_T channelID;
         Transport_T linktype;
         Address_T localInterface;     // If multicast, this specifies interface to use
         Address_T domainAddress;

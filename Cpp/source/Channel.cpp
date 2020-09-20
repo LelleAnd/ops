@@ -33,6 +33,11 @@ namespace ops
     void Channel::serialize(ArchiverInOut* archiver)
     {
         OPSObject::serialize(archiver);
+        if (idlVersionMask != 0) {
+            archiver->inout("Channel_version", Channel_version);
+        } else {
+            Channel_version = 0;
+        }
         archiver->inout("name", channelID);
         archiver->inout("linktype", linktype);
         archiver->inout("localInterface", localInterface);

@@ -1,7 +1,7 @@
 /**
-* 
+*
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2019-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -26,14 +26,23 @@
 
 namespace ops
 {
+	constexpr VersionMask_T Request_Level_Mask   = OPSObject_Level_Mask << 1;
+
 	class Request : public OPSObject
 	{
 	public:
+		char Request_version = 0;
+
 		std::string requestId;
 
 		void serialize(ops::ArchiverInOut* archiver) override
 		{
 			OPSObject::serialize(archiver);
+			if (idlVersionMask != 0) {
+					archiver->inout("Request_version", Request_version);
+			} else {
+					Request_version = 0;
+			}
 			archiver->inout("requestId", requestId);
 		}
 

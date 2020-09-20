@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016-2019 Lennart Andersson.
+* Copyright (C) 2016-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -27,9 +27,13 @@
 
 namespace ops
 {
+    constexpr VersionMask_T Transport_Level_Mask = OPSObject_Level_Mask << 1;
+
     class OPS_EXPORT Transport : public OPSObject
     {
     public:
+        char Transport_version = 0;
+
         ChannelId_T channelID;
         std::vector<ObjectName_T> topics;
 

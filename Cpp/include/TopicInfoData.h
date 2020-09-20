@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2019-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -26,11 +26,15 @@
 
 namespace ops
 {
-	/// NOTE. Must be kept in sync with other OPS language implementations
+    constexpr VersionMask_T TopicInfoData_Level_Mask = OPSObject_Level_Mask << 1;
+
+    /// NOTE. Must be kept in sync with other OPS language implementations
 	class TopicInfoData : public OPSObject
 	{
 	public:
-		TopicInfoData()
+        char TopicInfoData_version = 0;
+
+        TopicInfoData()
 		{
 			appendType(TypeId_T("TopicInfoData"));
 		}
@@ -48,8 +52,12 @@ namespace ops
 		void serialize(ArchiverInOut* archiver) override
 		{
 			OPSObject::serialize(archiver);
-
-			archiver->inout("name", name);
+            if (idlVersionMask != 0) {
+                archiver->inout("TopicInfoData_version", TopicInfoData_version);
+            } else {
+                TopicInfoData_version = 0;
+            }
+            archiver->inout("name", name);
 			archiver->inout("type", type);
 			archiver->inout("transport", transport);
 			archiver->inout("address", address);

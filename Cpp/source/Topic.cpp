@@ -158,7 +158,12 @@ namespace ops
 	void Topic::serialize(ArchiverInOut* const archiver)
 	{
 		OPSObject::serialize(archiver);
-		archiver->inout("name", name);
+        if (idlVersionMask != 0) {
+            archiver->inout("Topic_version", Topic_version);
+        } else {
+            Topic_version = 0;
+        }
+        archiver->inout("name", name);
 		archiver->inout("dataType", typeID);
 		archiver->inout("port", port);		
 		archiver->inout("address", domainAddress);

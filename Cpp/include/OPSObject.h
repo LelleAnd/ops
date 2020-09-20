@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2019-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -33,6 +33,8 @@
 
 namespace ops
 {
+    constexpr VersionMask_T OPSObject_Level_Mask = 1;
+
     ///Base class for object that can be serialized with OPSArchivers
     class OPS_EXPORT OPSObject : public Serializable
     {
@@ -43,13 +45,19 @@ namespace ops
 
         friend class ByteBuffer;
         friend class OPSArchiverIn;
+        friend class OPSArchiverOut;
 
 	protected:
+        // Used to indicate which classes in the hierachy, if any, that enabled the use of version bytes for this object instance
+        VersionMask_T idlVersionMask = 0;
+
         //Should only be set by the Publisher at publication time and by ByteBuffer at deserialization time.
-		ObjectKey_T key;
+        ObjectKey_T key;
         TypeId_T typesString;
 
-		void appendType(const TypeId_T& type)
+        char OPSObject_version = 0;
+
+        void appendType(const TypeId_T& type)
 		{
 			TypeId_T old = typesString;
 			typesString = type;
@@ -72,6 +80,11 @@ namespace ops
 
 		///Fills the parameter obj with all values from this object.
 		void fillClone(OPSObject* obj) const;
+
+        void setVersionMask(VersionMask_T verMask)
+        {
+            idlVersionMask = verMask;
+        }
 
     public:
         OPSObject();

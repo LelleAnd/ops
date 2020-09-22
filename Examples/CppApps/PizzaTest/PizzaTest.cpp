@@ -524,6 +524,9 @@ public:
 	MyListener& operator =(MyListener&&) = delete;
 	MyListener& operator =(MyListener const&) = delete;
 
+#if defined(_MSC_VER) && (_MSC_VER == 1900)
+#pragma warning( disable : 4373)
+#endif
     virtual void onData(ops::Subscriber* const sub, pizza::PizzaData* const data) override
 	{
         // test for sending derived objects on same topic
@@ -560,6 +563,9 @@ public:
 #endif
 	}
 
+#if defined(_MSC_VER) && (_MSC_VER == 1900)
+#pragma warning( disable : 4373)
+#endif
 	virtual void onData(ops::Subscriber* const sub, pizza::VessuvioData* const data) override
 	{
 		// test for sending derived objects on same topic
@@ -585,6 +591,9 @@ public:
         }
     }
 
+#if defined(_MSC_VER) && (_MSC_VER == 1900)
+#pragma warning( disable : 4373)
+#endif
 	virtual void onData(ops::Subscriber* const sub, pizza::special::ExtraAllt* const data) override
 	{
 		ops::Address_T addr = "";

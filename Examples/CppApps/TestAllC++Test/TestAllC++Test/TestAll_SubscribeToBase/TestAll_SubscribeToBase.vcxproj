@@ -93,6 +93,7 @@
       <PrecompiledHeader />
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <AdditionalDependencies>OPSCppLib_vc141_MTd.lib;%(AdditionalDependencies)</AdditionalDependencies>

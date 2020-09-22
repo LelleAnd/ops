@@ -201,6 +201,9 @@ public:
         sub.start();
     }
 
+#if defined(_MSC_VER) && (_MSC_VER == 1900)
+#pragma warning( disable : 4373)
+#endif
 	// Override from ops::DataListener, called whenever new data arrives.
 	virtual void onNewData(ops::DataNotifier* const subscriber) override
     {

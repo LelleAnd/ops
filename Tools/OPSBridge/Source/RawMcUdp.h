@@ -78,6 +78,9 @@ namespace opsbridge {
 		std::set<int> _senderPorts;
 
 		virtual void run();
+#if defined(_MSC_VER) && (_MSC_VER == 1900)
+#pragma warning( disable : 4373)
+#endif
 		void onNewEvent(ops::Notifier<ops::BytesSizePair>* const sender, ops::BytesSizePair byteSizePair);
 	};
 }

@@ -59,6 +59,9 @@ public:
 
 	}
 	///Override from ops::DataListener, called whenever new data arrives.
+#if defined(_MSC_VER) && (_MSC_VER == 1900)
+#pragma warning( disable : 4373)
+#endif
 	virtual void onNewData(ops::DataNotifier* const subscriber) override
 	{
 		hello::HelloData data;

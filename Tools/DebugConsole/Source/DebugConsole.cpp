@@ -46,6 +46,10 @@ public:
 		removeSubscriber();
 	}
 
+#if defined(_MSC_VER) && (_MSC_VER == 1900)
+#pragma warning( disable : 4373 )
+#endif
+
 	virtual void onNewData(ops::DataNotifier* const notifier) override
 	{
 		ops::Subscriber* const sub = dynamic_cast<ops::Subscriber*>(notifier);

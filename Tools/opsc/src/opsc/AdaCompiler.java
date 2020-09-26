@@ -404,7 +404,9 @@ public class AdaCompiler extends opsc.Compiler
     protected String getConstructorBody(IDLClass idlClass)
     {
       String ret = "";
-
+      if (idlClass.getVersion() > 0) {
+          ret += tab(2) + "Self.SetIdlVersionMask(Self.IdlVersionMask or UInt32(1)); -- Some value /= 0" + endl();
+      }
       for (IDLField field : idlClass.getFields()) {
           if (field.isIdlType() && !field.isArray()) {
               if (alwaysDynObject || field.isAbstract()) {
@@ -497,6 +499,7 @@ public class AdaCompiler extends opsc.Compiler
         String ret = "";
         int pos = 3;
         String className = idlClass.getClassName() + "_Class";
+        ret += tab(pos) + className + "(obj.all)." + idlClass.getClassName() + "_version := Self." + idlClass.getClassName() + "_version;" + endl();
         for (IDLField field : idlClass.getFields()) {
             if (field.isStatic()) continue;
             String fieldName = getFieldName(field);
@@ -722,6 +725,12 @@ public class AdaCompiler extends opsc.Compiler
     protected String getDeclarations(IDLClass idlClass)
     {
         String ret = "";
+        if (!isOnlyDefinition(idlClass)) {
+            int version = idlClass.getVersion();
+            if (version < 0) { version = 0; }
+            // Need an implicit version field that should be [de]serialized
+            ret += tab(3) + idlClass.getClassName() + "_version : Byte := " + version + ";" + endl();
+        }
         for (IDLField field : idlClass.getFields()) {
             if (field.isStatic()) continue;
             if(!field.getComment().equals("")) {
@@ -878,15 +887,47 @@ public class AdaCompiler extends opsc.Compiler
       return s;
     }
 
+    private String getFieldGuard(String versionName, IDLField field)
+    {
+        String ret = "";
+        Vector<VersionEntry> vec = getReducedVersions(field.getName(), field.getDirective());
+        if (vec != null) {
+            for (VersionEntry ent : vec) {
+                String cond = "(" + versionName + " >= " + ent.start + ")";
+                if (ent.stop != -1) {
+                    cond = "(" + cond + " and (" + versionName + " <= " + ent.stop + "))";
+                }
+                if (ret.length() > 0) {
+                    ret += " or ";
+                }
+                ret += cond;
+            }
+        }
+        return ret;
+    }
+
     protected String getSerialize(IDLClass idlClass)
     {
         String ret = "";
+        String versionName = idlClass.getClassName() + "_version";
+        // Need an implicit version field that may be [de]serialized
+        ret += tab(2) + "if Self.IdlVersionMask /= 0 then" + endl();
+        ret += tab(3) + "archiver.Inout(\"" + versionName + "\", Self." + versionName + ");" + endl();
+        ret += tab(2) + "else" + endl();
+        ret += tab(3) + "Self." + versionName + " := 0;" + endl();
+        ret += tab(2) + "end if;" + endl();
         for (IDLField field : idlClass.getFields()) {
             if (field.isStatic()) continue;
             String fieldName = getFieldName(field);
+            String fieldGuard = getFieldGuard("Self." + versionName, field);
+            int tabCnt = 2;
+            if (fieldGuard.length() > 0) {
+                ret += tab(tabCnt) + "if " + fieldGuard + " then" + endl();
+                tabCnt += 1;
+            }
             if (field.isIdlType()) {
                 if (field.isArray()) {
-                    ret += tab(2);
+                    ret += tab(tabCnt);
                     if ((!alwaysDynArray) && (field.getArraySize() > 0)) {
                         // idl = type[size] name;
                         // TestData_Class_InoutFixArr(archiver, "ftest2s2", Self.ftest2s2);
@@ -901,7 +942,7 @@ public class AdaCompiler extends opsc.Compiler
                     }
                 } else {
                     if (alwaysDynObject || field.isAbstract()) {
-                        ret += tab(2);
+                        ret += tab(tabCnt);
                         if (field.isAbstract()) {
                           ret += "Self." + fieldName + " := " + getFullyQualifiedClassName(field.getType()) + "_At" +
                                "(archiver.Inout2(\"" + field.getName() + "\", Serializable_Class_At(Self." + fieldName + ")));" + endl();
@@ -909,21 +950,21 @@ public class AdaCompiler extends opsc.Compiler
                           ret += "archiver.Inout(\"" + field.getName() + "\", Serializable_Class_At(Self." + fieldName + "));" + endl();
                         }
                     } else {
-                        ret += tab(2) + "declare" + endl();
-                        ret += tab(3) +   "tmp : " + getFullyQualifiedClassName(field.getType()) + "_At := Self." + fieldName + "'Unchecked_Access;" + endl();
-                        ret += tab(2) + "begin" + endl();
-                        ret += tab(3) +   "archiver.Inout(\"" + field.getName() + "\", Serializable_Class_At(tmp));" + endl();
-                        ret += tab(2) + "end;" + endl();
+                        ret += tab(tabCnt) + "declare" + endl();
+                        ret += tab(tabCnt+1) + "tmp : " + getFullyQualifiedClassName(field.getType()) + "_At := Self." + fieldName + "'Unchecked_Access;" + endl();
+                        ret += tab(tabCnt) + "begin" + endl();
+                        ret += tab(tabCnt+1) + "archiver.Inout(\"" + field.getName() + "\", Serializable_Class_At(tmp));" + endl();
+                        ret += tab(tabCnt) + "end;" + endl();
                     }
                 }
             } else if (field.isEnumType()) {
                 // Enum types
                 // Inout(archiver, "enu1", Self.enu1);
-                ret += tab(2);
+                ret += tab(tabCnt);
                 ret += "Inout(archiver, \"" + field.getName() + "\", Self." + fieldName + ");" + endl();
 
             } else {
-                ret += tab(2);
+                ret += tab(tabCnt);
                 // core types
                 if (field.isArray()) {
                     if ((!alwaysDynArray) && (field.getArraySize() > 0)) {
@@ -936,6 +977,10 @@ public class AdaCompiler extends opsc.Compiler
                 } else {
                     ret += "archiver.Inout(\"" + field.getName() + "\", Self." + fieldName + ");" + endl();
                 }
+            }
+            if (fieldGuard.length() > 0) {
+                tabCnt -= 1;
+                ret += tab(tabCnt) + "end if;" + endl();
             }
         }
         return ret;

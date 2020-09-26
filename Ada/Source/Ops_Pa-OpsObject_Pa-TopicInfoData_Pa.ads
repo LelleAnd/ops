@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2020 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -31,6 +31,7 @@ package Ops_Pa.OpsObject_Pa.TopicInfoData_Pa is
 -- ==========================================================================
   type TopicInfoData_Class is new OpsObject_Class with
     record
+      TopicInfoData_version : Byte := 0;
       name : String_At := null;
       dataType : String_At := null;
       transport : String_At := null;

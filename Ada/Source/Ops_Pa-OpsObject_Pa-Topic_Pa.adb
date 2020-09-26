@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2019 Lennart Andersson.
+-- Copyright (C) 2016-2020 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -193,10 +193,25 @@ package body Ops_Pa.OpsObject_Pa.Topic_Pa is
     Self.HeartbeatTimeout := Value;
   end;
 
+  function Topic_version( Self : Topic_Class ) return Byte is
+  begin
+    return Self.Topic_version;
+  end;
+
+  procedure SetTopic_version( Self : in out Topic_Class; Version : Byte ) is
+  begin
+    Self.Topic_version := Version;
+  end;
+
   overriding procedure Serialize( Self : in out Topic_Class; archiver : ArchiverInOut_Class_At) is
     tSampleMaxSize : Int32;
   begin
     Serialize( OpsObject_Class(Self), archiver );
+    if Self.IdlVersionMask /= 0 then
+      archiver.inout("Topic_version", Self.Topic_Version);
+    else
+      Self.Topic_Version := 0;
+    end if;
     archiver.Inout("name", Self.Name);
     archiver.Inout("dataType", Self.TypeID);
     archiver.Inout("port", Self.Port);
@@ -243,6 +258,7 @@ package body Ops_Pa.OpsObject_Pa.Topic_Pa is
   begin
     FillClone( OpsObject_Class(Self), obj );
     if obj.all in Topic_Class'Class then
+      Topic_Class(obj.all).Topic_version := Self.Topic_version;
       Replace(Topic_Class(obj.all).Name, Self.Name);
       Topic_Class(obj.all).Port := Self.Port;
       Topic_Class(obj.all).TimeToLive := Self.TimeToLive;

@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2019 Lennart Andersson.
+-- Copyright (C) 2016-2020 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -87,6 +87,16 @@ package body Ops_Pa.OpsObject_Pa.Domain_Pa is
     return Self.HeartbeatTimeout;
   end;
 
+  function Domain_version( Self : Domain_Class ) return Byte is
+  begin
+    return Self.Domain_version;
+  end;
+
+  procedure SetDomain_version( Self : in out Domain_Class; Version : Byte ) is
+  begin
+    Self.Domain_version := Version;
+  end;
+
   -- Helpers for handling [de]serializing of fixed arrays
   procedure Topic_Class_InoutDynArr is new inoutdynarr2(Topic_Class, Topic_Class_At, Topic_Class_At_Arr, Topic_Class_At_Arr_At, Create);
   procedure Channel_Class_InoutDynArr is new inoutdynarr2(Channel_Class, Channel_Class_At, Channel_Class_At_Arr, Channel_Class_At_Arr_At, Create);
@@ -95,6 +105,11 @@ package body Ops_Pa.OpsObject_Pa.Domain_Pa is
   overriding procedure Serialize( Self : in out Domain_Class; archiver : ArchiverInOut_Class_At) is
   begin
     Serialize( OpsObject_Class(Self), archiver );
+    if Self.IdlVersionMask /= 0 then
+      archiver.inout("Domain_version", Self.Domain_Version);
+    else
+      Self.Domain_Version := 0;
+    end if;
     archiver.Inout("domainID", Self.domainID);
     Topic_Class_InoutDynArr(archiver, "topics", Self.topics, False);
     archiver.Inout("domainAddress", Self.domainAddress);
@@ -169,6 +184,7 @@ package body Ops_Pa.OpsObject_Pa.Domain_Pa is
   begin
     FillClone( OpsObject_Class(Self), obj );
     if obj.all in Domain_Class'Class then
+      Domain_Class(obj.all).Domain_version := Self.Domain_version;
       Replace(Domain_Class(obj.all).domainAddress, Self.domainAddress);
       Domain_Class(obj.all).timeToLive := Self.timeToLive;
       Replace(Domain_Class(obj.all).localInterface, Self.localInterface);

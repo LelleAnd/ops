@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2019 Lennart Andersson.
+-- Copyright (C) 2016-2020 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -70,6 +70,8 @@ package Ops_Pa.OpsObject_Pa.OPSConfig_Pa is
   -- NOTE: The OPSConfig still owns them
   function getDomains( Self : OPSConfig_Class ) return Domain_Class_At_Arr_At;
 
+  function OPSConfig_version( Self : OPSConfig_Class ) return Byte;
+  procedure SetOPSConfig_version( Self : in out OPSConfig_Class; Version : Byte );
 
 -- ==========================================================================
 --      C l a s s    D e c l a r a t i o n.
@@ -136,6 +138,7 @@ private
 -- ==========================================================================
   type OPSConfig_Class is new OpsObject_Class with
     record
+      OPSConfig_version : Byte := 0;
       domains : Domain_Class_At_Arr_At := null;
     end record;
 

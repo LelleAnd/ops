@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2019 Lennart Andersson.
+-- Copyright (C) 2016-2020 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -15,6 +15,9 @@
 --
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
+
+with Ops_Pa.OpsObject_Pa;
+use  Ops_Pa.OpsObject_Pa;
 
 package body Ops_Pa.ArchiverInOut_Pa.ArchiverIn_Pa is
 
@@ -82,11 +85,16 @@ package body Ops_Pa.ArchiverInOut_Pa.ArchiverIn_Pa is
 
   procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Serializable_Class_At) is
     types : String_At := null;
+    verMask : UInt32 := 0;
   begin
     if value = null then
       raise Null_Object_Not_Allowed;
     end if;
     Self.FBuf.ReadString( types );
+    if types /= null and then types'Length >= 2 and then types(types'First) = '0' then
+      verMask := 1;
+    end if;
+    OpsObject_Class_At(value).SetIdlVersionMask( verMask );
     value.all.Serialize( ArchiverInOut_Class_At(Self.SelfAt) );
     if types /= null then
       Dispose(types);
@@ -94,16 +102,8 @@ package body Ops_Pa.ArchiverInOut_Pa.ArchiverIn_Pa is
   end;
 
   procedure inout( Self : in out ArchiverIn_Class; name : String; value : in out Serializable_Class_At; element : Integer) is
-    types : String_At := null;
   begin
-    if value = null then
-      raise Null_Object_Not_Allowed;
-    end if;
-    Self.FBuf.ReadString( types );
-    value.all.Serialize( ArchiverInOut_Class_At(Self.SelfAt) );
-    if types /= null then
-      Dispose(types);
-    end if;
+    inout( Self, name, value );
   end;
 
   function inout2( Self : in out ArchiverIn_Class; name : String; value : in out Serializable_Class_At) return Serializable_Class_At is
@@ -115,15 +115,26 @@ package body Ops_Pa.ArchiverInOut_Pa.ArchiverIn_Pa is
     end if;
     Self.FBuf.ReadString( types );
     if types /= null then
-      result := Self.Factory.Make( types.all );
-      if result /= null then
-        -- We need to preserve the type information since the factory only can create
-        -- objects it knows how to create, and this can be a more generalized (base) object
-        -- than the actual one. The rest of the bytes will be placed in the spareBytes member.
-        SetTypesString(result.all, types.all);
+      declare
+        verMask : UInt32 := 0;
+        start : Integer := types'First;
+      begin
+        if types'Length >= 2 and then types(start) = '0' then
+          verMask := 1;
+          start := start + 2;
+        end if;
+        result := Self.Factory.Make( types.all(start..types'Last) );
+        if result /= null then
+          OpsObject_Class_At(result).SetIdlVersionMask( verMask );
 
-        result.Serialize(ArchiverInOut_Class_At(Self.SelfAt));
-      end if;
+          -- We need to preserve the type information since the factory only can create
+          -- objects it knows how to create, and this can be a more generalized (base) object
+          -- than the actual one. The rest of the bytes will be placed in the spareBytes member.
+          SetTypesString(result.all, types.all(start..types'Last));
+
+          result.Serialize(ArchiverInOut_Class_At(Self.SelfAt));
+        end if;
+      end;
       Dispose(types);
     end if;
     return result;
@@ -135,10 +146,19 @@ package body Ops_Pa.ArchiverInOut_Pa.ArchiverIn_Pa is
   begin
     Self.FBuf.ReadString( types );
     if types /= null then
-      result := Self.Factory.Make( types.all );
-      if result /= null then
-        result.Serialize(ArchiverInOut_Class_At(Self.SelfAt));
-      end if;
+      declare
+        verMask : Int32 := 0;
+        start : Integer := types'First;
+      begin
+        if types'Length >= 2 and then types(start) = '0' then
+          verMask := 1;
+          start := start + 2;
+        end if;
+        result := Self.Factory.Make( types.all(start..types'Last) );
+        if result /= null then
+          result.Serialize(ArchiverInOut_Class_At(Self.SelfAt));
+        end if;
+      end;
       Dispose(types);
     end if;
     return result;

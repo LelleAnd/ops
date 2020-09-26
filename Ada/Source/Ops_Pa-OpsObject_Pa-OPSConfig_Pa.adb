@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2019 Lennart Andersson.
+-- Copyright (C) 2016-2020 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -53,7 +53,22 @@ package body Ops_Pa.OpsObject_Pa.OPSConfig_Pa is
   overriding procedure Serialize( Self : in out OPSConfig_Class; archiver : ArchiverInOut_Class_At) is
   begin
     Serialize( OpsObject_Class(Self), archiver );
+    if Self.IdlVersionMask /= 0 then
+      archiver.inout("OPSConfig_version", Self.OPSConfig_Version);
+    else
+      Self.OPSConfig_Version := 0;
+    end if;
     Domain_Class_InoutDynArr(archiver, "domains", Self.domains, False);
+  end;
+
+  function OPSConfig_version( Self : OPSConfig_Class ) return Byte is
+  begin
+    return Self.OPSConfig_version;
+  end;
+
+  procedure SetOPSConfig_version( Self : in out OPSConfig_Class; Version : Byte ) is
+  begin
+    Self.OPSConfig_version := Version;
   end;
 
   -- Returns a newely allocated deep copy/clone of Self.
@@ -83,6 +98,7 @@ package body Ops_Pa.OpsObject_Pa.OPSConfig_Pa is
   begin
     FillClone( OpsObject_Class(Self), obj );
     if obj.all in OPSConfig_Class'Class then
+      OPSConfig_Class(obj.all).OPSConfig_version := Self.OPSConfig_version;
       if OPSConfig_Class(obj.all).domains /= null then
         Clear(OPSConfig_Class(obj.all).domains.all);
         Dispose(OPSConfig_Class(obj.all).domains);

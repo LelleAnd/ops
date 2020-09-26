@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2019 Lennart Andersson.
+-- Copyright (C) 2016-2020 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -75,12 +75,16 @@ package Ops_Pa.OpsObject_Pa.Domain_Pa is
   function HeartbeatPeriod( Self : Domain_Class ) return Int32;
   function HeartbeatTimeout( Self : Domain_Class ) return Int32;
 
+  function Domain_version( Self : Domain_Class ) return Byte;
+  procedure SetDomain_version( Self : in out Domain_Class; Version : Byte );
+
 private
 -- ==========================================================================
 --
 -- ==========================================================================
   type Domain_Class is new OpsObject_Class with
     record
+      Domain_version : Byte := 0;
       DomainAddress : String_At := null;
       TimeToLive : Int32 := 1;
       LocalInterface : String_At := new String'("0.0.0.0");

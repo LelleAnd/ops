@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2020 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -33,6 +33,7 @@ package Ops_Pa.OpsObject_Pa.ParticipantInfoData_Pa is
 -- ==========================================================================
   type ParticipantInfoData_Class is new OpsObject_Class with
     record
+      ParticipantInfoData_version : Byte := 0;
       name : String_At := null;
       domain : String_At := null;
       id : String_At := null;

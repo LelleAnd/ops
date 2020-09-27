@@ -81,6 +81,11 @@ namespace ops
 		///Fills the parameter obj with all values from this object.
 		void fillClone(OPSObject* obj) const;
 
+        VersionMask_T getVersionMask() const
+        {
+            return idlVersionMask;
+        }
+
         void setVersionMask(VersionMask_T verMask)
         {
             idlVersionMask = verMask;

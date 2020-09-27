@@ -209,12 +209,12 @@ begin
       types := types.Substring(2);
     end;
   end;
-  Result := FFactory.Make(string(types));
+  Result := FFactory.Make(types);
   if Assigned(Result) then begin
     // We need to preserve the type information since the factory only can create
     // objects it knows how to create, and this can be a more generalized (base) object
     // than the actual one. The rest of the bytes will be placed in the spareBytes member.
-    SetTypesString(Result, types);
+    SetTypesString(Result, AnsiString(types));
 
     (Result as TOPSObject).IdlVersionMask := verMask;
     Result.Serialize(Self);

@@ -26,8 +26,46 @@ namespace message_dump {
 
     class MessageDump
     {
+        struct CheckVersion
+        {
+            struct Range
+            {
+                uint8_t low = 0;
+                uint8_t high = 255;
+                bool within_range(char version) { return ((uint8_t)version >= low) && ((uint8_t)version <= high); }
+                Range() {}
+            };
+            std::vector<Range> ranges;
+            bool operator()(char version)
+            {
+                for (auto& r : ranges) { if (r.within_range(version)) return true; }
+                return false;
+            }
+        };
+
+        struct DumpObject;
+
         struct DumpValue
         {
+            DumpObject* parent = nullptr;
+            CheckVersion* chkVer = nullptr;
+
+            bool optionalOnTagVersion = false;
+            bool skipField()
+            {
+                if (optionalOnTagVersion) {
+                    if (parent != nullptr) {
+                        return !parent->tagVersion;
+                    }
+                }
+                if (chkVer != nullptr) {
+                    if (parent != nullptr) {
+                        return !chkVer->operator()(parent->idlVersion);
+                    }
+                }
+                return false;
+            }
+
             std::string name;
             void SetName(std::string n) { name = n; }
 
@@ -52,6 +90,7 @@ namespace message_dump {
         {
             void operator()(char*& ptr, int level) override
             {
+                if (skipField()) return;
                 std::cout << indent(level) << name << " <boolean>: " << (*ptr ? "true" : "false") << "\n";
                 ptr += 1;
             }
@@ -60,6 +99,7 @@ namespace message_dump {
         {
             void operator()(char*& ptr, int level) override
             {
+                if (skipField()) return;
                 int len = GetInt(ptr);
                 if (len == 0) {
                     std::cout << indent(level) << name << "[ size == 0 ]\n";
@@ -76,6 +116,7 @@ namespace message_dump {
         {
             void operator()(char*& ptr, int level) override
             {
+                if (skipField()) return;
                 std::cout << indent(level) << name << " <" << sizeof(T) << ">: " << (P)*(T*)ptr << "\n";
                 ptr += sizeof(T);
             }
@@ -92,6 +133,7 @@ namespace message_dump {
         {
             void operator()(char*& ptr, int level) override
             {
+                if (skipField()) return;
                 int len = GetInt(ptr);
                 if (len == 0) {
                     std::cout << indent(level) << name << "[ size == 0 ]\n";
@@ -113,6 +155,7 @@ namespace message_dump {
         {
             void operator()(char*& ptr, int level) override
             {
+                if (skipField()) return;
                 int len = GetInt(ptr);
                 std::cout << indent(level) << name << " <string[" << len << "]>: " << GetString(ptr, len) << "\n";
             }
@@ -121,6 +164,7 @@ namespace message_dump {
         {
             void operator()(char*& ptr, int level) override
             {
+                if (skipField()) return;
                 int len1 = GetInt(ptr);
                 if (len1 == 0) {
                     std::cout << indent(level) << name << "[ size == 0 ]\n";
@@ -134,18 +178,32 @@ namespace message_dump {
 
         struct DumpObject : DumpValue
         {
+            bool tagVersion = false;
+            char idlVersion = 0;
             std::vector<DumpValue*> fields;
-            DumpValue* base = nullptr;
+            DumpObject* base = nullptr;
             std::string extends;
             void Add(DumpValue* dmp) { fields.push_back(dmp); }
             void SetExtends(std::string n) { extends = n; }
             void operator()(char*& ptr, int level) override
             {
-                if (base != nullptr) { base->operator()(ptr, level); }
+                if (skipField()) return;
+                if (base != nullptr) {
+                    base->tagVersion = tagVersion;
+                    base->operator()(ptr, level);
+                }
                 // Skip ops.OPSOBject if on top level, since it is already handled when calling Dump()
                 if ((level > 0) || (name != "ops.OPSObject")) {
                     std::cout << indent(level + 1) << "<<<" << name << ">>>\n";
-                    for (auto& dmp : fields) { dmp->operator()(ptr, level + 1); }
+                    if (tagVersion) {
+                        // Version is always placed first if it exist
+                        idlVersion = *ptr;
+                    } else {
+                        idlVersion = 0;
+                    }
+                    for (auto& dmp : fields) {
+                        dmp->operator()(ptr, level + 1);
+                    }
                 }
             }
         };
@@ -158,6 +216,7 @@ namespace message_dump {
         {
             void operator()(char*& ptr, int level) override
             {
+                if (skipField()) return;
                 int16_t val = GetShort(ptr);
                 if ((size_t)val >= enumvalues.size()) {
                     std::cout << indent(level) << name << " <2>: UNKNOWN enum value\n";
@@ -172,6 +231,7 @@ namespace message_dump {
             DumpVectorEnumShort(DumpEnumShort* d) : dmp(d) {}
             void operator()(char*& ptr, int level) override
             {
+                if (skipField()) return;
                 int len = GetInt(ptr);
                 if (len == 0) {
                     std::cout << indent(level) << name << "[ size == 0 ]\n";
@@ -191,28 +251,42 @@ namespace message_dump {
         struct DumpFieldObject : DumpValue
         {
             std::map<std::string, DumpObject*>& objs;
-            bool isvirtual = false;
-            std::string fieldtype;
+            const bool isvirtual;
+            const std::string fieldtype;
             DumpFieldObject(bool isvirt, std::string fname, std::map<std::string, DumpObject*>& o) : 
                 objs(o), isvirtual(isvirt), fieldtype(fname) {}
             void operator()(char*& ptr, int level) override
             {
+                if (skipField()) return;
                 // Get typestring
                 int len = GetInt(ptr);
-                if (isvirtual) {
-                    fieldtype = Trim(GetString(ptr, len));
-                } else {
-                    ptr += len;
+                std::string ftype = Trim(GetString(ptr, len));
+                bool tag = false;
+                if ((ftype.size() > 0) && (ftype[0] == '0')) {
+                    tag = true;
+                    ftype[0] = ' ';
+                    ftype = Trim(ftype);
                 }
-                
+
+                auto pos = ftype.find_first_of(' ');
+                if (pos != std::string::npos) {
+                    ftype = ftype.substr(0, pos);
+                }
+
+                // When we use 'optNonVirt = true', ftype will be empty, use fieldtype instead
+                if (ftype == "") {
+                    ftype = fieldtype;
+                }
+
                 // Dump object
-                auto search = objs.find(fieldtype);
+                auto search = objs.find(ftype);
                 if (search != objs.end()) {
                     DumpObject* dmp = search->second;
                     std::cout << indent(level) << name << ":\n";
+                    dmp->tagVersion = tag;
                     dmp->operator()(ptr, level + 1);
                 } else {
-                    std::cout << "FAILED to find type: '" << fieldtype << "'\n";
+                    std::cout << "FAILED to find type: '" << ftype << "'\n";
                 }
             }
         };
@@ -223,6 +297,7 @@ namespace message_dump {
                 obj(isvirt, fname, o) {}
             void operator()(char*& ptr, int level) override
             {
+                if (skipField()) return;
                 int len = GetInt(ptr);
                 if (len == 0) {
                     std::cout << indent(level) << name << "[ size == 0 ]\n";
@@ -334,9 +409,44 @@ namespace message_dump {
             }
         }
 
+        CheckVersion::Range CreateRangeChecker(pt::ptree& pt)
+        {
+            CheckVersion::Range rng;
+            for (pt::ptree::iterator pos = pt.begin(); pos != pt.end(); ++pos) {
+                if (pos->first == "low") {
+                    std::string value = pos->second.data();
+                    int val = atoi(value.c_str());
+                    if (val < 0) { val = 0; }
+                    if (val > 255) { val = 255; }
+                    rng.low = (char)val;
+                } else if (pos->first == "high") {
+                    std::string value = pos->second.data();
+                    int val = atoi(value.c_str());
+                    if (val < 0) { val = 0; }
+                    if (val > 255) { val = 255; }
+                    rng.high = (char)val;
+                }
+            }
+            return rng;
+        }
+
+        CheckVersion* CreateVersionChecker(pt::ptree& pt)
+        {
+            CheckVersion* chkVer = new CheckVersion();
+            for (pt::ptree::iterator pos = pt.begin(); pos != pt.end(); ++pos) {
+                chkVer->ranges.push_back(CreateRangeChecker(pos->second));
+            }
+            return chkVer;
+        }
+
         void AddField(pt::ptree& pt, DumpObject* dmp)
         {
             std::string fieldname, fieldtype, elementtype;
+            bool optionalOnTagVersion = false;
+            CheckVersion* chkVer = nullptr;
+
+            //{ "name": "Kalle", "type" : "int", "version" : [{ "low": "1", "high" : "5" }, { "low": "10", "high" : "255" }], "desc" : "hej hopp" }
+
             for (pt::ptree::iterator pos = pt.begin(); pos != pt.end(); ++pos) {
                 if (pos->first == "name") {
                     fieldname = pos->second.data();
@@ -346,6 +456,12 @@ namespace message_dump {
                     // Just a comment, skip
                 } else if (pos->first == "elementtype") {
                     elementtype = pos->second.data();
+                } else if (pos->first == "optional") {
+                    if (pos->second.data() == "type_is_version_tagged") { /// typestring dependent?
+                        optionalOnTagVersion = true;
+                    }
+                } else if (pos->first == "version") { /// Version dependent?
+                    chkVer = CreateVersionChecker(pos->second);
                 } else {
                     std::cout << "  UNKNOWN \"" << pos->first << "\"\n";
                 }
@@ -405,6 +521,9 @@ namespace message_dump {
 
             if (val) {
                 val->SetName(fieldname);
+                val->optionalOnTagVersion = optionalOnTagVersion;
+                val->chkVer = chkVer;
+                val->parent = dmp;
                 dmp->Add(val);
             }
         }
@@ -478,11 +597,12 @@ namespace message_dump {
 
         bool Any() { return objs.size() > 0; }
 
-        void Dump(std::string tname, char* ptr)
+        void Dump(std::string tname, uint32_t verMask, char* ptr)
         {
             auto search = objs.find(tname);
             if (search != objs.end()) {
                 DumpObject* dmp = search->second;
+                dmp->tagVersion = (verMask != 0);
                 dmp->operator()(ptr, 0);
             }
         }

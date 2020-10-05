@@ -286,6 +286,9 @@ public class CSharpCompiler extends opsc.Compiler
     protected String getConstructorBody(IDLClass idlClass)
     {
         String ret = "";
+        if (idlClass.getVersion() > 0) {
+            ret += tab(3) + "IdlVersionMask = IdlVersionMask | 1;" + endl();
+        }
         for (IDLField field : idlClass.getFields()) {
             if (field.isStatic()) continue;
             if (field.isArray() && (field.getArraySize() > 0)) {
@@ -302,6 +305,7 @@ public class CSharpCompiler extends opsc.Compiler
     private String getCloneBody(IDLClass idlClass)
     {
         String ret = "";
+        ret += tab(3) + "cloneResult." + idlClass.getClassName() + "_version = this." + idlClass.getClassName() + "_version;" + endl();
         for (IDLField field : idlClass.getFields())
         {
             if (field.isStatic()) continue;
@@ -383,6 +387,14 @@ public class CSharpCompiler extends opsc.Compiler
     protected String getDeclarations(IDLClass idlClass)
     {
         String ret = getEnumTypeDeclarations(idlClass);
+
+        if (!isOnlyDefinition(idlClass)) {
+            int version = idlClass.getVersion();
+            if (version < 0) { version = 0; }
+            // Need an implicit version field that should be [de]serialized
+            ret += tab(2) + "public const byte " + idlClass.getClassName() + "_idlVersion = " + version + ";" + endl();
+        }
+
         for (IDLField field : idlClass.getFields())
         {
             String fieldName = getFieldName(field);
@@ -487,34 +499,66 @@ public class CSharpCompiler extends opsc.Compiler
         return "new " + s + "()";
     }
 
+    private String getFieldGuard(String versionName, IDLField field)
+    {
+        String ret = "";
+        Vector<VersionEntry> vec = getReducedVersions(field.getName(), field.getDirective());
+        if (vec != null) {
+            for (VersionEntry ent : vec) {
+                String cond = "(" + versionName + " >= " + ent.start + ")";
+                if (ent.stop != -1) {
+                    cond = "(" + cond + " && (" + versionName + " <= " + ent.stop + "))";
+                }
+                if (ret.length() > 0) {
+                    ret += " || ";
+                }
+                ret += cond;
+            }
+        }
+        return ret;
+    }
+
     protected String getSerialize(IDLClass idlClass)
     {
         String ret = "";
+        String versionName = idlClass.getClassName() + "_version";
+        // Need an implicit version field that may be [de]serialized
+        ret += tab(3) + "if (IdlVersionMask != 0) {" + endl();
+        ret += tab(4) + versionName + " = archive.Inout(\"" + versionName + "\", " + versionName + ");" + endl();
+        ret += tab(3) + "} else {" + endl();
+        ret += tab(4) + versionName + " = 0;" + endl();
+        ret += tab(3) + "}" + endl();
         for (IDLField field : idlClass.getFields()) {
             if (field.isStatic()) continue;
             String fieldName = getFieldName(field);
+            String fieldGuard = getFieldGuard(versionName, field);
+            int tabCnt = 3;
+            if (fieldGuard.length() > 0) {
+                ret += tab(tabCnt) + "if (" + fieldGuard + ") {" + endl();
+                tabCnt += 1;
+            }
             if (field.isIdlType()) {
                 if (!field.isArray()) {
                   if (field.isAbstract()) {
-                    ret += tab(3) + "_" + fieldName + " = (" + field.getType() + ") archive.Inout(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
+                    ret += tab(tabCnt) + "_" + fieldName + " = (" + field.getType() + ") archive.Inout(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
                   } else {
-                    ret += tab(3) + "_" + fieldName + " = (" + field.getType() + ") archive.Inout<" + field.getType() + ">(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
+                    ret += tab(tabCnt) + "_" + fieldName + " = (" + field.getType() + ") archive.Inout<" + field.getType() + ">(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
                   }
                 } else {
                   if (field.isAbstract()) {
-                    ret += tab(3) + "_" + fieldName + " = (" + languageType(field.getType()) + ") archive.InoutSerializableList(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
+                    ret += tab(tabCnt) + "_" + fieldName + " = (" + languageType(field.getType()) + ") archive.InoutSerializableList(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
                   } else {
-                    ret += tab(3) + "_" + fieldName + " = (" + languageType(field.getType()) + ") archive.InoutSerializableList<" + languageType(elementType(field.getType())) + ">(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
+                    ret += tab(tabCnt) + "_" + fieldName + " = (" + languageType(field.getType()) + ") archive.InoutSerializableList<" + languageType(elementType(field.getType())) + ">(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
                   }
                 }
             } else if (field.isEnumType()) {
                 if (!field.isArray()) {
-                    ret += tab(3) + fieldName + " = archive.InoutEnum(\"" + field.getName() + "\", " + fieldName + ");" + endl();
+                    ret += tab(tabCnt) + fieldName + " = archive.InoutEnum(\"" + field.getName() + "\", " + fieldName + ");" + endl();
                 } else {
-                    ret += tab(3) + fieldName + " = archive.InoutEnumList(\"" + field.getName() + "\", " + fieldName + ");" + endl();
+                    ret += tab(tabCnt) + fieldName + " = archive.InoutEnumList(\"" + field.getName() + "\", " + fieldName + ");" + endl();
                 }
             } else if (field.isArray()) {
-                ret += tab(3) + "_" + fieldName + " = (" + languageType(field.getType()) + ") archive.Inout";
+                ret += tab(tabCnt) + "_" + fieldName + " = (" + languageType(field.getType()) + ") archive.Inout";
                 if (field.getType().equals("int[]")) {
                     ret += "Integer";
                 } else if(field.getType().equals("short[]")) {
@@ -534,7 +578,11 @@ public class CSharpCompiler extends opsc.Compiler
                 }
                 ret += "List(\"" + field.getName() + "\", _" + fieldName + ");" + endl();
             } else {
-                ret += tab(3) + fieldName + " = archive.Inout(\"" + field.getName() + "\", " + fieldName + ");" + endl();
+                ret += tab(tabCnt) + fieldName + " = archive.Inout(\"" + field.getName() + "\", " + fieldName + ");" + endl();
+            }
+            if (fieldGuard.length() > 0) {
+                tabCnt -= 1;
+                ret += tab(tabCnt) + "}" + endl();
             }
         }
         return ret;

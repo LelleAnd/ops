@@ -13,6 +13,20 @@ __classComment
     [Serializable]
     public class __className : __baseClassName
     {
+        private byte ___className_version = __className_idlVersion;
+        public byte __className_version
+        {
+            get { return ___className_version; }
+            set {
+                if (value > __className_idlVersion)
+                {
+                    throw new IdlVersionException(
+                        "__className: received version '" + value + "' > known version '" + __className_idlVersion + "'");
+                }
+                ___className_version = value;
+            }
+        }
+
 __declarations
 
         public static new string GetTypeName() { return "__packageName.__className"; }

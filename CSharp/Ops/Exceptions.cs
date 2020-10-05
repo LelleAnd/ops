@@ -66,6 +66,19 @@ namespace Ops
     }
 
     [Serializable()]
+    public class IdlVersionException : System.Exception
+    {
+        public IdlVersionException() : base() { }
+        public IdlVersionException(string message) : base(message) { }
+        public IdlVersionException(string message, System.Exception inner) : base(message, inner) { }
+
+        // A constructor is needed for serialization when an
+        // exception propagates from a remoting server to the client. 
+        protected IdlVersionException(System.Runtime.Serialization.SerializationInfo info,
+            System.Runtime.Serialization.StreamingContext context) { }
+    }
+
+    [Serializable()]
     public class InvalidHeaderException : System.Exception
     {
         public InvalidHeaderException() : base() { }

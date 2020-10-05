@@ -9,7 +9,22 @@ namespace Ops
 {
 	public class OPSMessage : OPSObject 
     {
-		private string address = "";            // Serialized
+        private byte _OPSMessage_version = OPSMessage_idlVersion;
+        public byte OPSMessage_version
+        {
+            get { return _OPSMessage_version; }
+            set {
+                if (value > OPSMessage_idlVersion)
+                {
+                    throw new IdlVersionException(
+                        "OPSMessage: received version '" + value + "' > known version '" + OPSMessage_idlVersion + "'");
+                }
+                _OPSMessage_version = value;
+            }
+        }
+
+        public const byte OPSMessage_idlVersion = 0;
+        private string address = "";            // Serialized
 		private OPSObject data;                 // serialized
 		private byte endianness;
 		private byte messageType;               // Serialized
@@ -146,6 +161,16 @@ namespace Ops
         public override void Serialize(IArchiverInOut archive)
         {
             base.Serialize(archive);
+
+            if (IdlVersionMask != 0)
+            {
+                OPSMessage_version = archive.Inout("OPSMessage_version", OPSMessage_version);
+            }
+            else
+            {
+                OPSMessage_version = 0;
+            }
+
             this.messageType = archive.Inout("messageType", messageType);
             this.publisherPriority = archive.Inout("publisherPriority", publisherPriority);
             this.publicationID = archive.Inout("publicationID", publicationID);
@@ -167,6 +192,7 @@ namespace Ops
         {
             base.FillClone(cloneO);
             OPSMessage cloneResult = (OPSMessage) cloneO;
+            cloneResult.OPSMessage_version = this.OPSMessage_version;
             cloneResult.SetKey(this.GetKey());
             cloneResult.messageType = this.messageType;
             cloneResult.publisherPriority = this.publisherPriority;

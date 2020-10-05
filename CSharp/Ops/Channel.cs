@@ -9,6 +9,21 @@ namespace Ops
 {
 	public class Channel : OPSObject 
     {
+        private byte _Channel_version = Channel_idlVersion;
+        public byte Channel_version
+        {
+            get { return _Channel_version; }
+            set {
+                if (value > Channel_idlVersion)
+                {
+                    throw new IdlVersionException(
+                        "Channel: received version '" + value + "' > known version '" + Channel_idlVersion + "'");
+                }
+                _Channel_version = value;
+            }
+        }
+
+        public const byte Channel_idlVersion = 0;
         public string channelID = "";
         public string linktype = "";
         public string localInterface = "";     // If multicast, this specifies interface to use
@@ -33,6 +48,15 @@ namespace Ops
             // We need to serialize fields in the same order as C++.
             //OPSObject::serialize(archiver);
             base.Serialize(archive);
+
+            if (IdlVersionMask != 0)
+            {
+                Channel_version = archive.Inout("Channel_version", Channel_version);
+            }
+            else
+            {
+                Channel_version = 0;
+            }
 
             //archiver->inout(std::string("name"), channelID);
             //archiver->inout(std::string("linktype"), linktype);

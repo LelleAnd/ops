@@ -13,6 +13,21 @@ namespace Ops
 {
 	public class OPSConfig : OPSObject 
     {
+        private byte _OPSConfig_version = OPSConfig_idlVersion;
+        public byte OPSConfig_version
+        {
+            get { return _OPSConfig_version; }
+            set {
+                if (value > OPSConfig_idlVersion)
+                {
+                    throw new IdlVersionException(
+                        "OPSConfig: received version '" + value + "' > known version '" + OPSConfig_idlVersion + "'");
+                }
+                _OPSConfig_version = value;
+            }
+        }
+
+        public const byte OPSConfig_idlVersion = 0;
         private protected List<Domain> domains = new List<Domain>();
 
         public static OPSConfig GetConfig() 
@@ -72,6 +87,14 @@ namespace Ops
         public override void Serialize(IArchiverInOut archive)
         {
             base.Serialize(archive);
+            if (IdlVersionMask != 0)
+            {
+                OPSConfig_version = archive.Inout("OPSConfig_version", OPSConfig_version);
+            }
+            else
+            {
+                OPSConfig_version = 0;
+            }
             domains = (List<Domain>)archive.InoutSerializableList("domains", domains);
         }
 

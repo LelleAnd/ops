@@ -11,26 +11,40 @@ namespace Ops
 {
     public class OPSObject : ISerializable 
     {
-		protected string key = "";
+        public int IdlVersionMask { get; set; } = 0;
+        private byte _OPSObject_version = OPSObject_idlVersion;
+        public byte OPSObject_version {
+            get { return _OPSObject_version; }
+            set {
+                if (value > OPSObject_idlVersion)
+                {
+                    throw new IdlVersionException(
+                        "OPSObject: received version '" + value + "' > known version '" + OPSObject_idlVersion + "'");
+                }
+                _OPSObject_version = value;
+            }
+        }
+
+        public const byte OPSObject_idlVersion = 0;
+        protected string key = "";
 
         /// Bytes that hold unserialized data for this object.
         /// This happens if a type can not be fully understood by a participants type support.
         public byte[] spareBytes = new byte[0];
 		protected string typesString = "";
 
+        public OPSObject()
+        {
+        }
+
         public static string GetTypeName()
         {
             return "";  // shall be overriden
         }
 
-        public OPSObject()
-        {
-
-        }
-
-		/// 
-		/// <param name="type"></param>
-		protected void AppendType(string type)
+        /// 
+        /// <param name="type"></param>
+        protected void AppendType(string type)
         {
             this.typesString = type + " " + this.typesString;
         }
@@ -48,6 +62,8 @@ namespace Ops
         /// Fills the parameter "cloneResult" with all values from this object.
         virtual public void FillClone(OPSObject cloneResult)
         {
+            cloneResult.IdlVersionMask = this.IdlVersionMask;
+            cloneResult.OPSObject_version = this.OPSObject_version;
             cloneResult.typesString = this.typesString;
             cloneResult.key = this.key;
             cloneResult.spareBytes = new byte[this.spareBytes.Length];
@@ -81,6 +97,14 @@ namespace Ops
 		/// <param name="archive"></param>
         virtual public void Serialize(IArchiverInOut archive)  
         {
+            if (IdlVersionMask != 0)
+            {
+                OPSObject_version = archive.Inout("OPSObject_version", OPSObject_version);
+            }
+            else
+            {
+                OPSObject_version = 0;
+            }
             key = archive.Inout("key", key);
         }
 
@@ -96,6 +120,6 @@ namespace Ops
             return GetClassName(false);
         }
 
-	}
+    }
 
 }

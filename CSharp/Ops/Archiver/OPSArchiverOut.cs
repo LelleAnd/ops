@@ -103,13 +103,18 @@ namespace Ops
         /// <param name="v"></param>
         public override ISerializable Inout<T>(string name, ISerializable v)
         {
+            string types = "";
+            if (((OPSObject)v).IdlVersionMask != 0)
+            {
+                types = "0 ";
+            }
             if (optNonVirt)
             {
-                writeBuf.Write("");
+                writeBuf.Write(types);
             }
             else
             {
-                writeBuf.Write(((OPSObject)v).GetTypesString());
+                writeBuf.Write(types + ((OPSObject)v).GetTypesString());
             }
             v.Serialize(this);
             return v;
@@ -120,7 +125,12 @@ namespace Ops
         /// <param name="v"></param>
         public override ISerializable Inout(string name, ISerializable v)
         {
-            writeBuf.Write(((OPSObject)v).GetTypesString());
+            string types = "";
+            if (((OPSObject)v).IdlVersionMask != 0)
+            {
+                types = "0 ";
+            }
+            writeBuf.Write(types + ((OPSObject)v).GetTypesString());
             v.Serialize(this);
             return v;
         }
@@ -185,7 +195,12 @@ namespace Ops
             writeBuf.Write(((IList)v).Count);
             foreach (ISerializable obj in (IList)v)
             {
-                writeBuf.Write(((OPSObject)obj).GetTypesString());
+                string types = "";
+                if (((OPSObject)obj).IdlVersionMask != 0)
+                {
+                    types = "0 ";
+                }
+                writeBuf.Write(types + ((OPSObject)obj).GetTypesString());
                 obj.Serialize(this);
             }
             return v;
@@ -197,13 +212,18 @@ namespace Ops
             writeBuf.Write(((IList)v).Count);
             foreach (ISerializable obj in (IList)v)
             {
+                string types = "";
+                if (((OPSObject)obj).IdlVersionMask != 0)
+                {
+                    types = "0 ";
+                }
                 if (optNonVirt)
                 {
-                    writeBuf.Write("");
+                    writeBuf.Write(types);
                 }
                 else
                 {
-                    writeBuf.Write(((OPSObject)obj).GetTypesString());
+                    writeBuf.Write(types + ((OPSObject)obj).GetTypesString());
                 }
                 obj.Serialize(this);
             }

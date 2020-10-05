@@ -11,7 +11,22 @@ namespace Ops
 {
 	public class Domain : OPSObject 
     {
-		private string domainAddress = "";
+        private byte _Domain_version = Domain_idlVersion;
+        public byte Domain_version
+        {
+            get { return _Domain_version; }
+            set {
+                if (value > Domain_idlVersion)
+                {
+                    throw new IdlVersionException(
+                        "Domain: received version '" + value + "' > known version '" + Domain_idlVersion + "'");
+                }
+                _Domain_version = value;
+            }
+        }
+
+        public const byte Domain_idlVersion = 0;
+        private string domainAddress = "";
 		private string domainID = "";
 		private string localInterface = "0.0.0.0";
 		protected List<Topic> topics = new List<Topic>();
@@ -73,6 +88,15 @@ namespace Ops
             // We need to serialize fields in the same order as C++.
             //OPSObject::serialize(archiver);
             base.Serialize(archive);
+
+            if (IdlVersionMask != 0)
+            {
+                Domain_version = archive.Inout("Domain_version", Domain_version);
+            }
+            else
+            {
+                Domain_version = 0;
+            }
 
             //archiver->inout(std::string("domainID"), domainID);
             //archiver->inout<Topic>(std::string("topics"), topics);

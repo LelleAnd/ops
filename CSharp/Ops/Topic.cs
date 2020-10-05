@@ -9,7 +9,22 @@ namespace Ops
 {
 	public class Topic : OPSObject 
     {
-		private string domainAddress = "";
+        private byte _Topic_version = Topic_idlVersion;
+        public byte Topic_version
+        {
+            get { return _Topic_version; }
+            set {
+                if (value > Topic_idlVersion)
+                {
+                    throw new IdlVersionException(
+                        "Topic: received version '" + value + "' > known version '" + Topic_idlVersion + "'");
+                }
+                _Topic_version = value;
+            }
+        }
+
+        public const byte Topic_idlVersion = 0;
+        private string domainAddress = "";
 		private string domainID;
 		private long inSocketBufferSize = -1;
         private string localInterface = "";
@@ -138,6 +153,14 @@ namespace Ops
         public override void Serialize(IArchiverInOut archive)
         {
             base.Serialize(archive);
+            if (IdlVersionMask != 0)
+            {
+                Topic_version = archive.Inout("Topic_version", Topic_version);
+            }
+            else
+            {
+                Topic_version = 0;
+            }
             this.name = archive.Inout("name", name);
             this.typeID = archive.Inout("dataType", typeID);
             this.port = archive.Inout("port", port);

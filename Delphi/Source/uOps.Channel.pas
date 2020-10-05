@@ -30,6 +30,7 @@ type
   TChannel = class(TOPSObject)
   public
     const
+      Channel_idlVersion : Byte = 0;
       LINKTYPE_MC = 'multicast';
       LINKTYPE_TCP = 'tcp';
       LINKTYPE_UDP = 'udp';
@@ -68,7 +69,7 @@ uses SysUtils,
 constructor TChannel.Create;
 begin
   inherited;
-  Channel_version := 0;
+  Channel_version := Channel_idlVersion;
   timeToLive := -1;
   outSocketBufferSize := -1;
   inSocketBufferSize := -1;
@@ -80,6 +81,9 @@ begin
   inherited Serialize(archiver);
   if FIdlVersionMask <> 0 then begin
     archiver.inout('Channel_version', Channel_version);
+    if Channel_version > Channel_idlVersion then begin
+      raise EIdlVersionException.Create('Channel', Channel_version, Channel_idlVersion);
+    end;
   end else begin
     Channel_version := 0;
   end;

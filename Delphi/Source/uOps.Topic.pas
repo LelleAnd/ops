@@ -30,6 +30,7 @@ type
 	TTopic = class(TOPSObject)
   public
     const
+      Topic_idlVersion : Byte = 0;
       TRANSPORT_MC = 'multicast';
       TRANSPORT_TCP = 'tcp';
       TRANSPORT_UDP = 'udp';
@@ -90,7 +91,7 @@ uses uOps.Exceptions;
 constructor TTopic.Create(namee : AnsiString; portt : Integer; typeIDd : AnsiString; domainAddresss : AnsiString);
 begin
   inherited Create;
-  FTopic_version := 0;
+  FTopic_version := Topic_idlVersion;
   FName := namee;
   FPort := portt;
   FTypeID := typeIDd;
@@ -139,6 +140,9 @@ begin
   inherited Serialize(archiver);
   if FIdlVersionMask <> 0 then begin
     archiver.inout('Topic_version', FTopic_version);
+    if FTopic_version > Topic_idlVersion then begin
+      raise EIdlVersionException.Create('Topic', FTopic_version, Topic_idlVersion);
+    end;
   end else begin
     FTopic_version := 0;
   end;

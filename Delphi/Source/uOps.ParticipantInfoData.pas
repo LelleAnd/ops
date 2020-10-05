@@ -33,6 +33,8 @@ type
 	/// NOTE. Must be kept in sync with other OPS language implementations
   TParticipantInfoData = class(TOPSObject)
   public
+    const
+      ParticipantInfoData_idlVersion : Byte = 0;
     type
       TDynTopicInfoDataArray = array of TTopicInfoData;
 
@@ -73,13 +75,14 @@ type
 
 implementation
 
-uses SysUtils;
+uses SysUtils,
+     uOps.Exceptions;
 
 constructor TParticipantInfoData.Create;
 begin
   inherited Create;
   AppendType('ops.ParticipantInfoData');
-  ParticipantInfoData_version := 0;
+  ParticipantInfoData_version := ParticipantInfoData_idlVersion;
 end;
 
 destructor TParticipantInfoData.Destroy;
@@ -100,6 +103,10 @@ begin
 	inherited Serialize(archiver);
   if FIdlVersionMask <> 0 then begin
     archiver.inout('ParticipantInfoData_version', ParticipantInfoData_version);
+    if ParticipantInfoData_version > ParticipantInfoData_idlVersion then begin
+      raise EIdlVersionException.Create('ParticipantInfoData',
+              ParticipantInfoData_version, ParticipantInfoData_idlVersion);
+    end;
   end else begin
     ParticipantInfoData_version := 0;
   end;

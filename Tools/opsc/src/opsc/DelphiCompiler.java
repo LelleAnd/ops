@@ -297,7 +297,7 @@ public class DelphiCompiler extends opsc.Compiler
       if (version > 0) {
           ret += tab(1) + "idlVersionMask := idlVersionMask or 1; // Some value <> 0" + endl();
       }
-      ret += tab(1) + getClassName(idlClass) + "_version := " + version + ";" + endl();
+      ret += tab(1) + getClassName(idlClass) + "_version := " + getClassName(idlClass) + "_idlVersion;" + endl();
       for (IDLField field : idlClass.getFields()) {
           if (field.isStatic()) continue;
           String fieldName = getFieldName(field);
@@ -506,6 +506,12 @@ public class DelphiCompiler extends opsc.Compiler
     protected String getConstantDeclarations(IDLClass idlClass)
     {
         String ret = "";
+        if (!isOnlyDefinition(idlClass)) {
+            int version = idlClass.getVersion();
+            if (version < 0) { version = 0; }
+            // Need an implicit version field that should be [de]serialized
+            ret += tab(3) + getClassName(idlClass) + "_idlVersion : Byte = " + version + ";" + endl();
+        }
         for (IDLField field : idlClass.getFields()) {
             if (!field.isStatic()) continue;
             String fieldName = getFieldName(field);
@@ -670,9 +676,13 @@ public class DelphiCompiler extends opsc.Compiler
     {
         String ret = "";
         String versionName = getClassName(idlClass) + "_version";
+        String versionNameIdl = getClassName(idlClass) + "_idlVersion";
         // Need an implicit version field that may be [de]serialized
         ret += tab(1) + "if idlVersionMask <> 0 then begin" + endl();
         ret += tab(2) + "archiver.Inout('" + versionName + "', " + versionName + ");" + endl();
+        ret += tab(2) + "if " + versionName + " > " + versionNameIdl + " then begin" + endl();
+        ret += tab(3) + "raise EIdlVersionException.Create('" + getClassName(idlClass) + "', " + versionName + ", " + versionNameIdl + ");" + endl();
+        ret += tab(2) + "end;" + endl();
         ret += tab(1) + "end else begin" + endl();
         ret += tab(2) + versionName + " := 0;" + endl();
         ret += tab(1) + "end;" + endl();

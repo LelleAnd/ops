@@ -28,8 +28,13 @@ uses uOps.ArchiverInOut,
 type
   TRequest = class(TOPSObject)
   public
+    const
+      Request_idlVersion : Byte = 0;
+  public
     Request_version : Byte;
     requestId : AnsiString;
+
+    constructor Create;
 
     procedure Serialize(archiver : TArchiverInOut); override;
 
@@ -42,11 +47,23 @@ type
 
 implementation
 
+uses uOps.Exceptions;
+
+constructor TRequest.Create;
+begin
+  inherited;
+  Request_version := Request_idlVersion;
+  AppendType('Request');
+end;
+
 procedure TRequest.Serialize(archiver : TArchiverInOut);
 begin
   inherited Serialize(archiver);
   if FIdlVersionMask <> 0 then begin
     archiver.inout('Request_version', Request_version);
+    if Request_version > Request_idlVersion then begin
+      raise EIdlVersionException.Create('Request', Request_version, Request_idlVersion);
+    end;
   end else begin
     Request_version := 0;
   end;

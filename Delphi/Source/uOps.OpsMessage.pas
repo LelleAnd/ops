@@ -28,6 +28,9 @@ uses uOps.Types,
 
 type
   TOPSMessage = class(TOPSObject)
+  public
+    const
+      OPSMessage_idlVersion : Byte = 0;
   private
     FOPSMessage_version : Byte;
     FMessageType : Byte;          // Serialized (not used, always 0)
@@ -92,13 +95,14 @@ implementation
 
 uses SysUtils,
      SyncObjs,
+     uOps.Exceptions,
      uOps.Error;
 
 constructor TOPSMessage.Create;
 begin
   inherited;
   TInterlocked.Increment(gNumObjects);
-  FOPSMessage_version := 0;
+  FOPSMessage_version := OPSMessage_idlVersion;
   FDataOwner := True;
   AppendType('ops.protocol.OPSMessage');
 end;
@@ -153,6 +157,9 @@ begin
   inherited Serialize(archiver);
   if FIdlVersionMask <> 0 then begin
     archiver.inout('OPSMessage_version', FOPSMessage_version);
+    if FOPSMessage_version > OPSMessage_idlVersion then begin
+      raise EIdlVersionException.Create('OPSMessage', FOPSMessage_version, OPSMessage_idlVersion);
+    end;
   end else begin
     FOPSMessage_version := 0;
   end;

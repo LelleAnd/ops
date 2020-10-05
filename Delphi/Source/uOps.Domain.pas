@@ -32,6 +32,8 @@ uses uOps.Types,
 type
 	TDomain = class(TOPSObject)
   public
+    const
+      Domain_idlVersion : Byte = 0;
     type
       TDynTopicArray = array of TTopic;
       TDynChannelArray = array of TChannel;
@@ -102,7 +104,7 @@ uses SysUtils,
 constructor TDomain.Create;
 begin
   inherited;
-  FDomain_version := 0;
+  FDomain_version := Domain_idlVersion;
 	FTimeToLive := 1;
 	FLocalInterface := '0.0.0.0';
 	FInSocketBufferSize := -1;    // Use OS default, Topics may override
@@ -176,6 +178,9 @@ begin
 	inherited Serialize(archiver);
   if FIdlVersionMask <> 0 then begin
     archiver.inout('Domain_version', FDomain_version);
+    if FDomain_version > Domain_idlVersion then begin
+      raise EIdlVersionException.Create('Domain', FDomain_version, Domain_idlVersion);
+    end;
   end else begin
     FDomain_version := 0;
   end;

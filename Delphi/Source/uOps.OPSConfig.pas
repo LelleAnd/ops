@@ -32,6 +32,8 @@ uses System.Generics.Collections,
 type
 	TOPSConfig = class(TOPSObject)
   public
+    const
+      OPSConfig_idlVersion : Byte = 0;
     type
       TDynDomainArray = array of TDomain;
 	protected
@@ -75,8 +77,14 @@ type
 
   TDefaultOPSConfigImpl = class(TOPSConfig)
   public
+    const
+      DefaultOPSConfigImpl_idlVersion : Byte = 0;
+  protected
+    FDefaultOPSConfigImpl_version : Byte;
+  public
     constructor Create;
     procedure Serialize(archiver : TArchiverInOut); override;
+    property DefaultOPSConfigImpl_version : Byte read FDefaultOPSConfigImpl_version write FDefaultOPSConfigImpl_version;
   end;
 
 implementation
@@ -84,6 +92,7 @@ implementation
 uses Classes,
      SysUtils,
      System.SyncObjs,
+     uOps.Exceptions,
      uOps.OPSConfigRepository,
      uOps.OPSObjectFactory,
      uOps.XMLArchiverIn;
@@ -91,7 +100,7 @@ uses Classes,
 constructor TOPSConfig.Create;
 begin
   inherited Create;
-  FOPSConfig_version := 0;
+  FOPSConfig_version := OPSConfig_idlVersion;
 end;
 
 destructor TOPSConfig.Destroy;
@@ -126,6 +135,9 @@ begin
   inherited Serialize(archiver);
   if FIdlVersionMask <> 0 then begin
     archiver.inout('OPSConfig_version', FOPSConfig_version);
+    if FOPSConfig_version > OPSConfig_idlVersion then begin
+      raise EIdlVersionException.Create('OPSConfig', FOPSConfig_version, OPSConfig_idlVersion);
+    end;
   end else begin
     FOPSConfig_version := 0;
   end;
@@ -161,11 +173,21 @@ constructor TDefaultOPSConfigImpl.Create;
 begin
   inherited Create;
   AppendType('DefaultOPSConfigImpl');
+  FDefaultOPSConfigImpl_version := DefaultOPSConfigImpl_idlVersion;
 end;
 
 procedure TDefaultOPSConfigImpl.Serialize(archiver : TArchiverInOut);
 begin
   inherited Serialize(archiver);
+  if FIdlVersionMask <> 0 then begin
+    archiver.inout('DefaultOPSConfigImpl_version', FDefaultOPSConfigImpl_version);
+    if FDefaultOPSConfigImpl_version > DefaultOPSConfigImpl_idlVersion then begin
+      raise EIdlVersionException.Create('DefaultOPSConfigImpl',
+              FDefaultOPSConfigImpl_version, DefaultOPSConfigImpl_idlVersion);
+    end;
+  end else begin
+    FDefaultOPSConfigImpl_version := 0;
+  end;
 end;
 
 // ---------------------------------------------------------------------------

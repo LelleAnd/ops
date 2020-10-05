@@ -32,6 +32,9 @@ type
 	/// NOTE. Must be kept in sync with other OPS language implementations
   TTopicInfoData = class(TOPSObject)
   public
+    const
+      TopicInfoData_idlVersion : Byte = 0;
+  public
     TopicInfoData_version : Byte;
     Name : AnsiString;
     DataType : AnsiString;
@@ -56,10 +59,12 @@ type
 
 implementation
 
+uses uOps.Exceptions;
+
 constructor TTopicInfoData.Create;
 begin
   inherited;
-  TopicInfoData_version := 0;
+  TopicInfoData_version := TopicInfoData_idlVersion;
   AppendType('TopicInfoData');
 end;
 
@@ -86,6 +91,9 @@ begin
 	inherited Serialize(archiver);
   if FIdlVersionMask <> 0 then begin
     archiver.inout('TopicInfoData_version', TopicInfoData_version);
+    if TopicInfoData_version > TopicInfoData_idlVersion then begin
+      raise EIdlVersionException.Create('TopicInfoData', TopicInfoData_version, TopicInfoData_idlVersion);
+    end;
   end else begin
     TopicInfoData_version := 0;
   end;

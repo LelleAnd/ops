@@ -26,6 +26,9 @@ uses uOps.ArchiverInOut;
 
 type
   TOPSObject = class(TSerializable)
+    public
+      const
+        OPSObject_idlVersion : Byte = 0;
     protected
       FIdlVersionMask : Int32;
       FOPSObject_version : Byte;
@@ -68,12 +71,14 @@ type
 
 implementation
 
+uses uOps.Exceptions;
+
 { TOPSObject }
 
 constructor TOPSObject.Create;
 begin
   FIdlVersionMask    := 0;
-  FOPSObject_version := 0;
+  FOPSObject_version := OPSObject_idlVersion;
   FKey               := '';
   FTypesString       := '';
 end;
@@ -117,6 +122,9 @@ procedure TOPSObject.Serialize(archiver : TArchiverInOut);
 begin
   if FIdlVersionMask <> 0 then begin
     archiver.inout('OPSObject_version', FOPSObject_version);
+    if FOPSObject_version > OPSObject_idlVersion then begin
+      raise EIdlVersionException.Create('OPSObject', FOPSObject_version, OPSObject_idlVersion);
+    end;
   end else begin
     FOPSObject_version := 0;
   end;

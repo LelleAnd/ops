@@ -39,6 +39,7 @@ package body Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
     Serialize( OpsObject_Class(Self), archiver );
     if Self.IdlVersionMask /= 0 then
       archiver.inout("OPSMessage_version", Self.OPSMessage_Version);
+      ValidateVersion("OPSMessage", Self.OPSMessage_version, OPSMessage_idlVersion);
     else
       Self.OPSMessage_Version := 0;
     end if;

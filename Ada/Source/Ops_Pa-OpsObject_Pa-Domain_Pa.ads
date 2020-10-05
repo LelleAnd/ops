@@ -30,6 +30,8 @@ use
 
 package Ops_Pa.OpsObject_Pa.Domain_Pa is
 
+  Domain_idlVersion : constant Byte := 0;
+
 -- ==========================================================================
 --      C l a s s    D e c l a r a t i o n.
 -- ==========================================================================
@@ -84,7 +86,7 @@ private
 -- ==========================================================================
   type Domain_Class is new OpsObject_Class with
     record
-      Domain_version : Byte := 0;
+      Domain_version : Byte := Domain_idlVersion;
       DomainAddress : String_At := null;
       TimeToLive : Int32 := 1;
       LocalInterface : String_At := new String'("0.0.0.0");

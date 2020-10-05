@@ -55,6 +55,7 @@ package body Ops_Pa.OpsObject_Pa.OPSConfig_Pa is
     Serialize( OpsObject_Class(Self), archiver );
     if Self.IdlVersionMask /= 0 then
       archiver.inout("OPSConfig_version", Self.OPSConfig_Version);
+      ValidateVersion("OPSConfig", Self.OPSConfig_version, OPSConfig_idlVersion);
     else
       Self.OPSConfig_Version := 0;
     end if;
@@ -165,6 +166,22 @@ package body Ops_Pa.OpsObject_Pa.OPSConfig_Pa is
   overriding procedure Serialize( Self : in out DefaultOPSConfigImpl_Class; archiver : ArchiverInOut_Class_At) is
   begin
     Serialize( OPSConfig_Class(Self), archiver );
+    if Self.IdlVersionMask /= 0 then
+      archiver.inout("DefaultOPSConfigImpl_version", Self.DefaultOPSConfigImpl_Version);
+      ValidateVersion("DefaultOPSConfigImpl", Self.DefaultOPSConfigImpl_version, DefaultOPSConfigImpl_idlVersion);
+    else
+      Self.DefaultOPSConfigImpl_Version := 0;
+    end if;
+  end;
+
+  function DefaultOPSConfigImpl_version( Self : DefaultOPSConfigImpl_Class ) return Byte is
+  begin
+    return Self.DefaultOPSConfigImpl_version;
+  end;
+
+  procedure SetDefaultOPSConfigImpl_version( Self : in out DefaultOPSConfigImpl_Class; Version : Byte ) is
+  begin
+    Self.DefaultOPSConfigImpl_version := Version;
   end;
 
   procedure InitInstance( Self : in out DefaultOPSConfigImpl_Class ) is

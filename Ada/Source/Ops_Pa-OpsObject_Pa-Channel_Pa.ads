@@ -23,12 +23,14 @@ use  Ops_Pa.ArchiverInOut_Pa,
 
 package Ops_Pa.OpsObject_Pa.Channel_Pa is
 
+  Channel_idlVersion : constant Byte := 0;
+
 -- ==========================================================================
 --      C l a s s    D e c l a r a t i o n.
 -- ==========================================================================
   type Channel_Class is new OpsObject_Class with
     record
-      Channel_version : Byte := 0;
+      Channel_version : Byte := Channel_idlVersion;
       ChannelID : String_At := new String'("");
       Linktype : String_At := new String'("");
       LocalInterface : String_At := new String'(""); -- If multicast, this specifies interface to use

@@ -729,7 +729,7 @@ public class AdaCompiler extends opsc.Compiler
             int version = idlClass.getVersion();
             if (version < 0) { version = 0; }
             // Need an implicit version field that should be [de]serialized
-            ret += tab(3) + idlClass.getClassName() + "_version : Byte := " + version + ";" + endl();
+            ret += tab(3) + idlClass.getClassName() + "_version : Byte := " + idlClass.getClassName() + "_idlVersion;" + endl();
         }
         for (IDLField field : idlClass.getFields()) {
             if (field.isStatic()) continue;
@@ -761,6 +761,11 @@ public class AdaCompiler extends opsc.Compiler
     protected String getConstantDeclarations(IDLClass idlClass)
     {
       String ret = "";
+      if (!isOnlyDefinition(idlClass)) {
+          int version = idlClass.getVersion();
+          if (version < 0) { version = 0; }
+          ret += tab(1) + idlClass.getClassName() + "_idlVersion : constant Byte := " + version + ";" + endl();
+      }
       for (IDLField field : idlClass.getFields()) {
           if (!field.isStatic()) continue;
           if(!field.getComment().equals("")) {
@@ -910,9 +915,11 @@ public class AdaCompiler extends opsc.Compiler
     {
         String ret = "";
         String versionName = idlClass.getClassName() + "_version";
+        String versionNameIdl = idlClass.getClassName() + "_idlVersion";
         // Need an implicit version field that may be [de]serialized
         ret += tab(2) + "if Self.IdlVersionMask /= 0 then" + endl();
         ret += tab(3) + "archiver.Inout(\"" + versionName + "\", Self." + versionName + ");" + endl();
+        ret += tab(3) + "ValidateVersion(\"" + idlClass.getClassName() + "\", Self." + versionName + ", " + versionNameIdl + ");" + endl();
         ret += tab(2) + "else" + endl();
         ret += tab(3) + "Self." + versionName + " := 0;" + endl();
         ret += tab(2) + "end if;" + endl();

@@ -39,6 +39,7 @@ package body Ops_Pa.OpsObject_Pa.ParticipantInfoData_Pa is
     Serialize( OpsObject_Class(Self), archiver );
     if Self.IdlVersionMask /= 0 then
       archiver.inout("ParticipantInfoData_version", Self.ParticipantInfoData_Version);
+      ValidateVersion("ParticipantInfoData", Self.ParticipantInfoData_version, ParticipantInfoData_idlVersion);
     else
       Self.ParticipantInfoData_Version := 0;
     end if;

@@ -36,6 +36,7 @@ package body Ops_Pa.OpsObject_Pa.Transport_Pa is
     Serialize( OpsObject_Class(Self), archiver );
     if Self.IdlVersionMask /= 0 then
       archiver.inout("Transport_version", Self.Transport_Version);
+      ValidateVersion("Transport", Self.Transport_version, Transport_idlVersion);
     else
       Self.Transport_Version := 0;
     end if;

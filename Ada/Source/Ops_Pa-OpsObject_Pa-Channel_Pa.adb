@@ -39,6 +39,7 @@ package body Ops_Pa.OpsObject_Pa.Channel_Pa is
     Serialize( OpsObject_Class(Self), archiver );
     if Self.IdlVersionMask /= 0 then
       archiver.inout("Channel_version", Self.Channel_Version);
+      ValidateVersion("Channel", Self.Channel_version, Channel_idlVersion);
     else
       Self.Channel_Version := 0;
     end if;

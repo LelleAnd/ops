@@ -107,6 +107,7 @@ package body Ops_Pa.OpsObject_Pa.Domain_Pa is
     Serialize( OpsObject_Class(Self), archiver );
     if Self.IdlVersionMask /= 0 then
       archiver.inout("Domain_version", Self.Domain_Version);
+      ValidateVersion("Domain", Self.Domain_version, Domain_idlVersion);
     else
       Self.Domain_Version := 0;
     end if;

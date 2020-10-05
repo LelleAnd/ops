@@ -21,6 +21,8 @@ use  Ops_Pa.ArchiverInOut_Pa;
 
 package Ops_Pa.OpsObject_Pa.Topic_Pa is
 
+  Topic_idlVersion : constant Byte := 0;
+
 -- ==========================================================================
 --      C l a s s    D e c l a r a t i o n.
 -- ==========================================================================
@@ -101,7 +103,7 @@ private
 -- ==========================================================================
   type Topic_Class is new OpsObject_Class with
     record
-      Topic_version : Byte := 0;
+      Topic_version : Byte := Topic_idlVersion;
       Name : String_At := null;
       Port : Int32 := 0;
       TimeToLive : Int32 := -1;

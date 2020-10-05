@@ -27,6 +27,9 @@ use  Ops_Pa.OpsObject_Pa.Domain_Pa,
 
 package Ops_Pa.OpsObject_Pa.OPSConfig_Pa is
 
+  OPSConfig_idlVersion : constant Byte := 0;
+  DefaultOPSConfigImpl_idlVersion : constant Byte := 0;
+
 -- ==========================================================================
 --      C l a s s    D e c l a r a t i o n.
 -- ==========================================================================
@@ -83,6 +86,8 @@ package Ops_Pa.OpsObject_Pa.OPSConfig_Pa is
 
   overriding procedure Serialize( Self : in out DefaultOPSConfigImpl_Class; archiver : ArchiverInOut_Class_At);
 
+  function DefaultOPSConfigImpl_version( Self : DefaultOPSConfigImpl_Class ) return Byte;
+  procedure SetDefaultOPSConfigImpl_version( Self : in out DefaultOPSConfigImpl_Class; Version : Byte );
 
 -- ==========================================================================
 --      C l a s s    D e c l a r a t i o n.
@@ -138,7 +143,7 @@ private
 -- ==========================================================================
   type OPSConfig_Class is new OpsObject_Class with
     record
-      OPSConfig_version : Byte := 0;
+      OPSConfig_version : Byte := OPSConfig_idlVersion;
       domains : Domain_Class_At_Arr_At := null;
     end record;
 
@@ -153,7 +158,10 @@ private
 -- ==========================================================================
 --
 -- ==========================================================================
-  type DefaultOPSConfigImpl_Class is new OPSConfig_Class with null record;
+  type DefaultOPSConfigImpl_Class is new OPSConfig_Class with
+    record
+      DefaultOPSConfigImpl_version : Byte := DefaultOPSConfigImpl_idlVersion;
+    end record;
 
   procedure InitInstance( Self : in out DefaultOPSConfigImpl_Class );
 

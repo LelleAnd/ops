@@ -16,7 +16,24 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
+with Ops_Pa.Error_Pa;
+use Ops_Pa.Error_Pa;
+
 package body Ops_Pa.OpsObject_pa is
+
+  --------------------------------------------------------------------------
+  --
+  --------------------------------------------------------------------------
+  procedure ValidateVersion(typ : String; gotVer : Byte; maxVer : Byte) is
+  begin
+    if gotVer > maxVer then
+      StaticErrorService.Report( typ, "ValidateVersion", 
+                                 "received version '" & Byte'Image(gotVer) & 
+                                   "' > known version '" & Byte'Image(maxVer) & "'"
+                                );
+      raise EIdlVersionException;
+    end if;
+  end;
 
   --------------------------------------------------------------------------
   --
@@ -40,6 +57,7 @@ package body Ops_Pa.OpsObject_pa is
   begin
     if Self.IdlVersionMask /= 0 then
       archiver.inout("OPSObject_version", Self.OPSObject_Version);
+      ValidateVersion("OPSObject", Self.OPSObject_version, OPSObject_idlVersion);
     else
       Self.OPSObject_Version := 0;
     end if;

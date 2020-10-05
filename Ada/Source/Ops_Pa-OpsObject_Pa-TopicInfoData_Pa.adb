@@ -48,6 +48,7 @@ package body Ops_Pa.OpsObject_Pa.TopicInfoData_Pa is
     Serialize( OpsObject_Class(Self), archiver );
     if Self.IdlVersionMask /= 0 then
       archiver.inout("TopicInfoData_version", Self.TopicInfoData_Version);
+      ValidateVersion("TopicInfoData", Self.TopicInfoData_version, TopicInfoData_idlVersion);
     else
       Self.TopicInfoData_Version := 0;
     end if;

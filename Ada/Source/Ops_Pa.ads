@@ -133,6 +133,7 @@ package Ops_Pa is
   -- Exceptions
   Not_Yet_Implemented : exception;
 
+  EIdlVersionException : exception;
   EConfigException : exception;
   ENoSuchTopicException : exception;
   ECommException : exception;

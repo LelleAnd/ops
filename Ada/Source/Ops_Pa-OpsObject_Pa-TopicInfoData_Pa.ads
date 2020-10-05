@@ -26,12 +26,14 @@ use
 
 package Ops_Pa.OpsObject_Pa.TopicInfoData_Pa is
 
+  TopicInfoData_idlVersion : constant Byte := 0;
+
 -- ==========================================================================
 --      C l a s s    D e c l a r a t i o n.
 -- ==========================================================================
   type TopicInfoData_Class is new OpsObject_Class with
     record
-      TopicInfoData_version : Byte := 0;
+      TopicInfoData_version : Byte := TopicInfoData_idlVersion;
       name : String_At := null;
       dataType : String_At := null;
       transport : String_At := null;

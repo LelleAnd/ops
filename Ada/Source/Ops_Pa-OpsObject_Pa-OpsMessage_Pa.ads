@@ -23,6 +23,8 @@ use  Ops_Pa.ArchiverInOut_Pa;
 
 package Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
 
+  OPSMessage_idlVersion : constant Byte := 0;
+
 -- ==========================================================================
 --      C l a s s    D e c l a r a t i o n.
 -- ==========================================================================
@@ -87,7 +89,7 @@ private
       SelfAt : OPSMessage_Class_At := null;
 
       -- Serialized members
-      OPSMessage_version : Byte := 0;
+      OPSMessage_version : Byte := OPSMessage_idlVersion;
       messageType : Byte := 0;
       publisherPriority : Byte := 0;
       publicationID : Int64 := 0;

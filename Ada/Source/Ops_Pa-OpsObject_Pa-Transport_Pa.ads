@@ -21,12 +21,14 @@ use Ops_Pa.ArchiverInOut_Pa;
 
 package Ops_Pa.OpsObject_Pa.Transport_Pa is
 
+  Transport_idlVersion : constant Byte := 0;
+
 -- ==========================================================================
 --      C l a s s    D e c l a r a t i o n.
 -- ==========================================================================
   type Transport_Class is new OpsObject_Class with
     record
-      Transport_version : Byte := 0;
+      Transport_version : Byte := Transport_idlVersion;
       ChannelID : String_At := null;
       Topics : String_Arr_At := null;
     end record;

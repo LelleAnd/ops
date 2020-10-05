@@ -21,6 +21,8 @@ use Ops_Pa.ArchiverInOut_Pa;
 
 package Ops_Pa.OpsObject_Pa is
 
+  OPSObject_idlVersion : constant Byte := 0;
+  
 -- ==========================================================================
 --      C l a s s    D e c l a r a t i o n.
 -- ==========================================================================
@@ -54,13 +56,15 @@ package Ops_Pa.OpsObject_Pa is
   procedure FillClone( Self : OpsObject_Class; obj : OpsObject_Class_At );
 
 private
+  procedure ValidateVersion(typ : String; gotVer : Byte; maxVer : Byte);
+
 -- ==========================================================================
 --
 -- ==========================================================================
   type OpsObject_Class is new Serializable_Class with
     record
       IdlVersionMask    : UInt32 := 0;
-      OPSObject_Version : Byte := 0;
+      OPSObject_Version : Byte := OPSObject_idlVersion;
       Key               : String_At := null;
       TypesString       : String_At := null;
       -- Bytes that hold unserialized data for this object.

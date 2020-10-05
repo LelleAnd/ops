@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2019-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 import ops.ReadByteBuffer;
+import ops.OPSObject;
 
 /**
  *
@@ -103,10 +104,12 @@ public class OPSArchiverIn extends ArchiverInOut
         String type = readBuf.readstring();     // Skip string for non virtual objects, type is known by T
         Serializable newSer = null;
         try {
-          newSer = (Serializable) cls.newInstance();
-          newSer.serialize(this);
-        } catch (InstantiationException | IllegalAccessException e)
-        {
+            newSer = (Serializable) cls.newInstance();
+            if ((type.length() > 0) && (type.charAt(0) == '0')) {
+                ((OPSObject)newSer).idlVersionMask = 1;   // Some value != 0
+            }
+            newSer.serialize(this);
+        } catch (InstantiationException | IllegalAccessException e) {
         }
         return newSer;
     }
@@ -114,9 +117,14 @@ public class OPSArchiverIn extends ArchiverInOut
     public Serializable inout(String name, Serializable v) throws IOException
     {
         String type = readBuf.readstring();
+        int verMask = 0;
+        if ((type.length() > 0) && (type.charAt(0) == '0')) {
+            verMask = 1;
+            type = type.substring(2);
+        }
         Serializable newSer = compositeFactory.create(type);
-        if(newSer != null)
-        {
+        if (newSer != null) {
+            ((OPSObject)newSer).idlVersionMask = verMask;
             newSer.serialize(this);
         }
         return newSer;

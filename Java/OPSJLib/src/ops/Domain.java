@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2019-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -32,6 +32,9 @@ import java.util.Vector;
  */
 public class Domain extends OPSObject
 {
+    public byte Domain_version = Domain_idlVersion;
+
+    public static final byte Domain_idlVersion = 0;
     private String domainAddress = "";
     private String domainID = "";
     private String localInterface = "0.0.0.0";
@@ -95,6 +98,16 @@ public class Domain extends OPSObject
         // We need to serialize fields in the same order as C++.
         //OPSObject::serialize(archiver);
         super.serialize(archive);
+
+        if (idlVersionMask != 0) {
+            byte tmp = archive.inout("Domain_version", Domain_version);
+            if (tmp > Domain_idlVersion) {
+                throw new IOException("Domain: received version '" + tmp + "' > known version '" + Domain_idlVersion + "'");
+            }
+            Domain_version = tmp;
+        } else {
+            Domain_version = 0;
+        }
 
         //archiver->inout(std::string("domainID"), domainID);
         //archiver->inout<Topic>(std::string("topics"), topics);

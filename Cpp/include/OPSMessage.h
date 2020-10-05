@@ -31,15 +31,15 @@
 
 namespace ops
 {
-    constexpr VersionMask_T OPSMessage_Level_Mask = OPSObject_Level_Mask << 1;
-
     class OPSMessage : public OPSObject
 #ifndef OPSSLIM_NORESERVE
 	, public Reservable
 #endif
     {
     public:
-        char OPSMessage_version = 0;
+        char OPSMessage_version = OPSMessage_idlVersion;
+
+        static const char OPSMessage_idlVersion = 0;
 
         OPSMessage() :
             OPSObject()
@@ -181,6 +181,7 @@ namespace ops
             OPSObject::serialize(archive);
             if (idlVersionMask != 0) {
                 archive->inout("OPSMessage_version", OPSMessage_version);
+                ValidateVersion("OPSMessage", OPSMessage_version, OPSMessage_idlVersion);
             } else {
                 OPSMessage_version = 0;
             }

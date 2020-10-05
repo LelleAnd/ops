@@ -10,15 +10,14 @@ __imports
 
 __packageDeclaration
 
-constexpr ops::VersionMask_T __className_Level_Mask   = __baseClassName_Level_Mask << 1;
-static_assert(__className_Level_Mask <= ops::MaxVersionMask, "Inheritance hierarchy too large");
-
 __classComment
 class __className :
 	public __baseClassName
 {
 public:
   	static ops::TypeId_T getTypeName(){return ops::TypeId_T("__packageName.__className");}
+
+  	char __className_version = __className_idlVersion;
 
 __declarations
     ///Default constructor.

@@ -113,6 +113,7 @@ namespace ops
 	{
         if (idlVersionMask != 0) {
             archive->inout("OPSObject_version", OPSObject_version);
+            ValidateVersion("OPSObject", OPSObject_version, OPSObject_idlVersion);
         } else {
             OPSObject_version = 0;
         }

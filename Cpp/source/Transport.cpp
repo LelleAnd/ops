@@ -34,6 +34,7 @@ namespace ops
         OPSObject::serialize(archiver);
         if (idlVersionMask != 0) {
             archiver->inout("Transport_version", Transport_version);
+            ValidateVersion("Transport", Transport_version, Transport_idlVersion);
         } else {
             Transport_version = 0;
         }

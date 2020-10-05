@@ -31,12 +31,11 @@
 
 namespace ops
 {
-    constexpr VersionMask_T Domain_Level_Mask = OPSObject_Level_Mask << 1;
-
     class OPS_EXPORT Domain : public OPSObject
 	{
-        char Domain_version = 0;
+        char Domain_version = Domain_idlVersion;
 
+        static const char Domain_idlVersion = 0;
         Address_T domainAddress;
         int timeToLive{ 1 };
         Address_T localInterface{ "0.0.0.0" };

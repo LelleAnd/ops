@@ -26,22 +26,22 @@
 
 namespace ops
 {
-	constexpr VersionMask_T Request_Level_Mask   = OPSObject_Level_Mask << 1;
-
 	class Request : public OPSObject
 	{
 	public:
-		char Request_version = 0;
+        char Request_version = Request_idlVersion;
 
-		std::string requestId;
+        static const char Request_idlVersion = 0;
+        std::string requestId;
 
 		void serialize(ops::ArchiverInOut* archiver) override
 		{
 			OPSObject::serialize(archiver);
 			if (idlVersionMask != 0) {
-					archiver->inout("Request_version", Request_version);
-			} else {
-					Request_version = 0;
+				archiver->inout("Request_version", Request_version);
+                ValidateVersion("Request", Request_version, Request_idlVersion);
+            } else {
+				Request_version = 0;
 			}
 			archiver->inout("requestId", requestId);
 		}

@@ -26,23 +26,24 @@
 
 namespace ops
 {
-	constexpr VersionMask_T Reply_Level_Mask   = OPSObject_Level_Mask << 1;
-
 	class Reply : public OPSObject
 	{
 	public:
-		char Reply_version = 0;
-		std::string requestId;
-    bool requestAccepted{ false };
-		std::string message;
+		char Reply_version = Reply_idlVersion;
+
+        static const char Reply_idlVersion = 0;
+        std::string requestId;
+        bool requestAccepted{ false };
+        std::string message;
 
 		void serialize(ops::ArchiverInOut* archiver) override
 		{
 			OPSObject::serialize(archiver);
 			if (idlVersionMask != 0) {
-					archiver->inout("Reply_version", Reply_version);
-			} else {
-					Reply_version = 0;
+				archiver->inout("Reply_version", Reply_version);
+                ValidateVersion("Reply", Reply_version, Reply_idlVersion);
+            } else {
+				Reply_version = 0;
 			}
 			archiver->inout("requestId", requestId);
 			archiver->inout("requestAccepted", requestAccepted);

@@ -421,7 +421,7 @@ public class CppCompiler extends opsc.Compiler
     {
         String ret = "";
         if (idlClass.getVersion() > 0) {
-            ret += tab(2) + "idlVersionMask |= " + getClassName(idlClass) + "_Level_Mask;" + endl();
+            ret += tab(2) + "idlVersionMask |= 1;" + endl();
         }
         for (IDLField field : idlClass.getFields()) {
             String fieldName = getFieldName(field);
@@ -508,7 +508,7 @@ public class CppCompiler extends opsc.Compiler
             int version = idlClass.getVersion();
             if (version < 0) { version = 0; }
             // Need an implicit version field that should be [de]serialized
-            ret += tab(1) + "char " + getClassName(idlClass) + "_version = " + version + ";" + endl() + endl();
+            ret += tab(1) + "static const char " + getClassName(idlClass) + "_idlVersion = " + version + ";" + endl() + endl();
         }
 
         for (IDLField field : idlClass.getFields()) {
@@ -736,9 +736,11 @@ public class CppCompiler extends opsc.Compiler
             ret += "ops::OPSObject::serialize(archive);" + endl();
         }
         String versionName = getClassName(idlClass) + "_version";
+        String versionNameIdl = getClassName(idlClass) + "_idlVersion";
         // Need an implicit version field that may be [de]serialized
         ret += tab(2) + "if (idlVersionMask != 0) {" + endl();
         ret += tab(3) + "archive->inout(\"" + versionName + "\", " + versionName + ");" + endl();
+        ret += tab(3) + "ValidateVersion(\"" + getClassName(idlClass) + "\", " + versionName + ", " + versionNameIdl + ");" + endl();
         ret += tab(2) + "} else {" + endl();
         ret += tab(3) + versionName + " = 0;" + endl();
         ret += tab(2) + "}" + endl();

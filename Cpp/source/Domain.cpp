@@ -97,6 +97,7 @@ void Domain::serialize(ArchiverInOut* const archiver)
 	OPSObject::serialize(archiver);
     if (idlVersionMask != 0) {
         archiver->inout("Domain_version", Domain_version);
+        ValidateVersion("Domain", Domain_version, Domain_idlVersion);
     } else {
         Domain_version = 0;
     }

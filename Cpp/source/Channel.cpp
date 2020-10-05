@@ -35,6 +35,7 @@ namespace ops
         OPSObject::serialize(archiver);
         if (idlVersionMask != 0) {
             archiver->inout("Channel_version", Channel_version);
+            ValidateVersion("Channel", Channel_version, Channel_idlVersion);
         } else {
             Channel_version = 0;
         }

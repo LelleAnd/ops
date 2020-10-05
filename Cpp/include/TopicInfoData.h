@@ -26,13 +26,13 @@
 
 namespace ops
 {
-    constexpr VersionMask_T TopicInfoData_Level_Mask = OPSObject_Level_Mask << 1;
-
     /// NOTE. Must be kept in sync with other OPS language implementations
 	class TopicInfoData : public OPSObject
 	{
 	public:
-        char TopicInfoData_version = 0;
+        char TopicInfoData_version = TopicInfoData_idlVersion;
+
+        static const char TopicInfoData_idlVersion = 0;
 
         TopicInfoData()
 		{
@@ -54,6 +54,7 @@ namespace ops
 			OPSObject::serialize(archiver);
             if (idlVersionMask != 0) {
                 archiver->inout("TopicInfoData_version", TopicInfoData_version);
+                ValidateVersion("TopicInfoData", TopicInfoData_version, TopicInfoData_idlVersion);
             } else {
                 TopicInfoData_version = 0;
             }

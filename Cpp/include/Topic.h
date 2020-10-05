@@ -28,8 +28,6 @@
 
 namespace ops
 {
-    constexpr VersionMask_T Topic_Level_Mask = OPSObject_Level_Mask << 1;
-
     class Participant;
 
 	class OPS_EXPORT Topic : public OPSObject
@@ -39,7 +37,9 @@ namespace ops
 		friend class Participant;
     
 	public:
-        char Topic_version = 0;
+        char Topic_version = Topic_idlVersion;
+
+        static const char Topic_idlVersion = 0;
 
         Topic(ObjectName_T namee, int portt, TypeId_T typeIDd, Address_T domainAddresss);
 		Topic();

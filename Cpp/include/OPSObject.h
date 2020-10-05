@@ -33,8 +33,6 @@
 
 namespace ops
 {
-    constexpr VersionMask_T OPSObject_Level_Mask = 1;
-
     ///Base class for object that can be serialized with OPSArchivers
     class OPS_EXPORT OPSObject : public Serializable
     {
@@ -48,14 +46,14 @@ namespace ops
         friend class OPSArchiverOut;
 
 	protected:
-        // Used to indicate which classes in the hierachy, if any, that enabled the use of version bytes for this object instance
+        // Used to indicate if the use of version bytes are enabled or not for this object instance
         VersionMask_T idlVersionMask = 0;
 
         //Should only be set by the Publisher at publication time and by ByteBuffer at deserialization time.
         ObjectKey_T key;
         TypeId_T typesString;
 
-        char OPSObject_version = 0;
+        char OPSObject_version = OPSObject_idlVersion;
 
         void appendType(const TypeId_T& type)
 		{
@@ -66,6 +64,8 @@ namespace ops
 		}
 
     public:
+        static const char OPSObject_idlVersion = 0;
+
 		ObjectKey_T getKey() const noexcept;
 		const TypeId_T& getTypeString() const noexcept;
 		void setKey(const ObjectKey_T& k) noexcept;
@@ -89,6 +89,19 @@ namespace ops
         void setVersionMask(VersionMask_T verMask)
         {
             idlVersionMask = verMask;
+        }
+
+        inline void ValidateVersion(const char* msg, const char gotVer, const char maxVer) const
+        {
+            if (gotVer > maxVer) {
+                ExceptionMessage_T m(msg);
+                m += ": received version '";
+                m += NumberToString((int)gotVer);
+                m += "' > known version '";
+                m += NumberToString((int)maxVer);
+                m += "'";
+                throw std::exception(m.c_str());
+            }
         }
 
     public:

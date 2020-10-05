@@ -27,13 +27,12 @@
 
 namespace ops
 {
-    constexpr VersionMask_T Transport_Level_Mask = OPSObject_Level_Mask << 1;
-
     class OPS_EXPORT Transport : public OPSObject
     {
     public:
-        char Transport_version = 0;
+        char Transport_version = Transport_idlVersion;
 
+        static const char Transport_idlVersion = 0;
         ChannelId_T channelID;
         std::vector<ObjectName_T> topics;
 

@@ -160,6 +160,7 @@ namespace ops
 		OPSObject::serialize(archiver);
         if (idlVersionMask != 0) {
             archiver->inout("Topic_version", Topic_version);
+            ValidateVersion("Topic", Topic_version, Topic_idlVersion);
         } else {
             Topic_version = 0;
         }

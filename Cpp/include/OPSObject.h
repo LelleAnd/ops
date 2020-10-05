@@ -100,7 +100,7 @@ namespace ops
                 m += "' > known version '";
                 m += NumberToString((int)maxVer);
                 m += "'";
-                throw std::exception(m.c_str());
+                throw exceptions::ArchiverException(m);
             }
         }
 

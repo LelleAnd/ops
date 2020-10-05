@@ -44,6 +44,7 @@ public class OpsCompiler
     boolean _bOnlyParse = false;
     boolean _bOnlyGenFactories = false;
     boolean _bGenMemoryPool = false;
+    boolean _bJsonVersion = false;
     String _strOps4GprPath = "";
 
     /** An instance of ProjectProperties is used to hold defaults
@@ -104,7 +105,7 @@ public class OpsCompiler
         System.out.println("FEATURE");
         System.out.println("  for generate: ALL, ada, cpp, csharp, delphi, java, json, python, debug");
         System.out.println("  for build:    ALL, csharp, java");
-        System.out.println("  for special:  mempool");
+        System.out.println("  for special:  mempool, jsonver");
         System.out.println("");
     }
 
@@ -357,6 +358,7 @@ public class OpsCompiler
                 i++;
                 String special = extraArgs.elementAt(i);
                 if(special.equals("mempool")) _bGenMemoryPool = true;
+                if(special.equals("jsonver")) _bJsonVersion = true;
             } else {
                 // not a known option - regard as input file
                 // Add file if not already in list
@@ -551,6 +553,7 @@ public class OpsCompiler
         // create the compiler and set parameters
         _JSONCompiler = new opsc.JSONCompiler(_strProjectName);
         _JSONCompiler.setVerbose(_verbose);
+        _JSONCompiler.includeVersion = _bJsonVersion;
         Property propTemplatePath = _props.getProperty("templatePath");
         if(propTemplatePath != null)
             _JSONCompiler.setTemplateDir(propTemplatePath.value);

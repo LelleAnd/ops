@@ -25,6 +25,7 @@ import parsing.IDLEnumType;
 public class JSONCompiler extends CompilerSupport
 {
     String res = "";
+    public boolean includeVersion = false;
 
     public JSONCompiler(String projname) {
         super(projname);
@@ -106,7 +107,7 @@ public class JSONCompiler extends CompilerSupport
 
         res += tab(t+2) + "\"non-coretypes\": {" + endl();
         res += tab(t+3) + "\"composed_of\": [" + endl();
-        res += tab(t+4) + "{ \"type_string\": \"string\" }," + endl();
+        res += tab(t+4) + "{ \"type_string\": \"string\", \"desc\": \"  TBD  \"}," + endl();
         res += tab(t+4) + "{ \"fields\": \"according to type\" }" + endl();
         res += tab(t+3) + "]" + endl();
         res += tab(t+2) + "}," + endl();
@@ -130,7 +131,9 @@ public class JSONCompiler extends CompilerSupport
         res += tab(t+1) + "\"type\": \"ops.OPSObject\"," + endl();
 
         res += tab(t+1) + "\"fields\": [" + endl();
-        res += tab(t+2) + getVersionField() + "," + endl();
+        if (includeVersion) {
+            res += tab(t+2) + getVersionField() + "," + endl();
+        }
         res += tab(t+2) + "{";
         res += " \"name\": \"key\",";
         res += " \"type\": \"string\"";
@@ -253,10 +256,17 @@ public class JSONCompiler extends CompilerSupport
 
           // Fields
           res += tab(t+1) + "\"fields\": [" + endl();
-          res += tab(t+2) + getVersionField();
+          boolean doneFirst = false;
+          if (includeVersion) {
+              res += tab(t+2) + getVersionField();
+              doneFirst = true;
+          }
           for (IDLField field : idlClass.getFields()) {
             if (field.isStatic()) continue;
-            res += "," + endl();
+            if (doneFirst) {
+                res += "," + endl();
+            }
+            doneFirst = true;
             res += tab(t+2) + "{";
             res += " \"name\": \"" + field.getName() + "\"";
             if (field.isArray()) {

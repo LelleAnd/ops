@@ -9,12 +9,20 @@ class ConfigError(Exception):
 	def __str__(self):
 		return repr(self.value)
 
+class IdlVersionError(Exception):
+	def __init__(self, msg, gotVer, maxVer):
+		self.value = "Error: " + msg + ": received version '" + str(gotVer) + "' > known version '" + str(maxVer) + "'"
+	def __str__(self):
+		return repr(self.value)
+
 class OPS_Object(object):
 	"""docstring for OPS_Object"""
+	OPSOBJECT_IDLVERSION = 0
+
 	def __init__(self):
 		super(OPS_Object, self).__init__()
 		self.idlVersionMask = 0
-		self.OPSObject_version = 0
+		self.OPSObject_version = OPS_Object.OPSOBJECT_IDLVERSION
 		self.key = ""
 		self.typesString = ""
 		self.spareBytes = None
@@ -25,6 +33,10 @@ class OPS_Object(object):
 	def serialize(self,dataBuffer):
 		if self.idlVersionMask != 0:
 			self.OPSObject_version = dataBuffer.Int8("OPSObject_version",self.OPSObject_version)
+			if self.OPSObject_version > OPS_Object.OPSOBJECT_IDLVERSION:
+				raise IdlVersionError("OPS_Object", self.OPSObject_version, OPS_Object.OPSOBJECT_IDLVERSION)
+			else:
+				pass
 		else:
 			self.OPSObject_version = 0
 		self.key = dataBuffer.String("key",self.key)
@@ -38,11 +50,13 @@ class OPS_Object(object):
 
 class Message(OPS_Object):
 	"""docstring for Message"""
+	OPSMESSAGE_IDLVERSION = 0
+
 	def __init__(self,data=None):
 		super(Message,self).__init__()
 		self.appendType("ops.protocol.OPSMessage")
 
-		self.OPSMessage_version = 0
+		self.OPSMessage_version = Message.OPSMESSAGE_IDLVERSION
 		self.messageType=0
 		self.publisherPriority=0
 		self.publicationID=0
@@ -67,6 +81,10 @@ class Message(OPS_Object):
 		super(Message,self).serialize(dataBuffer)
 		if self.idlVersionMask != 0:
 			self.OPSMessage_version = dataBuffer.Int8("OPSMessage_version",self.OPSMessage_version)
+			if self.OPSObject_version > Message.OPSOBJECT_IDLVERSION:
+				raise IdlVersionError("Message", self.OPSMessage_version, Message.OPSMESSAGE_IDLVERSION)
+			else:
+				pass
 		else:
 			self.OPSMessage_version = 0
 		self.messageType = dataBuffer.Int8("messageType",self.messageType)
@@ -107,9 +125,11 @@ class Message(OPS_Object):
 
 class Topic(OPS_Object):
 	"""docstring for Topic"""
+	TOPIC_IDLVERSION = 0
+
 	def __init__(self):
 		super(Topic,self).__init__()
-		self.Topic_version = 0
+		self.Topic_version = Topic.TOPIC_IDLVERSION
 		self.appendType("Topic");
 		self.name=""
 		self.typeID=""
@@ -146,6 +166,10 @@ class Topic(OPS_Object):
 		super(Topic,self).serialize(archiver)
 		if self.idlVersionMask != 0:
 			self.Topic_version = dataBuffer.Int8("Topic_version",self.Topic_version)
+			if self.Topic_version > Topic.TOPIC_IDLVERSION:
+				raise IdlVersionError("Topic", self.Topic_version, Topic.TOPIC_IDLVERSION)
+			else:
+				pass
 		else:
 			self.Topic_version = 0
 		self.name = archiver.String("name",self.name)
@@ -188,9 +212,11 @@ class Topic(OPS_Object):
 
 class Channel(OPS_Object):
 	"""docstring for Channel"""
+	CHANNEL_IDLVERSION = 0
+
 	def __init__(self):
 		super(Channel,self).__init__()
-		self.Channel_version = 0
+		self.Channel_version = Channel.CHANNEL_IDLVERSION
 		self.appendType("Channel")
 		self.channelID=""
 		self.linktype=""
@@ -217,6 +243,10 @@ class Channel(OPS_Object):
 		super(Channel,self).serialize(archiver)
 		if self.idlVersionMask != 0:
 			self.Channel_version = dataBuffer.Int8("Channel_version",self.Channel_version)
+			if self.Channel_version > Channel.CHANNEL_IDLVERSION:
+				raise IdlVersionError("Channel", self.Channel_version, Channel.CHANNEL_IDLVERSION)
+			else:
+				pass
 		else:
 			self.Channel_version = 0
 		self.channelID = archiver.String("name",self.channelID)
@@ -262,9 +292,11 @@ class Channel(OPS_Object):
 
 class Transport(OPS_Object):
 	"""docstring for Transport"""
+	TRANSPORT_IDLVERSION = 0
+
 	def __init__(self):
 		super(Transport,self).__init__()
-		self.Transport_version = 0
+		self.Transport_version = Transport.TRANSPORT_IDLVERSION
 		self.appendType("Transport")
 		self.channelID=""
 		self.topics=[]
@@ -281,6 +313,10 @@ class Transport(OPS_Object):
 		super(Transport,self).serialize(archiver)
 		if self.idlVersionMask != 0:
 			self.Transport_version = dataBuffer.Int8("Transport_version",self.Transport_version)
+			if self.Transport_version > Transport.TRANPSORT_IDLVERSION:
+				raise IdlVersionError("Transport", self.Transport_version, Transport.TRANSPORT_IDLVERSION)
+			else:
+				pass
 		else:
 			self.Transport_version = 0
 		self.channelID = archiver.String("channelID",self.channelID)
@@ -299,9 +335,11 @@ from ops.XML_Archiver import XML_Archiver_In
 
 class Domain(OPS_Object):
 	"""docstring for Domain"""
+	DOMAIN_IDLVERSION = 0
+
 	def __init__(self):
 		super(Domain,self).__init__()
-		self.Domain_version = 0
+		self.Domain_version = Domain.DOMAIN_IDLVERSION
 		self.appendType("Domain")
 		self.domainAddress=""
 		self.timeToLive = 1
@@ -338,6 +376,10 @@ class Domain(OPS_Object):
 		super(Domain,self).serialize(archiver)
 		if self.idlVersionMask != 0:
 			self.Domain_version = dataBuffer.Int8("Domain_version",self.Domain_version)
+			if self.Domain_version > Domain.DOMAIN_IDLVERSION:
+				raise IdlVersionError("Domain", self.Domain_version, Domain.DOMAIN_IDLVERSION)
+			else:
+				pass
 		else:
 			self.Domain_version = 0
 		self.domainID = archiver.String("domainID",self.domainID)
@@ -435,9 +477,11 @@ class Domain(OPS_Object):
 import ops.Factory
 
 class Config(OPS_Object):
+	OPSCONFIG_IDLVERSION = 0
+
 	def __init__(self):
 		super(Config, self).__init__()
-		self.OPSConfig_version = 0
+		self.OPSConfig_version = Config.OPSCONFIG_IDLVERSION
 		self.domains=[]
 
 	def __str__(self):
@@ -465,6 +509,10 @@ class Config(OPS_Object):
 		super(Config,self).serialize(dataBuffer)
 		if self.idlVersionMask != 0:
 			self.OPSConfig_version = dataBuffer.Int8("OPSConfig_version",self.OPSConfig_version)
+			if self.OPSConfig_version > Config.OPSCONFIG_IDLVERSION:
+				raise IdlVersionError("Config", self.OPSConfig_version, Config.OPSCONFIG_IDLVERSION)
+			else:
+				pass
 		else:
 			self.OPSConfig_version = 0
 		dataBuffer.OpsVector("domains",self.domains,Domain)
@@ -478,6 +526,20 @@ class Config(OPS_Object):
 
 
 class DefaultOPSConfigImpl(Config):
+	DEFAULTOPSCONFIGIMPL_IDLVERSION = 0
+
 	def __init__(self):
 		super(DefaultOPSConfigImpl, self).__init__()
+		self.DefaultOPSConfigImpl_version = DefaultOPSConfigImpl.DEFAULTOPSCONFIGIMPL_IDLVERSION
 		self.appendType("DefaultOPSConfigImpl")
+
+	def serialize(self,dataBuffer):
+		super(DefaultOPSConfigImpl,self).serialize(dataBuffer)
+		if self.idlVersionMask != 0:
+			self.DefaultOPSConfigImpl_version = dataBuffer.Int8("DefaultOPSConfigImpl_version",self.DefaultOPSConfigImpl_version)
+			if self.DefaultOPSConfigImpl_version > DefaultOPSConfigImpl.DEFAULTOPSCONFIGIMPL_IDLVERSION:
+				raise IdlVersionError("DefaultOPSConfigImpl", self.DefaultOPSConfigImpl_version, DefaultOPSConfigImpl.DEFAULTOPSCONFIGIMPL_IDLVERSION)
+			else:
+				pass
+		else:
+			self.DefaultOPSConfigImpl_version = 0

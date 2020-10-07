@@ -632,6 +632,11 @@ public class PythonCompiler extends opsc.CompilerSupport
     protected String getConstantDeclarations(IDLClass idlClass)
     {
         String ret = "";
+        if (!isOnlyDefinition(idlClass)) {
+            int version = idlClass.getVersion();
+            if (version < 0) { version = 0; }
+            ret += tab(1) + idlClass.getClassName().toUpperCase() + "_IDLVERSION = " + version + endl();
+        }
         for (IDLField field : idlClass.getFields()) {
             if (!field.isStatic()) continue;
             String fieldName = getFieldName(field);
@@ -673,7 +678,8 @@ public class PythonCompiler extends opsc.CompilerSupport
             int version = idlClass.getVersion();
             if (version < 0) { version = 0; }
             // Need an implicit version field that should be [de]serialized
-            ret += tab(2) + "self." + idlClass.getClassName() + "_version = " + version + endl();
+            ret += tab(2) + "self." + idlClass.getClassName() + "_version = " +
+                idlClass.getClassName() + "." + idlClass.getClassName().toUpperCase() + "_IDLVERSION" + endl();
         }
         if (idlClass.getVersion() > 0) {
             ret += tab(2) + "self.idlVersionMask |= 1" + endl();
@@ -772,8 +778,13 @@ public class PythonCompiler extends opsc.CompilerSupport
         String ret = "";
         // Need an implicit version field that may be [de]serialized
         String versionName = idlClass.getClassName() + "_version";
+        String versionNameIdl = idlClass.getClassName() + "." + idlClass.getClassName().toUpperCase() + "_IDLVERSION";
         ret += tab(2) + "if self.idlVersionMask != 0:" + endl();
         ret += tab(3) + "self." + versionName + " = archiver.Int8(\"" + versionName + "\", self." + versionName + ")" + endl();
+        ret += tab(3) + "if self." + versionName + " > " + versionNameIdl + ":" + endl();
+        ret += tab(4) + "raise IdlVersionError(\"" + idlClass.getClassName() + "\", self." + versionName + ", " + versionNameIdl + ")" + endl();
+        ret += tab(3) + "else:" + endl();
+        ret += tab(4) + "pass" + endl();
         ret += tab(2) + "else:" + endl();
         ret += tab(3) + "self." + versionName + " = 0" + endl();
         for (IDLField field : idlClass.getFields()) {

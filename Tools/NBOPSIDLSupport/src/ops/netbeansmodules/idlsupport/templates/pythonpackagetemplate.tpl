@@ -8,5 +8,6 @@ else:
   integer_types = (int,)
   numeric_types = (float, int,)
 
+from ops.opsTypes import IdlVersionError
 __imports
 __classes

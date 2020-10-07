@@ -1,10 +1,12 @@
-from ops.opsTypes import OPS_Object
+from ops.opsTypes import OPS_Object,IdlVersionError
 
 class TopicInfoData(OPS_Object):
+	TOPICINFODATA_IDLVERSION = 0
+
 	def __init__(self,topic=None,addr=None):
 		super(TopicInfoData, self).__init__()
 		self.appendType("TopicInfoData")
-		self.TopicInfoData_version = 0
+		self.TopicInfoData_version = TopicInfoData.TOPICINFODATA_IDLVERSION
 		if topic is not None:
 			self.name = topic.name
 			self.type = topic.typeID
@@ -27,6 +29,10 @@ class TopicInfoData(OPS_Object):
 		super(TopicInfoData,self).serialize(archiver)
 		if self.idlVersionMask != 0:
 			self.TopicInfoData_version = dataBuffer.Int8("TopicInfoData_version",self.TopicInfoData_version)
+			if self.TopicInfoData_version > TopicInfoData.TOPICINFODATA_IDLVERSION:
+				raise IdlVersionError("TopicInfoData", self.TopicInfoData_version, TopicInfoData.TOPICINFODATA_IDLVERSION)
+			else:
+				pass
 		else:
 			self.TopicInfoData_version = 0
 		self.name = archiver.String("name", self.name)
@@ -37,9 +43,11 @@ class TopicInfoData(OPS_Object):
 		archiver.StringVector("keys", self.keys)
 
 class ParticipantInfoData(OPS_Object):
+	PARTICIPANTINFODATA_IDLVERSION = 0
+
 	def __init__(self):
 		super(ParticipantInfoData, self).__init__()
-		self.ParticipantInfoData_version = 0
+		self.ParticipantInfoData_version = ParticipantInfoData.PARTICIPANTINFODATA_IDLVERSION
 		self.appendType("ops.ParticipantInfoData")
 
 		self.name = ""
@@ -59,6 +67,10 @@ class ParticipantInfoData(OPS_Object):
 		super(ParticipantInfoData,self).serialize(archiver)
 		if self.idlVersionMask != 0:
 			self.ParticipantInfoData_version = dataBuffer.Int8("ParticipantInfoData_version",self.ParticipantInfoData_version)
+			if self.ParticipantInfoData_version > ParticipantInfoData.PARTICIPANTINFODATA_IDLVERSION:
+				raise IdlVersionError("ParticipantInfoData", self.ParticipantInfoData_version, ParticipantInfoData.PARTICIPANTINFODATA_IDLVERSION)
+			else:
+				pass
 		else:
 			self.ParticipantInfoData_version = 0
 

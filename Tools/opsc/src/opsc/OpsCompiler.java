@@ -44,7 +44,7 @@ public class OpsCompiler
     boolean _bOnlyParse = false;
     boolean _bOnlyGenFactories = false;
     boolean _bGenMemoryPool = false;
-    boolean _bJsonVersion = false;
+    boolean _bJsonVersion = true;
     String _strOps4GprPath = "";
 
     /** An instance of ProjectProperties is used to hold defaults
@@ -95,6 +95,7 @@ public class OpsCompiler
         System.out.println("  -pp <file>        name an ops IDL project.properties file");
         System.out.println("  -printProps       print system props");
         System.out.println("  -s <feature>      special, generate with given feature");
+        System.out.println("  -S <feature>      special, don't generate with given feature");
         System.out.println("  -t <dir>          set template directory (overrides built-in templates)");
         System.out.println("");
         System.out.println("  -gpr <path>       explicit path to ops4.gpr when generating Ada");
@@ -103,9 +104,10 @@ public class OpsCompiler
         System.out.println("  -jar <file>       used when building Java to give any jar dependencies");
         System.out.println("");
         System.out.println("FEATURE");
-        System.out.println("  for generate: ALL, ada, cpp, csharp, delphi, java, json, python, debug");
+        System.out.println("  for generate: ALL, ada, cpp(*), csharp(*), delphi, java(*), json, python(*), debug");
         System.out.println("  for build:    ALL, csharp, java");
-        System.out.println("  for special:  mempool, jsonver");
+        System.out.println("  for special:  mempool, jsonver(*)");
+        System.out.println("                (*) == Default enabled");
         System.out.println("");
     }
 
@@ -354,11 +356,11 @@ public class OpsCompiler
                 i++;
             //} else if(arg.equals("-P")) {
             // -P is handled in first step above
-            } else if(arg.equals("-s") && (i < extraArgs.size())) {
+            } else if((arg.equals("-s") || (arg.equals("-S"))) && (i < extraArgs.size())) {
                 i++;
                 String special = extraArgs.elementAt(i);
-                if(special.equals("mempool")) _bGenMemoryPool = true;
-                if(special.equals("jsonver")) _bJsonVersion = true;
+                if(special.equals("mempool")) _bGenMemoryPool = arg.equals("-s");
+                if(special.equals("jsonver")) _bJsonVersion = arg.equals("-s");
             } else {
                 // not a known option - regard as input file
                 // Add file if not already in list

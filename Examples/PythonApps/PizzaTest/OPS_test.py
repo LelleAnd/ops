@@ -9,6 +9,7 @@ import pizza
 import pizza_special
 import PizzaProjectTypeFactory
 from ops import Participant,Publisher,Subscriber,Print_Archiver
+from ops.opsTypes import IdlVersionError
 
 
 beQuite = False
@@ -19,7 +20,12 @@ def onPizzaData(sub,mess):
 		data=mess.data
 		tempStr = "[Topic: " + sub.getTopic().getName()
 		tempStr +="] (From " + addr + ":" + port
-		tempStr +=") Pizza:: Cheese: " + data.cheese
+		tempStr +=") Pizza(v"
+		if data.idlVersionMask != 0:
+			tempStr += str(data.PizzaData_version)
+		else:
+			tempStr += "-"
+		tempStr +="):: Cheese: " + data.cheese
 		tempStr +=",  Tomato sauce: " + data.tomatoSauce
 		print(tempStr)
 
@@ -167,10 +173,6 @@ class CHelper(IHelper):
 			print("Subscriber must be created first!!")
 
 
-
-
-
-
 class ItemInfo(object):
 	def __init__(self,dom,top,typ):
 		self.Domain = dom;
@@ -187,6 +189,7 @@ ItemInfoList = []
 NumVessuvioBytes = 0
 sendPeriod = 1000
 FillerStr=""
+PD_version = pizza.PizzaData.PIZZADATA_IDLVERSION
 
 def WriteToAllSelected():
 	for info in ItemInfoList:
@@ -196,6 +199,11 @@ def WriteToAllSelected():
 		if info.TypeName == pizza.PizzaData.TypeName:
 			info.helper.data.cheese = "Pizza from Python: " + str(WriteToAllSelected.Counter)
 			##info.helper.data.spareBytes = [1,2,3,4]	#test
+			if PD_version < 0:
+				info.helper.data.idlVersionMask = 0
+			else:
+				info.helper.data.idlVersionMask = 1
+				info.helper.data.PizzaData_version = PD_version
 
 		if info.TypeName == pizza.VessuvioData.TypeName:
 			info.helper.data.cheese = "Vessuvio from Python: " + str(WriteToAllSelected.Counter)
@@ -206,7 +214,10 @@ def WriteToAllSelected():
 			if (len(info.helper.data.strings) == 0):
 				for k in range(1000):
 					info.helper.data.strings.append("hej")
-		info.helper.Write()
+		try:
+			info.helper.Write()
+		except IdlVersionError as err:
+			print("Exception: " + str(err))
 		WriteToAllSelected.Counter+=1
 
 WriteToAllSelected.Counter = 0
@@ -233,6 +244,7 @@ def menu():
 	print("\t T ms  Set deadline timeout [ms]")
 	print("\t V ms  Set send period [ms] [%s]" % sendPeriod)
 	print("\t A     Start/Stop periodical Write with set period")
+	print("\t M ver Set Pizzadata version [%s]" % PD_version)
 	print("\t W     Write data")
 	print("\t R     Resend data")
 	print("\t Q     Quite (minimize program output)")
@@ -413,6 +425,16 @@ while not doExit:
 				if num>=0:
 					FillerStr=" "*num
 					NumVessuvioBytes = num
+			del commands[0:2]
+
+		elif (commands[0]=="M"):
+			try:
+				num = int(commands[1])
+				print("version=",num)
+				if num>=-1:
+					PD_version = num
+			except:
+				pass
 			del commands[0:2]
 
 		else:

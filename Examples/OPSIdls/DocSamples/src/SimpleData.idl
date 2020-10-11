@@ -1,0 +1,8 @@
+package samples;
+
+class SimpleData
+{
+   int i;
+   double d;
+   string s;
+}

@@ -5,4 +5,8 @@ class PizzaData extends sds.MessageHeaderData
     string cheese;
     string tomatoSauce;
 
+    /* hej hopp */
+    //@version = 1 .. 5 //@version = 10
+    int Kalle;
+
 }

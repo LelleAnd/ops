@@ -353,6 +353,9 @@
     <Compile Include="..\..\..\..\Examples\OPSIdls\TestAll\Generated\CSharp\TestAll\TestData.cs">
       <Link>GenIDLs\TestData.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\OPSIdls\PizzaProject\Generated\CSharp\pizza\special\Parmesan.cs">
+      <Link>GenIDLs\Parmesan.cs</Link>
+    </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

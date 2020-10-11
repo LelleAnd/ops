@@ -1,0 +1,6 @@
+package pizza.special;
+
+class Parmesan extends Cheese
+{
+    float amount;
+}

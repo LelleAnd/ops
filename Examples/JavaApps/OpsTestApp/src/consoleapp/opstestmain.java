@@ -167,7 +167,7 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
   }
 
   public void OnData(final String topName, final pizza.PizzaData Data) {
-      OnLog("[ " + topName + " ] New PizzaData: " + Data.cheese + "\n");
+      OnLog("[ " + topName + " ] New PizzaData(v" + Data.PizzaData_version + "): " + Data.cheese + "\n");
   }
 
   public void OnData(final String topName, final pizza.VessuvioData Data) {
@@ -267,11 +267,18 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
     }
   }
 
-  public void WriteToAll(int NumExtraBytes) {
+  public void WriteToAll(int NumExtraBytes, int pd_version) {
       Counter++;
       pizzaData.cheese = "From Java " + Counter;
       vessuvioData.cheese = "From Java " + Counter;
       extraAlltData.cheese = "From Java " + Counter;
+
+      if (pd_version < 0) {
+          pizzaData.idlVersionMask = 0;
+      } else {
+          pizzaData.idlVersionMask = 1;
+          pizzaData.PizzaData_version = (byte)pd_version;
+      }
 
       StringBuilder sb = new StringBuilder();
       sb.setLength(NumExtraBytes);
@@ -308,6 +315,7 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
   int NumVessuvioBytes = 0;
   int deadlineTimeout = 1000;
   int sendPeriod = 1000;
+  int pd_version = pizza.PizzaData.PizzaData_idlVersion;
 
   public void menu()
 	{
@@ -344,6 +352,7 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
   	System.out.println("\t L num Set num Vessuvio Bytes [" + NumVessuvioBytes + "]");
   	System.out.println("\t T ms  Set deadline timeout [ms]");
   	System.out.println("\t V ms  Set send period [ms] [" + sendPeriod + "]");
+    System.out.println("\t M ver Set PizzaData version ["+ pd_version + "]");
   	System.out.println("\t A     Start/Stop periodical Write with set period");
   	System.out.println("\t W     Write data");
   	//System.out.println("\t Q     Quite (minimize program output)");
@@ -382,7 +391,7 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
       if (doPeriodicalSends) {
         try {
           while (!System.console().reader().ready()) {
-            WriteToAll(NumVessuvioBytes);
+            WriteToAll(NumVessuvioBytes, pd_version);
             try {
               Thread.sleep(sendPeriod);
             } catch (InterruptedException e) {
@@ -443,11 +452,19 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
           System.err.println("Invalid Format!");
         }
       }
+      if (input.startsWith("m", 0)) {
+        try {
+          pd_version = Integer.parseInt(input.substring(2));
+          menu();
+        } catch (NumberFormatException nfe) {
+          System.err.println("Invalid Format!");
+        }
+      }
       if (input.startsWith("a", 0)) {
         doPeriodicalSends = !doPeriodicalSends;
       }
 
-			if (input.startsWith("w", 0)) { WriteToAll(NumVessuvioBytes); }
+			if (input.startsWith("w", 0)) { WriteToAll(NumVessuvioBytes, pd_version); }
 			if (input.startsWith("x", 0)) break;
 		}
 

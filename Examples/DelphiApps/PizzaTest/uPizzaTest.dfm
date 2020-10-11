@@ -1,7 +1,7 @@
 object Form1: TForm1
   Left = 0
   Top = 0
-  Caption = 'PizzaTest (Version 2020-04-13)'
+  Caption = 'PizzaTest (Version 2020-10-04)'
   ClientHeight = 428
   ClientWidth = 746
   Color = clBtnFace
@@ -222,6 +222,16 @@ object Form1: TForm1
       TabOrder = 17
       Text = '0'
       OnExit = LabeledEdit_SendPeriodExit
+    end
+    object LabeledEdit_PizzadataVersion: TLabeledEdit
+      Left = 556
+      Top = 64
+      Width = 82
+      Height = 21
+      EditLabel.Width = 84
+      EditLabel.Height = 13
+      EditLabel.Caption = 'Pizzadata Version'
+      TabOrder = 18
     end
   end
   object Timer1: TTimer

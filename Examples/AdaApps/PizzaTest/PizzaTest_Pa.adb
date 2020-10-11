@@ -82,6 +82,7 @@ package body PizzaTest_Pa is
     procedure StartSubscriber( Self : in out IHelper_Interface ) is abstract;
     procedure StopSubscriber( Self : in out IHelper_Interface ) is abstract;
     procedure SetDeadlineQos( Self : in out IHelper_Interface; timeoutMs : Int64 ) is abstract;
+    procedure SetVersionMask( Self : in out IHelper_Interface; verMask : UInt32 ) is abstract;
 --    function Data( Self : IHelper_Interface ) return OpsObject_Class_At is abstract;
 
     generic
@@ -126,6 +127,7 @@ package body PizzaTest_Pa is
     procedure StartSubscriber( Self : in out Helper_Class );
     procedure StopSubscriber( Self : in out Helper_Class );
     procedure SetDeadlineQos( Self : in out Helper_Class; timeoutMs : Int64 );
+    procedure SetVersionMask( Self : in out Helper_Class; verMask : UInt32 );
     function Data( Self : Helper_Class ) return DataType_At;
 
   private
@@ -356,6 +358,11 @@ package body PizzaTest_Pa is
       end if;
     end;
 
+    procedure SetVersionMask( Self : in out Helper_Class; verMask : UInt32 ) is
+    begin
+      Self.data.SetIdlVersionMask( verMask );
+    end;
+
     procedure OnNotify( Self : in out Helper_Class;
                         Sender : in Ops_Class_At;
                         Item : in OPSMessage_Class_At ) is
@@ -551,11 +558,12 @@ package body PizzaTest_Pa is
       if not beQuite then
         Put_Line(
                  "[Topic: " & sub.Topic.Name &
-                 "] (From " & addr & ":" & Integer'Image(port) &
-                 ") PizzaData:: Cheese: " & X(data.cheese) &
-                 ", Tomato sauce: " & X(data.tomatoSauce) &
-                 ", spareBytes: " & XL(data.SpareBytes)
-                 );
+                   "] (From " & addr & ":" & Integer'Image(port) &
+                   ") PizzaData(v" & Byte'Image(data.PizzaData_version) &
+                   "):: Cheese: " & X(data.cheese) &
+                   ", Tomato sauce: " & X(data.tomatoSauce) &
+                   ", spareBytes: " & XL(data.SpareBytes)
+                );
       end if;
     end;
   end;
@@ -655,6 +663,7 @@ package body PizzaTest_Pa is
   FillerStr : String_At := Copy("");
   sendPeriod : Int64 := 1000;
   Counter : Int64 := 0;
+  PD_Version : Integer := Integer(Ops_Pa.OpsObject_Pa.pizza_PizzaData.PizzaData_idlVersion);
 
   procedure WriteToAllSelected is
   begin
@@ -666,6 +675,12 @@ package body PizzaTest_Pa is
             data : PizzaData_Class_At :=
               PizzaDataHelper.Data(PizzaDataHelper.Helper_Class_At(ItemInfoList(i).Helper).all);
           begin
+            if PD_Version < 0 then
+              data.all.SetIdlVersionMask(0);
+            else
+              data.all.SetIdlVersionMask(1);
+              data.all.PizzaData_version := Byte(PD_Version);
+            end if;
             Replace(data.cheese, "Pizza from Ada: " & Int64'Image(Counter));
             Replace(data.tomatoSauce, "Tomato");
           end;
@@ -728,6 +743,7 @@ package body PizzaTest_Pa is
     Put_Line(HT & " T ms  Set deadline timeout [ms]");
     Put_Line(HT & " V ms  Set send period [ms] [" & Int64'Image(sendPeriod) & "]");
     Put_Line(HT & " A     Start/Stop periodical Write with set period");
+    Put_Line(HT & " M ver Set Pizzadata version [" & Integer'Image(PD_Version) & "]");
     Put_Line(HT & " W     Write data");
     Put_Line(HT & " Q     Quite (minimize program output)");
     Put_Line(HT & " X     Exit program");
@@ -965,6 +981,17 @@ package body PizzaTest_Pa is
                   end loop;
                 end if;
               end;
+
+            elsif Ada.Strings.Fixed.Index(line, "m") = 1 then
+              line(1) := ' ';
+              declare
+                ll : String := Ada.Strings.Fixed.Trim(line, Ada.Strings.Both);
+              begin
+                if (ll(1) >= '0' and ll(1) <= '9') or (ll(1) = '-' or ll(1) = '+') then
+                  Get(ll, PD_Version, Last);
+                end if;
+              end;
+              Menu;
 
             elsif Ada.Strings.Fixed.Index(line, "w") = 1 then
               WriteToAllSelected;

@@ -45,6 +45,7 @@
             this.buttonDeletePublisher = new System.Windows.Forms.Button();
             this.buttonDeleteSubscriber = new System.Windows.Forms.Button();
             this.groupBoxMisc = new System.Windows.Forms.GroupBox();
+            this.label3 = new System.Windows.Forms.Label();
             this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.checkBoxEnableTrace = new System.Windows.Forms.CheckBox();
@@ -62,7 +63,8 @@
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.textBoxSendPeriod = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
+            this.textBoxPizzaDataVersion = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
             this.groupBoxSetup.SuspendLayout();
             this.groupBoxMisc.SuspendLayout();
             this.groupBoxSubscriberSettings.SuspendLayout();
@@ -231,6 +233,15 @@
             this.groupBoxMisc.TabStop = false;
             this.groupBoxMisc.Text = "Miscellaneous";
             // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(131, 112);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(35, 13);
+            this.label3.TabIndex = 20;
+            this.label3.Text = "label3";
+            // 
             // button2
             // 
             this.button2.Location = new System.Drawing.Point(118, 77);
@@ -386,20 +397,29 @@
             this.label2.TabIndex = 20;
             this.label2.Text = "Send Period [ms]:";
             // 
-            // label3
+            // textBoxPizzaDataVersion
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(131, 112);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(35, 13);
-            this.label3.TabIndex = 20;
-            this.label3.Text = "label3";
+            this.textBoxPizzaDataVersion.Location = new System.Drawing.Point(663, 154);
+            this.textBoxPizzaDataVersion.Name = "textBoxPizzaDataVersion";
+            this.textBoxPizzaDataVersion.Size = new System.Drawing.Size(59, 20);
+            this.textBoxPizzaDataVersion.TabIndex = 21;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(564, 157);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(96, 13);
+            this.label4.TabIndex = 22;
+            this.label4.Text = "PizzaData Version:";
             // 
             // Form_TestOps
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(734, 509);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.textBoxPizzaDataVersion);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.textBoxSendPeriod);
             this.Controls.Add(this.checkBox1);
@@ -462,6 +482,8 @@
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button buttonDeleteParticipant;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.TextBox textBoxPizzaDataVersion;
+        private System.Windows.Forms.Label label4;
     }
 }
 

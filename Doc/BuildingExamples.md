@@ -19,12 +19,14 @@ On Linux do
 This creates a 'Generated' directory in the TestAll directory with all generated files.
 For more information about compiling IDL's see [opsc](IDLCommandlineCompiler.md).
 
+For Windows you can also build all IDL examples at once using the bat-file *OPS_DIR/Examples/Build_Idls.bat*.
+
 ## Build C++ Examples ##
 Under OPS_DIR/Examples, you find C++ examples in the directory **CppApps**.
 
 An example using the above TestAll IDLs exist in the directory **TestAllC++Test**.
 
-Open **TestAllC++Test.sln** under **TestAllC++Test**, check the boost reference to the include and library directories so they point to your boost installation and then build and run to see that your OPS installation works correctly for C++.
+Open **TestAllC++Test.sln** in directory **TestAllC++Test**, check the boost reference to the include and library directories so they point to your boost installation and then build and run to see that your OPS installation works correctly for C++.
 
 ## Python Examples ##
 Under OPS_DIR/Examples, you find Python examples in the directory **PythonApps**.

@@ -17,7 +17,7 @@ void onNewData(DataNotifier* notifier)
 void printMessages()
 {
    OPSMessage* mess;
-   while ((mess = myQ.get()) != NULL) {
+   while ((mess = myQ.get()) != nullptr) {
       //NOTE: This will cause errors, references might no longer be valid
       print(mess);
    }
@@ -43,7 +43,7 @@ void onNewData(DataNotifier* notifier)
 void printMessages()
 {
   OPSMessage* mess;
-  while ((mess = myQ.get()) != NULL) {
+  while ((mess = myQ.get()) != nullptr) {
       print(mess);
 
       //This will state that you no longer have use for this messages, and it will be

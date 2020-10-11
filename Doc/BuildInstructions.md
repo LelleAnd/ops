@@ -20,9 +20,9 @@ This will first perform a bootstrap step to generate some needed source code and
 #### Windows ####
 Building with CMake on Windows currently requires Visual Studio.
 
-Start a *MSBuild* command prompt, change to "OPS_DIR" and run the *run-cmake.bat* file.
+Start a *MSBuild* command prompt, change to "OPS_DIR" and run the *run-cmake.bat* file for 32-bit binaries and *run-cmake-x64.bat* for 64-bit binaries.
 
-This will first perform a bootstrap step to generate some needed source code and then build both 'debug' and 'optimized' builds. The intermediate result is placed in subdirectories 'build.bootstrap', 'build.debug' and 'build.opt'.
+This will first perform a bootstrap step to generate some needed source code and then build both 'debug' and 'optimized' builds. The intermediate result is by default placed in subdirectories 'build.bootstrap', 'build.debug' and 'build.opt' (for 64-bit builds with -x64 added to the subdirectory names). The subdirectories used can be changed by defining some symbols before running the bat-file.
 
 #### CMake result ####
 The install result will be in the subdirectory 'deploy' with the following structure:
@@ -33,7 +33,7 @@ The install result will be in the subdirectory 'deploy' with the following struc
 >  - include
 >  - lib
 >  - share
->  - test 
+>  - test
 
 ## Building without CMake ##
 See [Building without CMake](BuildingWithoutCMake.md).

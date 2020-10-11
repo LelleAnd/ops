@@ -1,9 +1,3 @@
 # External Tools #
 
-Boost - TBD
-
-CMake - TBD
-
-GoogleTest - TBD
-
-javacc - java compiler compiler.
+See [Prerequisites](Prerequisites.md) for the required tools to build OPS.

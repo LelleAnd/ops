@@ -31,6 +31,7 @@ Make sure you have boost installed, otherwise download pre-built binaries for bo
     * Boost Thread
 
 OPS has been used with Boost versions 1.38, 1.48, 1.53, 1.55, 1.60, 1.64, 1.66, 1.67 and 1.71.
+Versions older than 1.60 hasn't been used/tested for quite a while. It is recommended to use a more modern version.
 
 ## CMake ##
 Version 3.1.0 or later is required to build OPS with CMake. Make sure the cmake command is in your path. CMake can be downloaded at https://cmake.org/.
@@ -43,7 +44,9 @@ OPS for C++ requires a C++11 compiler and has therefore only support for VS2015,
 OPS for C# requires language version 7.3 or later (due to generics and constraining type parameters to System.Enum), i.e. Visual Studio 2017 version 15.7 or later.
 
 ## gcc (Linux) ##
-OPS has been used with 4.4.7, 5.3.0, 5.4.0, 6.2.1, 6.4.1, 7.3.1 and 9.2.0.
+OPS for C++ requires a C++11 compiler and has therefore only support for gcc 4.8.1 an later.
+
+OPS has been used with 5.3.0, 5.4.0, 6.2.1, 6.4.1, 7.3.1 and 9.2.0.
 
 ## Google Test (required for unit tests) ##
 Google Test can be downloaded at https://github.com/google/googletest.

@@ -12,10 +12,13 @@ import java.io.IOException;
 
 public class SampleData extends OPSObject
 {
+    public byte SampleData_version = SampleData_idlVersion;
+
     public enum Order {
         UNDEFINED, START, STOP
     };
 
+    public static final byte SampleData_idlVersion = 0;
     public static final int max = 42;
 
     public boolean boo;
@@ -62,6 +65,15 @@ public class SampleData extends OPSObject
     public void serialize(ArchiverInOut archive) throws IOException
     {
         super.serialize(archive);
+        if (idlVersionMask != 0) {
+            byte tmp = archive.inout("SampleData_version", SampleData_version);
+            if (tmp > SampleData_idlVersion) {
+                throw new IOException("SampleData: received version '" + tmp + "' > known version '" + SampleData_idlVersion + "'");
+            }
+            SampleData_version = tmp;
+        } else {
+            SampleData_version = 0;
+        }
         boo = archive.inout("boo", boo);
         b = archive.inout("b", b);
         sh = archive.inout("sh", sh);
@@ -71,7 +83,7 @@ public class SampleData extends OPSObject
         d = archive.inout("d", d);
         s = archive.inout("s", s);
         s25 = archive.inout("s25", s25);
-        uData = (UserData) archive.inout("uData", uData);
+        uData = (UserData) archive.inout("uData", uData, UserData.class);
         command = archive.inoutEnum("command", command, Order.values());
         boos = (java.util.Vector<Boolean>) archive.inoutBooleanList("boos", boos);
         bytes = (java.util.Vector<Byte>) archive.inoutByteList("bytes", bytes);
@@ -82,7 +94,7 @@ public class SampleData extends OPSObject
         doubles = (java.util.Vector<Double>) archive.inoutDoubleList("doubles", doubles);
         strings = (java.util.Vector<String>) archive.inoutStringList("strings", strings);
         s43vect = (java.util.Vector<String>) archive.inoutStringList("s43vect", s43vect);
-        uDatas = (java.util.Vector<UserData>) archive.inoutSerializableList("uDatas", uDatas);
+        uDatas = (java.util.Vector<UserData>) archive.inoutSerializableList("uDatas", uDatas, UserData.class);
         intarr = (java.util.Vector<Integer>) archive.inoutIntegerList("intarr", intarr);
 
     }
@@ -99,7 +111,8 @@ public class SampleData extends OPSObject
     {
         super.fillClone(cloneO);
         SampleData cloneResult = (SampleData)cloneO;
-                cloneResult.boo = this.boo;
+        cloneResult.SampleData_version = this.SampleData_version;
+        cloneResult.boo = this.boo;
         cloneResult.b = this.b;
         cloneResult.sh = this.sh;
         cloneResult.i = this.i;

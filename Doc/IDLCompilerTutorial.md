@@ -23,40 +23,85 @@ Compiled to C++, this is what would be generated from the SimpleData data type a
 
 ```
 //Auto generated OPS-code. DO NOT MODIFY!
-#ifndef samples_SimpleData_h
-#define samples_SimpleData_h
+#pragma once
 
 #include "OPSObject.h"
 #include "ArchiverInOut.h"
-#include <string>
+#include <string.h>		// for memset() on Linux
 #include <vector>
 
 namespace samples {
+
+constexpr ops::VersionMask_T SimpleData_Level_Mask   = ops::OPSObject_Level_Mask << 1;
+static_assert(SimpleData_Level_Mask <= ops::MaxVersionMask, "Inheritance hierarchy too large");
 
 class SimpleData :
 	public ops::OPSObject
 {
 public:
+    static ops::TypeId_T getTypeName(){return ops::TypeId_T("samples.SimpleData");}
+
+    char SimpleData_version = 0;
 
     int i;
     double d;
     std::string s;
 
-    SimpleData() : ops::OPSObject(),
-        i(0),
-        d(0)
+    SimpleData()
+        : ops::OPSObject()
+        , i(0), d(0)
     {
         OPSObject::appendType(std::string("samples.SimpleData"));
+    }
+
+    ///Copy-constructor making full deep copy of a(n) SimpleData object.
+    SimpleData(const SimpleData& __c)
+        : ops::OPSObject()
+        , i(0), d(0)
+    {
+        OPSObject::appendType(ops::TypeId_T("samples.SimpleData"));
+        __c.fillClone(this);
+    }
+
+    ///Assignment operator making full deep copy of a(n) SimpleData object.
+    SimpleData& operator = (const SimpleData& other)
+    {
+        if (this != &other) {
+            other.fillClone(this);
+        }
+        return *this;
     }
 
     ///This method acceptes an ops::ArchiverInOut visitor which will serialize or deserialize an
     ///instance of this class to a format dictated by the implementation of the ArchiverInout.
     void serialize(ops::ArchiverInOut* archive)
     {
-		ops::OPSObject::serialize(archive);
-		archive->inout(std::string("i"), i);
-		archive->inout(std::string("d"), d);
-		archive->inout(std::string("s"), s);
+        ops::OPSObject::serialize(archive);
+        if (idlVersionMask != 0) {
+            archive->inout("SimpleData_version", SimpleData_version);
+        } else {
+            SimpleData_version = 0;
+        }
+        archive->inout("i", i);
+        archive->inout("d", d);
+        archive->inout("s", s);
+    }
+
+    //Returns a deep copy of this object.
+    virtual SimpleData* clone() override
+    {
+        SimpleData* ret = new SimpleData;
+        fillClone(ret);
+        return ret;
+    }
+
+    void fillClone(SimpleData* obj) const
+    {
+        ops::OPSObject::fillClone(obj);
+        obj->SimpleData_version = SimpleData_version;
+        obj->i = i;
+        obj->d = d;
+        obj->s = s;
     }
 
     ///Destructor: Note that all aggregated data and vectors are completely deleted.
@@ -66,8 +111,6 @@ public:
 };
 
 }
-
-#endif
 ```
 
 The IDL Compiler is also where you define your topics on which you will publish and subscribe to in your applications. This is done by creating a XML configuration file that looks something like this:
@@ -94,8 +137,6 @@ The IDL Compiler is also where you define your topics on which you will publish 
 </root>
 
 ```
-
-
 
 See what the OPS IDL Builder looks like and how to create a new project here:
 

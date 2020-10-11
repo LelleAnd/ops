@@ -1,4 +1,10 @@
+
+Outdated information
+
+---
+
 # Publish Subscribe Domain Model Used by OPS #
+
 
 ![domain_model_overview.JPG](domain_model_overview.JPG)
 

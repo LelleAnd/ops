@@ -1,7 +1,6 @@
 # Interfacing OPS with C# #
 
-Look in your folder "OPS\_DIR/Samples/SampleProject/Generated code/C#". Here you will find the C# code generated when compiling the SampleProject with the IDLCompiler.
-Notice that you have four classes for every data class you wrote in IDL.
+Look in your folder "OPS\_DIR/Examples/OPSIdls/\*/Generated/CSharp". Here you will find the C# code generated when compiling the different IDL examples with the IDLCompiler.
 
-Use your choice of Visual Studio to open up "OPS\_DIR/Samples/SampleProject/C#/ConsoleApplication1/TestPublishSubscribe.sln"
-In the solution you will find to projects: "PublishPositions" and "SubscribePositions". Examine the samples and build and run them to see how they work.
+Use your choice of Visual Studio to open up "OPS\_DIR/Examples/CSharpApps/\*/\*.sln"
+Examine the samples and build and run them to see how they work.

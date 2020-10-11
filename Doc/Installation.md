@@ -5,14 +5,14 @@ NOTE: This page contains a lot of outdated info and need to be updated
 - - -
 
 ## Set Up Your Environment ##
-Make sure you have a Java SE Development Kit (JDK, version 6 or higher) installed on
+Make sure you have a Java SE Development Kit (JDK, version 8 or higher) installed on
 your system. The tools you use to create systems with OPS are all running in Java and
 use the Java compiler to generate pre-compiled code to use for debugging. If you know
 you will only use OPS for C++ and C# and do not need any debugging capabilities, it may
 be sufficient to only have a Java runtime environment installed. It is strongly
 recommended to install a JDK though.
 
-To build or run the OPS IDL Builder, JDK version 7 or higher is required. 
+To build or run the OPS IDL Builder, JDK version 8 or higher is required.
 
 If you do not have a JDK installed on your system follow these steps:
   1. Download the latest JDK from oracle.com, (Tip! Select a bundle with Netbeans and you are ready to open the OPS sample Netbeans Java projects!)       http://www.oracle.com/technetwork/java/index.html
@@ -21,28 +21,11 @@ If you do not have a JDK installed on your system follow these steps:
  > "C:\Program Files\Java\jdk.jdk.version\bin" to your user environment variable
  > called path, you can do this without being an administrator of your system.
 
-## Download OPS Binaries ##
-
-Go to [Downloads](http://code.google.com/p/ops/downloads/list) to get the latest
-binaries for the languages you want to use OPS with. You will also need the
-latest Tools. Unpack all the zip files you downloaded directly under a common
-directory (E.g. C:\OPS\, this directory will be referred to as OPS\_DIR from here on).
-
-After unpacking the zip files, make sure your directory structure looks as follows:
-
-  * OPS\_DIR
-    * Cpp
-    * CSharp
-    * Examples
-    * Java
-    * Libs
-    * Tools
-
-
 ---
 
-Or, go [here](BuildInstructions.md), if you are interested in building OPS
-from source.
+## Build OPS Binaries ##
+
+Look at the [build instructions](BuildInstructions.md) to build OPS from source.
 
 ---
 

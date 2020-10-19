@@ -5,6 +5,7 @@ on:
     branches:
       - development
       - master
+      - Test-actions
     paths-ignore:
       - 'Ada/**'
       - 'CSharp/**'
@@ -32,18 +33,22 @@ jobs:
       - name: GTest Build
         run: pushd $HOME/gtest && mkdir mybuild && cd mybuild && cmake -DCMAKE_INSTALL_PREFIX=$HOME/gtest/deploy .. && make install && popd
       - name: GTest Set GOOGLETEST_HOME
-        run: echo "::set-env name=GOOGLETEST_HOME::$HOME/gtest/deploy"
-      #- name: debug
-      #  run: ls -alR $GOOGLETEST_HOME
-      - name: CppCheck Install
-        run: sudo apt-get install cppcheck
+      #  run: echo "::set-env name=GOOGLETEST_HOME::$HOME/gtest/deploy"
+        run: echo "GOOGLETEST_HOME=$HOME/gtest/deploy" >> $GITHUB_ENV
+      - name: debug
+        run: ls -alR $GOOGLETEST_HOME
+      #- name: CppCheck Install
+      #  run: sudo apt-get install cppcheck
       - name: Set BOOST_HOME
-        run: echo "::set-env name=BOOST_HOME::$BOOST_ROOT_1_72_0"
-      - name: Build
-        run: make
-        env:
-          MAKEFLAGS: "-j2"
-      - name: Run C++ Tests
-        run: make unittest-c++
-      - name: CppCheck Analysis
-        run: cppcheck --enable=all Cpp/source Cpp/include > /dev/null
+      #  run: echo "::set-env name=BOOST_HOME::$BOOST_ROOT_1_72_0"
+        run: echo "BOOST_HOME=$BOOST_ROOT_1_72_0" >> $GITHUB_ENV
+      - name: debug2
+        run: ls -alR $BOOST_HOME
+      #- name: Build
+      #  run: make
+      #  env:
+      #    MAKEFLAGS: "-j2"
+      #- name: Run C++ Tests
+      #  run: make unittest-c++
+      #- name: CppCheck Analysis
+      #  run: cppcheck --enable=all Cpp/source Cpp/include > /dev/null

@@ -36,4 +36,8 @@
 
   add_custom_target(target ALL DEPENDS ${OUTPUT})
 
-  install(FILES ${OUTPUT} DESTINATION lib)
+  if(NOT DEFINED OPS_PYTHON_INSTALL_PATH)
+    install(FILES ${OUTPUT} DESTINATION lib)
+  else()
+    install(FILES ${SRC} DESTINATION ${OPS_PYTHON_INSTALL_PATH}/ops)
+  endif()

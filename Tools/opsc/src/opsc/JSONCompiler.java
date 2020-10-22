@@ -107,7 +107,7 @@ public class JSONCompiler extends CompilerSupport
 
         res += tab(t+2) + "\"non-coretypes\": {" + endl();
         res += tab(t+3) + "\"composed_of\": [" + endl();
-        res += tab(t+4) + "{ \"type_string\": \"string\", \"desc\": \"  TBD  \"}," + endl();
+        res += tab(t+4) + "{ \"type_string\": \"string\", \"desc\": \"If the string has a leading '0 ', all types in the inheritance hierarchy are version tagged.\"}," + endl();
         res += tab(t+4) + "{ \"fields\": \"according to type\" }" + endl();
         res += tab(t+3) + "]" + endl();
         res += tab(t+2) + "}," + endl();
@@ -121,7 +121,7 @@ public class JSONCompiler extends CompilerSupport
 
     private String getVersionField()
     {
-        return "{ \"name\": \"version\", \"type\": \"byte\", \"optional\": \"type_is_version_tagged\" }";
+        return "{ \"name\": \"version\", \"type\": \"byte\", \"optional\": \"type_is_version_tagged\", \"desc\": \"If not present, 'version' is implicitly 0\" }";
     }
 
     protected String generate_OPSObject_JSON(int t)

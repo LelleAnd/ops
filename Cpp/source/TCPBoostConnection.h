@@ -38,6 +38,7 @@ namespace ops
 	protected:
 		boost::asio::ip::tcp::socket* _sock;
 		Address_T _remoteAddress;
+        uint32_t _remoteAddressHost = 0;
 		uint16_t _remotePort = 0;
 
 		// Used for a connection created by TCPClient
@@ -126,6 +127,7 @@ namespace ops
 				boost::asio::ip::tcp::endpoint sendingEndPoint;
 				sendingEndPoint = _sock->remote_endpoint(error);
 				if (!error) {
+                    _remoteAddressHost = sendingEndPoint.address().to_v4().to_uint();
 					_remoteAddress = sendingEndPoint.address().to_string().c_str();
 					_remotePort = sendingEndPoint.port();
 				}
@@ -177,7 +179,17 @@ namespace ops
 			port = _remotePort;
 		}
 
-		void getLocal(Address_T& address, uint16_t& port) override
+        void getRemote(uint32_t& address, uint16_t& port) override
+        {
+            // We cache the address and port for TCP, since it is the same until disconnected
+            if (_remotePort == 0) {
+                getRemoteEndPoint();
+            }
+            address = _remoteAddressHost;
+            port = _remotePort;
+        }
+
+        void getLocal(Address_T& address, uint16_t& port) override
 		{
 			boost::system::error_code error;
 			boost::asio::ip::tcp::endpoint localEndPoint;

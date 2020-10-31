@@ -570,7 +570,7 @@ std::string source(const ops::OPSMessage* const mess, const ops::OPSObject* cons
 	UNUSED(opsData);
 	if (mess == nullptr) { return ""; }
 	ops::Address_T srcIP;
-	int srcPort;
+	uint16_t srcPort;
 	mess->getSource(srcIP, srcPort);
 	std::ostringstream myPort;
 	myPort << srcPort << std::ends;
@@ -1007,7 +1007,7 @@ public:
 	{
 		UNUSED(sender);
 		ops::Address_T address;
-		int port;
+		uint16_t port;
 		arg.mess->getSource(address, port);
 
 		std::string const newPub = (arg.newPublisher) ? "NEW Publisher" : "SEQ ERROR";
@@ -1196,7 +1196,7 @@ public:
 				", mctcp: " << piData->mc_tcp_port <<
 				std::endl;
 			ops::Address_T srcIP;
-			int srcPort;
+			uint16_t srcPort;
 			mess->getSource(srcIP, srcPort);
 			std::cout <<
 				"  lang: " << piData->languageImplementation <<

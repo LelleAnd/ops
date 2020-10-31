@@ -62,9 +62,9 @@ TEST(Test_PubIdChecker, Test) {
 	// Setup OPSMessages
 	OPSMessage m1, m2, m3;
 
-	m1.setSource("192.168.0.1", 6666);
-	m2.setSource("192.168.0.1", 7777);
-	m3.setSource("192.168.0.2", 7777);
+	m1.setSource(0xC0A80001, 6666);
+	m2.setSource(0xC0A80001, 7777);
+	m3.setSource(0xC0A80002, 7777);
 
 	m1.setPublicationID(17);
 	m2.setPublicationID(988);

@@ -416,7 +416,7 @@ public:
 	{
 		UNUSED(sender);
 		ops::Address_T address;
-		int port;
+		uint16_t port;
 		arg.mess->getSource(address, port);
 
 		std::string newPub = (arg.newPublisher) ? "NEW Publisher" : "SEQ ERROR";
@@ -543,7 +543,7 @@ public:
 		}
 
 		ops::Address_T addr = "";
-		int port = 0;
+		uint16_t port = 0;
 		sub->getMessage()->getSource(addr, port);
 
 		if (!beQuite) {
@@ -588,7 +588,7 @@ public:
 		}
 
 		ops::Address_T addr = "";
-		int port = 0;
+		uint16_t port = 0;
 		sub->getMessage()->getSource(addr, port);
 
 		if (!beQuite) {
@@ -610,7 +610,7 @@ public:
 	virtual void onData(ops::Subscriber* const sub, pizza::special::ExtraAllt* const data) override
 	{
 		ops::Address_T addr = "";
-		int port = 0;
+		uint16_t port = 0;
 		sub->getMessage()->getSource(addr, port);
 
 		if (!beQuite) {

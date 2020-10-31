@@ -54,6 +54,7 @@ namespace ops
 		// Used to get the sender IP and port for a received message
 		// Only safe to call in callback, before a new asynchWait() is called.
 		virtual void getSource(Address_T& address, uint16_t& port) = 0;
+        virtual void getSource(uint32_t& address, uint16_t& port) = 0;
 	};
 }
 #endif

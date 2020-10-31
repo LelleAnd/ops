@@ -194,6 +194,12 @@ namespace ops
 			port = sendingEndPoint.port();
 		}
 
+        virtual void getSource(uint32_t& address, uint16_t& port) override
+        {
+            address = sendingEndPoint.address().to_v4().to_uint();
+            port = sendingEndPoint.port();
+        }
+
         size_t bytesAvailable() override
         {
             boost::asio::socket_base::bytes_readable command(true);

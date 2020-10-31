@@ -31,7 +31,6 @@
 
 namespace ops
 {
-    class SendDataHandler;
     class Participant;
 
     class SendDataHandlerFactory
@@ -44,6 +43,10 @@ namespace ops
         std::shared_ptr<SendDataHandler> getSendDataHandler(Topic& top, Participant& participant);
         void releaseSendDataHandler(const Topic& top, Participant& participant);
 
+        // If set, will be called for all unknown transports
+        typedef std::shared_ptr<SendDataHandler>(*snd_factory_t)(Topic top, Participant& part);
+        static void SetBackupHandler(snd_factory_t f);
+
     private:
         std::map<InternalKey_T, std::shared_ptr<SendDataHandler>> sendDataHandlers;
         Lockable mutex;
@@ -52,5 +55,4 @@ namespace ops
     };
 
 }
-
 #endif

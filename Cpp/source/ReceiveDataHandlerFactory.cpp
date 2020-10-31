@@ -34,6 +34,13 @@ namespace ops
 {
     using namespace opsidls;
 
+    static ReceiveDataHandlerFactory::rcv_factory_t backupfact = nullptr;
+
+    void ReceiveDataHandlerFactory::SetBackupHandler(ReceiveDataHandlerFactory::rcv_factory_t f)
+    {
+        backupfact = f;
+    }
+
     ReceiveDataHandlerFactory::ReceiveDataHandlerFactory()
     {
     }
@@ -116,7 +123,15 @@ namespace ops
         }
         else //For now we can not handle more transports
         {
-			//Signal an error by returning nullptr.
+            // See if an installed factory exist
+            if (backupfact != nullptr) {
+                std::shared_ptr<ReceiveDataHandler> rdh = backupfact(top, participant);
+                if (rdh != nullptr) {
+                    receiveDataHandlerInstances[key] = rdh;
+                    return rdh;
+                }
+            }
+            //Signal an error by returning nullptr.
 			ErrorMessage_T msg = "Unknown transport for Topic: ";
 			msg += top.getName();
 			BasicError err("ReceiveDataHandlerFactory", "getReceiveDataHandler", msg);

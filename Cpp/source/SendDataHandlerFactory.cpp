@@ -34,7 +34,14 @@
 namespace ops
 {
 
-	SendDataHandlerFactory::SendDataHandlerFactory() noexcept
+    static SendDataHandlerFactory::snd_factory_t backupfact = nullptr;
+
+    void SendDataHandlerFactory::SetBackupHandler(SendDataHandlerFactory::snd_factory_t f)
+    {
+        backupfact = f;
+    }
+
+    SendDataHandlerFactory::SendDataHandlerFactory() noexcept
 	{
 		// There is only one McUdpSendDataHandler for each participant
 	}
@@ -124,6 +131,13 @@ namespace ops
 		{
 			sdh = std::make_shared<TCPSendDataHandler>(participant.getIOService(), top);
 		}
+        else 
+        {
+            // See if an installed factory exist
+            if (backupfact != nullptr) {
+                sdh = backupfact(top, participant);
+            }
+        }
         if (sdh != nullptr) {
             sendDataHandlers[key] = sdh;
         }

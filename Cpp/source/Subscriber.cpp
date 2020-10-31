@@ -130,7 +130,7 @@ namespace ops
 		//Now lets go on and filter on data content...
 
         OPSObject* const o = message->getData();
-        if (applyFilterQoSPolicies(o))
+        if (applyFilterQoSPolicies(message, o))
         {
             if (timeBaseMinSeparationTime == 0 || TimeHelper::currentTimeMillis() - timeLastDataForTimeBase > timeBaseMinSeparationTime)
             {
@@ -200,23 +200,15 @@ namespace ops
         filterQoSPolicies.remove(fqos);
     }
 
-    bool Subscriber::applyFilterQoSPolicies(OPSObject* const obj)
+    bool Subscriber::applyFilterQoSPolicies(OPSMessage* const message, OPSObject* const obj)
     {
         const SafeLock lock(&filterQoSPolicyMutex);
-        bool ret = true;
-        std::list<FilterQoSPolicy*>::iterator p;
-        p = filterQoSPolicies.begin();
-        while (p != filterQoSPolicies.end())
-        {
-            if (!(*p)->applyFilter(obj))
-            {
-                ret = false;
-                break;
+        for (auto filter : filterQoSPolicies) {
+            if (filter->applyFilter(message, obj) == false) {
+                return false;
             }
-            ++p;
         }
-       
-        return ret;
+        return true;
     }
 
     void Subscriber::setDeadlineQoS(int64_t const millis)

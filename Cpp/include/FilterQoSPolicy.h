@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2020 Lennart Andersson.
 *
 * This notice apply to all source files, *.cpp, *.h, *.java, and *.cs in this directory 
 * and all its subdirectories if nothing else is explicitly stated within the source file itself.
@@ -21,7 +22,6 @@
 * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #ifndef FilterQoSPolicyH
 #define FilterQoSPolicyH
 
@@ -29,7 +29,8 @@ namespace ops
 {
     //Forward declaration
     class OPSObject;
-    
+    class OPSMessage;
+
     class FilterQoSPolicy
     {
     public:
@@ -37,8 +38,13 @@ namespace ops
         ///Returning false from a filter indicates that this data sample (OPSObject)
         ///shall not be propagated to the application layer.
         virtual bool applyFilter(const OPSObject* const o) = 0;
-        
+
+        virtual bool applyFilter(const OPSMessage*, const OPSObject* const o)
+        {
+            return applyFilter(o);
+        }
+
+        virtual ~FilterQoSPolicy() {}
     };
 }
-
 #endif

@@ -199,7 +199,7 @@ namespace ops
         int64_t timeBaseMinSeparationTime = 0;
         int64_t deadlineTimeout = 0;
 
-        bool applyFilterQoSPolicies(OPSObject* o);
+        bool applyFilterQoSPolicies(OPSMessage* message, OPSObject* o);
 
         void cancelDeadlineTimeouts();
 

@@ -5,6 +5,7 @@ set(BUILD_NAME opsidls)
 set(IDL_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/OPSConstants.idl
     ${CMAKE_CURRENT_SOURCE_DIR}/DebugRequestResponseData.idl
+    ${CMAKE_CURRENT_SOURCE_DIR}/SendAckPatternData.idl
     )
 
 # the output files that we want are a several, but we use one for the check

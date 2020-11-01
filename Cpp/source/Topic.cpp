@@ -21,13 +21,22 @@
 
 #include "Topic.h"
 #include "opsidls/OPSConstants.h"
+#include "XMLArchiverIn.h"
 #include "ConfigException.h"
+#include "opsidls/SendAckPatternData.h"
 
 namespace ops
 {
     using namespace opsidls;
 
-	Topic::Topic(ObjectName_T namee, int const portt, TypeId_T typeIDd, Address_T domainAddresss) :
+    Topic::Topic() :
+        participantID(OPSConstants::DEFAULT_PARTICIPANT_ID()),
+        sampleMaxSize(OPSConstants::PACKET_MAX_SIZE)
+    {
+        appendType(TypeId_T("Topic"));
+    }
+
+    Topic::Topic(ObjectName_T namee, int const portt, TypeId_T typeIDd, Address_T domainAddresss) :
 		name(namee), 
 		port(portt), 
 		typeID(typeIDd), 
@@ -37,12 +46,39 @@ namespace ops
 	{
 		appendType(TypeId_T("Topic"));
 	}
-	Topic::Topic() :
-		participantID(OPSConstants::DEFAULT_PARTICIPANT_ID()),
-		sampleMaxSize(OPSConstants::PACKET_MAX_SIZE)
-	{
-		appendType(TypeId_T("Topic"));
-	}
+
+    Topic::Topic(ObjectName_T namee, TypeId_T typeIDd, int sampleMaxSizee, bool useAckk, const Topic& base) :
+        name(namee),
+        port(base.port),
+        timeToLive(base.timeToLive),
+        typeID(typeIDd),
+        domainAddress(base.domainAddress),
+        localInterface(base.localInterface),
+        participantID(base.participantID),
+        domainID(base.domainID),
+        sampleMaxSize(sampleMaxSizee),
+        transport(base.transport),
+        outSocketBufferSize(base.outSocketBufferSize),
+        inSocketBufferSize(base.inSocketBufferSize),
+        useAck(useAckk),
+        optNonVirt(base.optNonVirt),
+        heartbeatPeriod(base.heartbeatPeriod),
+        heartbeatTimeout(base.heartbeatTimeout),
+        resendNum(base.resendNum),
+        resendTimeMs(base.resendTimeMs),
+        channelID(base.channelID)
+    {
+        appendType(TypeId_T("Topic"));
+    }
+
+    // Create ACK topic based on given topic
+    Topic Topic::CreateAckTopic(const Topic& base)
+    {
+        ObjectName_T ackName(base.getName());
+        ackName += "#ack";
+        int ackSampleMaxSize = 1024;
+        return Topic(ackName, opsidls::SendAckPatternData::getTypeName(), ackSampleMaxSize, false, base);
+    }
 
 	void Topic::setParticipantID(ObjectName_T const partID) noexcept
 	{
@@ -150,6 +186,28 @@ namespace ops
 		return heartbeatTimeout;
 	}
 
+    bool Topic::getUseAck() const noexcept
+    {
+        return useAck;
+    }
+    void Topic::setUseAck(bool value) noexcept
+    {
+        useAck = value;
+    }
+
+    int Topic::getNumResends() const noexcept
+    {
+        return resendNum;
+    }
+    int Topic::getResendTimeMs() const noexcept
+    {
+        return resendTimeMs;
+    }
+    int Topic::getRegisterTimeMs() const noexcept
+    {
+        return registerTimeMs;
+    }
+
 	ChannelId_T Topic::getChannelId() const noexcept
 	{
 		return channelID;
@@ -186,7 +244,13 @@ namespace ops
 			msg += "'. Transport for topic must be either 'multicast', 'tcp', 'udp' or left blank( = multicast)";
 			throw ops::ConfigException(msg);
 		}
-	}
+
+        // To not break binary compatibility we only do this when we know we are
+        // reading from an XML-file
+        if (dynamic_cast<XMLArchiverIn*>(archiver) != nullptr) {
+            archiver->inout("useAck", useAck);
+        }
+    }
 
 	Transport_T Topic::TRANSPORT_MC = "multicast";
 	Transport_T Topic::TRANSPORT_TCP = "tcp";

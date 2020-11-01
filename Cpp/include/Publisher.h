@@ -32,6 +32,7 @@
 #include "DebugHandler.h"
 #include "Listener.h"
 #include "ConnectStatus.h"
+#include "Lockable.h"
 
 namespace ops
 {
@@ -56,8 +57,19 @@ public:
 
 	bool writeOPSObject(OPSObject* obj);
 
+    // Ack specifics
+    void AddExpectedAckSender(const char* subkey);
+    bool CheckAckSender(const char* subkey);    // nullptr --> check all
+    void RemoveExpectedAckSender(const char* subkey);
+    void Activate();
+
 protected:
-	bool write(OPSObject* data);
+    int64_t currentPublicationID{ 0 };
+    std::shared_ptr<SendDataHandler> sendDataHandler{ nullptr };
+
+    virtual bool write(OPSObject* data);
+
+    bool writeSerializedBuffer();
 
 	// Called from SendDataHandler (TCPServer)
 	virtual void onNewEvent(Notifier<ConnectStatus>* sender, ConnectStatus arg) override
@@ -69,19 +81,18 @@ protected:
 
 private:
     Topic topic;
-
 	MemoryMap memMap;
-
-    std::shared_ptr<SendDataHandler> sendDataHandler{ nullptr };
+    ByteBuffer buf;
 
 	OPSMessage message;
  
     Participant* participant{ nullptr };
 
-    int64_t currentPublicationID{ 0 };
 	ObjectName_T name;
     ObjectKey_T key;
-	
+
+    bool started{ false };
+
 #ifdef OPS_ENABLE_DEBUG_HANDLER
     volatile int64_t _dbgSkip{ 0 };
 	Lockable _dbgLock;
@@ -89,6 +100,15 @@ private:
 	virtual void onRequest(opsidls::DebugRequestResponseData& req, opsidls::DebugRequestResponseData& resp) override;
 	bool internalWrite(OPSObject* data);
 #endif
+
+    // Ack specifics
+    struct AckSubscriber;
+    AckSubscriber* _ackSub{ nullptr };
+    Lockable _pubLock;
+    int64_t _ackTimeout{ 0 };
+    const int64_t _ackTimeoutInc;
+    int _resendsLeft{ 0 };
+    bool resendLatest();
 
 public:
 	//Send behavior parameters

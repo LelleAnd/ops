@@ -64,6 +64,9 @@ namespace ops
         // reading from an XML-file
         if (dynamic_cast<XMLArchiverIn*>(archiver) != nullptr) {
             archiver->inout("sampleMaxSize", sampleMaxSize);
+            archiver->inout("resendNum", resendNum);
+            archiver->inout("resendTimeMs", resendTimeMs);
+            archiver->inout("registerTimeMs", registerTimeMs);
         }
     }
 
@@ -81,6 +84,11 @@ namespace ops
         top.setInSocketBufferSize(inSocketBufferSize);
         top.setTimeToLive(timeToLive);
         top.channelID = channelID;
+        top.resendNum = resendNum;
+        top.resendTimeMs = resendTimeMs;
+        top.registerTimeMs = registerTimeMs;
+
+        // sampleMaxSize is only replaced in topics if it is specified for the channel
         if (sampleMaxSize >= 0) {
             top.setSampleMaxSize(sampleMaxSize);
         }

@@ -1,0 +1,13 @@
+package opsidls;
+
+//@toplevel = false
+class SendAckPatternData
+{
+    enum MType {ACK, REGISTER, UNREGISTER};
+    MType messageType;
+
+    /* Valid for ACK type, source IP/Port is the sender of the data we acknowledge */
+    int   sourceIP;
+    short sourcePort;
+    long  publicationID;
+}

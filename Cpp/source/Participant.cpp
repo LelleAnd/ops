@@ -426,7 +426,7 @@ namespace ops
 		Topic topic = domain->getTopic(name);
 		topic.setParticipantID(participantID);
 		topic.setDomainID(domainID);
-		topic.participant = this;
+//		topic.participant = this;
 
 		return topic;
 	}

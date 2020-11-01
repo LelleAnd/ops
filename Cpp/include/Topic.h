@@ -41,8 +41,12 @@ namespace ops
 
         static const char Topic_idlVersion = 0;
 
+        Topic();
         Topic(ObjectName_T namee, int portt, TypeId_T typeIDd, Address_T domainAddresss);
-		Topic();
+        Topic(ObjectName_T namee, TypeId_T typeIDd, int sampleMaxSize, bool useAck, const Topic& base);
+
+        // Create ACK topic based on given topic
+        static Topic CreateAckTopic(const Topic& base);
 
 		void setDomainID(ObjectName_T domID) noexcept;
 		ObjectName_T getDomainID() const noexcept;
@@ -84,10 +88,16 @@ namespace ops
 		int getHeartbeatTimeout() const noexcept;
 		ChannelId_T getChannelId() const noexcept;
 
-		Participant* getParticipant() const noexcept
-		{
-			return participant;
-		}
+        bool getUseAck() const noexcept;
+        void setUseAck(bool value) noexcept;
+        int getNumResends() const noexcept;
+        int getResendTimeMs() const noexcept;
+        int getRegisterTimeMs() const noexcept;
+
+//		Participant* getParticipant() const noexcept
+//		{
+//			return participant;
+//		}
 
 		static Transport_T TRANSPORT_MC;
 		static Transport_T TRANSPORT_TCP;
@@ -108,11 +118,22 @@ namespace ops
         int64_t outSocketBufferSize{ -1 };	// Serialized
         int64_t inSocketBufferSize{ -1 };	// Serialized
 
-        Participant* participant{ nullptr };
-	
+        bool useAck{ false };               // Serialized from XML-files only
+
+///        Participant* participant{ nullptr };
+
+        // Replaced by values from Domain when getting Topic
         bool optNonVirt{ false };
         int heartbeatPeriod{ 0 };
         int heartbeatTimeout{ 0 };
+
+        // Replaced by values from Channel if specified there,
+        // otherwise from Domain when getting Topic
+        int resendNum{ -1 };
+        int resendTimeMs{ -1 };
+        int registerTimeMs{ -1 };
+
+        // Set when created from a channel
 		ChannelId_T channelID;
 	};
 }

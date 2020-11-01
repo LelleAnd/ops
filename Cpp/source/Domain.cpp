@@ -45,7 +45,10 @@ void Domain::checkTopicValues(Topic* const top) const
 	if (top->getTimeToLive() < 0) { top->setTimeToLive(timeToLive); }
 	if (top->getInSocketBufferSize() < 0) { top->setInSocketBufferSize(inSocketBufferSize); }
 	if (top->getOutSocketBufferSize() < 0) { top->setOutSocketBufferSize(outSocketBufferSize); }
-	top->optNonVirt = optNonVirt;
+    if (top->resendNum < 0) { top->resendNum = resendNum; }
+    if (top->resendTimeMs < 0) { top->resendTimeMs = resendTimeMs; }
+    if (top->registerTimeMs < 0) { top->registerTimeMs = registerTimeMs; }
+    top->optNonVirt = optNonVirt;
 	top->heartbeatPeriod = heartbeatPeriod;
 	top->heartbeatTimeout = heartbeatTimeout;
 }
@@ -119,7 +122,10 @@ void Domain::serialize(ArchiverInOut* const archiver)
 		archiver->inout("optNonVirt", optNonVirt);
 		archiver->inout("heartbeatPeriod", heartbeatPeriod);
 		archiver->inout("heartbeatTimeout", heartbeatTimeout);
-		checkTransports();
+        archiver->inout("resendNum", resendNum);
+        archiver->inout("resendTimeMs", resendTimeMs);
+        archiver->inout("registerTimeMs", registerTimeMs);
+        checkTransports();
 	}
 }
 

@@ -49,10 +49,13 @@
 #endif
 #define OPS_NOTRACE(msg) 
 
+#define OPS_ACK_TRACE(msg)  { OPS_TRACE("ACK: " << msg); }
 #define OPS_DES_TRACE(msg)  { OPS_NOTRACE("DES: " << msg); }
 #define OPS_OBJ_TRACE(msg) { OPS_NOTRACE("OBJ: " << msg); }
-#define OPS_TCP_TRACE(msg) { OPS_NOTRACE("TCP: " << msg); }
 #define OPS_PIFO_TRACE(msg) { OPS_NOTRACE("PIFO: " << msg); }
+#define OPS_TCP_TRACE(msg) { OPS_NOTRACE("TCP: " << msg); }
+
+#define OPS_ACK_ERROR(msg)  { OPS_TRACE("ACK: " << msg); }
 #define OPS_TCP_ERROR(msg)  { OPS_TRACE("TCP: " << msg); }
 #define OPS_UDP_ERROR(msg)  { OPS_TRACE("UDP: " << msg); }
 

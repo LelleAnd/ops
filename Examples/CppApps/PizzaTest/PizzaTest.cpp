@@ -126,6 +126,7 @@ public:
 	virtual void StartSubscriber() = 0;
 	virtual void StopSubscriber() = 0;
 	virtual void SetDeadlineQos(int64_t timeoutMs) = 0;
+    virtual void Activate() = 0;
 	virtual ~IHelper() {};
 	IHelper() = default;
 	IHelper(IHelper const&) = delete;
@@ -237,7 +238,7 @@ public:
 					;
 
 				//Create a publisher on that topic
-				pub = new DataTypePublisher(topic);
+                pub = new DataTypePublisher(topic);
 				pub->addListener(this);
 
 				std::ostringstream myStream;
@@ -290,7 +291,7 @@ public:
             try {
                 if (other == nullptr) {
                     WriteUpdate(data, message);
-#ifdef NOT_USED_NOW
+#ifdef TRUE
                     res = pub->writeOPSObject(&data);     // Write using pointer
 #else
                     res = pub->write(data);               // Write using ref
@@ -335,6 +336,14 @@ public:
 
 				//Create a subscriber on that topic.
 				sub = new DataTypeSubscriber(topic);
+
+                std::ostringstream myStream;
+#ifdef _WIN32
+                myStream << " Win(" << _getpid() << ")" << std::ends;
+#else
+                myStream << " Linux(" << getpid() << ")" << std::ends;
+#endif
+                sub->setName(std::string("C++Test " + myStream.str()).c_str());
 
 				// Setup listeners
 #ifdef USE_LAMDAS
@@ -483,10 +492,16 @@ public:
 	}
 #endif
 
+    virtual void Activate()
+    {
+        if (pub != nullptr) { pub->Activate(); }
+        if (sub != nullptr) { sub->Activate(); }
+    }
+
 private:
 	CHelperListener<DataType>* client;
 	DataTypePublisher* pub;
-	ops::Subscriber* sub;
+    ops::Subscriber* sub;
 };
 
 typedef CHelper<pizza::PizzaData, pizza::PizzaDataPublisher, pizza::PizzaDataSubscriber> TPizzaHelper;
@@ -656,6 +671,14 @@ private:
 	}
 };
 #endif
+
+void ActivateAll()
+{
+    for (unsigned int i = 0; i < ItemInfoList.size(); i++) {
+        ItemInfo* const info = ItemInfoList[i];
+        info->helper->Activate();
+    }
+}
 
 void WriteToAllSelected(ops::OPSObject* const other = nullptr)
 {
@@ -907,6 +930,8 @@ int main(const int argc, const char* argv[])
 
 	while (!doExit) {
 		std::cout << std::endl << " (? = menu) > ";
+
+        ActivateAll();
 
 		// Repeated sends
 		if (doPeriodicSend || doPartPolling) {

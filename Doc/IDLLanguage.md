@@ -166,7 +166,7 @@ There is a special form of comments that is used to give instructions to the OPS
 | Directive | Values | Default | Applies to | Description |
 |-----------|--------|---------|------------|-------------|
 | toplevel  | true / false | true | class | Publishers/Subscribers are only generated for toplevel classes. This directive is currently only supported for Ada, C++ and Java. |
-| nofactory | - | - | class | Class is only ment to be a base class in a class hierarchy, so don't generate factory code for it (i.e. an object of this type can't be created by the OPS factory and therfore no field can be of this type). This also implies that the *toplevel* directive is false. |
+| nofactory | - | - | class | Class is only ment to be a base class in a class hierarchy, so don't generate factory code for it (i.e. an object of this type can't be created by the OPS factory and therefore no field can be of this type). This also implies that the *toplevel* directive is false. |
 | onlydefinition | - | - | class | Class only contains definitions (constants and enums) and should not be part of data objects published. Useful for defining common constants and enums. |
 | version   | number | - | field | The field is only valid for versions >= 'number'. Valid range for 'number' is 0..255. Several version directives can be given for a field. See also [version handling](VersionHandling.md) of IDLs. |
 | version   | number range | - | field | The field is only valid for the range: 'low' <= version <= 'high'. Several version directives can be given for a field. See also [version handling](VersionHandling.md) of IDLs. |

@@ -26,6 +26,7 @@
 #include "ParticipantInfoData.h"
 #include "PubIdChecker.h"
 #include "opsidls/DebugRequestResponseData.h"
+#include "opsidls/SendAckPatternData.h"
 #include "NetworkSupport.h"
 #include "Publisher.h"
 
@@ -39,7 +40,7 @@
 
 #endif
 
-const char c_program_version[] = "OPSListener Version 2020-09-27";
+const char c_program_version[] = "OPSListener Version 2020-10-18";
 
 void showDescription()
 {
@@ -768,7 +769,7 @@ public:
 			}
 		}
 
-		// Handle case where we are requested to listen to deug Request/Response data from all existing domains
+		// Handle case where we are requested to listen to debug Request/Response data from all existing domains
 		if (args.allDebugDomains) {
 			// Replace args.debugDomains with all known domains in configuration files
 			opsHelper.getAvailableDomains(args.debugDomains);
@@ -876,6 +877,10 @@ public:
 
 			LogTopic(ops::utilities::domainName(topName), topic);
 
+            // We don't want to be part of the ACK handling, we just listen to topics
+            bool useAck = topic.getUseAck();
+            topic.setUseAck(false);
+
 			ops::Subscriber* const sub = new ops::Subscriber(topic);
 			sub->addDataListener(this);
 			sub->addListener(this);
@@ -887,6 +892,16 @@ public:
 				pubIdMap[sub] = new ops::PublicationIdChecker();
 				pubIdMap[sub]->addListener(this);
 			}
+
+            if (useAck) {
+                // Add subscriber for the ACK's to this Topic
+                Topic ackTopic(Topic::CreateAckTopic(topic));
+                LogTopic(ops::utilities::domainName(topName), ackTopic);
+                ops::Subscriber* const subAck = new ops::Subscriber(ackTopic);
+                subAck->addDataListener(this);
+                subAck->start();
+                vSubs.push_back(subAck);
+            }
 		}
 
 		// Create subscribers to all DebugRequestResponseData
@@ -1137,7 +1152,35 @@ public:
 			break;
 		}
 	}
-	void ShowDebugMessage(const TEntry& ent, const ops::OPSMessage* const mess, const opsidls::DebugRequestResponseData* const data) const
+    void ShowAckMessage(const TEntry& ent, const ops::OPSMessage* const mess, const opsidls::SendAckPatternData* const data) const
+    {
+        if (logTime) {
+            std::cout << "[" << sds::sdsSystemTimeToLocalTime(ent.time) << "] ";
+        }
+        ops::Address_T addr;
+        uint16_t port;
+        mess->getSource(addr, port);
+
+        switch (data->messageType) {
+        case opsidls::SendAckPatternData::MType::ACK :
+            /* Valid for ACK type, source IP/Port is the sender of the data we acknowledge */
+            //int   sourceIP;
+            //short sourcePort;
+            //long  publicationID;
+            std::cout << "ACK from '" << mess->getPublisherName() << "', " << addr << "::" << port << 
+                " on topic '" << mess->getTopicName() << ", PubId: " << data->publicationID << "'\n";
+            break;
+        case opsidls::SendAckPatternData::MType::REGISTER :
+            std::cout << "REGISTER from '" << mess->getPublisherName() << "', " << addr << "::" << port << 
+                " on topic '" << mess->getTopicName() << "'\n";
+            break;
+        case opsidls::SendAckPatternData::MType::UNREGISTER :
+            std::cout << "UNREGISTER from '" << mess->getPublisherName() << "', " << addr << "::" << port << 
+                " on topic '" << mess->getTopicName() << "'\n";
+            break;
+        }
+    }
+    void ShowDebugMessage(const TEntry& ent, const ops::OPSMessage* const mess, const opsidls::DebugRequestResponseData* const data) const
 	{
 		// Show Debug Request/Response data
 		std::string str = "";
@@ -1262,6 +1305,7 @@ public:
 			ops::OPSObject* opsData = nullptr;
 			ops::ParticipantInfoData* piData = nullptr;
 			opsidls::DebugRequestResponseData* debugData = nullptr;
+            opsidls::SendAckPatternData* ackData = nullptr;
 
 			ListLock.lock();
 			if (List.size() > 0) {
@@ -1277,6 +1321,7 @@ public:
 
 			piData = dynamic_cast<ops::ParticipantInfoData*>(opsData);
 			debugData = dynamic_cast<opsidls::DebugRequestResponseData*>(opsData);
+            ackData = dynamic_cast<opsidls::SendAckPatternData*>(opsData);
 
 			if (piData != nullptr) {
 				// Show Participant Info
@@ -1285,7 +1330,10 @@ public:
 			} else if (debugData != nullptr) {
 				ShowDebugMessage(ent, mess, debugData);
 
-			} else {
+            } else if (ackData != nullptr) {
+                ShowAckMessage(ent, mess, ackData);
+
+            } else {
 				// Ordinary Topic
 				std::string str = "";
 				if (logTime) {
@@ -1298,9 +1346,11 @@ public:
 					std::cout << str << std::endl;
 				}
                 // Dump OPSData->spareBytes content in hex
-                dumpHex(&opsData->spareBytes[0], opsData->spareBytes.size());
+                if (opsData->spareBytes.size() > 0) {
+                    dumpHex(&opsData->spareBytes[0], opsData->spareBytes.size());
+                }
                 // Dump OPSData->spareBytes content in clear text
-                if (MsgDump.Any()) {
+                if (MsgDump.Any() && (opsData->spareBytes.size() > 0)) {
                     std::string tname = opsData->getTypeString().c_str();
                     // Skip ev leading spaces
                     std::string::size_type const idx = tname.find_first_not_of(' ');

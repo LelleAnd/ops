@@ -23,6 +23,8 @@
 #include "Listener.h"
 #include "BytesSizePair.h"
 #include "ConnectStatus.h"
+#include "UDPReceiver.h"
+#include "TCPClient.h"
 
 class MyBSPListener : public ops::Listener<ops::BytesSizePair>
 {

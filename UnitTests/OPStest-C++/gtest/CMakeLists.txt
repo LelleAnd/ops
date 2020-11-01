@@ -15,6 +15,8 @@ set(APP_SRCS
   listener_helpers.h
   Lockable_test.cpp
   MemoryMap_test.cpp
+  MocSendReceiveDataHelpers.cpp
+  MocSendReceiveDataHelpers.h
   NotifierListener_test.cpp
   ObjectFactory_test.cpp
   OpsConfigObjects_test.cpp
@@ -25,13 +27,15 @@ set(APP_SRCS
   OPSUtilities_test.cpp
   ParticipantInfo_test.cpp
   PubIdChecker_test.cpp
+  Publisher_test.cpp
+  PubSub_Test.cpp
   RAII_ioServ.h
   Reservable_test.cpp
   SerDesObjects.h
   Serialization_test.cpp
   SetupOPSConfig.cpp
   SetupOPSConfig.h
-##  socket_tcp_test.cpp
+  Subscriber_test.cpp
   TCPOpsProtocol_test.cpp
   ThreadPool_test.cpp
 )

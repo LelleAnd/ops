@@ -62,7 +62,7 @@ TEST(Test_OPSConfigObjects, TestTopic) {
 	EXPECT_STREQ(obj1.getTransport().c_str(), "");
 	//outsocketbuffersize
 	//insocketbuffersize
-	EXPECT_EQ(obj1.getParticipant(), nullptr);
+///	EXPECT_EQ(obj1.getParticipant(), nullptr);
 
 	// SetSampleMaxSize
 	obj1.setSampleMaxSize(789789);
@@ -85,7 +85,7 @@ TEST(Test_OPSConfigObjects, TestTopic) {
 	EXPECT_STREQ(obj2.getTransport().c_str(), "");
 	//outsocketbuffersize
 	//insocketbuffersize
-	EXPECT_EQ(obj2.getParticipant(), nullptr);
+///	EXPECT_EQ(obj2.getParticipant(), nullptr);
 }
 
 TEST(Test_OPSConfigObjects, TestTopic_Serialize) {

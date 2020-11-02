@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -24,38 +24,16 @@
 namespace ops
 {
     
-    DataNotifier::~DataNotifier()
-    {
-    }
+    DataNotifier::~DataNotifier() {}
     
     void DataNotifier::notifyNewData()
     {
-        for(unsigned int i = 0; i < listeners.size() ; i++) {
-            listeners[i]->onNewData(this);
-        }
-        for(unsigned int i = 0; i < callbackListeners.size() ; i++) {
-            TEntry& ent = callbackListeners[i];
-            ent.func(this, ent.userData);
-        }
         for (unsigned int i = 0; i < closureListeners.size(); i++) {
             closureListeners[i](this);
         }
     }
 
-    void DataNotifier::addDataListener(DataListener* listener)
-    {
-        listeners.push_back(listener);
-    }
-    
-    void DataNotifier::addDataListener(CallbackFunc func, void* userData)
-    {
-        TEntry ent;
-        ent.func = func;
-        ent.userData = userData;
-        callbackListeners.push_back(ent);
-    }
-
-    void DataNotifier::addDataListener(std::function<void(ops::DataNotifier* sender)> callback)
+    void DataNotifier::addDataListener(std::function<void(DataNotifier* sender)> callback)
     {
         closureListeners.push_back(callback);
     }

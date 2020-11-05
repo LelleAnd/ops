@@ -196,7 +196,7 @@ namespace ops
 
         virtual void getSource(uint32_t& address, uint16_t& port) override
         {
-            address = sendingEndPoint.address().to_v4().to_uint();
+            address = sendingEndPoint.address().to_v4().to_ulong();
             port = sendingEndPoint.port();
         }
 

@@ -127,7 +127,7 @@ namespace ops
 				boost::asio::ip::tcp::endpoint localEndPoint;
 				localEndPoint = _acceptor->local_endpoint(error);
 				address = localEndPoint.address().to_string().c_str();
-                addressHost = localEndPoint.address().to_v4().to_uint();
+                addressHost = localEndPoint.address().to_v4().to_ulong();
 				port = localEndPoint.port();
 			}
 		};

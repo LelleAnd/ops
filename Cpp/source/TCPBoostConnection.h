@@ -127,7 +127,7 @@ namespace ops
 				boost::asio::ip::tcp::endpoint sendingEndPoint;
 				sendingEndPoint = _sock->remote_endpoint(error);
 				if (!error) {
-                    _remoteAddressHost = sendingEndPoint.address().to_v4().to_uint();
+                    _remoteAddressHost = sendingEndPoint.address().to_v4().to_ulong();
 					_remoteAddress = sendingEndPoint.address().to_string().c_str();
 					_remotePort = sendingEndPoint.port();
 				}

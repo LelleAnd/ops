@@ -57,7 +57,7 @@ namespace ops
         virtual bool sendTo(const char* buf, const int size, const Address_T& ip, const uint16_t port) override;
         virtual uint16_t getLocalPort() override {return socket->local_endpoint().port();};
         virtual Address_T getLocalAddress() override {return socket->local_endpoint().address().to_string().c_str();};
-        virtual uint32_t getLocalAddressHost() override { return socket->local_endpoint().address().to_v4().to_uint(); };
+        virtual uint32_t getLocalAddressHost() override { return socket->local_endpoint().address().to_v4().to_ulong(); };
 
     private:
         ///This UDPSender wraps boost socket functionality.

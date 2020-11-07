@@ -14,6 +14,8 @@ INSTALL_PREFIX?=$(CURDIR)/deploy$(DEPLOY_SUFFIX)
 OPS_BUILD_UNITTESTS?=ON
 OPS_BUILD_EXAMPLES?=ON
 
+BOOST_ARCH?=
+
 # Common defines
 CCV=$(shell $(CC) -dumpversion)
 CXXV=$(shell $(CXX) -dumpversion)
@@ -21,7 +23,8 @@ CXXV=$(shell $(CXX) -dumpversion)
 COMMON_DEFINES_FOR_CMAKE= \
 			-DCMAKE_INSTALL_PREFIX=$(INSTALL_PREFIX) \
 			-DOPS_BUILD_UNITTESTS=$(OPS_BUILD_UNITTESTS) \
-			-DOPS_BUILD_EXAMPLES=$(OPS_BUILD_EXAMPLES)
+			-DOPS_BUILD_EXAMPLES=$(OPS_BUILD_EXAMPLES) \
+			-DBOOST_ARCH=$(BOOST_ARCH)
 
 ## Rules
 
@@ -95,7 +98,9 @@ $(BUILD_DEBUG)/Makefile : %/Makefile : bootstrap
 	cmake -DCMAKE_BUILD_TYPE=Debug $(COMMON_DEFINES_FOR_CMAKE) $(CURDIR)
 
 .PHONY : unittest-c++
-unittest-c++ : debug
+unittest-c++ : debug run-unittest-c++
+
+run-unittest-c++:
 	@echo "Running C++ unit tests!!!"
 	cd UnitTests/OPStest-C++ && \
 	./pizzatest.sh

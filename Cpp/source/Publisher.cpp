@@ -70,7 +70,7 @@ namespace ops
                         // If it's an expected subscribers, set mark
                         auto ent = _expectedSub.find(subName);
                         if (ent != _expectedSub.end()) {
-                            _expectedSub[subName] = true;
+                            _expectedSub[subName].ack();
                         }
                         OPS_ACK_TRACE(topic.getName() << ": CORRECT ACK from subscriber " << subName << "\n");
                     } else {
@@ -113,11 +113,11 @@ namespace ops
 
         typedef std::pair<uint32_t, uint16_t> MyKey_t;
         struct entry_t {
-            bool acked = false;
-            int32_t failed = 0;
-            void ack() { acked = true; failed = 0; }
+            bool acked{ false };
+            int32_t failed{ 0 };
+            void ack() { acked = true; }
         };
-        std::map<ObjectName_T, bool> _expectedSub;
+        std::map<ObjectName_T, entry_t> _expectedSub;
         std::map<MyKey_t, entry_t> _map;
         int64_t _lastSentPubId{ -1 };
         Publisher* _owner{ nullptr };
@@ -271,10 +271,13 @@ namespace ops
                 element.second.acked = false;
             }
             for (auto& element : _ackSub->_expectedSub) {
-                element.second = false;
+                element.second.acked = false;
             }
             _ackSub->_owner = this;
             _ackSub->_lastSentPubId = currentPublicationID;   // Will be sent with this number below
+            _sendState = SendState::sending;
+        } else {
+            _sendState = SendState::acked;
         }
 
         SafeLock lck(&_pubLock);
@@ -326,7 +329,6 @@ namespace ops
         if (_ackSub->_lastSentPubId < 0) { return true; }
         SafeLock lck(&_pubLock);
         bool res = writeSerializedBuffer();
-        --_resendsLeft;
         return res;
     }
 
@@ -336,7 +338,7 @@ namespace ops
         if (_ackSub == nullptr) { return; }
         // Add Subscriber to expected ACK senders
         MessageLock lck(*_ackSub);
-        _ackSub->_expectedSub[subkey] = false;
+        _ackSub->_expectedSub[subkey].acked = false;
     }
 
     // nullptr check all
@@ -346,13 +348,13 @@ namespace ops
         MessageLock lck(*_ackSub);
         if (subkey == nullptr) {
             for (auto& x : _ackSub->_expectedSub) {
-                if (x.second == false) return false;
+                if (!x.second.acked) { return false; }
             }
             return true;
         } else {
             for (auto& x : _ackSub->_expectedSub) {
                 if (x.first == ObjectName_T(subkey)) {
-                    if (x.second == true) return true;
+                    if (x.second.acked) { return true; }
                 }
             }
             return false;
@@ -372,44 +374,46 @@ namespace ops
     {
         if (_ackSub == nullptr) { return; }
 
-        //If haven't sent anything yet or all is ACKED/no more resends, return 
-        if (_resendsLeft <= 0) { return; }
+        //If we haven't sent anything yet or all is ACKED/no more resends, return
+        if (_resendsLeft < 0) { return; }
 
         if (_ackTimeout > TimeHelper::currentTimeMillis()) { return; }
 
         // If message isn't ACK'ed from all expected ACK senders, resend message with same Pub Id Counter
         bool resend = false;
-        bool failed_ack = false;
         {
             MessageLock lck(*_ackSub);
             // Check if any of the expected hasn't responded to us
-            for (auto& x : _ackSub->_expectedSub) {
-                if (x.second == false) {
+            for (auto& element : _ackSub->_expectedSub) {
+                AckSubscriber::entry_t& ent = element.second;
+                if (!ent.acked) {
+                    ++ent.failed;
                     resend = true;
                 }
             }
             // Also check all that has registered with us
             for (auto& element : _ackSub->_map) {
-                // Inc failed counter for each non acked case
                 AckSubscriber::entry_t& ent = element.second;
-                if (ent.acked == false) {
-                    if (++ent.failed > topic.getNumResends()) {
-                        // Too many failed acks
-                        failed_ack = true;
-                    } else {
-                        resend = true;
-                    }
+                if (!ent.acked) {
+                    ++ent.failed;
+                    resend = true;
                 }
             }
         }
         if (resend) {
-            resendLatest();
+            if (_resendsLeft == 0) {
+                // Failed to get ACK from all, within number of configured ACK's
+                _sendState = SendState::failed;
+                OPS_ACK_TRACE("ACK FAILED (no more resends)\n");
+            } else {
+                resendLatest();
+                OPS_ACK_TRACE("RESEND\n");
+            }
+            --_resendsLeft;
         } else {
-            _resendsLeft = 0;
+            _sendState = SendState::acked;
+            _resendsLeft = -1;
             OPS_ACK_TRACE("DATA FULLY ACKED (no more resends)\n");
-        }
-        if (failed_ack) {
-            OPS_ACK_ERROR("At least one subscriber failed to ACK\n");
         }
     }
 

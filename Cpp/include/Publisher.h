@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <atomic>
+
 #include "OPSTypeDefs.h"
 #include "OPSObject.h"
 #include "OPSMessage.h"
@@ -61,7 +63,17 @@ public:
     void AddExpectedAckSender(const char* subkey);
     bool CheckAckSender(const char* subkey);    // nullptr --> check all
     void RemoveExpectedAckSender(const char* subkey);
+
+    // Need to be called periodically to do resends and update SendState
     void Activate();
+
+    enum class SendState : uint8_t {
+        init,       // Before anything is published
+        sending,    // When Ack is enabled, and waiting for Ack's and doing resends
+        acked,      // Message sent and acked (if Ack is enabled)
+        failed      // When Ack is enabled, and at least one expected Ack sender failed to send Ack after x resends
+    };
+    SendState getSendState() { return _sendState; }
 
 protected:
     int64_t currentPublicationID{ 0 };
@@ -105,10 +117,11 @@ private:
     struct AckSubscriber;
     AckSubscriber* _ackSub{ nullptr };
     Lockable _pubLock;
-    int64_t _ackTimeout{ 0 };
+    std::atomic<int64_t> _ackTimeout{ 0 };
     const int64_t _ackTimeoutInc;
-    int _resendsLeft{ 0 };
+    std::atomic<int> _resendsLeft{ -1 };
     bool resendLatest();
+    SendState _sendState{ SendState::init };
 
 public:
 	//Send behavior parameters

@@ -194,12 +194,12 @@ namespace ops
         }
 
     private:
-        uint32_t _serverIPHost;
-        uint16_t _serverPort;
+        uint32_t _serverIPHost{ 0 };
+        uint16_t _serverPort{ 0 };
 		Address_T _serverIP;
-		int _outSocketBufferSize;
-		boost::asio::ip::tcp::endpoint* _endpoint;		// The local port to bind to.
-		boost::asio::io_service* _ioService;			// Boost io_service handles the asynchronous operations on the sockets
+        int _outSocketBufferSize{ 0 };
+        boost::asio::ip::tcp::endpoint* _endpoint{ nullptr };   // The local port to bind to.
+        boost::asio::io_service* _ioService{ nullptr };         // Boost io_service handles the asynchronous operations on the sockets
 
 		std::shared_ptr<impl> _server;
     };

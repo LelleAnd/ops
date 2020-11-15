@@ -82,10 +82,14 @@ TEST(Test_Publisher, TestBasics) {
         pub.setKey("sun");
         EXPECT_STREQ(pub.getKey().c_str(), "sun");
 
+        EXPECT_EQ(pub.getSendState(), ops::Publisher::SendState::init);
+
         ops::OPSObject obj;
         EXPECT_EQ(sdh->send_cnt, 0);
         EXPECT_TRUE(pub.writeOPSObject(&obj));
         EXPECT_EQ(sdh->send_cnt, 1);
+
+        EXPECT_EQ(pub.getSendState(), ops::Publisher::SendState::acked);
     }
 }
 
@@ -117,16 +121,21 @@ TEST(Test_Publisher, TestResends) {
         EXPECT_EQ(rdh->ss_cnt, 1);
         EXPECT_STREQ(rdh->topic.getName().c_str(), "TestTopic2#ack");
 
+        EXPECT_EQ(pub.getSendState(), ops::Publisher::SendState::init);
+
         // Send data with no expected ACK's
         EXPECT_EQ(sdh->send_cnt, 0);
         EXPECT_TRUE(pub.writeOPSObject(&obj));
         EXPECT_EQ(sdh->send_cnt, 1);
+
+        EXPECT_EQ(pub.getSendState(), ops::Publisher::SendState::sending);
 
         for (int i = 0; i < 10; i++) {
             std::this_thread::sleep_for(std::chrono::milliseconds(20));
             pub.Activate();
         }
         EXPECT_EQ(sdh->send_cnt, 1);
+        EXPECT_EQ(pub.getSendState(), ops::Publisher::SendState::acked);
 
         // Check without any added 
         EXPECT_FALSE(pub.CheckAckSender("sub-one"));
@@ -141,6 +150,7 @@ TEST(Test_Publisher, TestResends) {
         // Send data with expected ACK's
         EXPECT_TRUE(pub.writeOPSObject(&obj));
         EXPECT_EQ(sdh->send_cnt, 2);
+        EXPECT_EQ(pub.getSendState(), ops::Publisher::SendState::sending);
 
         for (int i = 0; i < 10; i++) {
             std::this_thread::sleep_for(std::chrono::milliseconds(20));
@@ -148,6 +158,7 @@ TEST(Test_Publisher, TestResends) {
         }
 
         EXPECT_EQ(sdh->send_cnt, 7);
+        EXPECT_EQ(pub.getSendState(), ops::Publisher::SendState::failed);
 
         EXPECT_FALSE(pub.CheckAckSender("sub-one"));
         EXPECT_FALSE(pub.CheckAckSender(nullptr));

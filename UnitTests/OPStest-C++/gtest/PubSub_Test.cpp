@@ -159,6 +159,8 @@ protected:
 
 TEST_F(Test_PubSub, TestNormal) {
 
+    EXPECT_EQ(pub->getSendState(), ops::Publisher::SendState::init);
+
     // --------------------------------------------------------------------------------
     // Write normal 
     // Publish some data, should result in an ack from the subscriber
@@ -170,12 +172,14 @@ TEST_F(Test_PubSub, TestNormal) {
     EXPECT_EQ(sub_sdh->send_cnt, 1);
     EXPECT_EQ(pub_rdh->rcv_cnt, 1);
     EXPECT_TRUE(pub->CheckAckSender("sub-one"));
+    EXPECT_EQ(pub->getSendState(), ops::Publisher::SendState::sending);
 
     // Check work in publisher
     for (int i = 0; i < 3; i++) {
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
         pub->Activate();
     }
+    EXPECT_EQ(pub->getSendState(), ops::Publisher::SendState::acked);
 
     // Check data incl. PubId
     EXPECT_EQ(sub->getMessage()->getPublicationID(), 0);
@@ -184,6 +188,8 @@ TEST_F(Test_PubSub, TestNormal) {
 }
 
 TEST_F(Test_PubSub, TestLostData) {
+
+    EXPECT_EQ(pub->getSendState(), ops::Publisher::SendState::init);
 
     // --------------------------------------------------------------------------------
     // Write simulating lost publications
@@ -197,6 +203,7 @@ TEST_F(Test_PubSub, TestLostData) {
     EXPECT_EQ(sub_sdh->send_cnt, 0);
     EXPECT_EQ(pub_rdh->rcv_cnt, 0);
     EXPECT_FALSE(pub->CheckAckSender("sub-one"));
+    EXPECT_EQ(pub->getSendState(), ops::Publisher::SendState::sending);
 
     // Each call to Activate should be a resend (time > 10 ms default resendTimeout)
     std::this_thread::sleep_for(std::chrono::milliseconds(20));
@@ -209,6 +216,7 @@ TEST_F(Test_PubSub, TestLostData) {
     EXPECT_EQ(sub_sdh->send_cnt, 0);
     EXPECT_EQ(pub_rdh->rcv_cnt, 0);
     EXPECT_FALSE(pub->CheckAckSender("sub-one"));
+    EXPECT_EQ(pub->getSendState(), ops::Publisher::SendState::sending);
 
     // Connect data again
     pub_sdh->forward = true;
@@ -217,6 +225,14 @@ TEST_F(Test_PubSub, TestLostData) {
     // (time > 10 ms default resendTimeout)
     std::this_thread::sleep_for(std::chrono::milliseconds(20));
     pub->Activate();
+
+    EXPECT_EQ(pub_sdh->send_cnt, 4);
+    EXPECT_EQ(sub_rdh->rcv_cnt, 1);
+    EXPECT_EQ(sub_sdh->send_cnt, 1);
+    EXPECT_EQ(pub_rdh->rcv_cnt, 1);
+    EXPECT_TRUE(pub->CheckAckSender("sub-one"));
+    EXPECT_EQ(pub->getSendState(), ops::Publisher::SendState::sending);
+
     std::this_thread::sleep_for(std::chrono::milliseconds(20));
     pub->Activate();
 
@@ -225,6 +241,7 @@ TEST_F(Test_PubSub, TestLostData) {
     EXPECT_EQ(sub_sdh->send_cnt, 1);
     EXPECT_EQ(pub_rdh->rcv_cnt, 1);
     EXPECT_TRUE(pub->CheckAckSender("sub-one"));
+    EXPECT_EQ(pub->getSendState(), ops::Publisher::SendState::acked);
 
     // Check data incl. PubId
     EXPECT_EQ(sub->getMessage()->getPublicationID(), 0);
@@ -233,6 +250,8 @@ TEST_F(Test_PubSub, TestLostData) {
 }
 
 TEST_F(Test_PubSub, TestLostAck) {
+
+    EXPECT_EQ(pub->getSendState(), ops::Publisher::SendState::init);
 
     // --------------------------------------------------------------------------------
     // Write simulating lost ACK's
@@ -246,6 +265,7 @@ TEST_F(Test_PubSub, TestLostAck) {
     EXPECT_EQ(sub_sdh->send_cnt, 1);
     EXPECT_EQ(pub_rdh->rcv_cnt, 0);
     EXPECT_FALSE(pub->CheckAckSender("sub-one"));
+    EXPECT_EQ(pub->getSendState(), ops::Publisher::SendState::sending);
 
     // Each call to Activate should be a resend (time > 10 ms default resendTimeout)
     std::this_thread::sleep_for(std::chrono::milliseconds(20));
@@ -258,6 +278,7 @@ TEST_F(Test_PubSub, TestLostAck) {
     EXPECT_EQ(sub_sdh->send_cnt, 3);
     EXPECT_EQ(pub_rdh->rcv_cnt, 0);
     EXPECT_FALSE(pub->CheckAckSender("sub-one"));
+    EXPECT_EQ(pub->getSendState(), ops::Publisher::SendState::sending);
 
     // Connect ACK's again
     sub_sdh->forward = true;
@@ -266,6 +287,14 @@ TEST_F(Test_PubSub, TestLostAck) {
     // (time > 10 ms default resendTimeout)
     std::this_thread::sleep_for(std::chrono::milliseconds(20));
     pub->Activate();
+
+    EXPECT_EQ(pub_sdh->send_cnt, 4);
+    EXPECT_EQ(sub_rdh->rcv_cnt, 4);
+    EXPECT_EQ(sub_sdh->send_cnt, 4);
+    EXPECT_EQ(pub_rdh->rcv_cnt, 1);
+    EXPECT_TRUE(pub->CheckAckSender("sub-one"));
+    EXPECT_EQ(pub->getSendState(), ops::Publisher::SendState::sending);
+
     std::this_thread::sleep_for(std::chrono::milliseconds(20));
     pub->Activate();
 
@@ -274,6 +303,7 @@ TEST_F(Test_PubSub, TestLostAck) {
     EXPECT_EQ(sub_sdh->send_cnt, 4);
     EXPECT_EQ(pub_rdh->rcv_cnt, 1);
     EXPECT_TRUE(pub->CheckAckSender("sub-one"));
+    EXPECT_EQ(pub->getSendState(), ops::Publisher::SendState::acked);
 
     // Check data incl. PubId
     EXPECT_EQ(sub->getMessage()->getPublicationID(), 0);
@@ -282,6 +312,8 @@ TEST_F(Test_PubSub, TestLostAck) {
 }
 
 TEST_F(Test_PubSub, TestResendLatest1) {
+
+    EXPECT_EQ(pub->getSendState(), ops::Publisher::SendState::init);
 
     // Send a REGISTER message
     sub->Activate();
@@ -292,6 +324,7 @@ TEST_F(Test_PubSub, TestResendLatest1) {
     EXPECT_EQ(pub_rdh->rcv_cnt, 1);
     EXPECT_FALSE(sub->CheckPublisher("pub-one"));
     EXPECT_TRUE(sub->CheckPublisher(nullptr));
+    EXPECT_EQ(pub->getSendState(), ops::Publisher::SendState::init);
 
     obj.setKey("test3");
     pub->writeOPSObject(&obj);
@@ -302,6 +335,7 @@ TEST_F(Test_PubSub, TestResendLatest1) {
     EXPECT_EQ(pub_rdh->rcv_cnt, 2);
     EXPECT_TRUE(sub->CheckPublisher("pub-one"));
     EXPECT_TRUE(sub->CheckPublisher(nullptr));
+    EXPECT_EQ(pub->getSendState(), ops::Publisher::SendState::sending);
 
     // Should not be any messages sent by this
     std::this_thread::sleep_for(std::chrono::milliseconds(120));
@@ -311,6 +345,9 @@ TEST_F(Test_PubSub, TestResendLatest1) {
     EXPECT_EQ(sub_rdh->rcv_cnt, 1);
     EXPECT_EQ(sub_sdh->send_cnt, 2);
     EXPECT_EQ(pub_rdh->rcv_cnt, 2);
+
+    pub->Activate();
+    EXPECT_EQ(pub->getSendState(), ops::Publisher::SendState::acked);
 
     // Adding another expected publisher should result in a REGISTER message sent
     // but no response since the subscriber is already known by the publisher.
@@ -327,9 +364,12 @@ TEST_F(Test_PubSub, TestResendLatest1) {
     EXPECT_TRUE(sub->CheckPublisher("pub-one"));
     EXPECT_FALSE(sub->CheckPublisher(nullptr));
     EXPECT_EQ(dataNotifications, 1);
+    EXPECT_EQ(pub->getSendState(), ops::Publisher::SendState::acked);
 }
 
 TEST_F(Test_PubSub, TestResendLatest2) {
+
+    EXPECT_EQ(pub->getSendState(), ops::Publisher::SendState::init);
 
     // Write simulating lost publications just to have a message for resending
     pub_sdh->forward = false;
@@ -343,6 +383,7 @@ TEST_F(Test_PubSub, TestResendLatest2) {
     EXPECT_EQ(pub_rdh->rcv_cnt, 0);
     EXPECT_FALSE(pub->CheckAckSender("sub-one"));
     EXPECT_EQ(dataNotifications, 0);
+    EXPECT_EQ(pub->getSendState(), ops::Publisher::SendState::sending);
 
     // Connect sender and receiver again
     pub_sdh->forward = true;
@@ -358,4 +399,8 @@ TEST_F(Test_PubSub, TestResendLatest2) {
     EXPECT_TRUE(sub->CheckPublisher("pub-one"));
     EXPECT_TRUE(sub->CheckPublisher(nullptr));
     EXPECT_EQ(dataNotifications, 1);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    pub->Activate();
+    EXPECT_EQ(pub->getSendState(), ops::Publisher::SendState::acked);
 }

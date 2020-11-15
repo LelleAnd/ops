@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2019-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -30,10 +30,10 @@ namespace ops
     {
     public:
         InternalLock() = default;
-        InternalLock(const InternalLock&) = default;
-        InternalLock(InternalLock&&) = default;
-        InternalLock& operator=(const InternalLock&) = default;
-        InternalLock& operator=(InternalLock&&) = default;
+        explicit InternalLock(const InternalLock&) = delete;
+        explicit InternalLock(InternalLock&&) = delete;
+        InternalLock& operator=(const InternalLock&) = delete;
+        InternalLock& operator=(InternalLock&&) = delete;
         virtual ~InternalLock() = default;
     };
 

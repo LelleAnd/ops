@@ -32,19 +32,25 @@
 #include "PrintArchiverOut.h"
 #include "ChecksumArchiver.h"
 
-#ifdef _WIN32
-#include "SdsSystemTime.h"
-#endif
 
-#include "../ConfigFileHelper.h"
-
+///----- Configuration -----
 #define USE_LAMDAS
 #undef USE_MEMORY_POOLS
 #undef USE_MESSAGE_HEADER
 
 
+
+#ifdef USE_MESSAGE_HEADER
+#include "SdsSystemTime.h"
+#endif
+
+#include "../ConfigFileHelper.h"
+
+
 #ifdef USE_MEMORY_POOLS
+#ifdef USE_MESSAGE_HEADER
 sds::MessageHeaderData::memory_pool_type sds::MessageHeaderData::_pool(1);
+#endif
 pizza::PizzaData::memory_pool_type pizza::PizzaData::_pool(20);
 pizza::VessuvioData::memory_pool_type pizza::VessuvioData::_pool(20);
 pizza::CapricosaData::memory_pool_type pizza::CapricosaData::_pool(10);
@@ -808,7 +814,9 @@ int main(const int argc, const char* argv[])
 	}
 	timeBeginPeriod(wTimerRes);
 
-	sds::sdsSystemTimeInit();
+  #ifdef USE_MESSAGE_HEADER
+    sds::sdsSystemTimeInit();
+  #endif
 #endif
 
 	// Setup the OPS static error service (common for all participants, reports errors during participant creation)
@@ -852,7 +860,7 @@ int main(const int argc, const char* argv[])
 	ops::Participant* const participant = ops::Participant::getInstance("PizzaDomain", "PizzaDomain", policy);
     if (participant == nullptr) {
 	    std::cout << "Failed to create Participant. Missing ops_config.xml ??" << std::endl;
-		exit(-1);
+		return -1;
     }
 	participant->addTypeSupport(new PizzaProject::PizzaProjectTypeFactory());
 	printDomainInfo(*participant);
@@ -866,7 +874,7 @@ int main(const int argc, const char* argv[])
 	ops::Participant* const otherParticipant = ops::Participant::getInstance("OtherPizzaDomain", "OtherPizzaDomain", policy);
 	if (otherParticipant == nullptr) {
 		std::cout << "Failed to create Participant. Missing ops_config.xml ??" << std::endl;
-        exit(-1);
+        return -1;
 	}
 	otherParticipant->addTypeSupport(new PizzaProject::PizzaProjectTypeFactory());
 	printDomainInfo(*otherParticipant);
@@ -1173,4 +1181,5 @@ int main(const int argc, const char* argv[])
 #ifdef USE_MEMORY_POOLS
 	ops::memory_pools::memory_pool_manager::Instance().PrintStat(std::cout);
 #endif
+    return 0;
 }

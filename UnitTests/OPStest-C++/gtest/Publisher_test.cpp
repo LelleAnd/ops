@@ -139,13 +139,13 @@ TEST(Test_Publisher, TestResends) {
 
         // Check without any added 
         EXPECT_FALSE(pub.CheckAckSender("sub-one"));
-        EXPECT_TRUE(pub.CheckAckSender(nullptr));
+        EXPECT_TRUE(pub.CheckAckSender(""));
 
         // Add expected ACK's
         pub.AddExpectedAckSender("sub-one");
 
         EXPECT_FALSE(pub.CheckAckSender("sub-one"));
-        EXPECT_FALSE(pub.CheckAckSender(nullptr));
+        EXPECT_FALSE(pub.CheckAckSender(""));
 
         // Send data with expected ACK's
         EXPECT_TRUE(pub.writeOPSObject(&obj));
@@ -161,11 +161,11 @@ TEST(Test_Publisher, TestResends) {
         EXPECT_EQ(pub.getSendState(), ops::Publisher::SendState::failed);
 
         EXPECT_FALSE(pub.CheckAckSender("sub-one"));
-        EXPECT_FALSE(pub.CheckAckSender(nullptr));
+        EXPECT_FALSE(pub.CheckAckSender(""));
 
         pub.RemoveExpectedAckSender("sub-one");
         EXPECT_FALSE(pub.CheckAckSender("sub-one"));
-        EXPECT_TRUE(pub.CheckAckSender(nullptr));
+        EXPECT_TRUE(pub.CheckAckSender(""));
     }
 }
 

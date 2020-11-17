@@ -207,19 +207,19 @@ namespace ops
 	}
 
     // One way for us to know which publishers to expect
-    void Subscriber::AddExpectedPublisher(const char* pubkey)
+    void Subscriber::AddExpectedPublisher(const ObjectName_T& pubname)
     {
         if (_ackFilter == nullptr) { return; }
         MessageLock lck(*this);
-        ((ACKFilter*)_ackFilter)->_expectedPub[pubkey] = false;
+        ((ACKFilter*)_ackFilter)->_expectedPub[pubname] = false;
     }
 
     // nullptr check all
-    bool Subscriber::CheckPublisher(const char* pubkey)
+    bool Subscriber::CheckPublisher(const ObjectName_T& pubname)
     {
         if (_ackFilter == nullptr) { return true; }
         MessageLock lck(*this);
-        if (pubkey == nullptr) {
+        if (pubname == "") {
             for (auto& x : ((ACKFilter*)_ackFilter)->_expectedPub) {
                 if (x.second == false) return false;
             }
@@ -227,7 +227,7 @@ namespace ops
         }
         else {
             for (auto& x : ((ACKFilter*)_ackFilter)->_expectedPub) {
-                if (x.first == ObjectName_T(pubkey)) {
+                if (x.first == pubname) {
                     if (x.second == true) return true;
                 }
             }
@@ -235,11 +235,11 @@ namespace ops
         }
     }
 
-    void Subscriber::RemoveExpectedPublisher(const char* pubkey)
+    void Subscriber::RemoveExpectedPublisher(const ObjectName_T& pubname)
     {
         if (_ackFilter == nullptr) { return; }
         MessageLock lck(*this);
-        ((ACKFilter*)_ackFilter)->_expectedPub.erase(pubkey);
+        ((ACKFilter*)_ackFilter)->_expectedPub.erase(pubname);
     }
 
     // Activate (need to be called periodically)

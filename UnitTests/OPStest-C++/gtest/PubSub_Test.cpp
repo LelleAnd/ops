@@ -323,7 +323,7 @@ TEST_F(Test_PubSub, TestResendLatest1) {
     EXPECT_EQ(sub_sdh->send_cnt, 1);
     EXPECT_EQ(pub_rdh->rcv_cnt, 1);
     EXPECT_FALSE(sub->CheckPublisher("pub-one"));
-    EXPECT_TRUE(sub->CheckPublisher(nullptr));
+    EXPECT_TRUE(sub->CheckPublisher(""));
     EXPECT_EQ(pub->getSendState(), ops::Publisher::SendState::init);
 
     obj.setKey("test3");
@@ -334,7 +334,7 @@ TEST_F(Test_PubSub, TestResendLatest1) {
     EXPECT_EQ(sub_sdh->send_cnt, 2);
     EXPECT_EQ(pub_rdh->rcv_cnt, 2);
     EXPECT_TRUE(sub->CheckPublisher("pub-one"));
-    EXPECT_TRUE(sub->CheckPublisher(nullptr));
+    EXPECT_TRUE(sub->CheckPublisher(""));
     EXPECT_EQ(pub->getSendState(), ops::Publisher::SendState::sending);
 
     // Should not be any messages sent by this
@@ -362,7 +362,7 @@ TEST_F(Test_PubSub, TestResendLatest1) {
     EXPECT_EQ(pub_rdh->rcv_cnt, 3);
     EXPECT_FALSE(sub->CheckPublisher("test"));
     EXPECT_TRUE(sub->CheckPublisher("pub-one"));
-    EXPECT_FALSE(sub->CheckPublisher(nullptr));
+    EXPECT_FALSE(sub->CheckPublisher(""));
     EXPECT_EQ(dataNotifications, 1);
     EXPECT_EQ(pub->getSendState(), ops::Publisher::SendState::acked);
 }
@@ -397,7 +397,7 @@ TEST_F(Test_PubSub, TestResendLatest2) {
     EXPECT_EQ(pub_rdh->rcv_cnt, 2);
     EXPECT_TRUE(pub->CheckAckSender("sub-one"));
     EXPECT_TRUE(sub->CheckPublisher("pub-one"));
-    EXPECT_TRUE(sub->CheckPublisher(nullptr));
+    EXPECT_TRUE(sub->CheckPublisher(""));
     EXPECT_EQ(dataNotifications, 1);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(20));

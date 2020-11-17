@@ -60,9 +60,9 @@ public:
 	bool writeOPSObject(OPSObject* obj);
 
     // Ack specifics
-    void AddExpectedAckSender(const char* subkey);
-    bool CheckAckSender(const char* subkey);    // nullptr --> check all
-    void RemoveExpectedAckSender(const char* subkey);
+    void AddExpectedAckSender(const ObjectName_T& subname);
+    bool CheckAckSender(const ObjectName_T& subname);    // "" --> check all
+    void RemoveExpectedAckSender(const ObjectName_T& subname);
 
     // Need to be called periodically to do resends and update SendState
     void Activate();

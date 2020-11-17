@@ -190,9 +190,9 @@ namespace ops
         void onNewEvent(Notifier<int>* sender, int message) override;
 
         // Ack specific
-        void AddExpectedPublisher(const char* pubkey);
-        bool CheckPublisher(const char* pubkey);    // nullptr --> check all
-        void RemoveExpectedPublisher(const char* pubkey);
+        void AddExpectedPublisher(const ObjectName_T& pubname);
+        bool CheckPublisher(const ObjectName_T& pubname);    // "" --> check all
+        void RemoveExpectedPublisher(const ObjectName_T& pubname);
 
         // Activate (need to be called periodically)
         ///TBD controllable if called by user or timer???

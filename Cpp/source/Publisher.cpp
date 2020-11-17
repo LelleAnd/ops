@@ -333,27 +333,27 @@ namespace ops
     }
 
     // One way for us to know which ACK's to expect
-    void Publisher::AddExpectedAckSender(const char* subkey)
+    void Publisher::AddExpectedAckSender(const ObjectName_T& subname)
     {
         if (_ackSub == nullptr) { return; }
         // Add Subscriber to expected ACK senders
         MessageLock lck(*_ackSub);
-        _ackSub->_expectedSub[subkey].acked = false;
+        _ackSub->_expectedSub[subname].acked = false;
     }
 
-    // nullptr check all
-    bool Publisher::CheckAckSender(const char* subkey)
+    // "" check all
+    bool Publisher::CheckAckSender(const ObjectName_T& subname)
     {
         if (_ackSub == nullptr) { return true; }
         MessageLock lck(*_ackSub);
-        if (subkey == nullptr) {
+        if (subname == "") {
             for (auto& x : _ackSub->_expectedSub) {
                 if (!x.second.acked) { return false; }
             }
             return true;
         } else {
             for (auto& x : _ackSub->_expectedSub) {
-                if (x.first == ObjectName_T(subkey)) {
+                if (x.first == subname) {
                     if (x.second.acked) { return true; }
                 }
             }
@@ -361,12 +361,12 @@ namespace ops
         }
     }
 
-    void Publisher::RemoveExpectedAckSender(const char* subkey)
+    void Publisher::RemoveExpectedAckSender(const ObjectName_T& subname)
     {
         if (_ackSub == nullptr) { return; }
         // Remove Subscriber from expected ACK senders
         MessageLock lck(*_ackSub);
-        _ackSub->_expectedSub.erase(subkey);
+        _ackSub->_expectedSub.erase(subname);
     }
 
     // Need to be called periodically

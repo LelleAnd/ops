@@ -172,7 +172,7 @@ TEST(Test_Subscriber, TestConnection) {
         ASSERT_NE(sdh, nullptr) << "Failed to create MOC SDH";
         EXPECT_EQ(sdh->oc_cnt, 1);
         EXPECT_STREQ(sdh->topic.getName().c_str(), "TestTopic#ack");
-        EXPECT_TRUE(sub.CheckPublisher(nullptr));
+        EXPECT_TRUE(sub.CheckPublisher(""));
 
         EXPECT_EQ(top.getRegisterTimeMs(), 100);
 
@@ -183,15 +183,15 @@ TEST(Test_Subscriber, TestConnection) {
         }
         // Check that a number of REGISTER has been sent
         EXPECT_EQ(sdh->send_cnt, 3);
-        EXPECT_TRUE(sub.CheckPublisher(nullptr));
+        EXPECT_TRUE(sub.CheckPublisher(""));
 
         sub.AddExpectedPublisher("pub-one");
         EXPECT_FALSE(sub.CheckPublisher("pub-one"));
-        EXPECT_FALSE(sub.CheckPublisher(nullptr));
+        EXPECT_FALSE(sub.CheckPublisher(""));
 
         sub.RemoveExpectedPublisher("pub-one");
         EXPECT_FALSE(sub.CheckPublisher("pub-one"));
-        EXPECT_TRUE(sub.CheckPublisher(nullptr));
+        EXPECT_TRUE(sub.CheckPublisher(""));
     }
 
     // Check that an UNREGISTER has been sent

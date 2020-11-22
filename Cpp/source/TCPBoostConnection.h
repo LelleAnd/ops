@@ -197,5 +197,14 @@ namespace ops
 			address = localEndPoint.address().to_string().c_str();
 			port = localEndPoint.port();
 		}
-	};
+
+        void getLocal(uint32_t& address, uint16_t& port) override
+        {
+            boost::system::error_code error;
+            boost::asio::ip::tcp::endpoint localEndPoint;
+            localEndPoint = _sock->local_endpoint(error);
+            address = localEndPoint.address().to_v4().to_ulong();
+            port = localEndPoint.port();
+        }
+    };
 }

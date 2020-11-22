@@ -190,6 +190,11 @@ namespace ops
 
         uint32_t getLocalAddressHost() noexcept override
         {
+            if ((_serverIPHost == 0) && (_server != nullptr)) {
+                Address_T addr;
+                uint16_t port;
+                _server->getLocal(addr, _serverIPHost, port);
+            }
             return _serverIPHost;
         }
 

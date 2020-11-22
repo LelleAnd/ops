@@ -2,7 +2,7 @@ unit uOps.OPSObjectFactory;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -48,6 +48,7 @@ uses SysUtils,
      uOps.ParticipantInfoData,
      uOps.TopicInfoData,
      uOps.ArchiverInOut,
+     opsidls.SendAckPatternData,
      uOps.SerializableFactory;
 
 type
@@ -62,6 +63,10 @@ begin
   Result := nil;
   if types = 'ops.protocol.OPSMessage' then begin
     Result := TOPSMessage.Create;
+  end else if types = 'ops.ParticipantInfoData' then begin
+    Result := TParticipantInfoData.Create;
+  end else if types = 'opsidls.SendAckPatternData' then begin
+    Result := opsidls.SendAckPatternData.SendAckPatternData.Create;
   end else if types = 'Topic' then begin
     Result := TTopic.Create;
   end else if types = 'Channel' then begin
@@ -74,8 +79,6 @@ begin
     Result := TDomain.Create;
   end else if types = 'Domain' then begin
     Result := TDomain.Create;
-  end else if types = 'ops.ParticipantInfoData' then begin
-    Result := TParticipantInfoData.Create;
   end else if types = 'TopicInfoData' then begin
     Result := TTopicInfoData.Create;
   end;

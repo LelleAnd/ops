@@ -68,7 +68,9 @@ uses
   uOps.Transport in '..\..\..\Delphi\Source\uOps.Transport.pas',
   sds.MessageHeaderData in '..\..\OPSIdls\PizzaProject\Generated\Delphi\sds\sds.MessageHeaderData.pas',
   uOps.NetworkSupport in '..\..\..\Delphi\Source\uOps.NetworkSupport.pas',
-  pizza.special.Parmesan in '..\..\OPSIdls\PizzaProject\Generated\Delphi\pizza\special\pizza.special.Parmesan.pas';
+  pizza.special.Parmesan in '..\..\OPSIdls\PizzaProject\Generated\Delphi\pizza\special\pizza.special.Parmesan.pas',
+  opsidls.OPSConstants in '..\..\..\Common\idl\Generated\Delphi\opsidls\opsidls.OPSConstants.pas',
+  opsidls.SendAckPatternData in '..\..\..\Common\idl\Generated\Delphi\opsidls\opsidls.SendAckPatternData.pas';
 
 {$R *.res}
 

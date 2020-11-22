@@ -135,6 +135,8 @@
         <DCCReference Include="Source\RequestReply\uOps.RequestReply.Reply.pas"/>
         <DCCReference Include="Source\RequestReply\uOps.RequestReply.Request.pas"/>
         <DCCReference Include="Source\uOps.NetworkSupport.pas"/>
+        <DCCReference Include="..\Common\idl\Generated\Delphi\opsidls\opsidls.OPSConstants.pas"/>
+        <DCCReference Include="..\Common\idl\Generated\Delphi\opsidls\opsidls.SendAckPatternData.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -157,7 +159,6 @@
                 </Source>
             </Delphi.Personality>
             <Platforms>
-                <Platform value="Linux64">False</Platform>
                 <Platform value="Win32">True</Platform>
             </Platforms>
         </BorlandProject>

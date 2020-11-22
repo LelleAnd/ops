@@ -18,6 +18,14 @@ namespace Ops
             {
                 return new OPSMessage();
             }
+            if (type.Equals("ops.ParticipantInfoData"))
+            {
+                return new ParticipantInfoData();
+            }
+            if (type.Equals("opsidls.SendAckPatternData"))
+            {
+                return new opsidls.SendAckPatternData();
+            }
             if (type.Equals("DefaultOPSConfigImpl"))
             {
                 return new DefaultOPSConfigImpl();
@@ -44,10 +52,6 @@ namespace Ops
             if (type.Equals("Transport"))
             {
                 return new Transport();
-            }
-            if (type.Equals("ops.ParticipantInfoData"))
-            {
-                return new ParticipantInfoData();
             }
             return null;
         }

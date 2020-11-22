@@ -47,6 +47,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\..\Common\idl\Generated\CSharp\opsidls\OPSConstants.cs">
+      <Link>opsidls\OPSConstants.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Common\idl\Generated\CSharp\opsidls\SendAckPatternData.cs">
+      <Link>opsidls\SendAckPatternData.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\CSharp\Ops\AckData.cs">
       <Link>Ops\AckData.cs</Link>
     </Compile>

@@ -66,8 +66,8 @@ Optional elements of _Domain_:
   * **heartbeatPeriod**, sets the TCP heartbeat Period in [ms], which defines the longest silent period on TCP before a heartbeat message is sent (heartbeats are suppressed if other data is sent on the socket). Default value is 1000 [ms], setting a value of 0 disables heartbeat sending and monitoring. See also [TCP transport](TcpTransport.md).
   * **heartbeatTimeout**, sets the TCP monitoring timeout in [ms], which defines the longest silent period on TCP before the socket is disconnected. Default value is 3000 [ms].
   * **resendNum**, sets the maximum number of resends of a _Topic_ due to missed acknowledge (if ACK's are enabled for a _Topic_). Default value is 0.
-  * **resendTime**, sets the minimum time in [ms] between two resends (if ACK's are enabled for a _Topic_). Default value is 10 [ms].
-  * **registerTime**, sets the minimum time in [ms] between two REGISTER messages from a subscriber (if ACK's are enabled for a _Topic_). Default value is 1000 [ms].
+  * **resendTimeMs**, sets the minimum time in [ms] between two resends (if ACK's are enabled for a _Topic_). Default value is 10 [ms].
+  * **registerTimeMs**, sets the minimum time in [ms] between two REGISTER messages from a subscriber (if ACK's are enabled for a _Topic_). Default value is 1000 [ms].
 
 Optional elements of _Topic_:
   * **sampleMaxSize**, defines the maximum size of the data type when used in this topic. The value is used for reserving memory to be able to buffer data during reception. The value is also used for a buffer in each publisher for a serialized version of the data type during sending. If this tag is omitted a value of 60000 is used. If a value < 60000 is specified, 60000 is still used for reception. If a value > 60000 is specified, this topic MUST use its own port, see also [Sending Large Messages](LargeMessages.md).
@@ -93,8 +93,8 @@ Elements of _Channel_ contains:
   * **outSocketBufferSize**, changes the underlying sockets buffer size if possible. If this tag is omitted, the _Domain_ value is used.
   * **sampleMaxSize**, see _Topic_ above for a description. If this tag is specified, this value will be used instead of eventual values specified for the topics used on this _Channel_.
   * **resendNum**, see _Domain_ above for a description. If this tag is omitted, the _Domain_ value is used.
-  * **resendTime**, see _Domain_ above for a description. If this tag is omitted, the _Domain_ value is used.
-  * **registerTime**, see _Domain_ above for a description. If this tag is omitted, the _Domain_ value is used.
+  * **resendTimeMs**, see _Domain_ above for a description. If this tag is omitted, the _Domain_ value is used.
+  * **registerTimeMs**, see _Domain_ above for a description. If this tag is omitted, the _Domain_ value is used.
 
 Elements of _Transport_ contains:
   * **channelID**, name of the channel as a string, must be defined in a _Channel_ element.

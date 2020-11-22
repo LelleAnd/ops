@@ -37,14 +37,16 @@
 	#include <iomanip>
 	#include <iostream>
 	#define OPS_TRACE(msg) { std::cout << msg << std::flush; }
+    #define OPS_TRACE_ERROR(msg) { std::cout << msg << std::flush; }
 	#define OPS_DUMP_MEMORY(addr, len) { \
 	  uint8_t* Ptr__ = (uint8_t*)addr; \
 	  std::cout << std::setw(2) << std::hex; \
 	  for(int i=0; i<len; ++i) { std::cout << (int)*Ptr__++ << " "; } \
-	  std::cout << std::dec << "\n";\
+	  std::cout << std::dec << std::endl;\
 	}
 #else
 	#define OPS_TRACE(msg) 
+    #define OPS_TRACE_ERROR(msg)
 	#define OPS_DUMP_MEMORY(addr, len)
 #endif
 #define OPS_NOTRACE(msg) 
@@ -55,9 +57,9 @@
 #define OPS_PIFO_TRACE(msg) { OPS_NOTRACE("PIFO: " << msg); }
 #define OPS_TCP_TRACE(msg) { OPS_NOTRACE("TCP: " << msg); }
 
-#define OPS_ACK_ERROR(msg)  { OPS_TRACE("ACK: " << msg); }
-#define OPS_TCP_ERROR(msg)  { OPS_TRACE("TCP: " << msg); }
-#define OPS_UDP_ERROR(msg)  { OPS_TRACE("UDP: " << msg); }
+#define OPS_ACK_ERROR(msg)  { OPS_TRACE_ERROR("ACK: " << msg); }
+#define OPS_TCP_ERROR(msg)  { OPS_TRACE_ERROR("TCP: " << msg); }
+#define OPS_UDP_ERROR(msg)  { OPS_TRACE_ERROR("UDP: " << msg); }
 
 
 // -----------------------------------------------------------------------------

@@ -34,6 +34,7 @@
     * [Understanding OPSObject and OPSMessage](OpsMessage.md)
     * [Error Handling](HandlingErrors.md)
     * [Version handling](VersionHandling.md)
+    * [Reliability in transports](Reliability.md)
     * [Request Reply](RequestReply.md)
     * [Serializing](Serializing.md)
     * [Binary Protocol](Protocol.md)

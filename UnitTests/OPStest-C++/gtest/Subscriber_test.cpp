@@ -53,7 +53,7 @@ struct MySubscriberBase : public ops::SubscriberBase
     MySubscriberBase(ops::Topic top) : ops::SubscriberBase(top) {}
 
     // Callback for received messages
-    void onNewEvent(Notifier<OPSMessage*>*, OPSMessage* const message)
+    void onNewEvent(Notifier<OPSMessage*>*, OPSMessage* const )
     {
     }
     // Callback for deadline timeouts

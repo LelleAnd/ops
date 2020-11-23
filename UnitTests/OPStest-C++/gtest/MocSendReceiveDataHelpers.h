@@ -53,7 +53,7 @@ struct MocReceiveDataHandler : public ops::ReceiveDataHandler
 
         // Used to get the sender IP and port for a received message
         // Only safe to call in callback, before a new asynchWait() is called.
-        virtual void getSource(ops::Address_T& address, uint16_t& port) override { }
+        virtual void getSource(ops::Address_T& , uint16_t& ) override { }
         virtual void getSource(uint32_t& address, uint16_t& port) override { address = src_address; port = src_port; }
         void IndicateNewData(int size, uint32_t address, uint16_t port)
         {
@@ -141,7 +141,7 @@ struct MocSendDataHandler : public ops::SendDataHandler
         MocSendDataHandler& owner;
     public:
         MocSender(MocSendDataHandler& o) : owner(o) {}
-        virtual bool sendTo(const char* buf, const int size, const ops::Address_T& ip, const uint16_t port) override { return true; }
+        virtual bool sendTo(const char* , const int , const ops::Address_T& , const uint16_t ) override { return true; }
         virtual bool open() override { ++owner.oc_cnt; return true; };
         virtual void close() override { --owner.oc_cnt; };
 
@@ -150,13 +150,13 @@ struct MocSendDataHandler : public ops::SendDataHandler
         virtual uint32_t getLocalAddressHost() override { return owner.local_address; };
     };
 
-    MocSendDataHandler(ops::Topic top, ops::Participant& part, uint16_t port) : topic(top), local_port(port)
+    MocSendDataHandler(ops::Topic top, ops::Participant& , uint16_t port) : topic(top), local_port(port)
     {
         //std::cout << "MocSendDataHandler()\n";
         sender = (ops::Sender*)new MocSender(*this);
     }
 
-    bool sendData(char* buf, int bufSize, ops::Topic& topic) override
+    bool sendData(char* buf, int bufSize, ops::Topic& ) override
     {
         //std::cout << "MocSendDataHandler::sendData()\n";
         ++send_cnt;

@@ -40,7 +40,7 @@ TEST(Test_OPSMessage, Test) {
 	uint16_t port;
 	obj1.getSource(addrRaw, port);
 	EXPECT_EQ(port, 0);
-	EXPECT_EQ(addrRaw, 0);
+	EXPECT_EQ(addrRaw, 0u);
 
     obj1.getSource(addr, port);
     EXPECT_EQ(port, 0);

@@ -127,7 +127,7 @@ namespace ops
 				boost::asio::ip::tcp::endpoint sendingEndPoint;
 				sendingEndPoint = _sock->remote_endpoint(error);
 				if (!error) {
-                    _remoteAddressHost = sendingEndPoint.address().to_v4().to_ulong();
+                    _remoteAddressHost = (uint32_t)sendingEndPoint.address().to_v4().to_ulong();
 					_remoteAddress = sendingEndPoint.address().to_string().c_str();
 					_remotePort = sendingEndPoint.port();
 				}
@@ -203,7 +203,7 @@ namespace ops
             boost::system::error_code error;
             boost::asio::ip::tcp::endpoint localEndPoint;
             localEndPoint = _sock->local_endpoint(error);
-            address = localEndPoint.address().to_v4().to_ulong();
+            address = (uint32_t)localEndPoint.address().to_v4().to_ulong();
             port = localEndPoint.port();
         }
     };

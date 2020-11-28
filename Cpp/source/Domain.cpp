@@ -28,16 +28,7 @@
 namespace ops
 {
 
-Domain::Domain() : 
-	timeToLive(1), 
-	localInterface("0.0.0.0"),
-	inSocketBufferSize(-1),		// Use OS default, Topics may override
-	outSocketBufferSize(-1),	// Use OS default, Topics may override
-	metaDataMcPort(9494),		// Default port 
-	debugMcPort(0),
-	optNonVirt(false), 
-	heartbeatPeriod(1000),
-	heartbeatTimeout(3000)
+Domain::Domain() 
 {
 	appendType(TypeId_T("Domain"));
 }
@@ -96,12 +87,12 @@ bool Domain::existsTopic(ObjectName_T const name) const
 	return false;
 }
 
-ObjectName_T Domain::getDomainID() const
+ObjectName_T Domain::getDomainID() const noexcept
 {
 	return domainID;
 }
 
-void Domain::serialize(ArchiverInOut* archiver)
+void Domain::serialize(ArchiverInOut* const archiver)
 {
 	OPSObject::serialize(archiver);
 	archiver->inout("domainID", domainID);
@@ -146,7 +137,7 @@ Topic* Domain::findTopic(ObjectName_T const id) const
 	return nullptr;
 }
 
-void Domain::checkTransports()
+void Domain::checkTransports() const
 {
 	// Now update topics with values from the transports and channels
 	// Loop over all transports and for each topic, see if it needs parameters from the channel
@@ -174,45 +165,45 @@ void Domain::checkTransports()
 	}
 }
 
-int Domain::getTimeToLive() const
+int Domain::getTimeToLive() const noexcept
 {
 	return timeToLive;
 }
 
-Address_T Domain::getLocalInterface() const
+Address_T Domain::getLocalInterface() const noexcept
 {
 	return localInterface;
 }
 
-int Domain::getInSocketBufferSize() const
+int Domain::getInSocketBufferSize() const noexcept
 {
 	return inSocketBufferSize;
 }
 
-int Domain::getOutSocketBufferSize() const
+int Domain::getOutSocketBufferSize() const noexcept
 {
 	return outSocketBufferSize;
 }
 
-int Domain::getMetaDataMcPort() const
+int Domain::getMetaDataMcPort() const noexcept
 {
 	return metaDataMcPort;
 }
 
-int Domain::getDebugMcPort() const
+int Domain::getDebugMcPort() const noexcept
 {
 	return debugMcPort;
 }
 
-bool Domain::getOptNonVirt() const
+bool Domain::getOptNonVirt() const noexcept
 {
 	return optNonVirt;
 }
-int Domain::getHeartbeatPeriod() const
+int Domain::getHeartbeatPeriod() const noexcept
 {
 	return heartbeatPeriod;
 }
-int Domain::getHeartbeatTimeout() const
+int Domain::getHeartbeatTimeout() const noexcept
 {
 	return heartbeatTimeout;
 }

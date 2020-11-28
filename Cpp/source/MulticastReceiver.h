@@ -56,14 +56,14 @@ namespace ops
 		  _localInterface(localInterface),
 		  _inSocketBufferSizent(inSocketBufferSizent)
 		{
-			boost::asio::io_service* ioService = dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService;
+			boost::asio::io_service* ioService = BoostIOServiceImpl::get(ioServ);
 			//udp::resolver resolver(*ioService);
 			//udp::resolver::query query(boost::asio::ip::host_name(),"");
 			//udp::resolver::iterator it=resolver.resolve(query);
 			//boost::asio::ip::address addr=(it++)->endpoint().address();
 
             // Linux needs INADDR_ANY here, for Windows it works with INADDR_ANY or localInterface
-            boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string("0.0.0.0"));
+            const boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string("0.0.0.0"));
             //boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(localInterface));
 
 			localEndpoint = new boost::asio::ip::udp::endpoint(ipAddr, bindPort);
@@ -168,7 +168,7 @@ namespace ops
 		}
 
 		// Returns true if all asynchronous work has finished
-		virtual bool asyncFinished() override
+		virtual bool asyncFinished() noexcept override
 		{
 			return !m_working;
 		}
@@ -286,12 +286,12 @@ namespace ops
 			}
 		}
 
-		virtual uint16_t getLocalPort() override
+		virtual uint16_t getLocalPort() noexcept override
 		{
 			return _port;
 		}
 
-		virtual Address_T getLocalAddress() override
+		virtual Address_T getLocalAddress() noexcept override
 		{
 			return _ipaddress;
 		}

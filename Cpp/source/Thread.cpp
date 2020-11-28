@@ -23,7 +23,7 @@
 
 namespace ops
 {
-    Thread::Thread()
+    Thread::Thread() noexcept
     {
     }
     
@@ -56,9 +56,9 @@ namespace ops
     {
 	}
     
-    /*static */ void Thread::EntryPoint(void* pthis)
+    /*static */ void Thread::EntryPoint(void* const pthis)
     {
-        Thread* pt = (Thread*)pthis;
+        Thread* const pt = (Thread*)pthis;
         pt->run();
     }
 }

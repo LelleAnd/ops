@@ -33,7 +33,7 @@ namespace ops
 	class ReferenceHandler : Lockable
 	{
 	public:
-		ReferenceHandler()
+		ReferenceHandler() noexcept
 		{
 		}
 
@@ -52,7 +52,7 @@ namespace ops
 			}
 		}
 
-		int size() const
+		int size() const noexcept
 		{
 			return (int)references.size();
 		}
@@ -60,7 +60,7 @@ namespace ops
 	private:
 		std::vector<Reservable*> references;
 
-		void removeReference(Reservable* reservable)
+		void removeReference(const Reservable* reservable)
 		{
 			SafeLock lock(this);
 			for(unsigned int i = 0; i < references.size(); i++)

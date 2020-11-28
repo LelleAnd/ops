@@ -40,7 +40,7 @@ namespace ops
     {
     public:
 
-        Serializable* create(const TypeId_T& type)
+        Serializable* create(const TypeId_T& type) override
         {
             if (type == ("ops.protocol.OPSMessage"))
             {

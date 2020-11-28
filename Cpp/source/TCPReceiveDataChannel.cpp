@@ -66,7 +66,7 @@ namespace ops
 
     ///Override from Listener
     ///Called whenever the receiver has new data.
-    void TCPReceiveDataChannel::onNewEvent(Notifier<BytesSizePair>* sender, BytesSizePair byteSizePair)
+    void TCPReceiveDataChannel::onNewEvent(Notifier<BytesSizePair>* const sender, BytesSizePair const byteSizePair)
     {
 		/// Here we got some data in our buffer
 		///TODO Check if it is an internal TCP Transport info and if so handle it and start a new asynch read
@@ -83,7 +83,7 @@ namespace ops
 		if (conn.getProtocol() == nullptr) {
 			conn.setProtocol(new TCPOpsProtocol(TimeHelper::currentTimeMillis, _heartbeatPeriod, _heartbeatTimeout));
 		}
-		TCPOpsProtocol* prot = dynamic_cast<TCPOpsProtocol*>(conn.getProtocol());
+		TCPOpsProtocol* const prot = dynamic_cast<TCPOpsProtocol*>(conn.getProtocol());
 		if (prot != nullptr) {
 			InternalString_T dbgId(status.addr);
 			dbgId += "::";
@@ -113,12 +113,12 @@ namespace ops
 
 	// Called from client when a connection is closed
 	// Ev. buffer used in asynchRead() is no longer in use
-	void TCPReceiveDataChannel::onDisconnect(TCPConnection& conn, ConnectStatus status)
+	void TCPReceiveDataChannel::onDisconnect(TCPConnection& conn, ConnectStatus const status)
 	{
 		OPS_TCP_TRACE("RDC: onDisconnect()\n");
         _isConnected = false;
         // Need to reset protocol state in case the next connection is to a server with another version
-		TCPOpsProtocol* prot = dynamic_cast<TCPOpsProtocol*>(conn.getProtocol());
+		TCPOpsProtocol* const prot = dynamic_cast<TCPOpsProtocol*>(conn.getProtocol());
 		if (prot != nullptr) {
 			prot->resetProtocol();
 		}

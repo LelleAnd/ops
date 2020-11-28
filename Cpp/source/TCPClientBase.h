@@ -72,7 +72,7 @@ namespace ops
             return _connection->bytesAvailable();
         }
 
-        int sendTo(char* buf, int size)
+        int sendTo(const char* buf, int size)
 		{
 			return _connection->sendData(buf, size);
 		}
@@ -85,7 +85,7 @@ namespace ops
 		// Should be called by the derived classes
 		void connected(bool value)
 		{
-			bool doNotify = _cs.connected != value;
+			const bool doNotify = _cs.connected != value;
 			_cs.connected = value;
 			_cs.totalNo = value ? 1 : 0;
 			if (value) getSource(_cs.addr, _cs.port);
@@ -127,7 +127,7 @@ namespace ops
 		}
 
 		// Called from periodic timer
-		void onNewEvent(Notifier<int>*, int)
+		void onNewEvent(Notifier<int>*, int) override
 		{
 			if (_connection->isConnected()) {
 				if (!_connection->getProtocol()->periodicCheck()) {

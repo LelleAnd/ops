@@ -25,12 +25,12 @@
 
 namespace ops
 {
-    UDPReceiveDataHandler::UDPReceiveDataHandler(Topic top, Participant& part, bool commonReceiver) :
-		ReceiveDataHandler(top, part,
+    UDPReceiveDataHandler::UDPReceiveDataHandler(Topic top, Participant& part, bool const commonReceiver) :
+		ReceiveDataHandler(part,
 			new ReceiveDataChannel(top, part))
     {
 		if (commonReceiver) {
-			Receiver* recv = rdc[0]->getReceiver();
+			Receiver* const recv = rdc[0]->getReceiver();
 			part.setUdpTransportInfo(recv->getLocalAddress(), recv->getLocalPort());
 		}
 	}

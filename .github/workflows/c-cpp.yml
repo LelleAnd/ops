@@ -1,0 +1,49 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches:
+      - development
+      - master
+    paths-ignore:
+      - 'Ada/**'
+      - 'CSharp/**'
+      - 'Delphi/**'
+      - 'Doc/**'
+      - 'Python/**'
+      - 'Scripts/**'
+      - 'Syntax*/**'
+  pull_request:
+    branches: [ development ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      #- name: list environment
+      #  run: env
+      #- name: cmake version
+      #  run: cmake --version
+      - name: GTest Get
+        run: git clone https://github.com/google/googletest/ $HOME/gtest
+      - name: GTest Build
+        run: pushd $HOME/gtest && mkdir mybuild && cd mybuild && cmake -DCMAKE_INSTALL_PREFIX=$HOME/gtest/deploy .. && make install && popd
+      - name: GTest Set GOOGLETEST_HOME
+        run: echo "::set-env name=GOOGLETEST_HOME::$HOME/gtest/deploy"
+      #- name: debug
+      #  run: ls -alR $GOOGLETEST_HOME
+      - name: CppCheck Install
+        run: sudo apt-get install cppcheck
+      - name: Set BOOST_HOME
+        run: echo "::set-env name=BOOST_HOME::$BOOST_ROOT_1_72_0"
+      - name: Build
+        run: make
+        env:
+          MAKEFLAGS: "-j2"
+      - name: Run C++ Tests
+        run: make unittest-c++
+      - name: CppCheck Analysis
+        run: cppcheck --enable=all Cpp/source Cpp/include > /dev/null

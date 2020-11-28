@@ -37,7 +37,7 @@ namespace ops
     {
     public:
 
-        OPSArchiverOut(ByteBuffer& _buf, bool _optNonVirt):
+        OPSArchiverOut(ByteBuffer& _buf, bool _optNonVirt) noexcept :
 			buf(_buf), optNonVirt(_optNonVirt)
         {
         }
@@ -47,7 +47,7 @@ namespace ops
         }
 
 		// Returns true if it's an output archiver
-		virtual bool isOut() override { return true; }
+		virtual bool isOut() noexcept override { return true; }
 
 		void inout(InoutName_T name, bool& value) override
         {
@@ -139,7 +139,7 @@ namespace ops
         Serializable* inout(InoutName_T name, Serializable* value) override
         {
             UNUSED(name)
-            TypeId_T typeS = ((OPSObject*) value)->getTypeString();
+            const TypeId_T typeS = ((OPSObject*) value)->getTypeString();
             buf.WriteString(typeS);
             value->serialize(this);
             return value;
@@ -259,7 +259,7 @@ namespace ops
             return size;
         }
 
-        void endList(InoutName_T name) override
+        void endList(InoutName_T name) noexcept override
         {
             //Nothing to do in this implementation
             UNUSED(name)

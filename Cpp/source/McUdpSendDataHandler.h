@@ -1,6 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
+ * Copyright (C) 2020 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -36,34 +37,31 @@ namespace ops
     class McUdpSendDataHandler : public SendDataHandler
     {
     public:
-        McUdpSendDataHandler(IOService* ioService, Address_T localInterface, int ttl, int64_t outSocketBufferSize = 16000000)
+        McUdpSendDataHandler(IOService* ioService, Address_T localInterface, int64_t outSocketBufferSize = 16000000)
         {
-            sender = Sender::createUDPSender(ioService, localInterface, ttl, outSocketBufferSize);
+            sender = Sender::createUDPSender(ioService, localInterface, 1, outSocketBufferSize);
         }
 
-        bool sendData(char* buf, int bufSize, Topic& topic)
+        bool sendData(char* buf, int bufSize, Topic& topic) override
         {
+            bool result = true;
+            std::stack<InternalKey_T> sinksToDelete;
+
             SafeLock lock(&mutex);
 
             Entry_T& topicSinks = topicSinkMap[topic.getName()];
-            std::map<InternalKey_T, IpPortPair>::iterator it;
-
-            bool result = true;
-
-            std::stack<InternalKey_T> sinksToDelete;
 
             //Loop over all sinks and send data, remove items that isn't "alive".
-            for (it = topicSinks.portMap.begin(); it != topicSinks.portMap.end(); ++it)
-            {
-                //Check if this sink is alive
-                if (it->second.isAlive()) {
-                    //std::cout << topic.getName() << ", sending to sink: " << it->second.getKey() << std::endl;
-                    result &= sender->sendTo(buf, bufSize, it->second._ip, (uint16_t)it->second._port);
+            for (const auto& kv : topicSinks.portMap) {
+                const IpPortPair& sink = kv.second;
+                if (sink.isAlive()) {
+                    //std::cout << topic.getName() << ", sending to sink: " << sink.second.getKey() << std::endl;
+                    result &= sender->sendTo(buf, bufSize, sink._ip, (uint16_t)sink._port);
                 }
-                else //Remove it.
+                else
                 {
                     //std::cout << topic.getName() << ", removing sink: " << it->second.getKey() << std::endl;
-                    sinksToDelete.push(it->second._key);
+                    sinksToDelete.push(sink._key);
                 }
             }
             while (!sinksToDelete.empty()) {
@@ -77,7 +75,7 @@ namespace ops
 		{
             SafeLock lock(&mutex);
 
-			IpPortPair ipPort(ip, port, staticRoute);
+			const IpPortPair ipPort(ip, port, staticRoute);
 
 			//Check if we already have any sinks for this topic
             if (topicSinkMap.find(topic) == topicSinkMap.end())
@@ -122,7 +120,6 @@ namespace ops
         {
             SafeLock lock(&mutex);
             delete sender;
-			sender = nullptr;
         }
 
     private:
@@ -138,12 +135,9 @@ namespace ops
                 _key += NumberToString(_port);
             }
 
-            IpPortPair():
-				_port(0), _alwaysAlive(false), _lastTimeAlive(0)
-            {
-            }
+            IpPortPair() noexcept {}
 
-            bool isAlive()
+            bool isAlive() const
             {
                 return _alwaysAlive || ((TimeHelper::currentTimeMillis() - _lastTimeAlive) < ALIVE_TIMEOUT);
             }
@@ -155,10 +149,10 @@ namespace ops
             }
 
 			Address_T _ip;
-            int _port;
+            int _port{ 0 };
             InternalKey_T _key;
-			bool _alwaysAlive;
-			int64_t _lastTimeAlive;
+            bool _alwaysAlive{ false };
+            int64_t _lastTimeAlive{ 0 };
             const static int ALIVE_TIMEOUT = 3000;
         };
 

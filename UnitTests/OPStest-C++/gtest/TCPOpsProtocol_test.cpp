@@ -30,11 +30,11 @@ class MyTcpProtClient : public ops::TCPProtocolCallbacks
 public:
 	ops::TCPProtocol* _prot;
 
-	MyTcpProtClient(ops::TCPProtocol* prot) : _prot(prot) 
+	MyTcpProtClient(ops::TCPProtocol* const prot) : _prot(prot) 
 	{
 		memset(sbuf, 0, sizeof(sbuf));
 	}
-	~MyTcpProtClient() = default;
+	virtual ~MyTcpProtClient() = default;
 
 	MyTcpProtClient() = delete;
 	MyTcpProtClient(const MyTcpProtClient& r) = delete;
@@ -53,7 +53,7 @@ public:
 	char* _dstPtr = nullptr;
 	int _toRead = 0;
 
-	virtual void startAsyncRead(ops::TCPProtocol& prot, char* bytes, uint32_t size) override
+	virtual void startAsyncRead(ops::TCPProtocol& prot, char* const bytes, const uint32_t size) override
 	{
 		EXPECT_EQ(_prot, &prot);
 		_dstPtr = bytes;
@@ -62,7 +62,7 @@ public:
 
 	ops::BytesSizePair _event = { nullptr, 0 };
 
-	virtual void onEvent(ops::TCPProtocol& prot, ops::BytesSizePair arg) override
+	virtual void onEvent(ops::TCPProtocol& prot, const ops::BytesSizePair arg) override
 	{
 		EXPECT_EQ(_prot, &prot);
 		_event = arg;
@@ -79,7 +79,7 @@ public:
 		send_count = 0;
 	}
 
-	virtual int sendBuffer(ops::TCPProtocol& prot, const char* bytes, const uint32_t size) override
+	virtual int sendBuffer(ops::TCPProtocol& prot, const char* const bytes, const uint32_t size) override
 	{
 		send_count++;
 

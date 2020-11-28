@@ -27,7 +27,7 @@ namespace ops
 	class ReserveInfo
 	{
 	public:
-		ReserveInfo(Reservable* reservabl, int nrOfReserv):
+		ReserveInfo(Reservable* reservabl, int nrOfReserv) noexcept :
 			reservable(reservabl), nrOfReservations(nrOfReserv)
 		{}
 		Reservable* reservable;

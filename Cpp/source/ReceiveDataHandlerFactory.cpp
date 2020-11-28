@@ -38,7 +38,7 @@ namespace ops
     {
     }
 
-	InternalKey_T ReceiveDataHandlerFactory::makeKey(Topic& top, IOService* ioServ)
+	InternalKey_T ReceiveDataHandlerFactory::makeKey(const Topic& top, IOService* const ioServ)
 	{
 		// Since topics can use the same port for transports multicast & tcp, or 
 		// use transport udp which in most cases use a single ReceiveDataHandler, 
@@ -60,9 +60,9 @@ namespace ops
     std::shared_ptr<ReceiveDataHandler> ReceiveDataHandlerFactory::getReceiveDataHandler(Topic& top, Participant& participant)
     {
 		// Make a key with the transport info that uniquely defines the receiver.
-		InternalKey_T key = makeKey(top, participant.getIOService());
+		const InternalKey_T key = makeKey(top, participant.getIOService());
 
-        SafeLock lock(&garbageLock);
+        const SafeLock lock(&garbageLock);
         if (receiveDataHandlerInstances.find(key) != receiveDataHandlerInstances.end())
         {
             // If we already have a ReceiveDataHandler for this topic, use it.
@@ -84,6 +84,14 @@ namespace ops
 				}
 				BasicError err("ReceiveDataHandlerFactory", "getReceiveDataHandler", msg);
 				participant.reportError(&err);
+            }
+
+            if (top.getSampleMaxSize() > rdh->getSampleMaxSize()) {
+                ErrorMessage_T msg("Error: Topic '");
+                msg += top.getName();
+                msg += "' has larger 'sampleMaxSize' than previous topics using same transport and port";
+                BasicError err("ReceiveDataHandlerFactory", "getReceiveDataHandler", msg);
+                participant.reportError(&err);
             }
             return rdh;
         }
@@ -120,12 +128,12 @@ namespace ops
     void ReceiveDataHandlerFactory::releaseReceiveDataHandler(Topic& top, Participant& participant)
     {
 		// Make a key with the transport info that uniquely defines the receiver.
-		InternalKey_T key = makeKey(top, participant.getIOService());
+		const InternalKey_T key = makeKey(top, participant.getIOService());
 
-		SafeLock lock(&garbageLock);
+		const SafeLock lock(&garbageLock);
         if (receiveDataHandlerInstances.find(key) != receiveDataHandlerInstances.end())
         {
-            std::shared_ptr<ReceiveDataHandler> rdh = receiveDataHandlerInstances[key];
+            const std::shared_ptr<ReceiveDataHandler> rdh = receiveDataHandlerInstances[key];
             if (rdh->Notifier<OPSMessage*>::getNrOfListeners() == 0)
             {
                 //Time to mark this receiveDataHandler as garbage.
@@ -144,7 +152,7 @@ namespace ops
 
     void ReceiveDataHandlerFactory::cleanUpReceiveDataHandlers()
     {
-        SafeLock lock(&garbageLock);
+        const SafeLock lock(&garbageLock);
         
         for (int i = (int)garbageReceiveDataHandlers.size() - 1; i >= 0; i--)
         {
@@ -152,7 +160,7 @@ namespace ops
                 (garbageReceiveDataHandlers[i]->asyncFinished()))
             {
                 garbageReceiveDataHandlers[i].reset();
-                auto iter = garbageReceiveDataHandlers.begin() + i;
+                const auto iter = garbageReceiveDataHandlers.begin() + i;
                 garbageReceiveDataHandlers.erase(iter);
             }
         }
@@ -160,15 +168,15 @@ namespace ops
 
 	bool ReceiveDataHandlerFactory::cleanUpDone()
 	{
-        SafeLock lock(&garbageLock);
+        const SafeLock lock(&garbageLock);
 		return garbageReceiveDataHandlers.size() == 0;
 	}
 
     bool ReceiveDataHandlerFactory::dataAvailable()
     {
-        SafeLock lock(&garbageLock);
-        for (auto& rdh : receiveDataHandlerInstances) {
-            if (rdh.second->dataAvailable()) return true;
+        const SafeLock lock(&garbageLock);
+        for (const auto& rdh : receiveDataHandlerInstances) {
+            if (rdh.second->dataAvailable()) { return true; }
         }
         return false;
     }

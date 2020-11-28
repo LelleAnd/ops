@@ -26,7 +26,7 @@ namespace ops
 	class BytesSizePair
 	{
 	public:
-		BytesSizePair(char* b, int s) :
+		BytesSizePair(char* b, int s) noexcept :
 		  bytes(b),
 		  size(s)
 		{

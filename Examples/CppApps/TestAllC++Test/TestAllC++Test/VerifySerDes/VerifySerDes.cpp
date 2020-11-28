@@ -26,6 +26,7 @@ char arr[TestAll::Definitions::const_b];
 #include <MemoryMap.h>
 #include <OPSConfigRepository.h>
 #include "PrintArchiverOut.h"
+#include "ChecksumArchiver.h"
 #include "OPSArchiverOut.h"
 
 #ifdef _WIN32
@@ -167,7 +168,6 @@ void checkEmpty(const TestAll::ChildData& data)
 	for (int i = 0; i < 4; i++) { checkEmpty(data.ftest2s2[i]); }
 
 	AssertEQ<size_t>(data.fruitarr.size(), 0);
-	//    Fruit ffruitarr[15];
 	for (int i = 0; i < 15; i++) { AssertEQ<int>(data.ffruitarr[i].value, TestAll::Fruit::APPLE); }
 }
 
@@ -185,14 +185,16 @@ void checkObjects(const TestAll::ChildData& data, const TestAll::ChildData& exp)
 	AssertEQ<std::string>(data.baseText, exp.baseText, "baseText");
 
 	AssertEQ<size_t>(data.stringOpenArr.size(), exp.stringOpenArr.size(), "stringOpenArr");
-	for (size_t i = 0; i < data.stringOpenArr.size(); i++) { AssertEQ<std::string>(data.stringOpenArr[i], exp.stringOpenArr[i], "stringOpenArr"); }
+    AssertEQ<size_t>(data.stringOpenArr.size(), 2, "stringOpenArr");
+    for (size_t i = 0; i < 2; i++) { AssertEQ<std::string>(data.stringOpenArr[i], exp.stringOpenArr[i], "stringOpenArr"); }
 
 	for (int i = 0; i < 5; i++) { AssertEQ<std::string>(data.stringFixArr[i], exp.stringFixArr[i], "stringFixArr"); }
 
 	AssertEQ<ops::strings::fixed_string<23>>(data.fixLengthString, exp.fixLengthString, "fixLengthString");
 
 	AssertEQ<size_t>(data.fixLengthStringOpenArr.size(), exp.fixLengthStringOpenArr.size(), "fixLengthStringOpenArr");
-	for (size_t i = 0; i < data.fixLengthStringOpenArr.size(); i++) { AssertEQ<ops::strings::fixed_string<16>>(data.fixLengthStringOpenArr[i], exp.fixLengthStringOpenArr[i], "fixLengthStringOpenArr"); }
+    AssertEQ<size_t>(data.fixLengthStringOpenArr.size(), 2, "fixLengthStringOpenArr");
+    for (size_t i = 0; i < 2; i++) { AssertEQ<ops::strings::fixed_string<16>>(data.fixLengthStringOpenArr[i], exp.fixLengthStringOpenArr[i], "fixLengthStringOpenArr"); }
 
 	for (int i = 0; i < 10; i++) { AssertEQ<ops::strings::fixed_string<16>>(data.fixLengthStringFixArr[i], exp.fixLengthStringFixArr[i], "fixLengthStringFixArr"); }
 
@@ -200,7 +202,8 @@ void checkObjects(const TestAll::ChildData& data, const TestAll::ChildData& exp)
 	//  enums
 	AssertEQ<TestAll::ChildData::Order>(data.enu1, exp.enu1);
 	AssertEQ<size_t>(data.enuVec.size(), exp.enuVec.size());
-	for (unsigned int i = 0; i < data.enuVec.size(); i++) { AssertEQ<TestAll::ChildData::Order>(data.enuVec[i], exp.enuVec[i]); }
+    AssertEQ<size_t>(data.enuVec.size(), 5);
+    for (unsigned int i = 0; i < 5; i++) { AssertEQ<TestAll::ChildData::Order>(data.enuVec[i], exp.enuVec[i]); }
 	for (int i = 0; i < 6; i++) { AssertEQ<TestAll::ChildData::Order>(data.enuFixArr[i], exp.enuFixArr[i]); }
 	AssertEQ< TestAll::Definitions::Command>(data.cmd, exp.cmd);
 	for (int i = 0; i < 2; i++) { AssertEQ<TestAll::Definitions::Command>(data.cmds[i], exp.cmds[i]); }
@@ -229,51 +232,63 @@ void checkObjects(const TestAll::ChildData& data, const TestAll::ChildData& exp)
 
 	// vectors
 	AssertEQ<size_t>(data.bos.size(), exp.bos.size());
-	for (unsigned int i = 0; i < data.bos.size(); i++) { AssertEQ<bool>(data.bos[i], exp.bos[i]); }
+    AssertEQ<size_t>(data.bos.size(), 3);
+    for (unsigned int i = 0; i < 3; i++) { AssertEQ<bool>(data.bos[i], exp.bos[i]); }
 	for (int i = 0; i < 11; i++) { AssertEQ<bool>(data.fbos[i], exp.fbos[i]); }
 
 	AssertEQ<size_t>(data.bs.size(), exp.bs.size());
-	for (unsigned int i = 0; i < data.bs.size(); i++) { AssertEQ<char>(data.bs[i], exp.bs[i]); }
+    AssertEQ<size_t>(data.bs.size(), 3);
+    for (unsigned int i = 0; i < 3; i++) { AssertEQ<char>(data.bs[i], exp.bs[i]); }
 	for (int i = 0; i < 256; i++) { AssertEQ<char>(data.fbs[i], exp.fbs[i]); }
 
 	AssertEQ<size_t>(data.shs.size(), exp.shs.size());
-	for (unsigned int i = 0; i < data.shs.size(); i++) { AssertEQ<short>(data.shs[i], exp.shs[i]); }
+    AssertEQ<size_t>(data.shs.size(), 2);
+    for (unsigned int i = 0; i < 2; i++) { AssertEQ<short>(data.shs[i], exp.shs[i]); }
 	for (int i = 0; i < 4; i++) { AssertEQ<short>(data.fshs[i], exp.fshs[i]); }
 
 	AssertEQ<size_t>(data.is_.size(), exp.is_.size());
-	for (unsigned int i = 0; i < data.is_.size(); i++) { AssertEQ<int>(data.is_[i], exp.is_[i]); }
+    AssertEQ<size_t>(data.is_.size(), 4);
+    for (unsigned int i = 0; i < 4; i++) { AssertEQ<int>(data.is_[i], exp.is_[i]); }
 	for (int i = 0; i < 3; i++) { AssertEQ<int>(data.fis_[i], exp.fis_[i]); }
 
 	AssertEQ<size_t>(data.ls.size(), exp.ls.size());
-	for (unsigned int i = 0; i < data.ls.size(); i++) { AssertEQ<int64_t>(data.ls[i], exp.ls[i]); }
-	for(int i = 0; i < 6; i++) AssertEQ<int64_t>(data.fls[i], exp.fls[i]);
+    AssertEQ<size_t>(data.ls.size(), 4);
+    for (unsigned int i = 0; i < 4; i++) { AssertEQ<int64_t>(data.ls[i], exp.ls[i]); }
+    for (int i = 0; i < 6; i++) { AssertEQ<int64_t>(data.fls[i], exp.fls[i]); }
 
 	AssertEQ<size_t>(data.fs.size(), exp.fs.size());
-	for (unsigned int i = 0; i < data.fs.size(); i++) { AssertEQ<float>(data.fs[i], exp.fs[i]); }
-	for(int i = 0; i < 77; i++) AssertEQ<float>(data.ffs[i], exp.ffs[i]);
+    AssertEQ<size_t>(data.fs.size(), 4);
+    for (unsigned int i = 0; i < 4; i++) { AssertEQ<float>(data.fs[i], exp.fs[i]); }
+    for (int i = 0; i < 77; i++) { AssertEQ<float>(data.ffs[i], exp.ffs[i]); }
 
 	AssertEQ<size_t>(data.ds.size(), exp.ds.size());
-	for (unsigned int i = 0; i < data.ds.size(); i++) { AssertEQ<double>(data.ds[i], exp.ds[i]); }
+    AssertEQ<size_t>(data.ds.size(), 2);
+    for (unsigned int i = 0; i < 2; i++) { AssertEQ<double>(data.ds[i], exp.ds[i]); }
 	for (int i = 0; i < 5; i++) { AssertEQ<double>(data.fds[i], exp.fds[i]); }
 
 	AssertEQ<size_t>(data.ss.size(), exp.ss.size());
-	for (unsigned int i = 0; i < data.ss.size(); i++) { AssertEQ<std::string>(data.ss[i], exp.ss[i]); }
+    AssertEQ<size_t>(data.ss.size(), 3);
+    for (unsigned int i = 0; i < 3; i++) { AssertEQ<std::string>(data.ss[i], exp.ss[i]); }
 	for (int i = 0; i < 10; i++) { AssertEQ<std::string>(data.fss[i], exp.fss[i]); }
 
 	AssertEQ<size_t>(data.test2s.size(), exp.test2s.size());
-	for (unsigned int i = 0; i < data.test2s.size(); i++) { checkObjects(*data.test2s[i], *exp.test2s[i]); }
+    AssertEQ<size_t>(data.test2s.size(), 4);
+    for (unsigned int i = 0; i < 4; i++) { checkObjects(*data.test2s[i], *exp.test2s[i]); }
 	for (int i = 0; i < 5; i++) { checkObjects(*data.ftest2s[i], *exp.ftest2s[i]); }
 
 	AssertEQ<size_t>(data.secondVirtArray.size(), exp.secondVirtArray.size());
-	for (unsigned int i = 0; i < data.secondVirtArray.size(); i++) { checkObjects(*data.secondVirtArray[i], *exp.secondVirtArray[i]); }
+    AssertEQ<size_t>(data.secondVirtArray.size(), 2);
+    for (unsigned int i = 0; i < 2; i++) { checkObjects(*data.secondVirtArray[i], *exp.secondVirtArray[i]); }
 	for (int i = 0; i < 7; i++) { checkObjects(*data.fsecondVirtArray[i], *exp.fsecondVirtArray[i]); }
 
 	AssertEQ<size_t>(data.test2s2.size(), exp.test2s2.size());
-	for (unsigned int i = 0; i < data.test2s2.size(); i++) { checkObjects(data.test2s2[i], exp.test2s2[i]); }
+    AssertEQ<size_t>(data.test2s2.size(), 11);
+    for (unsigned int i = 0; i < 11; i++) { checkObjects(data.test2s2[i], exp.test2s2[i]); }
 	for (int i = 0; i < 4; i++) { checkObjects(data.ftest2s2[i], exp.ftest2s2[i]); }
 
 	AssertEQ<size_t>(data.fruitarr.size(), exp.fruitarr.size());
-	for (unsigned int i = 0; i < data.fruitarr.size(); i++) { AssertEQ<int>(data.fruitarr[i].value, exp.fruitarr[i].value); }
+    AssertEQ<size_t>(data.fruitarr.size(), 2);
+    for (unsigned int i = 0; i < 2; i++) { AssertEQ<int>(data.fruitarr[i].value, exp.fruitarr[i].value); }
 	for (int i = 0; i < 15; i++) { AssertEQ<int>(data.ffruitarr[i].value, exp.ffruitarr[i].value); }
 }
 
@@ -485,7 +500,6 @@ int main(const int argc, const char* args[])
 		checkEmpty(cd2);
 		checkEmpty(cd3);
 
-		checkObjects(cd1, cd2);
 		std::cout << "Finished " << std::endl;
 
 #if defined(DEBUG_OPSOBJECT_COUNTER)
@@ -495,7 +509,7 @@ int main(const int argc, const char* args[])
 		fillChildData(cd1);
 
 		std::cout << "Test copy constructor..." << std::endl;
-		TestAll::ChildData cd2c(cd1);
+		const TestAll::ChildData cd2c(cd1);
 		checkObjects(cd1, cd2c);
 		std::cout << "Finished " << std::endl;
 
@@ -510,8 +524,8 @@ int main(const int argc, const char* args[])
 
 		// Test that all is cleared in cd2 by cloning an empty object
 		cd3.fillClone(&cd2);
-		checkObjects(cd3, cd2);
-
+        checkEmpty(cd2);
+        
 		// Fill cd2 object again, it is needed below
 		cd1.fillClone(&cd2);
 		checkObjects(cd1, cd2);
@@ -529,6 +543,18 @@ int main(const int argc, const char* args[])
 			prt.printObject("data", &cd1);
 		}
 		std::cout << "Print Archiver Test Finished " << std::endl;
+
+        std::cout << "Test Checksum Archiver" << std::endl;
+        {
+            ops::ChecksumArchiver<ops::example::calculator_xor_8> chk;
+            chk.calc.sum = 0;
+            cd1.serialize(&chk);
+            AssertEQ((int)chk.calc.sum, 140, "Checksum error");
+
+            std::cout << "Checksum Archiver # fields = " << chk.calc.totalfields << std::endl;
+            std::cout << "Checksum Archiver # bytes = " << chk.calc.totalbytes << std::endl;
+            std::cout << "Checksum Archiver 8-bit XOR = " << (int)chk.calc.sum << std::endl;
+        }
 
 #if defined(DEBUG_OPSOBJECT_COUNTER)
 		std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
@@ -646,8 +672,8 @@ int main(const int argc, const char* args[])
 
 			std::cout << "Waiting for more data during 60 seconds... (Press Ctrl-C to terminate)" << std::endl;
 			int64_t PubTime = ops::TimeHelper::currentTimeMillis() + 5000;
-			int64_t Limit = ops::TimeHelper::currentTimeMillis() + 60000;
-			while (!gTerminate) {
+			const int64_t Limit = ops::TimeHelper::currentTimeMillis() + 60000;
+			while ((!gTerminate) && (Limit >= ops::TimeHelper::currentTimeMillis())) {
 				if (sub.waitForNewData(100)) {
 					sub.aquireMessageLock();
 					std::cout << "Received new data from " << sub.getMessage()->getPublisherName() << ". Checking..." << std::endl;
@@ -663,7 +689,6 @@ int main(const int argc, const char* args[])
 					PubTime = ops::TimeHelper::currentTimeMillis() + 5000;
 					pub.write(cd1);
 				}
-				if (Limit < ops::TimeHelper::currentTimeMillis()) break;
 			}
 		}
 

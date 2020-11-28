@@ -148,7 +148,7 @@ void ListDomains()
 	std::cout << "   " << std::setw(20) << "---------" << "   " << std::setw(20) << "---------------" << 
 		"   " << std::setw(20) << "--------------" << "   " << std::setw(8) << "--------" <<
 		"\n";
-	for (auto& d : domains) {
+	for (const auto& d : domains) {
 		if (d->getDebugMcPort() != 0) {
 			std::cout << 
 				"   " << std::setw(20) << d->getDomainID() << 
@@ -162,14 +162,14 @@ void ListDomains()
 
 void ForAllTopics(DebugListener& listener, opsidls::DebugRequestResponseDataPublisher& pub)
 {
-	for (auto n : listener._topics) {
+	for (const auto n : listener._topics) {
 		request.Name = n;
 		pub.write(request);
 		ops::TimeHelper::sleep(20);
 	}
 }
 
-void CommandLoop(const ops::Participant* part)
+void CommandLoop(const ops::Participant* const part)
 {
 	request.setKey("Pizza");
 	request.Entity = 2;	// Publisher

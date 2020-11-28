@@ -750,12 +750,12 @@ TEST(Test_ByteBuffer, TestSegmentsMinimal) {
 	size += 15 * 1;
 	EXPECT_EQ(buf.GetSize(), size);
 
-	std::string str1 = TEST_STRING;
+	const std::string str1 = TEST_STRING;
 	buf.WriteString(str1);
 	size += 15 * (4 + (int)TEST_STRING.size());
 	EXPECT_EQ(buf.GetSize(), size);
 
-	strings::fixed_string<100> fstr1 = TEST_FIXSTRING;
+	const strings::fixed_string<100> fstr1 = TEST_FIXSTRING;
 	buf.WriteString(fstr1);
 	size += 15 * (4 + (int)TEST_FIXSTRING.size());
 	EXPECT_EQ(buf.GetSize(), size);

@@ -155,7 +155,7 @@ namespace ops
 		}
 		
 		// Called from periodic timer
-		void onNewEvent(Notifier<int>*, int)
+		void onNewEvent(Notifier<int>*, int) override
 		{
             _doPeriodic = true;
             SafeTryLock lck(&_mtx);
@@ -197,7 +197,7 @@ namespace ops
 		std::vector<std::shared_ptr<TCPConnection>> _connectedSockets;
 		std::vector<ConnectStatus> _connectedStatus;
 		Lockable _mtx;
-		DeadlineTimer* _timer;
+        DeadlineTimer* _timer{ nullptr };
 		const int64_t period = 1000;
 
 	private:

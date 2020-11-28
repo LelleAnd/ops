@@ -14,7 +14,7 @@ public:
 	Test_OPS_Serialization_And_Deserialization() {
 	}
 
-    ~Test_OPS_Serialization_And_Deserialization() {}
+  virtual ~Test_OPS_Serialization_And_Deserialization() {}
 
 	Test_OPS_Serialization_And_Deserialization(const Test_OPS_Serialization_And_Deserialization& r) = delete;
 	Test_OPS_Serialization_And_Deserialization& operator= (const Test_OPS_Serialization_And_Deserialization& l) = delete;

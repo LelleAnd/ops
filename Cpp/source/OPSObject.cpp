@@ -73,7 +73,7 @@ namespace ops
 
 	OPSObject* OPSObject::clone()
 	{
-		OPSObject* obj = new OPSObject();
+		OPSObject* const obj = new OPSObject();
 		fillClone(obj);
 		return obj;
 	}
@@ -83,23 +83,23 @@ namespace ops
 		obj->key = key;
 		obj->typesString = typesString;
 		// Copy spareBytes vector
-		size_t len = spareBytes.size();
+		const size_t len = spareBytes.size();
 		obj->spareBytes.reserve(len);
 		obj->spareBytes.resize(len, 0);
 		if (len > 0) { memcpy((void*)&obj->spareBytes[0], &spareBytes[0], len); }
 	}
 
-	ObjectKey_T OPSObject::getKey() const
+	ObjectKey_T OPSObject::getKey() const noexcept
     {
          return key;
     }
 
-	const TypeId_T& OPSObject::getTypeString() const
+	const TypeId_T& OPSObject::getTypeString() const noexcept
 	{
 		return typesString;
 	}
 
-	void OPSObject::setKey(ObjectKey_T k)
+	void OPSObject::setKey(const ObjectKey_T& k) noexcept
 	{
 		key = k;
 	}

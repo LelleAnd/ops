@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016-2019 Lennart Andersson.
+* Copyright (C) 2016-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -35,10 +35,11 @@ namespace ops
         Transport_T linktype;
         Address_T localInterface;     // If multicast, this specifies interface to use
         Address_T domainAddress;
-        int timeToLive;                 // if multicast, this specifies the ttl parameter
-        int port;
-        int64_t outSocketBufferSize;
-        int64_t inSocketBufferSize;
+        int timeToLive{ -1 };         // if multicast, this specifies the ttl parameter
+        int port{ 0 };
+        int64_t outSocketBufferSize{ -1 };
+        int64_t inSocketBufferSize{ -1 };
+        int sampleMaxSize{ -1 };
 
         Channel();
 

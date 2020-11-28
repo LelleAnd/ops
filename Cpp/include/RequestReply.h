@@ -75,8 +75,8 @@ namespace ops
 			delete pub;
 		}
 	private:
-		Subscriber* sub;
-		Publisher* pub;
+        Subscriber* sub{ nullptr };
+        Publisher* pub{ nullptr };
 		KeyFilterQoSPolicy keyFilter;
 		ObjectKey_T key;
     };

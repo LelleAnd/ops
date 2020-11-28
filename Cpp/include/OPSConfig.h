@@ -65,7 +65,7 @@ namespace ops
 			return domains;
 		}
 
-        std::vector<Domain*>& getRefToDomains()
+        std::vector<Domain*>& getRefToDomains() noexcept
         {
             return domains;
         }

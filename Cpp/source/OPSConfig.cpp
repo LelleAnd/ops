@@ -42,9 +42,8 @@ namespace ops
 			return getConfig(inStream);
 		} else {
 #ifdef _WIN32
-			char* buffer = nullptr;
-			buffer = _getcwd(nullptr, 0);
-			if (buffer) {
+			char* buffer = _getcwd(nullptr, 0);
+			if (buffer != nullptr) {
 				ErrorMessage_T msg("Failed to open ");
 				msg += configFile;
 				msg += ". Working Dir: ";
@@ -60,14 +59,14 @@ namespace ops
 
     std::shared_ptr<OPSConfig> OPSConfig::getConfig()
 	{
-		static std::shared_ptr<OPSConfig> theConfiguration = OPSConfigRepository::Instance()->getConfig();
+		static const std::shared_ptr<OPSConfig> theConfiguration = OPSConfigRepository::Instance()->getConfig();
 		return theConfiguration;
 	}
 
     std::shared_ptr<OPSConfig> OPSConfig::getConfig(std::istream& inStream)
 	{
 		XMLArchiverIn archiver(inStream, "root", OPSObjectFactory::getInstance());
-		OPSConfig* theConfig = nullptr;
+		OPSConfig* const theConfig = nullptr;
 		return std::shared_ptr<OPSConfig>((OPSConfig*)archiver.inout("ops_config", theConfig));
 	}
 

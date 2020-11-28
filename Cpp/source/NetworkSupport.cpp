@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2019-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -35,48 +35,48 @@
 namespace ops
 {
 
-	uint32_t IPString2Addr(Address_T addr) 
+	uint32_t IPString2Addr(const Address_T addr) 
 	{
 		return (uint32_t)boost::asio::ip::address_v4::from_string(addr.c_str()).to_ulong();
 	}
 
-	Address_T IPAddr2String(uint32_t addr)
+	Address_T IPAddr2String(const uint32_t addr)
 	{
 		return boost::asio::ip::address_v4(addr).to_string();
 	}
 
 	// Return true if a valid MC address (224.0.0.0 to 239.255.255.255)
-	bool isValidMCAddress(Address_T addr)
+	bool isValidMCAddress(const Address_T addr)
 	{
 		//std::cout << "isValidNodeAddress(): " << addr << std::endl;
-		if (addr == "") return false;
-		unsigned long Ip = boost::asio::ip::address_v4::from_string(addr.c_str()).to_ulong();
+        if (addr == "") { return false; }
+		const unsigned long Ip = boost::asio::ip::address_v4::from_string(addr.c_str()).to_ulong();
 		//std::cout << "isValidNodeAddress(): " << std::hex << Ip << std::dec << std::endl;
-		if ((Ip >= 0xE0000000) && (Ip < 0xF0000000)) return true;
+        if ((Ip >= 0xE0000000) && (Ip < 0xF0000000)) { return true; }
 		return false;
 	}
 
 	// Return true if a valid node address
-	bool isValidNodeAddress(Address_T addr)
+	bool isValidNodeAddress(const Address_T addr)
 	{
 		//std::cout << "isValidNodeAddress(): " << addr << std::endl;
-		if (addr == "") return false;
-		unsigned long Ip = boost::asio::ip::address_v4::from_string(addr.c_str()).to_ulong();
+        if (addr == "") { return false; }
+		const unsigned long Ip = boost::asio::ip::address_v4::from_string(addr.c_str()).to_ulong();
 		//std::cout << "isValidNodeAddress(): " << std::hex << Ip << std::dec << std::endl;
-		if (Ip == 0) return false;
-		if (Ip >= 0xE0000000) return false;  // Skip multicast and above
+        if (Ip == 0) { return false; }
+        if (Ip >= 0xE0000000) { return false; }  // Skip multicast and above
 		return true;
 	}
 
-	bool isMyNodeAddress(Address_T addr, IOService* const ioServ)
+	bool isMyNodeAddress(const Address_T addr, IOService* const ioServ)
 	{
 		//std::cout << "isMyNodeAddress(): " << addr << std::endl;
-		if (addr == "") return false;
-		unsigned long Ip = boost::asio::ip::address_v4::from_string(addr.c_str()).to_ulong();
+        if (addr == "") { return false; }
+		const unsigned long Ip = boost::asio::ip::address_v4::from_string(addr.c_str()).to_ulong();
 		//std::cout << "isMyNodeAddress(): " << std::hex << Ip << std::dec << std::endl;
-		if (Ip == 0x7F000001) return true;  // localhost
+        if (Ip == 0x7F000001) { return true; }  // localhost
 
-		boost::asio::io_service* ioService = dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService;
+		boost::asio::io_service* const ioService = BoostIOServiceImpl::get(ioServ);
 
 		using boost::asio::ip::udp;
 
@@ -84,15 +84,15 @@ namespace ops
 		// e.g due to the hostname beeing listed with an ipv4 address in /etc/hosts.
 		// On linux this can be tested by using the command "hostname -i"
 		udp::resolver resolver(*ioService);
-		udp::resolver::query query(boost::asio::ip::host_name(), "");
+		const udp::resolver::query query(boost::asio::ip::host_name(), "");
 		udp::resolver::iterator it = resolver.resolve(query);
-		udp::resolver::iterator end;
+		const udp::resolver::iterator end;
 		while (it != end) {
-			boost::asio::ip::address ipaddr = it->endpoint().address();
+			const boost::asio::ip::address ipaddr = it->endpoint().address();
 			if (ipaddr.is_v4()) {
-				unsigned long myIp = ipaddr.to_v4().to_ulong();
+				const unsigned long myIp = ipaddr.to_v4().to_ulong();
 				//std::cout << "isMyNodeAddress() avail: " << std::hex << myIp << std::dec << std::endl;
-				if (myIp == Ip) return true;
+                if (myIp == Ip) { return true; }
 			}
 			++it;
 		}
@@ -103,41 +103,42 @@ namespace ops
 // e.g "192.168.10.0/255.255.255.0" or "192.168.10.0/24"
 // In that case we loop over all interfaces and take the first one that matches
 // i.e. the one whos interface address is on the subnet
-Address_T doSubnetTranslation(Address_T addr, IOService* const ioServ)
+Address_T doSubnetTranslation(const Address_T addr, IOService* const ioServ)
 {
 	using boost::asio::ip::udp;
 
 	Address_T::size_type index;
 
 	index = addr.find("/");
-	if (index == Address_T::npos) return addr;
+    if (index == Address_T::npos) { return addr; }
 
 	Address_T subnet = addr.substr(0, index);
-	Address_T mask = addr.substr(index+1);
+	const Address_T mask = addr.substr(index+1);
 
-	unsigned long subnetIp = boost::asio::ip::address_v4::from_string(subnet.c_str()).to_ulong();
+	const unsigned long subnetIp = boost::asio::ip::address_v4::from_string(subnet.c_str()).to_ulong();
 	unsigned long subnetMask;
 	if (mask.length() <= 2) {
 		// Expand to the number of bits given
 		subnetMask = atoi(mask.c_str());
-		subnetMask = (((1 << subnetMask)-1) << (32 - subnetMask)) & 0xFFFFFFFF;
+        if ((subnetMask == 0) || (subnetMask > 31)) { return subnet; }
+		subnetMask = (((1u << subnetMask)-1u) << (32u - subnetMask)) & 0xFFFFFFFF;
 	} else {
 		subnetMask = boost::asio::ip::address_v4::from_string(mask.c_str()).to_ulong();
 	}
 
-	boost::asio::io_service* ioService = dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService;
+	boost::asio::io_service* const ioService = BoostIOServiceImpl::get(ioServ);
 
 	// Note: The resolver requires that the hostname can be used to resolve to an ip
 	// e.g due to the hostname beeing listed with an ipv4 address in /etc/hosts.
 	// On linux this can be tested by using the command "hostname -i"
 	udp::resolver resolver(*ioService);
-	udp::resolver::query query(boost::asio::ip::host_name(), "");
+	const udp::resolver::query query(boost::asio::ip::host_name(), "");
 	udp::resolver::iterator it = resolver.resolve(query);
-	udp::resolver::iterator end;
+	const udp::resolver::iterator end;
 	while (it != end) {
-		boost::asio::ip::address ipaddr = it->endpoint().address();
+		const boost::asio::ip::address ipaddr = it->endpoint().address();
 		if (ipaddr.is_v4()) {
-			unsigned long Ip = ipaddr.to_v4().to_ulong();
+			const unsigned long Ip = ipaddr.to_v4().to_ulong();
 			if ((Ip & subnetMask) == (subnetIp & subnetMask)) {
 				return ipaddr.to_string().c_str();
 			}

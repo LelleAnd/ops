@@ -38,10 +38,9 @@ namespace ops
             sender = Sender::create(ioService, localInterface, ttl, topic.getOutSocketBufferSize());
         }
 
-        bool sendData(char* buf, int bufSize, Topic& topic)
+        bool sendData(char* buf, int bufSize, Topic& topic) override
         {
-            bool result = sender->sendTo(buf, bufSize, topic.getDomainAddress(), (uint16_t)topic.getPort());
-            return result;
+            return sender->sendTo(buf, bufSize, topic.getDomainAddress(), (uint16_t)topic.getPort());
         }
 
         virtual ~McSendDataHandler()

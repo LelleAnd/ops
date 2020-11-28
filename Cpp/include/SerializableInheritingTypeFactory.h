@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -33,8 +34,7 @@ public:
     /**
      * Tries to construct the most specialized object in the given typeString list
      */
-	virtual Serializable* create(const TypeId_T& typeString);
-    
+	virtual Serializable* create(const TypeId_T& typeString) override;
 };
 
 }

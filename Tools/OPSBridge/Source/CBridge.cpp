@@ -612,93 +612,96 @@ ops::Publisher* CBridge::setupPublisher(ops::Topic& destTopic)
 	return pd.pub;
 }
 
-// NOTE Called from transport thread
-void CBridge::onCommandMessage(CTransport* const sender, TCommandMessage& cmd)
+void CBridge::HandlePreparePubCommand(TCommandMessage& cmd)
 {
-    UNUSED(sender);
+    // cmd.DestTopicName contains Domain::TopicName to publish on
+    // cmd.DataType contains the expected type for the topic
+
+    // Check if publisher already created
+    ops::Publisher* pub = nullptr;
+    std::vector<TPublisherData>::iterator iter;
+    for (iter = m_publishers.begin(); iter != m_publishers.end(); iter++) {
+        if ((*iter).topicName == cmd.DestTopicName) {
+            pub = (*iter).pub;
+            break;
+        }
+    }
+    if (pub != nullptr) {
+        BL_TRACE("# [ CBridge (%s) ] Prepare Pub (EXISTED): %s\n", m_myName.c_str(), cmd.DestTopicName.c_str());
+        if (cmd.AckCounter < (*iter).AckNumber) {
+            // Other side has probably been restarted, so we need to clear our saved AckCounter's.
+            // Otherwise we will skip publish of messages until AckCounter becomes large enough
+            (*iter).AckNumber = 0;
+        }
+        return;
+    }
+
+    BL_TRACE("# [ CBridge (%s) ] Prepare Pub: %s\n", m_myName.c_str(), cmd.DestTopicName.c_str());
+
+    ops::ObjectName_T dom, top;
+    ops::utilities::splitTopicName(cmd.DestTopicName, dom, top);
+
+    // Get participant
+    ops::ObjectName_T partID(dom);
+    partID += "PubSpec";
+    ops::Participant* const part = ops::Participant::getInstance(dom, partID);
+    if (part != nullptr) {
+        // Check if we already has handled this participant
+        bool found = false;
+        for (unsigned int i = 0; i < m_vPubPart.size(); i++) {
+            if (part == m_vPubPart[i]) { found = true; }
+        }
+        if (!found) {
+            // If not add the special factory
+            part->addTypeSupport(new BridgeTypeFactory());
+            ///TODO add an error listener???
+            m_vPubPart.push_back(part);
+        }
+
+        // Check that topic exists
+        if (part->getConfig() != nullptr) {
+            bool exist = false;
+            try {
+                ops::Domain* const domain = part->getConfig()->getDomain(dom);
+                if (domain != nullptr) { exist = domain->existsTopic(top); }
+            }
+            catch (...) {
+                exist = false;
+            }
+            if (!exist) {
+                BL_TRACE("##### Topic: %s doesn't exist\n", cmd.DestTopicName.c_str());
+            }
+            else {
+                // Create topic
+                ops::Topic t = part->createTopic(top);
+
+                // Check data type
+                if (t.getTypeID() == cmd.DataType) {
+                    setupPublisher(t);
+                }
+                else {
+                    BL_TRACE("##### Topic: %s has wrong datatype\n", cmd.DestTopicName.c_str());
+                }
+            }
+        }
+    }
+}
+
+// NOTE Called from transport thread
+void CBridge::onCommandMessage(CTransport* , TCommandMessage& cmd)
+{
     UpdateReceiveTime();
 
 	// Commands
 	switch (cmd.Command) {
 		case ctPreparePub:
-			{
-///TODO
-/// We should probably send over the result if it is possible to publish
-/// This would save bandwidth 
-
-				// cmd.DestTopicName contains Domain::TopicName to publish on
-				// cmd.DataType contains the expected type for the topic
-				ops::ObjectName_T dom, top;
-				ops::utilities::splitTopicName(cmd.DestTopicName, dom, top);
-
-				// Check if publisher already created 
-				ops::Publisher* pub = nullptr;
-				std::vector<TPublisherData>::iterator iter;
-				for ( iter = m_publishers.begin(); iter != m_publishers.end(); iter++) {
-					if ((*iter).topicName == cmd.DestTopicName) {
-						pub = (*iter).pub;
-						break;
-					}
-				}
-				if (pub != nullptr) {
-					BL_TRACE("# [ CBridge (%s) ] Prepare Pub (EXISTED): %s\n", m_myName.c_str(), cmd.DestTopicName.c_str());
-					if (cmd.AckCounter < (*iter).AckNumber) {
-						// Other side has probably been restarted, so we need to clear our saved AckCounter's.
-						// Otherwise we will skip publish of messeges until AckCounter becomes large enough
-						(*iter).AckNumber = 0;
-					}
-					break;
-				}
-
-				BL_TRACE("# [ CBridge (%s) ] Prepare Pub: %s\n", m_myName.c_str(), cmd.DestTopicName.c_str());
-
-				try {
-					// Get participant
-					ops::ObjectName_T partID(dom);
-					partID += "PubSpec";
-					ops::Participant* const part = ops::Participant::getInstance(dom, partID);
-					if (part != nullptr) {
-						// Check if we already has handled this participant
-						bool found = false;
-						for (unsigned int i = 0; i < m_vPubPart.size(); i++) {
-							if (part == m_vPubPart[i]) { found = true; }
-						}
-						if (!found) {
-							// If not add the special factory
-							part->addTypeSupport(new BridgeTypeFactory());
-							///TODO add an error listener???
-							m_vPubPart.push_back(part);
-						}
-
-						// Check that topic exists
-						if (part->getConfig() != nullptr) {
-							bool exist = false;
-							try {
-								ops::Domain* const domain = part->getConfig()->getDomain(dom);
-								if (domain != nullptr) { exist = domain->existsTopic(top); }
-							}
-							catch (...) {
-								exist = false;
-							}
-							if (!exist) {
-								BL_TRACE("##### Topic: %s doesn't exist\n", cmd.DestTopicName.c_str());
-							} else {
-								// Create topic
-								ops::Topic t = part->createTopic(top);
-
-								// Check data type
-								if (t.getTypeID() == cmd.DataType) {
-									setupPublisher(t);
-								} else {
-									BL_TRACE("##### Topic: %s has wrong datatype\n", cmd.DestTopicName.c_str());
-								}
-							}
-						}
-					}
-				} 
-				catch (...) {
-				}
-			}
+            ///TODO
+            /// We should probably send over the result if it is possible to publish
+            /// This would save bandwidth 
+            try {
+                HandlePreparePubCommand(cmd);
+            } catch (...) {
+            }
 			break;
 
 		case ctPause: 
@@ -736,17 +739,15 @@ void CBridge::onStatusMessage(CTransport* const sender, const TStatusMessage& st
 
 // =================================================================================
 // NOTE Called from transport thread
-void CBridge::onUdpMcMessage(CTransport* const sender, TUdpMcMessage& udpMc, const char* data)
+void CBridge::onUdpMcMessage(CTransport* , const TUdpMcMessage& udpMc, const char* const data)
 {
-    UNUSED(sender);
     // We don't buffer Raw UDP/MC messages
 	m_raw.Write(udpMc, data);
 }
 
 // NOTE Called from RawMcUdp thread
-void CBridge::onUdpMcMessage(RawMcUdp* const sender, TUdpMcMessage& mess, const char* data)
+void CBridge::onUdpMcMessage(RawMcUdp* , TUdpMcMessage& mess, const char* const data)
 {
-    UNUSED(sender);
     // We don't buffer Raw UDP/MC messages
 	m_transport->writeUdpMcMessage(mess, data);
 }

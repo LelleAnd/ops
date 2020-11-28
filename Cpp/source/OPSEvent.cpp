@@ -29,10 +29,14 @@ namespace ops {
 #ifndef REPLACE_OPS_EVENT
     class Event::InternalImpl
     {
-        std::mutex mtx;
-        std::condition_variable cv;
-        bool signaled = false;
     public:
+        InternalImpl() = default;
+        InternalImpl(const InternalImpl&) = default;
+        InternalImpl(InternalImpl&&) = default;
+        InternalImpl& operator=(const InternalImpl&) = default;
+        InternalImpl& operator=(InternalImpl&&) = default;
+        virtual ~InternalImpl() = default;
+
         bool waitFor(const std::chrono::milliseconds& timeout)
         {
             std::unique_lock<std::mutex> lock(mtx);
@@ -49,10 +53,15 @@ namespace ops {
 
         void signal()
         {
-            std::unique_lock<std::mutex> lock(mtx);
+            const std::unique_lock<std::mutex> lock(mtx);
             signaled = true;
             cv.notify_one();
         }
+
+    private:
+        std::mutex mtx;
+        std::condition_variable cv;
+        bool signaled = false;
     };
 
     Event::Event() : _impl(new InternalImpl) {}

@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2019 Lennart Andersson.
+ * Copyright (C) 2019-2020 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -33,7 +33,7 @@ namespace ops
 		TypeId_T::size_type j = typeString.find(' ');
 
 		while (j != TypeId_T::npos) {
-			Serializable* serializable = SerializableCompositeFactory::create(typeString.substr(i, j - i));
+			Serializable* const serializable = SerializableCompositeFactory::create(typeString.substr(i, j - i));
 			if (serializable != nullptr) {
 				return serializable;
 			}

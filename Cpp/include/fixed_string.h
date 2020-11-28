@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2017-2019 Lennart Andersson.
+* Copyright (C) 2017-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -34,6 +34,9 @@
 	// VS2013 an earlier also defines _cplusplus to 199711L but does not support the features.
 	#define FIXED_C11_DETECTED
 #endif
+#ifndef FIXED_C11_DETECTED
+#error C++11 Compiler required
+#endif
 
 #if __cplusplus >= 201402L		// Value according to standard for full C++14 conformity
 	#define FIXED_C14_DETECTED
@@ -51,14 +54,6 @@
 	#endif
 #endif
 
-#ifndef NOEXCEPT
-	#ifdef FIXED_C11_DETECTED
-		#define NOEXCEPT noexcept
-	#else
-		#define NOEXCEPT
-	#endif
-#endif
-
 #ifdef FIXED_C17_DETECTED
 #define FIXED_IF_CONSTEXPR if constexpr
 #else
@@ -72,12 +67,12 @@ namespace ops { namespace strings {
 	public:
 		typedef size_t size_type;
 		// Capacity:
-		virtual size_type size() const NOEXCEPT = 0;
-		virtual size_type length() const NOEXCEPT = 0;
+		virtual size_type size() const noexcept = 0;
+		virtual size_type length() const noexcept = 0;
 
 		// String operations
-		virtual const char* data() const NOEXCEPT = 0;
-		virtual const char* c_str() const NOEXCEPT = 0;
+		virtual const char* data() const noexcept = 0;
+		virtual const char* c_str() const noexcept = 0;
 	};
 
 	typedef enum { truncate_string, throw_exception } overrun_policy_t;
@@ -88,33 +83,33 @@ namespace ops { namespace strings {
 	public:
 		typedef basic_fixed_string::size_type size_type;
 	private:
-		char _array[N + 1];
-		size_type _size;
+        char _array[N + 1]{ 0 };
+        size_type _size{ 0 };
 	public:
 		// Exceptions:
 		struct index_out_of_range : public std::exception {
-			const char* what() const NOEXCEPT { return "Index too large"; }
+			const char* what() const noexcept { return "Index too large"; }
 		};
 		struct size_out_of_range : public std::exception {
-			const char* what() const NOEXCEPT { return "String too large"; }
+			const char* what() const noexcept { return "String too large"; }
 		};
 
 		// Constructors:
-		fixed_string() : _size(0) { _array[0] = '\0'; }
-		fixed_string(char* s) : _size(0) { append(s, strlen(s)); }
-		fixed_string(const char* s) : _size(0) { append(s, strlen(s)); }
-		fixed_string(char* s, size_type len) : _size(0) { size_type sz = strlen(s); append(s, (sz < len) ? sz : len); }
-		fixed_string(const char* s, size_type len) : _size(0) { size_type sz = strlen(s); append(s, (sz < len) ? sz : len); }
+		fixed_string() noexcept { }
+		fixed_string(char* s) { append(s, strlen(s)); }
+		fixed_string(const char* s) { append(s, strlen(s)); }
+		fixed_string(char* s, size_type len) { size_type sz = strlen(s); append(s, (sz < len) ? sz : len); }
+		fixed_string(const char* s, size_type len) { const size_type sz = strlen(s); append(s, (sz < len) ? sz : len); }
 #ifndef FIXED_NO_STD_STRING
-		fixed_string(const std::string s) : _size(0) { append(s.c_str(), s.size()); }
+		fixed_string(const std::string s) { append(s.c_str(), s.size()); }
 #endif
 
 		template<size_t M, overrun_policy_t POL>
-		fixed_string(const fixed_string<M, POL>& str) : _size(0) { append(str.c_str(), str.size()); }
+		fixed_string(const fixed_string<M, POL>& str) { append(str.c_str(), str.size()); }
 
 		// Construction from any type that have c_str() and size() methods
 		template<typename T>
-		fixed_string(const T& str) : _size(0) { append(str.c_str(), str.size()); }
+		fixed_string(const T& str) { append(str.c_str(), str.size()); }
 
 		// all the special members can be defaulted
 #ifdef FIXED_C11_DETECTED
@@ -129,10 +124,10 @@ namespace ops { namespace strings {
 		// ...
 
 		// Capacity:
-		size_type size() const NOEXCEPT { return _size; }
-		size_type length() const NOEXCEPT { return _size; }
-		size_type max_size() const NOEXCEPT { return N; }
-		void resize() 
+		size_type size() const noexcept { return _size; }
+		size_type length() const noexcept { return _size; }
+		size_type max_size() const noexcept { return N; }
+		void resize() noexcept
 		{
 			_array[N] = '\0';	// make sure the array is null terminated
 			_size = strlen(&_array[0]); 
@@ -149,8 +144,8 @@ namespace ops { namespace strings {
 			_array[_size] = '\0';
 		}
 
-		void clear() NOEXCEPT { _array[0] = '\0'; _size = 0; }
-		bool empty() const NOEXCEPT { return _size == 0; }
+		void clear() noexcept { _array[0] = '\0'; _size = 0; }
+		bool empty() const noexcept { return _size == 0; }
 
 		// Element access:
 		char& operator[] (size_type pos)
@@ -214,21 +209,21 @@ namespace ops { namespace strings {
 #endif
 
 		// String operations
-		const char* data() const NOEXCEPT { return &_array[0]; }
-		const char* c_str() const NOEXCEPT { return &_array[0]; }
+		const char* data() const noexcept { return &_array[0]; }
+		const char* c_str() const noexcept { return &_array[0]; }
 
 		size_type find(const fixed_string& str, size_type pos = 0) const
 		{
 			return find(str.c_str(), pos);
 		}
-		size_type find(const char* s, size_type pos = 0) const
+		size_type find(const char* s, size_type pos = 0) const noexcept
 		{
 			if (pos > _size) return npos;
 			const char* ptr = strstr(&_array[pos], s);
 			if (ptr == nullptr) return npos;
 			return (size_type)(ptr - &_array[0]);
 		}
-		size_type find(char c, size_type pos = 0) const
+		size_type find(char c, size_type pos = 0) const noexcept
 		{
 			if (pos > _size) return npos;
 			const char* ptr = strchr(&_array[pos], c);
@@ -300,7 +295,7 @@ namespace ops { namespace strings {
 		fixed_string substr(size_type pos = 0, size_type len = npos) const
 		{
 			if (pos > _size) throw index_out_of_range();
-			size_type avail = _size - pos;
+			const size_type avail = _size - pos;
 			if (len > avail) len = avail;
 			return fixed_string(&_array[pos], len);
 		}

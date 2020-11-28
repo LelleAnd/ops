@@ -51,8 +51,8 @@ public:
 		}
 		return *this;
 	}
-	//	MyObject(MyObject&&) = delete;
-	//	MyObject& operator =(MyObject&&) = delete;
+	MyObject(MyObject&&) = delete;
+	MyObject& operator =(MyObject&&) = delete;
 	virtual ~MyObject()
 	{
 		MyObject_Ctr--;

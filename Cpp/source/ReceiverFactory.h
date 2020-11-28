@@ -33,7 +33,7 @@ namespace ops
     {
     public:
         //Creates a receiver based on topic transport information and ioService
-        static Receiver* getReceiver(Topic& top, Participant& participant);
+        static Receiver* getReceiver(const Topic& top, Participant& participant);
 
     };
 }

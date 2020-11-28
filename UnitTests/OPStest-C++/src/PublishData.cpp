@@ -53,6 +53,11 @@ class CHelperListener
 public:
 	virtual void onData(ops::Subscriber* sub, DataType* data) = 0;
 	virtual ~CHelperListener() {}
+  CHelperListener() {}
+  CHelperListener(const CHelperListener&) = delete;
+  CHelperListener(CHelperListener&&) = delete;
+  CHelperListener& operator=(const CHelperListener&) = delete;
+  CHelperListener& operator=(CHelperListener&&) = delete;
 };
 
 class IHelper
@@ -65,6 +70,11 @@ public:
 	virtual void Write() = 0;
 	virtual void SetDeadlineQos(int64_t timeoutMs) = 0;
 	virtual ~IHelper() {};
+  IHelper() {}
+  IHelper(const IHelper&) = delete;
+  IHelper(IHelper&&) = delete;
+  IHelper& operator=(const IHelper&) = delete;
+  IHelper& operator=(IHelper&&) = delete;
 };
 
 template <class DataType, class DataTypePublisher, class DataTypeSubscriber>
@@ -230,18 +240,14 @@ class MyListener :
 		public CHelperListener<pizza::special::ExtraAllt>
 {
 public:
-	virtual void onData(ops::Subscriber* sub, pizza::special::ExtraAllt* data) override
+	virtual void onData(ops::Subscriber* , pizza::special::ExtraAllt* ) override
 	{
-	  UNUSED(sub)
-	  UNUSED(data)
 	}
-	virtual void onData(ops::Subscriber* sub, pizza::VessuvioData* data) override
+	virtual void onData(ops::Subscriber* , pizza::VessuvioData* ) override
 	{
-	  UNUSED(sub)
-	  UNUSED(data)
 	}
 	MyListener() = default;
-	~MyListener() = default;
+	virtual ~MyListener() = default;
 	MyListener(const MyListener& r) = delete;
 	MyListener& operator= (const MyListener& l) = delete;
 	MyListener(MyListener&&) = delete;

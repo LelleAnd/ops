@@ -199,7 +199,7 @@ public:
                 // Check next arg if it belongs to -d
                 std::string val = toAnsi(szArglist[argIdx]);
                 if (val.size() > 0) {
-                    if (isdigit(val[0])) {
+                    if (isdigit(val[0]) != 0) {
                         maxDumpBytes = atoi(val.c_str());
                         argIdx++;
                     }
@@ -509,7 +509,7 @@ public:
 	}
 
 	AllOpsTypeFactory() = default;
-	~AllOpsTypeFactory() = default;
+	virtual ~AllOpsTypeFactory() = default;
 	AllOpsTypeFactory(const AllOpsTypeFactory& other) = delete;
 	AllOpsTypeFactory& operator= (const AllOpsTypeFactory& other) = delete;
 	AllOpsTypeFactory(AllOpsTypeFactory&& other) = delete;
@@ -555,7 +555,7 @@ std::string publicationId(const ops::OPSMessage* const mess, const ops::OPSObjec
 	if (mess == nullptr) { return ""; }
 	std::stringstream str;
 	str << mess->getPublicationID();
-	std::string IdStr(str.str());
+	const std::string IdStr(str.str());
 	return "PubId: " + IdStr;
 }
 std::string topicName(const ops::OPSMessage* const mess, const ops::OPSObject* const opsData)
@@ -617,10 +617,9 @@ private:
 	std::map<ops::Subscriber*, ops::PublicationIdChecker*> pubIdMap;
 
 	typedef struct _entry {
-		int64_t time;
-		ops::Subscriber* sub;
-		ops::OPSMessage* mess;
-		_entry(): time(0), sub(nullptr), mess(nullptr) {}
+        int64_t time{ 0 };
+        ops::Subscriber* sub{ nullptr };
+        ops::OPSMessage* mess{ nullptr };
 	} TEntry;
 	std::deque<TEntry> List;
 	ops::Lockable ListLock;
@@ -657,7 +656,7 @@ public:
 			std::endl;
 	}
 
-	void updateVector(std::vector<ops::ObjectName_T>& v, const ops::ObjectName_T& topName)
+	void updateVector(std::vector<ops::ObjectName_T>& v, const ops::ObjectName_T& topName) const
 	{
 		for (unsigned int j = 0; j < v.size(); j++) {
 			if (v[j] == topName) {
@@ -705,7 +704,7 @@ public:
 				args.topicNames[i] = "";
 			}
 		}
-		for (auto& x : vec) {
+		for (const auto& x : vec) {
 			updateVector(args.topicNames, x);
 		}
 		vec.clear();
@@ -716,14 +715,14 @@ public:
 				args.skipTopicNames[i] = "";
 			}
 		}
-		for (auto& x : vec) {
+		for (const auto& x : vec) {
 			updateVector(args.skipTopicNames, x);
 		}
 		vec.clear();
 
 		// Now, Check given topics and find all unique domains for these
 		for (unsigned int i = 0; i < args.topicNames.size(); i++) {
-			if (args.topicNames[i] == "") continue;
+            if (args.topicNames[i] == "") { continue; }
 			if (!opsHelper.existsTopic(args.topicNames[i])) {
 				std::cout << "##### Topic '" << args.topicNames[i] << "' not found in configuration file(s)" << std::endl;
 				args.topicNames[i] = "";
@@ -1004,10 +1003,10 @@ public:
 			", Got: " << arg.mess->getPublicationID() <<
 			std::endl;
 	}
-	virtual void onNewEvent(ops::Notifier<ops::ConnectStatus>* sender, ops::ConnectStatus arg) override
+	virtual void onNewEvent(ops::Notifier<ops::ConnectStatus>* const sender, ops::ConnectStatus const arg) override
 	{
-		ops::Subscriber* sb = dynamic_cast<ops::Subscriber*>(sender);
-		if (sb) {
+		ops::Subscriber* const sb = dynamic_cast<ops::Subscriber*>(sender);
+		if (sb != nullptr) {
 			std::cout << "[Publisher on " << sb->getTopic().getName() << "] ";
 		}
 		std::cout << "IP: " << arg.addr << "::" << arg.port;
@@ -1204,20 +1203,20 @@ public:
 		}
 	}
 	//
-    char toAscii(uint8_t val)
+    static char toAscii(uint8_t const val)
     {
-        if (val < 0x20) return '.';
-        if (val > 0x7F) return '.';
+        if (val < 0x20) { return '.'; }
+        if (val > 0x7F) { return '.'; }
         return (char)val;
     }
-    void dumpHex(const char* ptr, size_t numbytes)
+    void dumpHex(const char* const ptr, size_t numbytes) const
     {
         int offset = 0;
-        if (numbytes > maxDumpBytes) numbytes = maxDumpBytes;
+        if (numbytes > maxDumpBytes) { numbytes = maxDumpBytes; }
         while (numbytes > 0) {
             const uint8_t* Ptr__ = (const uint8_t*)&ptr[offset];
             int len = (int)numbytes;
-            if (len > 16) len = 16;
+            if (len > 16) { len = 16; }
 
             std::cout << std::hex << "    " << std::setw(8) << offset << ": ";
             for (int i = 0; i < len; ++i) { std::cout << std::setw(2) << (int)*Ptr__++ << " "; }
@@ -1280,7 +1279,7 @@ public:
                 dumpHex(&opsData->spareBytes[0], opsData->spareBytes.size());
                 if (MsgDump.Any()) {
                     std::string tname = opsData->getTypeString().c_str();
-                    auto pos = tname.find(' ');
+                    const auto pos = tname.find(' ');
                     if (pos != tname.npos) {
                         tname = tname.substr(0, pos);
                     }

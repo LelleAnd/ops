@@ -41,7 +41,7 @@ private:
 public:
 	memory_pool_stub(int value) : _value(value) {}
 
-	void PrintStat(std::ostream& os)
+	void PrintStat(std::ostream& os) override
 	{
 		os << _value;
 	}
@@ -63,18 +63,18 @@ TEST(Test_memory_pools, Test_manager) {
 	CheckMemoryPools(mgr, "");
 
 	{
-		memory_pool_stub mp1(11);
-		memory_pool_stub mp2(22);
-		memory_pool_stub mp3(33);
+		const memory_pool_stub mp1(11);
+		const memory_pool_stub mp2(22);
+		const memory_pool_stub mp3(33);
 
 		EXPECT_EQ(mgr.numPools(), 3);
 		CheckMemoryPools(mgr, "112233");
 	}
 
 	{
-		memory_pool_stub mp1(11);
+		const memory_pool_stub mp1(11);
 		memory_pool_stub* mp2 = new memory_pool_stub(44);
-		memory_pool_stub mp3(33);
+		const memory_pool_stub mp3(33);
 
 		EXPECT_EQ(mgr.numPools(), 3);
 		CheckMemoryPools(mgr, "114433");
@@ -87,9 +87,9 @@ TEST(Test_memory_pools, Test_manager) {
 
 	memory_pool_stub* mp2 = nullptr;
 	{
-		memory_pool_stub mp1(11);
+		const memory_pool_stub mp1(11);
 		mp2 = new memory_pool_stub(99);
-		memory_pool_stub mp3(33);
+		const memory_pool_stub mp3(33);
 
 		EXPECT_EQ(mgr.numPools(), 3);
 		CheckMemoryPools(mgr, "119933");

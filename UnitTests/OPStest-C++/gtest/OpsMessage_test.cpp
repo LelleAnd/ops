@@ -85,13 +85,13 @@ public:
 		archive->inout("Message", Message);
 	}
 
-	virtual OPSObject* clone() override
+	virtual OpsObject_MessageTest* clone() override
 	{ 
-		OpsObject_MessageTest* obj = new OpsObject_MessageTest();
+		OpsObject_MessageTest* const obj = new OpsObject_MessageTest();
 		fillClone(obj);
 		return obj; 
 	}
-	void fillClone(OpsObject_MessageTest* obj) const
+	void fillClone(OpsObject_MessageTest* const obj) const
 	{ 
 		ops::OPSObject::fillClone(obj);
 		obj->Message = Message;
@@ -113,7 +113,7 @@ public:
 	}
 
 	OpsObject_MessageTest_Factory() = default;
-	~OpsObject_MessageTest_Factory() = default;
+	virtual ~OpsObject_MessageTest_Factory() = default;
 
 	OpsObject_MessageTest_Factory(const OpsObject_MessageTest_Factory& r) = delete;
 	OpsObject_MessageTest_Factory& operator= (const OpsObject_MessageTest_Factory& l) = delete;
@@ -278,7 +278,7 @@ TEST(Test_OPSMessage, Test_CopyMove) {
 		EXPECT_EQ(obj2.getData(), nullptr);
 
 		// Create some data
-		OpsObject_MessageTest* data = new OpsObject_MessageTest();
+		OpsObject_MessageTest* const data = new OpsObject_MessageTest();
 		EXPECT_EQ(OpsObject_MessageTest_Cnt, 1);
 
 		obj1.setData(data);

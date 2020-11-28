@@ -29,7 +29,7 @@ namespace ops
         appendType(TypeId_T("Transport"));
     }
 
-    void Transport::serialize(ArchiverInOut* archiver)
+    void Transport::serialize(ArchiverInOut* const archiver)
     {
         OPSObject::serialize(archiver);
         archiver->inout("channelID", channelID);

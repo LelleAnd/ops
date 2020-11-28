@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -34,8 +35,8 @@ namespace ops
 
 	DeadlineTimer* DeadlineTimer::create(IOService* ioService)
 	{
-		return new BoostDeadlineTimerImpl(dynamic_cast<BoostIOServiceImpl*>(ioService)->boostIOService);
-	}
+        return new BoostDeadlineTimerImpl(BoostIOServiceImpl::get(ioService));
+    }
 
 }
 #endif // REPLACE_TRANSPORT_LAYER

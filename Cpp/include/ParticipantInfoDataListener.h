@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -38,32 +38,32 @@ namespace ops
 	class OPS_EXPORT ParticipantInfoDataListener : public DataListener
 	{
 	public:
-		ParticipantInfoDataListener(Participant& part);
+		explicit ParticipantInfoDataListener(Participant& part);
 
 		void prepareForDelete();
 		virtual ~ParticipantInfoDataListener();
 
 		virtual void onNewData(DataNotifier* notifier) override;
 
-		void connectUdp(Topic& top, SendDataHandler* handler);
-		void disconnectUdp(Topic& top, SendDataHandler* handler);
+		void connectUdp(const Topic& top, std::shared_ptr<SendDataHandler> handler);
+		void disconnectUdp(const Topic& top, std::shared_ptr<SendDataHandler> handler);
 
-		void connectTcp(ObjectName_T& top, std::shared_ptr<ReceiveDataHandler> handler);
-		void disconnectTcp(ObjectName_T& top, std::shared_ptr<ReceiveDataHandler> handler);
+		void connectTcp(const ObjectName_T& top, std::shared_ptr<ReceiveDataHandler> handler);
+		void disconnectTcp(const ObjectName_T& top, std::shared_ptr<ReceiveDataHandler> handler);
 
 	private:
 		Participant& participant;
 
 		Lockable mutex;
-		Subscriber* partInfoSub;
-		SendDataHandler* sendDataHandler;
+		Subscriber* partInfoSub = nullptr;
 
+        std::map<ObjectName_T, std::shared_ptr<SendDataHandler>> sendDataHandlers;
 		std::map<ObjectName_T, std::shared_ptr<ReceiveDataHandler>> rcvDataHandlers;
-
-		int numUdpTopics;
 
 		bool setupSubscriber();
 		void removeSubscriber();
+
+        void handle(ParticipantInfoData* partInfo);
 	};
 }
 #endif

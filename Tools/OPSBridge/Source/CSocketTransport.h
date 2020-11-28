@@ -57,9 +57,9 @@ namespace opsbridge {
 		~CSocketTransport();
 
 		bool writeOpsMessage(ops::OPSObject* mess, 
-			ops::ObjectName_T publisherName,
-			ops::ObjectName_T topicName,
-			uint64_t ackCounter);
+			const ops::ObjectName_T publisherName,
+			const ops::ObjectName_T topicName,
+			const uint64_t ackCounter);
 		bool writeAckNak(uint64_t ackCounter, uint32_t errorCode);
 
 		// The .Head field in cmd and status will be overwritten

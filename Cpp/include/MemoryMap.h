@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2019-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -40,30 +40,28 @@ public:
 		message = "MemoryMapException: ";
 		message += m;
 	}
-	const char* what() const NOEXCEPT { return message.c_str(); }
+	const char* what() const noexcept { return message.c_str(); }
 };
 
 // TODO: Replace this with a C++ allocator??
 struct MemoryMapAllocator {
 	virtual char* Allocate(unsigned int size) = 0;
 	virtual void Deallocate(char*& ptr) = 0;
+    virtual ~MemoryMapAllocator() {}
 };
 
 class OPS_EXPORT MemoryMap
 {
 public:
-	MemoryMap() :
-		no_of_segments(0),
-		segment_size(0),
-		dataCreator(false)
+	MemoryMap()
 	{
 		bytes = small_width_vector;
 		bytes[0] = nullptr;
 	}
-	MemoryMap(int width, int height, MemoryMapAllocator* mma = nullptr): 
+	MemoryMap(int no_segs, int seg_size, MemoryMapAllocator* mma = nullptr):
 		segment_allocator(mma),
-		no_of_segments(width),
-		segment_size(height),
+		no_of_segments(no_segs),
+		segment_size(seg_size),
 		dataCreator(true)
 	{
 		if (no_of_segments <= smallWidthOpt) {
@@ -84,10 +82,9 @@ public:
 			bytes[i] = bytes[i-1] + segment_size;
 		}
 	}
-	MemoryMap(char* segment, int size):
+	MemoryMap(char* segment, int size) noexcept :
 		  no_of_segments(1), 
-		  segment_size(size),
-		  dataCreator(false)
+		  segment_size(size)
 	{
 		bytes = small_width_vector;
 		bytes[0] = segment;
@@ -110,7 +107,7 @@ public:
 
 	// Method to initialize/re-initialize object
 	// Fails if object is created as a data owner
-	bool set(char* segment, int size)
+	bool set(char* segment, int size) noexcept
 	{
 		if ((no_of_segments > 1) || dataCreator) return false;
 		no_of_segments = 1;
@@ -119,20 +116,20 @@ public:
 		return true;
 	}
 
-	char* getSegment(int i)
+	char* getSegment(int i) const
 	{
 		if (i >= no_of_segments) throw MemoryMapException("Allocated MemoryMap too small!!!");
 		return bytes[i];
 	}
-	int getSegmentSize() const
+	int getSegmentSize() const noexcept
 	{
 		return segment_size;
 	}
-	int getNrOfSegments() const
+	int getNrOfSegments() const noexcept
 	{
 		return no_of_segments;
 	}
-	int getTotalSize() const
+	int getTotalSize() const noexcept
 	{
 		return no_of_segments*segment_size;
 	}
@@ -140,7 +137,7 @@ public:
 	///Makes a copy of the content of this memory to dest. startIndex and endIndex are memory map relative. 
 	bool copyToBytes(char* dest, int startIndex, int endIndex) const
 	{
-		int bytesToCopy = endIndex - startIndex + 1;
+		const int bytesToCopy = endIndex - startIndex + 1;
 
 		if ( (startIndex < 0) || (endIndex >= getTotalSize()) || (bytesToCopy <= 0) ) return false;
 
@@ -150,13 +147,13 @@ public:
 	}
 
 private:
-	MemoryMapAllocator* segment_allocator = nullptr;
-	int no_of_segments;
-	int segment_size;
-	bool dataCreator;
+    MemoryMapAllocator* segment_allocator{ nullptr };
+    int no_of_segments{ 0 };
+    int segment_size{ 0 };
+    bool dataCreator{ false };
 	char** bytes;
 	static const int smallWidthOpt = 4;
-	char* small_width_vector[smallWidthOpt];
+    char* small_width_vector[smallWidthOpt]{ nullptr };
 };
 
 }

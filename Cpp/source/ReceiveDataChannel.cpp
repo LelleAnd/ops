@@ -34,11 +34,11 @@ namespace ops
 {
     using namespace opsidls;
 
-	ReceiveDataChannel::ReceiveDataChannel(Topic top, Participant& part, Receiver* recv) :
-		memMap(top.getSampleMaxSize() / OPSConstants::PACKET_MAX_SIZE + 1, OPSConstants::PACKET_MAX_SIZE, &DataSegmentAllocator::Instance()),
+	ReceiveDataChannel::ReceiveDataChannel(Topic top, Participant& part, Receiver* const recv) :
+        sampleMaxSize(top.getSampleMaxSize() > OPSConstants::PACKET_MAX_SIZE ? top.getSampleMaxSize() : OPSConstants::PACKET_MAX_SIZE),
+        memMap(sampleMaxSize / OPSConstants::PACKET_MAX_SIZE + 1, OPSConstants::PACKET_MAX_SIZE, &DataSegmentAllocator::Instance()),
         participant(part),
-        receiver(recv),
-        sampleMaxSize(top.getSampleMaxSize())
+        receiver(recv)
     {
 		if (receiver == nullptr) { receiver = ReceiverFactory::getReceiver(top, participant); }
 
@@ -67,7 +67,7 @@ namespace ops
 		receiver->stop();
 	}
 
-	static void ReportError(Participant& participant, ErrorMessage_T message, Address_T addr, uint16_t port)
+	static void ReportError(Participant& participant, ErrorMessage_T message, Address_T const addr, uint16_t const port)
 	{
 		message += " [";
 		message += addr;
@@ -87,7 +87,7 @@ namespace ops
 
     ///Override from Listener
     ///Called whenever the receiver has new data.
-    void ReceiveDataChannel::onNewEvent(Notifier<BytesSizePair>* sender, BytesSizePair byteSizePair)
+    void ReceiveDataChannel::onNewEvent(Notifier<BytesSizePair>* const sender, BytesSizePair const byteSizePair)
     {
 		UNUSED(sender);
         if (byteSizePair.size <= 0) {
@@ -110,15 +110,15 @@ namespace ops
         //Check protocol
         if (tBuf.checkProtocol())
         {
-            int nrOfFragments = tBuf.ReadInt();
-            int currentFragment = tBuf.ReadInt();
+            const int nrOfFragments = tBuf.ReadInt();
+            const int currentFragment = tBuf.ReadInt();
 
             if (currentFragment != (nrOfFragments - 1) && byteSizePair.size != OPSConstants::PACKET_MAX_SIZE)
             {
 				ReportError(participant, "Debug: Received broken package.", addr, port);
             }
 
-            currentMessageSize += byteSizePair.size; // - tBuf.GetSize();
+            currentMessageSize += byteSizePair.size;
 
             if (currentFragment != expectedSegment)
             {//For testing only...
@@ -140,11 +140,11 @@ namespace ops
                 ByteBuffer buf(memMap);
 
                 buf.checkProtocol();
-                int i1 = buf.ReadInt();
-                int i2 = buf.ReadInt();
+                const int i1 = buf.ReadInt();
+                const int i2 = buf.ReadInt();
                 UNUSED(i1)
                 UNUSED(i2)
-                int segmentPaddingSize = buf.GetSize();
+                const int segmentPaddingSize = buf.GetSize();
 
                 //Read of the actual OPSMessage
                 OPSArchiverIn archiver(buf, participant.getObjectFactory());
@@ -221,15 +221,15 @@ namespace ops
         receiver->removeListener(this);
     }
 
-    bool ReceiveDataChannel::calculateAndSetSpareBytes(ByteBuffer &buf, OPSObject* obj, int segmentPaddingSize)
+    bool ReceiveDataChannel::calculateAndSetSpareBytes(ByteBuffer &buf, OPSObject* obj, int const segmentPaddingSize)
     {
         //We must calculate how many unserialized segment headers we have and substract that total header size from the size of spareBytes.
-        int nrOfSerializedBytes = buf.GetSize();
-        int totalNrOfSegments = (int) (currentMessageSize / memMap.getSegmentSize());
-        int nrOfSerializedSegements = (int) (nrOfSerializedBytes / memMap.getSegmentSize());
-        int nrOfUnserializedSegments = totalNrOfSegments - nrOfSerializedSegements;
+        const int nrOfSerializedBytes = buf.GetSize();
+        const int totalNrOfSegments = (int) (currentMessageSize / memMap.getSegmentSize());
+        const int nrOfSerializedSegements = (int) (nrOfSerializedBytes / memMap.getSegmentSize());
+        const int nrOfUnserializedSegments = totalNrOfSegments - nrOfSerializedSegements;
 
-        int nrOfSpareBytes = currentMessageSize - buf.GetSize() - (nrOfUnserializedSegments * segmentPaddingSize);
+        const int nrOfSpareBytes = currentMessageSize - buf.GetSize() - (nrOfUnserializedSegments * segmentPaddingSize);
 
         if (nrOfSpareBytes > 0) {
             obj->spareBytes.reserve(nrOfSpareBytes);

@@ -56,7 +56,7 @@ mem_pool_obj2::memory_pool_type mem_pool_obj2::_pool(2);
 class mem_pool_log : public memory_pool_logger
 {
 public:
-	virtual void Log(const char* message, std::exception& e) override
+	virtual void Log(const char* const message, std::exception& e) override
 	{
 		std::cout << "[" << message << "] memory_pool Exception: " << e.what() << std::endl;
 	}

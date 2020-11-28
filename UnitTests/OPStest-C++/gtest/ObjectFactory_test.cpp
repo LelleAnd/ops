@@ -32,38 +32,41 @@ using namespace ops;
 
 class Object_A : public Serializable
 {
-	virtual void serialize(ArchiverInOut* archiver) override { UNUSED(archiver); }
 public:
 	Object_A() = default;
-	~Object_A() = default;
+	virtual ~Object_A() = default;
 	Object_A(const Object_A& other) = delete;
 	Object_A& operator= (const Object_A& other) = delete;
 	Object_A(Object_A&& other) = delete;
 	Object_A& operator =(Object_A&& other) = delete;
+private:
+    virtual void serialize(ArchiverInOut* archiver) override { UNUSED(archiver); }
 };
 
 class Object_B : public Serializable
 {
-	virtual void serialize(ArchiverInOut* archiver) override { UNUSED(archiver); }
 public:
 	Object_B() = default;
-	~Object_B() = default;
+    virtual ~Object_B() = default;
 	Object_B(const Object_B& other) = delete;
 	Object_B& operator= (const Object_B& other) = delete;
 	Object_B(Object_B&& other) = delete;
 	Object_B& operator =(Object_B&& other) = delete;
+private:
+    virtual void serialize(ArchiverInOut* archiver) override { UNUSED(archiver); }
 };
 
 class Object_C : public Serializable
 {
-	virtual void serialize(ArchiverInOut* archiver) override { UNUSED(archiver); }
 public:
 	Object_C() = default;
-	~Object_C() = default;
+    virtual ~Object_C() = default;
 	Object_C(const Object_C& other) = delete;
 	Object_C& operator= (const Object_C& other) = delete;
 	Object_C(Object_C&& other) = delete;
 	Object_C& operator =(Object_C&& other) = delete;
+private:
+    virtual void serialize(ArchiverInOut* archiver) override { UNUSED(archiver); }
 };
 
 class ObjectFactory_1 : public SerializableFactory
@@ -77,7 +80,7 @@ public:
 	}
 
 	ObjectFactory_1() = default; 
-	~ObjectFactory_1() = default; 
+    virtual ~ObjectFactory_1() = default;
 	ObjectFactory_1(const ObjectFactory_1& r) = delete;	
 	ObjectFactory_1& operator= (const ObjectFactory_1& l) = delete;	
 	ObjectFactory_1(ObjectFactory_1&&) = delete; 
@@ -94,7 +97,7 @@ public:
 	}
 
 	ObjectFactory_2() = default;
-	~ObjectFactory_2() = default; 
+    virtual ~ObjectFactory_2() = default;
 	ObjectFactory_2(const ObjectFactory_2& r) = delete;	
 	ObjectFactory_2& operator= (const ObjectFactory_2& l) = delete;	
 	ObjectFactory_2(ObjectFactory_2&&) = delete; 

@@ -54,7 +54,7 @@ namespace ops
 		ReceiveDataChannel(Topic top, Participant& part, Receiver* recv = nullptr);
 		virtual ~ReceiveDataChannel();
 
-		void connect(ReceiveDataChannelCallbacks* client) {
+		void connect(ReceiveDataChannelCallbacks* client) noexcept {
 			_client = client;
 		}
 
@@ -63,12 +63,12 @@ namespace ops
 		void start();
 		void stop();
 
-		int getSampleMaxSize() const
+		int getSampleMaxSize() const noexcept
         {
             return sampleMaxSize;
         }
 
-		Receiver* getReceiver() const
+		Receiver* getReceiver() const noexcept
 		{
 			return receiver;
 		}
@@ -89,6 +89,8 @@ namespace ops
 
         void onNewEvent(Notifier<ConnectStatus>*, ConnectStatus arg) override;
 
+        int sampleMaxSize = 0;
+
         ///Preallocated MemoryMap for receiving data
         MemoryMap memMap;
         int expectedSegment = 0;
@@ -101,8 +103,6 @@ namespace ops
 
 		///The receiver used for this topic. 
 		Receiver* receiver = nullptr;
-
-		int sampleMaxSize = 0;
 
 		///The accumulated size in bytes of the current message
 		int currentMessageSize = 0;

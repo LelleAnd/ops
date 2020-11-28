@@ -48,7 +48,7 @@ namespace opsbridge {
 		virtual void onCommandMessage(CTransport* sender, TCommandMessage& cmd) = 0;
 		virtual void onStatusMessage(CTransport* sender, const TStatusMessage& status) = 0;
 
-		virtual void onUdpMcMessage(CTransport* sender, TUdpMcMessage& udpMc, const char* data) = 0;
+		virtual void onUdpMcMessage(CTransport* sender, const TUdpMcMessage& udpMc, const char* data) = 0;
 	};
 
 	class CTransport : public CWorkItemEx

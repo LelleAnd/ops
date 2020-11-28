@@ -32,13 +32,15 @@ namespace ops
 	{
 		// Should not copy our data
 	}
-	Reservable& Reservable::operator= (const Reservable&)
+	Reservable& Reservable::operator= (const Reservable& l)
 	{
-		// Should not copy our data
+        if (this != &l) {
+            // Should not copy our data
+        }
 		return *this;
 	}
 	
-	void Reservable::setReferenceHandler(ReferenceHandler* refHandler)
+	void Reservable::setReferenceHandler(ReferenceHandler* const refHandler)
 	{
 #ifndef OPS_REMOVE_ASSERT
 		// Referencehandler should not be changed if already reserved
@@ -46,7 +48,7 @@ namespace ops
 #endif
 		referenceHandler = refHandler;
 	}
-	ReferenceHandler* Reservable::getReferenceHandler() const
+	ReferenceHandler* Reservable::getReferenceHandler() const noexcept
 	{
 		return referenceHandler;
 	}
@@ -75,7 +77,7 @@ namespace ops
 			referenceHandler->onNewEvent(this, ReserveInfo(this, nrOfReservations));
 		}
 	}
-	int Reservable::getNrOfReservations() const
+	int Reservable::getNrOfReservations() const noexcept
 	{
 		return nrOfReservations;
 	}

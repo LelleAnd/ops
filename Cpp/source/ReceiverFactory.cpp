@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2019-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -27,11 +27,11 @@
 
 namespace ops
 {
-    Receiver* ReceiverFactory::getReceiver(Topic& top, Participant& participant)
+    Receiver* ReceiverFactory::getReceiver(const Topic& top, Participant& participant)
     {
         Receiver* receiver = nullptr;
 
-        IOService* ioService = participant.getIOService();
+        IOService* const ioService = participant.getIOService();
 
         //This should never happen, log an internal error and return nullptr;
         if (ioService == nullptr)
@@ -47,11 +47,7 @@ namespace ops
         {
             receiver = Receiver::createMCReceiver(top.getDomainAddress(), top.getPort(), ioService, localIf, top.getInSocketBufferSize());
         }
-//Moved into TCPReceiveDataHandler
-//        else if (top.getTransport() == Topic::TRANSPORT_TCP)
-//        {
-//            receiver = Receiver::createTCPClient(top.getDomainAddress(), top.getPort(), ioService, top.getInSocketBufferSize());
-//        }
+        //TRANSPORT_TCP creation moved into TCPReceiveDataHandler
         else if (top.getTransport() == Topic::TRANSPORT_UDP)
         {
             int port = 0;

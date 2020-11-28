@@ -55,14 +55,16 @@ JavaCC can be downloaded from http://java.net/projects/javacc.
 OPS uses JavaCC version 6.0.
 
 ## Python ##
-Limited support exist for Python (2.7 and 3.x).
+Support exist for Python 2.7 and Python 3.
 
 ## Delphi ##
 OPS has been used with Delphi XE2, Delphi 10.1, 10.2 and 10.3.
 
 ## Ada ##
 The Ada implementation requires Ada 2012 support.
-OPS has been used with GNAT GPS 2016 and GNAT Pro 17.1.
+OPS has been used with GNAT GPS 2016, GNAT Community 2020 and GNAT Pro 17.1.
+
+Please note that *GNAT Community 2019 (20190517)* isn't supported. The compiler crashes with a GNAT BUG DETECTED. This has not been investigated further.
 
 ## gcovr ##
 TBD

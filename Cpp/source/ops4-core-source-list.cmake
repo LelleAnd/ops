@@ -11,6 +11,7 @@ set(LIB_OPS_PUBLIC_HEADERS
   ${OPS_HEADER_PATH}/ByteBuffer.h
   ${OPS_HEADER_PATH}/BytesSizePair.h
   ${OPS_HEADER_PATH}/Channel.h
+  ${OPS_HEADER_PATH}/ChecksumArchiver.h
   ${OPS_HEADER_PATH}/CommException.h
   ${OPS_HEADER_PATH}/Compatibility.h
   ${OPS_HEADER_PATH}/ConnectStatus.h

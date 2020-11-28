@@ -151,7 +151,7 @@ int main(const int argc, const char* args[])
 	testData.value = 3456.0;
 	data.test2 = testData;
 
-	data.testPointer = dynamic_cast<TestData*>(testData.clone());
+    data.testPointer = testData.clone();
 
 	//
 	//Set primitives
@@ -178,7 +178,7 @@ int main(const int argc, const char* args[])
 	
 	data.setKey("key1");
 
-	ChildData* const dataClone = dynamic_cast<ChildData*>(data.clone());
+	ChildData* const dataClone = data.clone();
 
 	double theta = 0.0;
 	double const pi = 3.1415926535;

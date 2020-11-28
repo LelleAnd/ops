@@ -33,7 +33,7 @@ namespace ops
     class OPS_EXPORT Thread
     {
     public:
-        Thread();
+        Thread() noexcept;
         virtual ~Thread();
         int start();
         void stop();

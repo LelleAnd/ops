@@ -27,11 +27,11 @@
 namespace ops {
 
 	typedef struct _PublicationIdNotification {
-		OPSMessage* mess;		// Pointer to received message
-		int64_t expectedPubID;
-		bool newPublisher;		// True for a new Publisher, False for a detected Sequence Error
-		_PublicationIdNotification() : mess(nullptr), expectedPubID(0), newPublisher(false) {}
-		_PublicationIdNotification(int64_t id, OPSMessage* m, bool f) : mess(m), expectedPubID(id), newPublisher(f) {}
+        OPSMessage* mess{ nullptr };        // Pointer to received message
+        int64_t expectedPubID{ 0 };
+        bool newPublisher{ false };         // True for a new Publisher, False for a detected Sequence Error
+		_PublicationIdNotification() noexcept {}
+		_PublicationIdNotification(int64_t id, OPSMessage* m, bool f) noexcept : mess(m), expectedPubID(id), newPublisher(f) {}
 	} PublicationIdNotification_T;
 
 	class PublicationIdChecker : public Notifier<PublicationIdNotification_T>
@@ -39,16 +39,16 @@ namespace ops {
 	private:
 		typedef struct _Entry {
 			Address_T Addr;
-			int Port;
-			int64_t expectedPubID;
-			_Entry() : Port(0), expectedPubID(0) {}
+            int Port{ 0 };
+            int64_t expectedPubID{ 0 };
+			_Entry() noexcept {}
 		} Entry_T;
 
 		std::map<InternalKey_T, Entry_T> _map;
-		Entry_T* _prev;
+        Entry_T* _prev{ nullptr };
 
 	public:
-		PublicationIdChecker() : _prev(nullptr) {}
+		PublicationIdChecker() noexcept {}
 
 		// Note: The Check() won't work if an application uses several publishers to publish on the same topic, since
 		// the PublicationID is unique for each publisher, but the underlaying transport can use the same IP & Port,
@@ -80,7 +80,7 @@ namespace ops {
 					_prev->Addr = addr;
 					_prev->Port = port;
 					// Notify listeners, that a new publisher arrived
-					PublicationIdNotification_T arg(_prev->expectedPubID, message, true);
+					const PublicationIdNotification_T arg(_prev->expectedPubID, message, true);
 					notifyNewEvent(arg);
 				}
 			}
@@ -88,7 +88,7 @@ namespace ops {
 			// _prev points to correct entry
 			if (_prev->expectedPubID != message->getPublicationID()) {
 				// Notify listeners, that sequence didn't match
-				PublicationIdNotification_T arg(_prev->expectedPubID, message, false);
+				const PublicationIdNotification_T arg(_prev->expectedPubID, message, false);
 				notifyNewEvent(arg);
 			}
 

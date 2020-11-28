@@ -68,7 +68,7 @@ TEST(Test_OPSConfigObjects, TestTopic) {
 	obj1.setSampleMaxSize(789789);
 	EXPECT_EQ(obj1.getSampleMaxSize(), 789789);
 	obj1.setSampleMaxSize(3333);
-	EXPECT_EQ(obj1.getSampleMaxSize(), PACKET_MAX_SIZE);
+	EXPECT_EQ(obj1.getSampleMaxSize(), 3333);
 
 	// Other constructor
 	Topic obj2("Kalle", 9999, "MinType", "localhost");

@@ -37,7 +37,7 @@ namespace ops
 			archiver->inout("requestId", requestId);
 		}
 
-		OPSObject* clone() override
+		Request* clone() override
 		{
 			Request* obj = new Request;
 			fillClone(obj);

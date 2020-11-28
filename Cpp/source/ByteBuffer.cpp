@@ -19,6 +19,7 @@
  * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "OPSTypeDefs.h"
+#include "opsidls/OPSConstants.h"
 #include "ByteBuffer.h"
 
 namespace ops
@@ -26,16 +27,10 @@ namespace ops
 
     ByteBuffer::ByteBuffer(MemoryMap& mMap, bool const _preserveWrittenData):
         preserveWrittenData(_preserveWrittenData), memMap(mMap),
-		index(0), totalSize(0), currentSegment(0)
+        nextSegmentAt(memMap.getSegmentSize())
     {
-        nextSegmentAt = memMap.getSegmentSize();
-
 		// Check that each segment in map is larger than our needed segment header
-		//   protocolID                 4
-		//   version                    2
-		//   total number of segments   4
-		//   current segment number     4
-		if (memMap.getSegmentSize() <= 14) { throw illformed_memmap(); }
+		if (memMap.getSegmentSize() <= opsidls::OPSConstants::SEGMENT_HEADER_SIZE) { throw illformed_memmap(); }
     }
 
 	///Resets the whole buffer to creation state
@@ -47,7 +42,7 @@ namespace ops
         nextSegmentAt = memMap.getSegmentSize();
 	}
 
-    int ByteBuffer::getNrOfSegments() const
+    int ByteBuffer::getNrOfSegments() const noexcept
     {
         return currentSegment + 1;
     }
@@ -64,7 +59,7 @@ namespace ops
         }
     }
 
-    char* ByteBuffer::getSegment(int const i)
+    char* ByteBuffer::getSegment(int const i) const
     {
         return memMap.getSegment(i);
     }
@@ -90,9 +85,9 @@ namespace ops
     {
     }
 
-    void ByteBuffer::WriteChars(const char* const chars, int const length)
+    void ByteBuffer::WriteChars(const char* const chars, const int length)
     {
-        int bytesLeftInSegment = memMap.getSegmentSize() - index;
+        const int bytesLeftInSegment = memMap.getSegmentSize() - index;
         if (bytesLeftInSegment >= length)
         {
             memcpy((void*) (memMap.getSegment(currentSegment) + index), chars, length);
@@ -115,7 +110,7 @@ namespace ops
     {
         index = 0;
         writeProtocol();
-        int const tInt = 0;
+        const int tInt = 0;
         WriteInt(tInt); 
         WriteInt(currentSegment);
     }
@@ -129,7 +124,7 @@ namespace ops
         ReadInt();
     }
 
-    void ByteBuffer::ReadChars(char* chars, int length)
+    void ByteBuffer::ReadChars(char* chars, const int length)
     {
         int bytesLeftInSegment = memMap.getSegmentSize() - index;
         if (bytesLeftInSegment >= length)
@@ -149,7 +144,7 @@ namespace ops
         }
     }
 
-    void ByteBuffer::ByteSwap(unsigned char * b, int n)
+    void ByteBuffer::ByteSwap(unsigned char* const b, const int n) const noexcept
     {
         int i = 0;
         int j = n - 1;
@@ -161,7 +156,7 @@ namespace ops
         }
     }
 
-    int ByteBuffer::GetSize() const
+    int ByteBuffer::GetSize() const noexcept
     {
         return totalSize; 
     }
@@ -213,9 +208,9 @@ namespace ops
         WriteChars((const char*)&c, 1);
     }
 
-    void ByteBuffer::WriteString(std::string& s)
+    void ByteBuffer::WriteString(const std::string& s)
     {
-        int const siz = (int) s.size();
+        const int siz = (int) s.size();
         WriteInt(siz);
         WriteChars(s.c_str(), siz);
     }
@@ -341,7 +336,7 @@ namespace ops
         ReadBytes(out, 0, length);
     }
 
-    void ByteBuffer::ReadBytes(std::vector<char>& out, int offset, int length)
+    void ByteBuffer::ReadBytes(std::vector<char>& out, const int offset, const int length)
     {
         int bytesLeftInSegment = memMap.getSegmentSize() - index;
         std::vector<char>::iterator it = out.begin();
@@ -372,9 +367,9 @@ namespace ops
         WriteBytes(out, 0, size);
     }
 
-    void ByteBuffer::WriteBytes(std::vector<char>& out, int offset, int length)
+    void ByteBuffer::WriteBytes(std::vector<char>& out, const int offset, const int length)
     {
-        int bytesLeftInSegment = memMap.getSegmentSize() - index;
+        const int bytesLeftInSegment = memMap.getSegmentSize() - index;
         std::vector<char>::iterator it = out.begin();
         it += offset;
         if (bytesLeftInSegment >= length)
@@ -657,12 +652,12 @@ namespace ops
         WriteChar(versionHigh);
     }
 
-    int ByteBuffer::GetIndex() const
+    int ByteBuffer::GetIndex() const noexcept
     {
         return index;
     }
 
-    void ByteBuffer::ResetIndex()
+    void ByteBuffer::ResetIndex() noexcept
     {
         index = 0;
 		currentSegment = 0;

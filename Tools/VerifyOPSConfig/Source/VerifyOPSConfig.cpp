@@ -12,7 +12,7 @@
 
 #include "Configuration.h"
 
-const std::string sVersion = "Version 2019-12-01";
+const std::string sVersion = "Version 2020-07-14";
 
 
 bool gErrorGiven = false;
@@ -466,7 +466,7 @@ public:
 		{
 			std::vector<std::string> known = { 
 				"name", "linktype", "address", "localInterface", "port", "timeToLive",
-				"outSocketBufferSize", "inSocketBufferSize"
+				"outSocketBufferSize", "inSocketBufferSize", "sampleMaxSize"
 			};
 			CheckForUnknown(config, known, "in <channels> <element> section for domain: " + domainName + " channel: " + channelName);
 		}
@@ -531,6 +531,14 @@ public:
 		verifyOnlyOneEntry(config, "timeToLive", "<channels> <element> section in domain: " + domainName + " with name: " + channelName);
 		verifyOnlyOneEntry(config, "outSocketBufferSize", "<channels> <element> section in domain: " + domainName + " with name: " + channelName);
 		verifyOnlyOneEntry(config, "inSocketBufferSize", "<channels> <element> section in domain: " + domainName + " with name: " + channelName);
+
+        verifyOnlyOneEntry(config, "sampleMaxSize", "<channels> <element> section in domain: " + domainName + " with name: " + channelName);
+        uint64_t sampleMaxSize = config.parseInt64(config.getString("sampleMaxSize"), 0);
+        if (sampleMaxSize > 60000) {
+            // For datatypes > 60000, we require different ports, so the corresponding transport section should only contain 1 topic
+            ///TODO
+        }
+
 	}
 
 	void VerifyTransport(Configuration& config, std::string const domainName)

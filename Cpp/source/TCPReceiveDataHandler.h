@@ -33,10 +33,12 @@ namespace ops
 	public:
 		TCPReceiveDataHandler(Topic top, Participant& part);
 
-		void AddReceiveChannel(ObjectName_T& topicName, Address_T& ip, int port);
+		void AddReceiveChannel(const ObjectName_T& topicName, const Address_T& ip, int port);
 
 	protected:
-		std::map<ObjectName_T, int32_t> topics;
+        Topic topic;
+
+        std::map<ObjectName_T, int32_t> topics;
         Lockable topicsLock;
         bool usingPartInfo = true;
 

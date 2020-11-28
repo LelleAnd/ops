@@ -1,0 +1,136 @@
+/**
+*
+* Copyright (C) 2018-2020 Lennart Andersson.
+*
+* This file is part of OPS (Open Publish Subscribe).
+*
+* OPS (Open Publish Subscribe) is free software: you can redistribute it and/or modify
+* it under the terms of the GNU Lesser General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+
+* OPS (Open Publish Subscribe) is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU Lesser General Public License for more details.
+*
+* You should have received a copy of the GNU Lesser General Public License
+* along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#include "OPSObject.h"
+#include "ArchiverInOut.h"
+
+class SerDesObject_Core : public ops::OPSObject
+{
+public:
+    static ops::TypeId_T getTypeName() { return ops::TypeId_T("SerDesObject_Core"); }
+    SerDesObject_Core() { appendType(getTypeName()); }
+    ~SerDesObject_Core() = default;
+
+    bool bo;
+    char ch;
+    int16_t i16;
+    int i32;
+    int64_t i64;
+    float f32;
+    double d64;
+    std::string str;
+    ops::strings::fixed_string<30> fstr;
+    char buffer[10];
+
+    virtual void serialize(ops::ArchiverInOut* archive) override
+    {
+        ops::OPSObject::serialize(archive);
+        archive->inout("bo", bo);
+        archive->inout("ch", ch);
+        archive->inout("i16", i16);
+        archive->inout("i32", i32);
+        archive->inout("i64", i64);
+        archive->inout("f32", f32);
+        archive->inout("d64", d64);
+        archive->inout("str", str);
+        archive->inout("fstr", fstr);
+        archive->inout("buffer", buffer, 10);
+    }
+
+    SerDesObject_Core(const SerDesObject_Core& r) = default;
+    SerDesObject_Core& operator= (const SerDesObject_Core& l) = default;
+    SerDesObject_Core(SerDesObject_Core&&) = default;
+    SerDesObject_Core& operator =(SerDesObject_Core&&) = default;
+};
+
+class SerDesObject_Vectors : public ops::OPSObject
+{
+public:
+    static ops::TypeId_T getTypeName() { return ops::TypeId_T("SerDesObject_Vectors"); }
+    SerDesObject_Vectors() { appendType(getTypeName()); }
+    ~SerDesObject_Vectors() = default;
+
+    std::vector<bool> bo;
+    std::vector<char> ch;
+    std::vector<int16_t> i16;
+    std::vector<int> i32;
+    std::vector<int64_t> i64;
+    std::vector<float> f32;
+    std::vector<double> d64;
+    std::vector<std::string> str;
+    std::vector<ops::strings::fixed_string<30>> fstr;
+
+    virtual void serialize(ops::ArchiverInOut* archive) override
+    {
+        OPSObject::serialize(archive);
+        archive->inout("bo", bo);
+        archive->inout("ch", ch);
+        archive->inout("i16", i16);
+        archive->inout("i32", i32);
+        archive->inout("i64", i64);
+        archive->inout("f32", f32);
+        archive->inout("d64", d64);
+        archive->inout("str", str);
+        archive->inout("fstr", fstr);
+    }
+
+    SerDesObject_Vectors(const SerDesObject_Vectors& r) = delete;
+    SerDesObject_Vectors& operator= (const SerDesObject_Vectors& l) = delete;
+    SerDesObject_Vectors(SerDesObject_Vectors&&) = delete;
+    SerDesObject_Vectors& operator =(SerDesObject_Vectors&&) = delete;
+};
+
+class SerDesObject_Fixarrays : public ops::OPSObject
+{
+public:
+    static ops::TypeId_T getTypeName() { return ops::TypeId_T("SerDesObject_Fixarrays"); }
+    SerDesObject_Fixarrays() { appendType(getTypeName()); }
+    ~SerDesObject_Fixarrays() = default;
+
+    bool bo[4];
+    char ch[2];
+    int16_t i16[1];
+    int i32[3];
+    int64_t i64[2];
+    float f32[2];
+    double d64[2];
+    std::string str[2];
+    ops::strings::fixed_string<30> fstr[2];
+
+    virtual void serialize(ops::ArchiverInOut* archive) override
+    {
+        OPSObject::serialize(archive);
+        archive->inoutfixarr("bo", bo, 4, sizeof(bo));
+        archive->inoutfixarr("ch", ch, 2, sizeof(ch));
+        archive->inoutfixarr("i16", i16, 1, sizeof(i16));
+        archive->inoutfixarr("i32", i32, 3, sizeof(i32));
+        archive->inoutfixarr("i64", i64, 2, sizeof(i64));
+        archive->inoutfixarr("f32", f32, 2, sizeof(f32));
+        archive->inoutfixarr("d64", d64, 2, sizeof(d64));
+        archive->inoutfixarr("str", str, 2);
+        archive->inoutfixarr("fstr", fstr, 2);
+    }
+
+    SerDesObject_Fixarrays(const SerDesObject_Fixarrays& r) = delete;
+    SerDesObject_Fixarrays& operator= (const SerDesObject_Fixarrays& l) = delete;
+    SerDesObject_Fixarrays(SerDesObject_Fixarrays&&) = delete;
+    SerDesObject_Fixarrays& operator =(SerDesObject_Fixarrays&&) = delete;
+};
+

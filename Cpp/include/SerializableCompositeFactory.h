@@ -55,7 +55,7 @@ public:
 		if (o) childFactories.push_back(o);
 	}
 
-	virtual Serializable* create(const TypeId_T& type)
+	virtual Serializable* create(const TypeId_T& type) override
 	{
         Serializable* obj = nullptr;
 

@@ -30,20 +30,20 @@ namespace ops {
 			return mpm;
 		}
 
-		memory_pool_manager::memory_pool_manager() : _root(nullptr), _numPools(0), _client(nullptr)
+		memory_pool_manager::memory_pool_manager() noexcept
 		{
 			_root.next = &_root;
 			_root.prev = &_root;
 		}
 
-		void memory_pool_manager::setLogger(memory_pool_logger* client)
+		void memory_pool_manager::setLogger(memory_pool_logger* const client) noexcept
 		{
 			_client = client;
 		}
 
 		void memory_pool_manager::Add(node<memory_pool_abs>& nd)
 		{
-			SafeLock lck(&_mtx);
+			const SafeLock lck(&_mtx);
 
 			// last node = _root.prev
 			nd.next = _root.prev->next;
@@ -56,7 +56,7 @@ namespace ops {
 
 		void memory_pool_manager::Remove(node<memory_pool_abs>& nd)
 		{
-			SafeLock lck(&_mtx);
+			const SafeLock lck(&_mtx);
 
 			nd.prev->next = nd.next;
 			nd.next->prev = nd.prev;
@@ -67,7 +67,7 @@ namespace ops {
 		}
 
 		// Uses the link chain to print statistics from each memory_pool
-		void memory_pool_manager::PrintStat(std::ostream& os, bool skip_header)
+		void memory_pool_manager::PrintStat(std::ostream& os, const bool skip_header)
 		{
 			if (!skip_header) {
 				os <<
@@ -75,7 +75,7 @@ namespace ops {
 					std::endl << "======================" << std::endl;
 			}
 
-			SafeLock lck(&_mtx);
+			const SafeLock lck(&_mtx);
 
 			node<memory_pool_abs>* Ptr = _root.next;
 			while (Ptr != &_root) {
@@ -84,7 +84,7 @@ namespace ops {
 			}
 		}
 
-		void memory_pool_manager::Log(const char* message, std::exception& e)
+		void memory_pool_manager::Log(const char* const message, std::exception& e)
 		{
 			if (_client != nullptr) { _client->Log(message, e); }
 		}
@@ -99,7 +99,7 @@ namespace ops {
 			memory_pool_manager::Instance().Remove(_node);
 		}
 
-		void memory_pool_abs::Log(const char* message, std::exception& e)
+		void memory_pool_abs::Log(const char* const message, std::exception& e)
 		{
 			memory_pool_manager::Instance().Log(message, e);
 		}

@@ -6,7 +6,7 @@
 
 namespace ops
 {
-    void ErrorService::report(Error* error)
+    void ErrorService::report(Error* const error)
     {
         notifyNewEvent(error);
     }

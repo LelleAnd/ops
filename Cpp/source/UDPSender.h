@@ -63,7 +63,7 @@ namespace ops
         ///These are the required boost members to perform operations required.
 		boost::asio::ip::address ipAddr;
 		boost::asio::ip::udp::endpoint localEndpoint;   //<-- The local port to bind to.
-        boost::asio::ip::udp::socket* socket;           //<-- The socket that sends data.
+        boost::asio::ip::udp::socket* socket{ nullptr };//<-- The socket that sends data.
         boost::asio::io_service* io_service;            //<-- Required for boost sockets.
 
 		Address_T _localInterface;

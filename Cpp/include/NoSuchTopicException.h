@@ -11,12 +11,12 @@ namespace ops
 	class NoSuchTopicException : public std::exception
 	{
 	public:
-		NoSuchTopicException(ExceptionMessage_T mess) : message(mess)
+		NoSuchTopicException(ExceptionMessage_T mess) noexcept : message(mess)
 		{
 		}
-		const char* what() const NOEXCEPT { return message.c_str(); }
+		const char* what() const noexcept { return message.c_str(); }
 
-		~NoSuchTopicException() throw()
+		~NoSuchTopicException()
         {
         }
 	private:

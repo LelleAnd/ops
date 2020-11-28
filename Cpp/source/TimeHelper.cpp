@@ -30,13 +30,13 @@
 namespace ops
 {
     ///Returns the current time as a number of milliseconds since Epoch 1970-01-01.
-    int64_t TimeHelper::currentTimeMillis()
+    int64_t TimeHelper::currentTimeMillis() noexcept
     {
         return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     }
 
     ///Sleeps the given number of milliseconds (millis).
-    void TimeHelper::sleep(int64_t millis)
+    void TimeHelper::sleep(const int64_t millis)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(millis));
     }
@@ -48,9 +48,9 @@ namespace ops
 #pragma warning(push)
 #pragma warning(disable: 4996)
 #endif
-        std::time_t t = std::time(nullptr);
+        const std::time_t t = std::time(nullptr);
         char mbstr[100];
-        if (std::strftime(mbstr, sizeof(mbstr), "%Y-%m-%d %H-%M-%S", std::localtime(&t))) {
+        if (std::strftime(mbstr, sizeof(mbstr), "%Y-%m-%d %H-%M-%S", std::localtime(&t)) > 0) {
             return mbstr;
         }
 #if defined(_MSC_VER)
@@ -60,7 +60,7 @@ namespace ops
     }
 
 	///Returns the current time as a number of milliseconds since Epoch 1970-01-01.
-    int64_t TimeHelper::getEpochTime()
+    int64_t TimeHelper::getEpochTime() noexcept
     {
         return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     }

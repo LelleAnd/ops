@@ -102,11 +102,13 @@ namespace opsbridge {
 		void onAckNakMessage(CTransport* const sender, TAckNakMessage& ackNak) override;
 		void onCommandMessage(CTransport* const sender, TCommandMessage& cmd) override;
 		void onStatusMessage(CTransport* const sender, const TStatusMessage& status) override;
-		void onUdpMcMessage(CTransport* const sender, TUdpMcMessage& udpMc, const char* data) override;
+		void onUdpMcMessage(CTransport* const sender, const TUdpMcMessage& udpMc, const char* data) override;
 
 		// Override from RawMcUdpListener
 		void onUdpMcMessage(RawMcUdp* const sender, TUdpMcMessage& mess, const char* data) override;
 
+        // ---------------------------------------------------------------
+        void HandlePreparePubCommand(TCommandMessage& cmd);
 		void Run();
 
 	private:

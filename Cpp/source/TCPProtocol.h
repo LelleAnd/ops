@@ -44,17 +44,17 @@ namespace ops
 	class TCPProtocol
 	{
 	protected:
-		TCPProtocolCallbacks* _client;
-		char* _data;
-		uint32_t _maxLength;
-		uint32_t _accumulatedSize;
-		uint32_t _expectedSize;
+        TCPProtocolCallbacks* _client{ nullptr };
+        char* _data{ nullptr };
+        uint32_t _maxLength{ 0 };
+        uint32_t _accumulatedSize{ 0 };
+        uint32_t _expectedSize{ 0 };
 		InternalString_T _debugId;
 
 		// Returns false on error
 		bool startAsyncRead(uint32_t size)
 		{
-			if (!_client) return false;
+            if (_client == nullptr) { return false; }
 			_accumulatedSize = 0;
 			_expectedSize = size;
 			_client->startAsyncRead(*this, _data, _expectedSize);
@@ -73,24 +73,22 @@ namespace ops
 	public:
 		TCPUserBase* userData = nullptr;
 
-		TCPProtocol() :
-			_client(nullptr), _data(nullptr), _maxLength(0), _accumulatedSize(0), _expectedSize(0)
-		{}
+		TCPProtocol() {}
 
 		virtual ~TCPProtocol()
 		{
-			if (userData) delete userData;
+            if (userData != nullptr) { delete userData; }
 		}
 
 		// Connect a client
-		void connect(TCPProtocolCallbacks* client) { _client = client; }
+		void connect(TCPProtocolCallbacks* client) noexcept { _client = client; }
 
-		void setDebugId(const InternalString_T& dbgId) { _debugId = dbgId; }
-		const InternalString_T& getDebugId() { return _debugId; }
+		void setDebugId(const InternalString_T& dbgId) noexcept { _debugId = dbgId; }
+		const InternalString_T& getDebugId() noexcept { return _debugId; }
 
 		// Called to reset protocol internal state
 		// Normaly used at connect
-		virtual void resetProtocol() {}
+		virtual void resetProtocol() noexcept {}
 
 		// Returning false if unable to start
 		virtual bool startReceive(char* bytes, uint32_t size) = 0;

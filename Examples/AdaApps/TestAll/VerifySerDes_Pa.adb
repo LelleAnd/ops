@@ -65,6 +65,9 @@ use Ops_Pa.Subscriber_Pa.TestAll_ChildData;
 with Ops_Pa.ArchiverInOut_Pa.PrintArchiverOut_Pa;
 use Ops_Pa.ArchiverInOut_Pa.PrintArchiverOut_Pa;
 
+with Ops_Pa.ArchiverInOut_Pa.ChecksumArchiver_Pa;
+use Ops_Pa.ArchiverInOut_Pa.ChecksumArchiver_Pa;
+
 with Ops_Pa; use Ops_Pa;
 with Ops_Pa.Error_Pa;
 with Ops_Pa.Participant_Pa;
@@ -1106,6 +1109,26 @@ package body VerifySerDes_Pa is
 --        prt.PrintObject("Kalle", Serializable_Class_At(cd1));
 --        Free(prt);
 --      end;
+
+--    Put_Line("Debug: Count= " & Ctv.Integer32'Image(Ops_Pa.NumActiveObjects));
+
+    Log("Test Checksum Archiver ...");
+    declare
+      calc : Checksum_Calc_8bit_xor_Class_At := Create;
+      chksum : ChecksumArchiver_Class_At := Create( Checksum_Calculator_Class_At(calc) );
+    begin
+      cd1.Serialize( ArchiverInOut_Class_At(chksum) );
+      Free(chksum);
+      AssertEQ(calc.Sum, 140, "Wrong checksum");
+      Log("Checksum # fields  = " & UInt32'Image(calc.TotalFields));
+      Log("Checksum # bytes   = " & UInt32'Image(calc.TotalBytes));
+      Log("Checksum 8-bit XOR = " & Byte'Image(calc.Sum));
+      Free(calc);
+    exception
+      when others =>
+        ErrorLog("Checksum exception !!!");
+    end;
+    Log("Checksum Archiver finished");
 
 --    Put_Line("Debug: Count= " & Ctv.Integer32'Image(Ops_Pa.NumActiveObjects));
 

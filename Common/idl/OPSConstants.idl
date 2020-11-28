@@ -10,4 +10,13 @@ class OPSConstants
 
     /* Participant ID used when none or an empty string is given */
     const string DEFAULT_PARTICIPANT_ID = "DEFAULT_PARTICIPANT";
+
+    /* When a message is sent on the network, it may need to be split in several
+       segments. Each segment will have the following header:
+          protocolID                 4
+          version                    2
+          total number of segments   4
+          current segment number     4
+    */
+    const int SEGMENT_HEADER_SIZE = 14;
 }

@@ -72,15 +72,17 @@ namespace ops
         ///listeners to deadlineMissedEvent will be notified
         const static int64_t MAX_DEADLINE_TIMEOUT = LLONG_MAX;
         void setDeadlineQoS(int64_t deadlineT);
-        int64_t getDeadlineQoS() const;
+        int64_t getDeadlineQoS() const noexcept;
 
+        // Note that the subscriber just borrows the reference. The caller still owns it and 
+        // need to keep it around at least as long as the subscriber use it.
         void addFilterQoSPolicy(FilterQoSPolicy* fqos);
         void removeFilterQoSPolicy(FilterQoSPolicy* fqos);
 
-        int64_t getTimeBasedFilterQoS() const;                              // (CB)
+        int64_t getTimeBasedFilterQoS() const noexcept;                              // (CB)
         ///Sets the minimum time separation between to consecutive messages.
         ///Received messages in between will be ignored by this Subscriber
-        void setTimeBasedFilterQoS(int64_t timeBaseMinSeparationMillis);    // (CB)
+        void setTimeBasedFilterQoS(int64_t timeBaseMinSeparationMillis) noexcept;    // (CB)
 
         ///Returns a copy of this subscribers Topic.
         Topic getTopic() const;                                             // (CB)
@@ -91,7 +93,7 @@ namespace ops
 
         ///Checks if new data exist (same as 'waitForNewData(0)' but faster) 
         ///Returns: true if new data (i.e. unread data) exist.
-        bool newDataExist() const {                                         // (CB)
+        bool newDataExist() const noexcept {                                         // (CB)
             return hasUnreadData;
         }
 
@@ -105,39 +107,39 @@ namespace ops
         ///Clears the "new data" flag.
         ///NOTE: MessageLock should be held while working with the message, to prevent a
         ///new incomming message to delete the current one while in use.
-        OPSMessage* getMessage();                                           // (CB)
+        OPSMessage* getMessage() noexcept;                                           // (CB)
 
         ///Returns the number of reserved messages in the underlying ReceiveDataHandler
         ///This value is the total nr for this topic on this participant not only
         ///for this subscriber.
-        int numReservedMessages()                                           // (CB)
+        int numReservedMessages() const                                     // (CB)
         {
             return receiveDataHandler->numReservedMessages();
         }
 
-        ObjectName_T getName() const;                                       // (CB)
-        void setName(ObjectName_T name);                                    // (CB)
+        ObjectName_T getName() const noexcept;                                       // (CB)
+        void setName(ObjectName_T name) noexcept;                                    // (CB)
 
         bool isDeadlineMissed();
 
-        void setHistoryMaxSize(int s);
+        void setHistoryMaxSize(int s) noexcept;
         std::deque<OPSMessage*> getHistory();
 
         ///Returns a reference to the latest received data object.
         ///Clears the "new data" flag.
         ///NOTE: MessageLock should be held while working with the data object, to prevent a
         ///new incomming message to delete the current one while in use. 
-        virtual OPSObject* getDataReference()                               // (CB)
+        virtual OPSObject* getDataReference() noexcept                               // (CB)
         {
             hasUnreadData = false;
             return data;
         }
 
         //Message listener callback
-        void onNewEvent(Notifier<OPSMessage*>* sender, OPSMessage* message);
+        void onNewEvent(Notifier<OPSMessage*>* sender, OPSMessage* message) override;
 
         //Deadline listener callback
-        void onNewEvent(Notifier<int>* sender, int message);
+        void onNewEvent(Notifier<int>* sender, int message) override;
 
 		//Default nullptr. Create a PublicationIdChecker if you want OPS to perform Publication Id checking.
 		//The check is performed before any QoS filtering, so it sees all messages.
@@ -157,12 +159,12 @@ namespace ops
         OPSMessage* message = nullptr;
 
         OPSObject* data = nullptr;
-        OPSObject* getData();
+        OPSObject* getData() noexcept;
         bool firstDataReceived = false;
         bool hasUnreadData = false;
 
 		// Called from ReceiveDataHandler (TCPClient)
-		virtual void onNewEvent(Notifier<ConnectStatus>* sender, ConnectStatus arg)
+		virtual void onNewEvent(Notifier<ConnectStatus>* sender, ConnectStatus arg) override
 		{
 			UNUSED(sender);
 			// Forward status to all connected
@@ -211,7 +213,7 @@ namespace ops
 		volatile int64_t _dbgSkip = 0;
 		volatile int64_t _numReceived = 0;
 		Lockable _dbgLock;
-		virtual void onRequest(opsidls::DebugRequestResponseData& req, opsidls::DebugRequestResponseData& resp);
+		virtual void onRequest(opsidls::DebugRequestResponseData& req, opsidls::DebugRequestResponseData& resp) override;
 #endif
 	};
 

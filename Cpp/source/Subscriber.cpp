@@ -30,7 +30,7 @@
 namespace ops
 {
 
-    Subscriber::Subscriber(Topic t) :
+    Subscriber::Subscriber(Topic const t) :
 		topic(t),
 		deadlineTimeout(TimeHelper::infinite)
 	{
@@ -62,7 +62,7 @@ namespace ops
 
     void Subscriber::start()
     {
-		if (started) return;
+        if (started) { return; }
 
         receiveDataHandler = participant->getReceiveDataHandler(topic);
         receiveDataHandler->addListener(this, topic);
@@ -74,7 +74,7 @@ namespace ops
 
     void Subscriber::stop()
     {
-        if (!started) return;
+        if (!started) { return; }
 
         // Note that the receiveDataHandler messageLock is held while we are removed from its list.
         // This ensures that the receive thread can't be in our onNewEvent() or be calling us anymore
@@ -89,9 +89,8 @@ namespace ops
     }
 
     // Note that the receiveDataHandler messageLock is held while executing this method
-    void Subscriber::onNewEvent(Notifier<OPSMessage*>* sender, OPSMessage* message)
+    void Subscriber::onNewEvent(Notifier<OPSMessage*>* , OPSMessage* const message)
     {
-        UNUSED(sender);
         //Perform a number of checks on incomming data to be sure we want to deliver it to the application layer
         //Check that this message is delivered on the same topic as this Subscriber use
         if (message->getTopicName() != topic.getName())
@@ -114,7 +113,7 @@ namespace ops
         }
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 		{
-			SafeLock lck(&_dbgLock);
+			const SafeLock lck(&_dbgLock);
 			if (_dbgSkip > 0) {
 				_dbgSkip--;
 				return;
@@ -130,7 +129,7 @@ namespace ops
 
 		//Now lets go on and filter on data content...
 
-        OPSObject* o = message->getData();
+        OPSObject* const o = message->getData();
         if (applyFilterQoSPolicies(o))
         {
             if (timeBaseMinSeparationTime == 0 || TimeHelper::currentTimeMillis() - timeLastDataForTimeBase > timeBaseMinSeparationTime)
@@ -157,7 +156,7 @@ namespace ops
         }
     }
 
-    void Subscriber::addToBuffer(OPSMessage* mess)
+    void Subscriber::addToBuffer(OPSMessage* const mess)
     {
         mess->reserve();
         messageBuffer.push_front(mess);
@@ -168,7 +167,7 @@ namespace ops
         }
     }
 
-    void Subscriber::setHistoryMaxSize(int s)
+    void Subscriber::setHistoryMaxSize(int const s) noexcept
     {
         messageBufferMaxSize = s;
     }
@@ -178,7 +177,7 @@ namespace ops
         return messageBuffer;
     }
 
-    OPSObject* Subscriber::getData()
+    OPSObject* Subscriber::getData() noexcept
     {
         hasUnreadData = false;
         return data;
@@ -189,21 +188,21 @@ namespace ops
         return topic;
     }
 
-    void Subscriber::addFilterQoSPolicy(FilterQoSPolicy* fqos)
+    void Subscriber::addFilterQoSPolicy(FilterQoSPolicy* const fqos)
     {
-        SafeLock lock(&filterQoSPolicyMutex);
+        const SafeLock lock(&filterQoSPolicyMutex);
         filterQoSPolicies.push_back(fqos);
     }
 
-    void Subscriber::removeFilterQoSPolicy(FilterQoSPolicy* fqos)
+    void Subscriber::removeFilterQoSPolicy(FilterQoSPolicy* const fqos)
     {
-        SafeLock lock(&filterQoSPolicyMutex);
+        const SafeLock lock(&filterQoSPolicyMutex);
         filterQoSPolicies.remove(fqos);
     }
 
-    bool Subscriber::applyFilterQoSPolicies(OPSObject* obj)
+    bool Subscriber::applyFilterQoSPolicies(OPSObject* const obj)
     {
-        SafeLock lock(&filterQoSPolicyMutex);
+        const SafeLock lock(&filterQoSPolicyMutex);
         bool ret = true;
         std::list<FilterQoSPolicy*>::iterator p;
         p = filterQoSPolicies.begin();
@@ -220,7 +219,7 @@ namespace ops
         return ret;
     }
 
-    void Subscriber::setDeadlineQoS(int64_t millis)
+    void Subscriber::setDeadlineQoS(int64_t const millis)
     {
 		if (millis == 0) {
 		    deadlineTimeout = TimeHelper::infinite;
@@ -230,7 +229,7 @@ namespace ops
 		cancelDeadlineTimeouts();	// Restart with new timeout
     }
 
-    int64_t Subscriber::getDeadlineQoS() const
+    int64_t Subscriber::getDeadlineQoS() const noexcept
     {
         return deadlineTimeout;
     }
@@ -239,23 +238,23 @@ namespace ops
     {
         if (isDeadlineMissed())
         {
-            //printf("DeadlineMissed timeLastData = %d, currTime = %d, deadlineTimeout = %d\n", timeLastData, currTime, deadlineTimeout);
+            //printf("DeadlineMissed timeLastData = %d, currTime = %d, deadlineTimeout = %d\n", timeLastData, currTime, deadlineTimeout)
             deadlineMissedEvent.notifyDeadlineMissed();
             timeLastData = TimeHelper::currentTimeMillis();
         }
     }
 
-    int64_t Subscriber::getTimeBasedFilterQoS() const
+    int64_t Subscriber::getTimeBasedFilterQoS() const noexcept
     {
         return timeBaseMinSeparationTime;
     }
 
-    void Subscriber::setTimeBasedFilterQoS(int64_t timeBaseMinSeparationMillis)
+    void Subscriber::setTimeBasedFilterQoS(int64_t const timeBaseMinSeparationMillis) noexcept
     {
         timeBaseMinSeparationTime = timeBaseMinSeparationMillis;
     }
 
-    bool Subscriber::waitForNewData(int timeoutMs)
+    bool Subscriber::waitForNewData(int const timeoutMs)
     {
         if (hasUnreadData) {
             return true;
@@ -263,19 +262,19 @@ namespace ops
         return newDataEvent.waitFor(std::chrono::milliseconds(timeoutMs));
     }
 
-	ObjectName_T Subscriber::getName() const
+	ObjectName_T Subscriber::getName() const noexcept
     {
         return name;
     }
 
-    void Subscriber::setName(ObjectName_T name)
+    void Subscriber::setName(ObjectName_T const name) noexcept
     {
         this->name = name;
     }
 
     bool Subscriber::isDeadlineMissed()
     {
-        int64_t currTime = TimeHelper::currentTimeMillis();
+        const int64_t currTime = TimeHelper::currentTimeMillis();
         if (currTime - timeLastData > deadlineTimeout)
         {
             deadlineMissed = true;
@@ -289,10 +288,8 @@ namespace ops
         deadlineTimer->start(deadlineTimeout);
     }
 
-    void Subscriber::onNewEvent(Notifier<int>* sender, int message)
+    void Subscriber::onNewEvent(Notifier<int>* , int )
     {
-        UNUSED(sender);
-        UNUSED(message);
         deadlineMissedEvent.notifyDeadlineMissed();
         deadlineTimer->start(deadlineTimeout);
     }
@@ -307,7 +304,7 @@ namespace ops
         receiveDataHandler->releaseMessageLock();
     }
 
-    OPSMessage* Subscriber::getMessage()
+    OPSMessage* Subscriber::getMessage() noexcept
     {
         hasUnreadData = false;
         return message;
@@ -316,7 +313,7 @@ namespace ops
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 	void Subscriber::onRequest(opsidls::DebugRequestResponseData& req, opsidls::DebugRequestResponseData& resp)
 	{
-		SafeLock lck(&_dbgLock);
+		const SafeLock lck(&_dbgLock);
 		switch (req.Command) {
 		case 1: // Request
 			break;

@@ -21,53 +21,33 @@ class Main : ops::DataListener, ops::DeadlineMissedListener, ops::Listener<ops::
 {
 public:
 	//Use a member subscriber so we can use it from onNewData, see below.
-	TestAll::ChildDataSubscriber* sub;
-	TestAll::BaseDataSubscriber* baseSub;
+    TestAll::ChildDataSubscriber* sub{ nullptr };
+    TestAll::BaseDataSubscriber* baseSub{ nullptr };
 	TestAll::ChildData chdata;
-	ops::Subscriber* piSub;
+    ops::Subscriber* piSub{ nullptr };
 
 	std::vector<ops::OPSMessage*> inCommingMessages;
 
 	//
-	int packagesLost;
-	int lastPacket;
+    int packagesLost{ 0 };
+    int lastPacket{ -1 };
 
-	ops::Receiver* rec;
-	char bytes[100];
+    ops::Receiver* rec{ nullptr };
+    char bytes[100]{ 0 };
 
 public:
-	virtual void onNewEvent(ops::Notifier<ops::BytesSizePair>* sender, ops::BytesSizePair const byteSizePair) override
+	virtual void onNewEvent(ops::Notifier<ops::BytesSizePair>* , ops::BytesSizePair ) override
 	{
-		UNUSED(sender);
-		UNUSED(byteSizePair);
-		rec->asynchWait(bytes, 100);
+        rec->asynchWait(bytes, 100);
 	}
-	explicit Main(bool const piSubscriber): 
-	  sub(nullptr), 
-      baseSub(nullptr), 
-      piSub(nullptr), 
-	  packagesLost(0), 
-	  lastPacket(-1),
-	  rec(nullptr)
-	{
+	explicit Main(bool const piSubscriber)
+    {
 		using namespace TestAll;
 		using namespace ops;
-
-
-		//Create a topic. NOTE, this is a temporary solution to get topics before OPS4 is completely released.
-		//ops::Topic<ChildData> topic("ChildTopic", 6778, "testall.ChildData", "236.7.8.44");
 
 		//Create a topic from configuration.
 		ops::Participant* const participant = Participant::getInstance("TestAllDomain");
 		participant->addTypeSupport(new TestAll::TestAllTypeFactory());
-
-		/*rec = ops::Receiver::createTCPClient("127.0.0.1", 1342, participant->getIOService());
-		rec->addListener(this);
-		rec->asynchWait(bytes, 100);
-		while(true)
-		{
-			Sleep(1000);
-		}*/
 
 		ErrorWriter* const errorWriter = new ErrorWriter(std::cout);
 		participant->addListener(errorWriter);
@@ -77,12 +57,8 @@ public:
 
 			//Create a subscriber on that topic.
 			sub = new ChildDataSubscriber(topic);
-			//sub->setDeadlineQoS(10);
-			//sub->setTimeBasedFilterQoS(1000);
-			//sub->addFilterQoSPolicy(new KeyFilterQoSPolicy("key1"));
 			sub->addDataListener(this);
 			sub->deadlineMissedEvent.addDeadlineMissedListener(this);
-			//sub->setHistoryMaxSize(5);
 			sub->start();
 
 			//I godtycklig component
@@ -102,25 +78,27 @@ public:
 			piSub->start();
 		}
 
-		//while(true)
+#ifdef OLD_NOT_USED
+        //while(true)
 		//{
 		//	Sleep(1000);
 		//	sub->aquireMessageLock();
 		//	onNewData(sub);
 		//	sub->releaseMessageLock();
 		//}
-	}
+#endif
+    }
 	///Override from ops::DataListener, called whenever new data arrives.
-	virtual void onNewData(ops::DataNotifier* subscriber) override
+	virtual void onNewData(ops::DataNotifier* const subscriber) override
 	{
 		if(subscriber == sub) {
 			sub->numReservedMessages();
 
-///LA test
 			sub->getData(&chdata);   
+
+#ifdef OLD_NOT_USED
 //			ops::OPSMessage* newMess = sub->getMessage();
 //			data = *(TestAll::ChildData*)newMess->getData();
-///LA
 
 			//std::cout << data.i << " From: " << sub->getMessage()->getPublisherName() << std::endl;
 
@@ -154,10 +132,8 @@ public:
 			//}
 			//If you dont want to keep track of data yourself, you can use the history deque from the subscriber, its max size is set by sub->setHistoryMaxSize() in constructor.
 			//std::cout << "Buffer size: " << sub->getHistory().size() << std::endl;
-
+#endif			
 			
-			
-			//if(data == nullptr) return;
 			if (chdata.i != (lastPacket + 1)) {
 				packagesLost++;
 			}
@@ -168,30 +144,31 @@ public:
 				<< ". Lost messages: " << packagesLost << "          \r";// << std::endl;
 		
 		} else if (subscriber == baseSub) {
-			//Sleep(100000);
-			TestAll::BaseData* const data = dynamic_cast<TestAll::BaseData*>(baseSub->getMessage()->getData());
+            const ops::MessageLock lck(*baseSub);
+			TestAll::BaseData* const data = baseSub->getTypedDataReference();
 			if (data == nullptr) { return; }
 			std::cout << std::endl << data->baseText << " " << baseSub->getMessage()->getPublicationID() << " From: " << baseSub->getMessage()->getPublisherName() << std::endl;
 
 		} else if (subscriber == piSub) {
-			ops::ParticipantInfoData* const data = dynamic_cast<ops::ParticipantInfoData*>(piSub->getMessage()->getData());
+            const ops::MessageLock lck(*piSub);
+            ops::ParticipantInfoData* const data = dynamic_cast<ops::ParticipantInfoData*>(piSub->getMessage()->getData());
 			if (data == nullptr) { return; }
 			std::cout << "name: " << data->name << ", id: " << data->id << ", domain: " << data->domain << ", ip: " << data->ip << std::endl;
 			std::cout << "  lang: " << data->languageImplementation << ", opsver: " << data->opsVersion << ", mcudp: " << data->mc_udp_port << ", mctcp: " << data->mc_tcp_port << std::endl;
-			//std::vector<TopicInfoData> subscribeTopics;
+
 			std::cout << "  subscr Topics: ";
 			for (unsigned int i = 0; i < data->subscribeTopics.size(); i++) {
 				std::cout << data->subscribeTopics[i].name << " ";
 			}
 			std::cout << std::endl;
-			//std::vector<TopicInfoData> publishTopics;
-			std::cout << "  pub Topics: ";
+
+            std::cout << "  pub Topics: ";
 			for (unsigned int i = 0; i < data->publishTopics.size(); i++) {
 				std::cout << data->publishTopics[i].name << " ";
 			}
 			std::cout << std::endl;
-			//std::vector<std::string> knownTypes;
-			std::cout << "  knownTypes: ";
+			
+            std::cout << "  knownTypes: ";
 			for (unsigned int i = 0; i < data->knownTypes.size(); i++) {
   				std::cout << data->knownTypes[i] << " ";
 			}
@@ -199,9 +176,8 @@ public:
 		}
 	}
 	///Override from ops::DeadlineMissedListener, called if no new data has arrived within deadlineQoS.
-	virtual void onDeadlineMissed(ops::DeadlineMissedEvent* evt) override
+	virtual void onDeadlineMissed(ops::DeadlineMissedEvent* ) override
 	{
-		UNUSED(evt);
 		std::cout << "Deadline Missed!" << std::endl;
 	}
 	virtual ~Main()
@@ -238,7 +214,9 @@ int main(const int argc, const char* argv[])
 	//Run it on main application thread only.
 	for(int i = 0; i < 100; i++) {
 		ops::TimeHelper::sleep(100);
-		//break;
+
+#ifdef OLD_NOT_USED
+        //break;
 		/*m.sub->aquireMessageLock();
 		std::deque<ops::OPSMessage*> messages = m.sub->getHistory();
 		for(int i = 0; i < 5 && i < messages.size(); i++)
@@ -249,10 +227,11 @@ int main(const int argc, const char* argv[])
 		std::cout << std::endl;*/
 
 		//ops::Participant::getIOService()->run();
-	}
+#endif
+    }
 
 	delete m;
-	//Force OPS shudown.
+	//Force OPS shutdown.
 	delete participant;
 	
 	return 0;

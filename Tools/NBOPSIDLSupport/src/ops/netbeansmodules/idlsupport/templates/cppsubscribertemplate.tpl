@@ -11,7 +11,7 @@ __packageDeclaration
 class __classNameSubscriber : public ops::Subscriber
 {
 public:
-    __classNameSubscriber(ops::Topic t)
+    explicit __classNameSubscriber(ops::Topic t)
         : ops::Subscriber(t)
     {
     }

@@ -20,19 +20,12 @@
 
 #include "OPSTypeDefs.h"
 #include "Channel.h"
+#include "XMLArchiverIn.h"
 #include "ConfigException.h"
 
 namespace ops
 {
     Channel::Channel()
-        : channelID(""), 
-        linktype(""),
-        localInterface(""),
-        domainAddress(""),
-        timeToLive(-1),
-        port(0), 
-        outSocketBufferSize(-1),
-        inSocketBufferSize(-1)
     {
         appendType(TypeId_T("Channel"));
     }
@@ -60,6 +53,12 @@ namespace ops
 			msg += "'. Linktype for Channel must be either 'multicast', 'tcp', 'udp' or left blank( = multicast)";
 			throw ops::ConfigException(msg);
         }
+
+        // To not break binary compatibility we only do this when we know we are
+        // reading from an XML-file
+        if (dynamic_cast<XMLArchiverIn*>(archiver) != nullptr) {
+            archiver->inout("sampleMaxSize", sampleMaxSize);
+        }
     }
 
     void Channel::populateTopic(Topic& top) const
@@ -76,6 +75,9 @@ namespace ops
         top.setInSocketBufferSize(inSocketBufferSize);
         top.setTimeToLive(timeToLive);
         top.channelID = channelID;
+        if (sampleMaxSize >= 0) {
+            top.setSampleMaxSize(sampleMaxSize);
+        }
     }
 
 	Transport_T Channel::LINKTYPE_MC = "multicast";

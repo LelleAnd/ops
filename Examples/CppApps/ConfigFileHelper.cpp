@@ -10,7 +10,7 @@
 #include "ConfigFileHelper.h"
 #include "OPSConfigRepository.h"
 
-void setup_alt_config(std::string cfg_rel_ops4)
+void setup_alt_config(std::string const cfg_rel_ops4)
 {
     // First, if CWD contains an ops_config.xml, use it
     bool exist = false;
@@ -20,7 +20,7 @@ void setup_alt_config(std::string cfg_rel_ops4)
     }
     if (exist) {
         std::cout << "Using config file in CWD\n";
-        // not needed (default behaviour): ops::OPSConfigRepository::Instance()->Add("ops_config.xml");
+        // not needed (default behaviour): ops::OPSConfigRepository::Instance()->Add("ops_config.xml")
 
     } else {
         // Second, check if we are in the OPS4 Examples hierarchy and then use the given cfg
@@ -31,11 +31,11 @@ void setup_alt_config(std::string cfg_rel_ops4)
 #else
         buffer = getcwd(nullptr, 0);
 #endif
-        if (buffer) {
+        if (buffer != nullptr) {
             path = buffer;
             free(buffer);
         }
-        auto pos = path.find("Examples");
+        const auto pos = path.find("Examples");
         if (pos != path.npos) {
             path = path.substr(0, pos);
             path += cfg_rel_ops4;

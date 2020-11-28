@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include "Topic.h"
 #include "Sender.h"
 #include "Notifier.h"
@@ -29,7 +31,9 @@
 
 namespace ops
 {
-	class SendDataHandler : protected Listener<ConnectStatus>, public Notifier<ConnectStatus>
+	class SendDataHandler :
+        protected Listener<ConnectStatus>, public Notifier<ConnectStatus>,
+        public std::enable_shared_from_this<SendDataHandler>
 	{
 	public:
 		virtual ~SendDataHandler() {}
@@ -85,7 +89,7 @@ namespace ops
         Lockable mutex;
 
 		// Called from senders (TCPServer)
-		virtual void onNewEvent(Notifier<ConnectStatus>* sndr, ConnectStatus arg)
+		virtual void onNewEvent(Notifier<ConnectStatus>* sndr, ConnectStatus arg) override
 		{
 			UNUSED(sndr)
 			// Forward status to all connected publishers

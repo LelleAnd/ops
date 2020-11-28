@@ -82,7 +82,7 @@ package body Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa is
     -- use transport udp which in most cases use a single ReceiveDataHandler,
     -- we need to return the same ReceiveDataHandler in these cases.
     -- Make a key with the transport info that uniquely defines the receiver.
-    if (top.Transport = TRANSPORT_UDP) or (not Ops_Pa.Socket_Pa.isMyNodeAddress(top.DomainAddress)) then
+    if (top.Transport = TRANSPORT_UDP) and (not Ops_Pa.Socket_Pa.isMyNodeAddress(top.DomainAddress)) then
       return top.Transport;
     else
       return top.Transport & "::" & top.DomainAddress & "::" & Int32'Image(top.Port);

@@ -18,6 +18,7 @@ import ops.OPSConfigRepository;
 import ops.Domain;
 import ops.Topic;
 import ops.KeyFilterQoSPolicy;
+import ops.NetworkSupport;
 
 import pizza.PizzaData;
 import pizza.PizzaDataSubscriber;
@@ -349,11 +350,29 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
   	System.out.println("\t X     Exit program");
 	}
 
+  public void test(String addr)
+  {
+      System.out.println("IsValidNodeAddress(" + addr + ") = " + NetworkSupport.IsValidNodeAddress(addr));
+      System.out.println("IsMyNodeAddress(" + addr + ") = " + NetworkSupport.IsMyNodeAddress(addr));
+  }
+
   public void doRun()
   {
     // set item 0 as default
     ChangeSelect(0, true);
     menu();
+
+    /*
+    test("");
+    test("0.0.0.0");
+    test("223.255.255.255");
+    test("224.0.0.0");
+    test("127.0.0.1");
+    test("192.168.0.24");
+    test("192.168.0.25");
+    test("192.168.0.26");
+    test("172.17.205.209");
+    */
 
     boolean doPeriodicalSends = false;
 

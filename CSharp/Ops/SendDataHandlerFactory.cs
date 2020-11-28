@@ -15,7 +15,6 @@ namespace Ops
     {
         private Dictionary<string, ISendDataHandler> SendDataHandlers = new Dictionary<string, ISendDataHandler>();
 
-        private McUdpSendDataHandler udpSendDataHandler = null;
         private ParticipantInfoDataListener partInfoListener = null;
         private Subscriber partInfoSub = null;
 
@@ -26,23 +25,64 @@ namespace Ops
             partInfoListener = null;
         }
 
+        private string MakeKey(Topic top, string localIf)
+        {
+            // In the case that we use the same port for several topics, we need to find the sender for the transport::address::port used
+            string key = top.GetTransport() + "::";
+            if (top.GetTransport().Equals(Topic.TRANSPORT_UDP))
+            {
+                key += localIf + "::";
+            }
+            key += top.GetDomainAddress();
+            if (!top.GetTransport().Equals(Topic.TRANSPORT_UDP))
+            {
+                key += "::" + top.GetPort();
+            }
+            return key;   // t.GetTransport() + "::" + t.GetDomainAddress() + "::" + t.GetPort();
+        }
+
+        private void PostSetup(Topic t, Participant participant, McUdpSendDataHandler sdh)
+        {
+            // If topic specifies a valid node address, add that as a static destination address for topic
+            if (Ops.InetAddress.IsValidNodeAddress(t.GetDomainAddress()))
+            {
+                sdh.AddSink(t.GetName(), t.GetDomainAddress(), t.GetPort(), true);
+            }
+            else
+            {
+                if (partInfoListener == null)
+                {
+                    // Setup a listener on the participant info data published by participants on our domain.
+                    // We use the information for topics with UDP as transport, to know the destination for UDP sends
+                    // ie. we extract ip and port from the information and add it to our McUdpSendDataHandler
+                    partInfoListener = new ParticipantInfoDataListener(participant, sdh);
+
+                    partInfoSub = new Subscriber(participant.CreateParticipantInfoTopic());
+                    partInfoSub.newDataDefault += new NewDataDefaultEventHandler(partInfoListener.SubscriberNewData);
+                    partInfoSub.Start();
+                }
+            }
+        }
+
         ///LA TODO Protection ?? What if several subscribers at the same time
         /// Not needed since all calls go through the participant which is synched
         public ISendDataHandler GetSendDataHandler(Topic t, Participant participant)
         {
-            // In the case that we use the same port for several topics, we need to find the sender for the transport::address::port used
-            string key = t.GetTransport() + "::" + t.GetDomainAddress() + "::" + t.GetPort();
-            
+            // Get the local interface, doing a translation from subnet if necessary
+            string localIF = InetAddress.DoSubnetTranslation(t.GetLocalInterface());
+            string key = MakeKey(t, localIF);
+
             if (SendDataHandlers.ContainsKey(key))
             {
-                return SendDataHandlers[key];
+                ISendDataHandler sender = SendDataHandlers[key];
+                if (t.GetTransport().Equals(Topic.TRANSPORT_UDP)) {
+                    PostSetup(t, participant, (McUdpSendDataHandler)sender);
+                }
+                return sender;
             }
 
             try
             {
-                // Get the local interface, doing a translation from subnet if necessary
-                string localIF = InetAddress.DoSubnetTranslation(t.GetLocalInterface());
-
                 ISendDataHandler sender = null;
                 if (t.GetTransport().Equals(Topic.TRANSPORT_MC))
                 {
@@ -52,43 +92,16 @@ namespace Ops
                 {
                     sender = new TcpSendDataHandler(t, localIF);
                 }
+                else if (t.GetTransport().Equals(Topic.TRANSPORT_UDP))
+                {
+                    // We have only one sender for all topics on an interface, so use the domain value for buffer size
+                    sender = new McUdpSendDataHandler(participant.getDomain().GetOutSocketBufferSize(), localIF);
+                    PostSetup(t, participant, (McUdpSendDataHandler)sender);
+                }
                 if (sender != null)
                 {
                     SendDataHandlers.Add(key, sender);
                     return sender;
-                }
-
-                // We don't want to add the udp handler to the handler list, so handle this last
-                if (t.GetTransport().Equals(Topic.TRANSPORT_UDP))
-                {
-                    if (udpSendDataHandler == null)
-                    {
-                        // We have only one sender for all topics, so use the domain value for buffer size
-                        udpSendDataHandler = new McUdpSendDataHandler(
-                            participant.getDomain().GetOutSocketBufferSize(),
-                            localIF);
-                    }
-
-                    // If topic specifies a valid node address, add that as a static destination address for topic
-                    if (Ops.InetAddress.IsValidNodeAddress(t.GetDomainAddress()))
-                    {
-                        udpSendDataHandler.AddSink(t.GetName(), t.GetDomainAddress(), t.GetPort(), true);
-                    }
-                    else
-                    {
-                        if (partInfoListener == null)
-                        {
-                            // Setup a listener on the participant info data published by participants on our domain.
-                            // We use the information for topics with UDP as transport, to know the destination for UDP sends
-                            // ie. we extract ip and port from the information and add it to our McUdpSendDataHandler
-                            partInfoListener = new ParticipantInfoDataListener(participant, udpSendDataHandler);
-
-                            partInfoSub = new Subscriber(participant.CreateParticipantInfoTopic());
-                            partInfoSub.newDataDefault += new NewDataDefaultEventHandler(partInfoListener.SubscriberNewData);
-                            partInfoSub.Start();
-                        }
-                    }
-                    return udpSendDataHandler;
                 }
 
                 throw new CommException("No such Transport " + t.GetTransport());

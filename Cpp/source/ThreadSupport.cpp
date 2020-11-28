@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2017 Lennart Andersson.
+* Copyright (C) 2017-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -20,7 +20,6 @@
 
 #include "OPSTypeDefs.h"
 #include "SingleThreadPool.h"
-//#include "MultiThreadPool.h"
 #include "ThreadSupport.h"
 
 #ifdef _WIN32
@@ -36,7 +35,6 @@ namespace thread_support {
 	ThreadPool* CreateThreadPool()
 	{
 		return new SingleThreadPool();
-		//return new MultiThreadPool();
 	}
 
 #ifdef _WIN32
@@ -53,7 +51,7 @@ namespace thread_support {
 #endif
 
 	// Called from within the thread to be named
-	void SetThreadName(const char* name)
+	void SetThreadName(const char* const name)
 	{
 #ifdef _WIN32
 		THREADNAME_INFO info;

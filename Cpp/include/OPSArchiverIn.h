@@ -39,7 +39,7 @@ namespace ops
     class OPSArchiverIn : public ArchiverInOut
     {
     public:
-        OPSArchiverIn(ByteBuffer& _buf, SerializableInheritingTypeFactory* _factory):
+        OPSArchiverIn(ByteBuffer& _buf, SerializableInheritingTypeFactory* _factory) noexcept :
 			buf(_buf), factory(_factory)
         {
         }
@@ -49,7 +49,7 @@ namespace ops
         }
 
 		// Returns true if it's an output archiver
-		virtual bool isOut() override { return false; }
+		virtual bool isOut() noexcept override { return false; }
 
 		void inout(InoutName_T name, bool& value) override
         {
@@ -207,7 +207,7 @@ namespace ops
 		void inoutfixarr(InoutName_T name, bool* value, int numElements, int totalSize) override
 		{
 			UNUSED(name)
-			int num = buf.ReadInt();
+			const int num = buf.ReadInt();
 			if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
 			buf.ReadChars((char *)value, totalSize);
 		}
@@ -215,7 +215,7 @@ namespace ops
 		void inoutfixarr(InoutName_T name, char* value, int numElements, int totalSize) override
 		{
 			UNUSED(name)
-			int num = buf.ReadInt();
+			const int num = buf.ReadInt();
 			if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
 			buf.ReadChars((char *)value, totalSize);
 		}
@@ -223,7 +223,7 @@ namespace ops
 		void inoutfixarr(InoutName_T name, int* value, int numElements, int totalSize) override
 		{
 			UNUSED(name)
-			int num = buf.ReadInt();
+			const int num = buf.ReadInt();
 			if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
 			buf.ReadChars((char *)value, totalSize);
 		}
@@ -231,7 +231,7 @@ namespace ops
 		void inoutfixarr(InoutName_T name, int16_t* value, int numElements, int totalSize) override
 		{
 			UNUSED(name)
-			int num = buf.ReadInt();
+			const int num = buf.ReadInt();
 			if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
 			buf.ReadChars((char *)value, totalSize);
 		}
@@ -239,7 +239,7 @@ namespace ops
 		void inoutfixarr(InoutName_T name, int64_t* value, int numElements, int totalSize) override
 		{
 			UNUSED(name)
-			int num = buf.ReadInt();
+			const int num = buf.ReadInt();
 			if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
 			buf.ReadChars((char *)value, totalSize);
 		}
@@ -247,7 +247,7 @@ namespace ops
 		void inoutfixarr(InoutName_T name, float* value, int numElements, int totalSize) override
 		{
 			UNUSED(name)
-			int num = buf.ReadInt();
+			const int num = buf.ReadInt();
 			if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
 			buf.ReadChars((char *)value, totalSize);
 		}
@@ -255,7 +255,7 @@ namespace ops
 		void inoutfixarr(InoutName_T name, double* value, int numElements, int totalSize) override
 		{
 			UNUSED(name)
-			int num = buf.ReadInt();
+			const int num = buf.ReadInt();
 			if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
 			buf.ReadChars((char *)value, totalSize);
 		}
@@ -263,7 +263,7 @@ namespace ops
 		void inoutfixarr(InoutName_T name, std::string* value, int numElements) override
         {
             UNUSED(name)
-            int num = buf.ReadInt();
+            const int num = buf.ReadInt();
             if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
             for(int i = 0; i < numElements; i++) {
                 value[i] = buf.ReadString();

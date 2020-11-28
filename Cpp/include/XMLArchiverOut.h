@@ -55,7 +55,7 @@ namespace ops
         }
 
 		// Returns true if it's an output archiver
-		virtual bool isOut() override { return true; }
+		virtual bool isOut() noexcept override { return true; }
 
 		void close()
         {
@@ -162,7 +162,7 @@ namespace ops
 
         virtual void inout(InoutName_T name, Serializable& value) override
         {
-			OPSObject& opsO = dynamic_cast<OPSObject&> (value);
+			const OPSObject& opsO = dynamic_cast<OPSObject&> (value);
 
 			os << tab() << "<" << name << " type = \"" << opsO.getTypeString() << "\" >" << "\n";
 			currentTabDepth++;

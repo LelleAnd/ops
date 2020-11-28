@@ -41,7 +41,7 @@ namespace ops
         private:
 			ExceptionMessage_T message;
         public:
-            ArchiverException()
+            ArchiverException() noexcept
             {
                 message = "ArchiverException: empty";
             }
@@ -56,7 +56,7 @@ namespace ops
 				message += m;
 				message += name;
 			}
-			const char* what() const NOEXCEPT { return message.c_str(); }
+			const char* what() const noexcept override { return message.c_str(); }
 		};
     }
     using namespace exceptions;
@@ -115,7 +115,7 @@ namespace ops
 		template<size_t N>
 		void inout(InoutName_T name, std::vector<strings::fixed_string<N>>& vec)
 		{
-			int size = beginList(name, (int)vec.size());
+			const int size = beginList(name, (int)vec.size());
 			if ((int)vec.size() != size) {
 				vec.clear();
 				vec.reserve(size);
@@ -134,7 +134,7 @@ namespace ops
 		template <class T>
 		void inoutenum(InoutName_T name, std::vector<T>& vec)
 		{
-			int size = beginList(name, (int)vec.size());
+			const int size = beginList(name, (int)vec.size());
 			if ((int)vec.size() != size) {
 				vec.clear();
 				vec.reserve(size);
@@ -162,7 +162,7 @@ namespace ops
 		template<size_t N>
 		void inoutfixarr(InoutName_T name, strings::fixed_string<N>* value, int numElements)
 		{
-			int size = beginList(name, numElements);
+			const int size = beginList(name, numElements);
 			if (size != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
 			for (int i = 0; i < size; i++) {
 				inout("element", value[i], i);
@@ -173,7 +173,7 @@ namespace ops
 		template <class T>
 		void inoutenum(InoutName_T name, T* value, int numElements)
 		{
-			int size = beginList(name, numElements);
+			const int size = beginList(name, numElements);
 			if (size != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
 			for (int i = 0; i < size; i++) {
 				inoutenum("element", value[i]); ///TODO , i);
@@ -184,7 +184,7 @@ namespace ops
         template <class SerializableType> 
 		void inout(InoutName_T name, std::vector<SerializableType>& vec, SerializableType prototype)
         {
-            int size = beginList(name, (int)vec.size());
+            const int size = beginList(name, (int)vec.size());
             if ((int) vec.size() < size)
             {
                 vec.clear();
@@ -208,7 +208,7 @@ namespace ops
         template <class SerializableType> 
 		void inout(InoutName_T name, std::vector<SerializableType*>& vec)
         {
-            int size = beginList(name, (int)vec.size());
+            const int size = beginList(name, (int)vec.size());
             if ((int) vec.size() < size)
             {
                 vec.clear();
@@ -231,7 +231,7 @@ namespace ops
         template <class SerializableType> 
 		void inoutfixarr(InoutName_T name, SerializableType** value, int numElements)
         {
-            int size = beginList(name, numElements);
+            const int size = beginList(name, numElements);
             if (size != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
             for (int i = 0; i < size; i++) {
                 value[i] = (SerializableType*) inout(name, value[i], i);
@@ -242,7 +242,7 @@ namespace ops
         template <class SerializableType> 
 		void inoutfixarr(InoutName_T name, SerializableType* value, int numElements)
         {
-            int size = beginList(name, numElements);
+            const int size = beginList(name, numElements);
             if (size != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
             for (int i = 0; i < size; i++) {
                 inout("element", value[i]);

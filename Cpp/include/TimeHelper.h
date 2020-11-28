@@ -30,13 +30,13 @@ namespace ops
 	{
 	public:
 		///Returns the current time as a number of milliseconds since Epoch 1970-01-01.
-		static int64_t currentTimeMillis();
+		static int64_t currentTimeMillis() noexcept;
 		///Sleeps the given number of milliseconds (millis).
 	    static void sleep(int64_t millis);
 		///Returns current system time as a string to be used as user output, file names etc...
 	    static std::string getTimeToString();
 		///Returns the current time as a number of milliseconds since Epoch 1970-01-01.
-	    static int64_t getEpochTime();
+	    static int64_t getEpochTime() noexcept;
 
 		const static int64_t infinite = 0xffffffffLL; 
 	};

@@ -10,7 +10,7 @@ int64_t getNow()
 {
     timespec ts;
     memset(&ts, 0, sizeof(ts));
-    //clock_gettime(CLOCK_REALTIME, &ts);
+    //clock_gettime(CLOCK_REALTIME, &ts)
     return ((1000 * ts.tv_sec) + (ts.tv_nsec / 1000000));
 }
 
@@ -50,6 +50,11 @@ class CHelperListener
 public:
 	virtual void onData(ops::Subscriber* sub, DataType* data) = 0;
 	virtual ~CHelperListener() {}
+  CHelperListener() {}
+  CHelperListener(const CHelperListener&) = delete;
+  CHelperListener(CHelperListener&&) = delete;
+  CHelperListener& operator=(const CHelperListener&) = delete;
+  CHelperListener& operator=(CHelperListener&&) = delete;
 };
 
 class IHelper
@@ -60,6 +65,11 @@ public:
 	virtual void StartSubscriber() = 0;
 	virtual void StopSubscriber() = 0;
 	virtual ~IHelper() {};
+  IHelper() {}
+  IHelper(const IHelper&) = delete;
+  IHelper(IHelper&&) = delete;
+  IHelper& operator=(const IHelper&) = delete;
+  IHelper& operator=(IHelper&&) = delete;
 };
 
 template <class DataType, class DataTypePublisher, class DataTypeSubscriber>
@@ -213,13 +223,12 @@ ItemInfo* itemInfo = nullptr;
 class MyListener : public CHelperListener<pizza::special::ExtraAllt>
 {
 public:
-	virtual void onData(ops::Subscriber* sub, pizza::special::ExtraAllt* data) override {
-		UNUSED(sub)
+	virtual void onData(ops::Subscriber* , pizza::special::ExtraAllt* data) override {
 		receivedPizzaVec.push_back(*data);
 		std::cout << "GETS DATA, size = " << receivedPizzaVec.size() << std::endl;
 	}
 	MyListener() = default;
-	~MyListener() = default;
+	virtual ~MyListener() = default;
 	MyListener(const MyListener& r) = delete;
 	MyListener& operator= (const MyListener& l) = delete;
 	MyListener(MyListener&&) = delete;
@@ -232,7 +241,7 @@ class Test_OPS_Publisher_And_Subscriber : public testing::Test
 {
 public:
 	Test_OPS_Publisher_And_Subscriber() {}
-    ~Test_OPS_Publisher_And_Subscriber() {}
+  virtual ~Test_OPS_Publisher_And_Subscriber() {}
 	Test_OPS_Publisher_And_Subscriber(const Test_OPS_Publisher_And_Subscriber& r) = delete;
 	Test_OPS_Publisher_And_Subscriber& operator= (const Test_OPS_Publisher_And_Subscriber& l) = delete;
 	Test_OPS_Publisher_And_Subscriber(Test_OPS_Publisher_And_Subscriber&&) = delete;

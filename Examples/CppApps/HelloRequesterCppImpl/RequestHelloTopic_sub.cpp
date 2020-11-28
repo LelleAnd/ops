@@ -6,6 +6,7 @@
 #include "HelloRequestReply/HelloRequestReplyTypeFactory.h"
 #include <iostream>
 #include <vector>
+#include <memory>
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -20,8 +21,8 @@ class Main : ops::DataListener, ops::DeadlineMissedListener
 {
 public:
 	//Use a member subscriber so we can use it from onNewData, see below.
-	hello::RequestHelloDataSubscriber* sub;
-	hello::HelloDataPublisher* pub;
+    std::unique_ptr<hello::RequestHelloDataSubscriber> sub;
+    std::unique_ptr<hello::HelloDataPublisher> pub;
 
 public:
 
@@ -46,7 +47,7 @@ public:
 		ops::Topic topic = participant->createTopic("RequestHelloTopic");
 
 		//Create a subscriber on that topic.
-		sub = new hello::RequestHelloDataSubscriber(topic);
+		sub.reset(new hello::RequestHelloDataSubscriber(topic));
 
 		//Tell the subscriber that we expect data at least once every 1500 ms
 		sub->setDeadlineQoS(1500);
@@ -59,7 +60,7 @@ public:
 
 		// Setup publisher for sending reply on
 		ops::Topic replyTopic = participant->createTopic("HelloTopic");
-		pub = new hello::HelloDataPublisher(replyTopic);
+		pub.reset(new hello::HelloDataPublisher(replyTopic));
 
 		//Start the subscription
 		sub->start();
@@ -68,7 +69,7 @@ public:
 	virtual void onNewData(ops::DataNotifier* const subscriber) override
 	{
 		hello::RequestHelloData data;
-		if(sub == subscriber)
+		if(sub.get() == subscriber)
 		{
 			sub->getData(data);
 			std::cout << "Data received. RequestId: " << data.requestId << std::endl;
@@ -88,7 +89,6 @@ public:
 	}
 	~Main()
 	{
-		delete sub;
 	}
 	Main(Main const&) = delete;
 	Main(Main&&) = delete;

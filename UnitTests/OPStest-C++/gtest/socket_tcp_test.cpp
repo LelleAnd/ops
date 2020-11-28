@@ -202,12 +202,6 @@ TEST(Test_Sockets, TestTCPdefault) {
 	EXPECT_EQ(ClientCB.cst.port, snd.getLocalPort());
 	EXPECT_EQ(ClientCB.cst.totalNo, 1);
 
-	EXPECT_EQ(listener.counter, 1);
-	EXPECT_EQ(listener.bsp.size, -5);
-	EXPECT_EQ(listener.bsp.bytes, nullptr);
-	EXPECT_STREQ(listener.srcIp.c_str(), snd.getLocalAddress().c_str());
-	EXPECT_EQ(listener.srcPort, snd.getLocalPort());
-
 	EXPECT_STREQ(rcv.getLocalAddress().c_str(), "127.0.0.1");
 
 	// Save connected client for later use
@@ -226,7 +220,7 @@ TEST(Test_Sockets, TestTCPdefault) {
 	WaitWTimeout(rcv, ioServ, 500);
 	EXPECT_TRUE(rcv.isConnected());
 
-	EXPECT_EQ(listener.counter, 2);
+	EXPECT_EQ(listener.counter, 1);
 	EXPECT_EQ(listener.bsp.size, 100);
 	EXPECT_EQ(listener.bsp.bytes, &rcvbuf[0]);
 	EXPECT_STREQ(listener.srcIp.c_str(), snd.getLocalAddress().c_str());

@@ -26,7 +26,16 @@
 namespace ops
 {
 #ifndef REPLACE_OPS_LOCKABLE
-    class Lockable::InternalLock : public std::recursive_mutex { };
+    class Lockable::InternalLock : public std::recursive_mutex 
+    {
+    public:
+        InternalLock() = default;
+        InternalLock(const InternalLock&) = default;
+        InternalLock(InternalLock&&) = default;
+        InternalLock& operator=(const InternalLock&) = default;
+        InternalLock& operator=(InternalLock&&) = default;
+        virtual ~InternalLock() = default;
+    };
 
     Lockable::Lockable()
     {

@@ -73,7 +73,7 @@ namespace ops
             UNUSED(topic);
             SafeLock lock(&mutex);
             //We dont "sendTo" but rather lets the server (sender) send to all connected clients.
-            bool result = sender->sendTo(buf, bufSize, "", 0);
+            const bool result = sender->sendTo(buf, bufSize, "", 0);
             return result;
         }
 

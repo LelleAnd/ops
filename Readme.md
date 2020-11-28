@@ -1,3 +1,4 @@
+![C/C++ CI](https://github.com/LelleAnd/ops/workflows/C/C++%20CI/badge.svg?branch=development)
 # Welcome to OPS - Open Publish-Subscribe #
 
 

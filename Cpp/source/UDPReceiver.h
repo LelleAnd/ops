@@ -54,7 +54,7 @@ namespace ops
     public:
         UDPReceiver(uint16_t bindPort, IOService* ioServ, Address_T localInterface = "0.0.0.0", int inSocketBufferSizent = 16000000)
         {
-            boost::asio::io_service* ioService = dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService;
+            boost::asio::io_service* ioService = BoostIOServiceImpl::get(ioServ);
 
             if (localInterface == "0.0.0.0") {
                 udp::resolver resolver(*ioService);
@@ -62,7 +62,7 @@ namespace ops
                 udp::resolver::iterator it = resolver.resolve(query);
                 udp::resolver::iterator end;
                 while (it != end) {
-                    boost::asio::ip::address addr = it->endpoint().address();
+                    const boost::asio::ip::address addr = it->endpoint().address();
                     if (addr.is_v4()) {
                         ipaddress = addr.to_string().c_str();
                         localEndpoint = new udp::endpoint(addr, bindPort);
@@ -71,7 +71,7 @@ namespace ops
                     ++it;
                 }
             } else {
-                boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(localInterface.c_str()));
+                const boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(localInterface.c_str()));
                 localEndpoint = new boost::asio::ip::udp::endpoint(ipAddr, bindPort);
 				ipaddress = localInterface;
             }
@@ -220,12 +220,12 @@ namespace ops
             }
         }
 
-        virtual uint16_t getLocalPort() override
+        virtual uint16_t getLocalPort() noexcept override
         {
             return port;
         }
 
-		virtual Address_T getLocalAddress() override
+		virtual Address_T getLocalAddress() noexcept override
         {
             return ipaddress;
         }

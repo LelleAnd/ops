@@ -4,6 +4,7 @@
 #include "HelloWorld/HelloWorldTypeFactory.h"
 #include <iostream>
 #include <vector>
+#include <memory>
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -18,8 +19,8 @@ class Main : ops::DataListener
 {
 public:
 	//Use a member subscriber so we can use it from onNewData, see below.
-	hello::HelloDataSubscriber* sub;
-	ops::KeyFilterQoSPolicy* keyFilter;
+	std::unique_ptr<hello::HelloDataSubscriber> sub;
+	std::unique_ptr<ops::KeyFilterQoSPolicy> keyFilter;
 
 public:
 
@@ -44,14 +45,14 @@ public:
 		ops::Topic topic = participant->createTopic("HelloTopic");
 
 		//Create a subscriber on that topic.
-		sub = new hello::HelloDataSubscriber(topic);
+		sub.reset(new hello::HelloDataSubscriber(topic));
 
 		//Add this class as a listener for new data events
 		sub->addDataListener(this);
 
 		//Create and add key filter that will make us only receive samples published with key "cpp_sample"
-		keyFilter = new ops::KeyFilterQoSPolicy("cpp_sample");
-		sub->addFilterQoSPolicy(keyFilter);
+		keyFilter.reset(new ops::KeyFilterQoSPolicy("cpp_sample"));
+		sub->addFilterQoSPolicy(keyFilter.get());
 
 		//Start the subscription
 		sub->start();
@@ -61,7 +62,7 @@ public:
 	virtual void onNewData(ops::DataNotifier* const subscriber) override
 	{
 		hello::HelloData data;
-		if(sub == subscriber)
+		if(sub.get() == subscriber)
 		{
 			sub->getData(&data);
 			std::cout << data.helloString << std::endl;
@@ -69,7 +70,6 @@ public:
 	}
 	~Main()
 	{
-		delete sub;
 	}
 	Main(Main const&) = delete;
 	Main(Main&&) = delete;

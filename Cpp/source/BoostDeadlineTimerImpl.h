@@ -56,14 +56,14 @@ namespace ops
         boost::shared_ptr<impl> pimpl_;
 
         // Listens on events from the inner class and forwards them to our user(s).
-		void onNewEvent(Notifier<int>* sender, int message);
+		void onNewEvent(Notifier<int>* sender, int message) override;
 
     public:
         explicit BoostDeadlineTimerImpl(boost::asio::io_service* boostIOService);
-        ~BoostDeadlineTimerImpl();
+        virtual ~BoostDeadlineTimerImpl();
 
-		void start(int64_t timeoutMs);
-		void cancel();
+		void start(int64_t timeoutMs) override;
+		void cancel() override;
     };
 
     // -------------------------------------------
@@ -97,7 +97,7 @@ namespace ops
             }
 		}
 
-		~impl()
+		virtual ~impl()
 		{
 			cancel();
 		}

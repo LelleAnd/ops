@@ -46,7 +46,7 @@ namespace ops
 
         // Add a runnable to the list of things to run. If threadpool has been started, this will hang until
         // the run() method exits, to be backward compatible.
-        virtual void addRunnable(Runnable* runnable)
+        virtual void addRunnable(Runnable* runnable) override
         {
             for (;;) {
                 {
@@ -62,7 +62,7 @@ namespace ops
 
         // Remove a runnable from the list of things to run. If threadpool has been started, this will hang until
         // the run() method exits, to be backward compatible.
-        virtual void removeRunnable(Runnable* runnable)
+        virtual void removeRunnable(Runnable* runnable) override
         {
             for (;;) {
                 {
@@ -84,13 +84,13 @@ namespace ops
         }
 
         // Starts the thread that calls our run() method
-        void start()
+        virtual void start() override
         {
             Thread::start();
         }
 
         // Called by Thread. While we are running we don't allow changes to the runnables container.
-        void run()
+        void run() override
         {
             // Take mutex to make sure add/remove isn't in process of updating the runnables container
             {
@@ -117,6 +117,8 @@ namespace ops
             Thread::join();
         }
         
+        bool isRunning() const noexcept { return running.load(); }
+
     private:
         std::vector<Runnable*> runnables;
         Lockable mutex;

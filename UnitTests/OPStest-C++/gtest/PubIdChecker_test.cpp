@@ -35,9 +35,8 @@ public:
 	MyPubIdNotifyListener() : Counter(0) {}
 	~MyPubIdNotifyListener() = default;
 
-	virtual void onNewEvent(Notifier<PublicationIdNotification_T>* sender, PublicationIdNotification_T arg) override
+	virtual void onNewEvent(Notifier<PublicationIdNotification_T>* , PublicationIdNotification_T const arg) override
 	{ 
-		UNUSED(sender);
 		value = arg;
 		++Counter;
 	}

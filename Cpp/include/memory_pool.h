@@ -44,7 +44,7 @@ namespace ops {
 			T* owner;
 			node* prev;
 			node* next;
-			node(T* own) : owner(own), prev(nullptr), next(nullptr) {}
+			node(T* own) noexcept : owner(own), prev(nullptr), next(nullptr) {}
 		};
 
 		// Non-templated base class for memory_pools with the interface and needed functionality 
@@ -74,9 +74,9 @@ namespace ops {
 		public:
 			static memory_pool_manager& Instance();
 
-			void setLogger(memory_pool_logger* client);
+			void setLogger(memory_pool_logger* client) noexcept;
 
-			int numPools() { return _numPools; }
+			int numPools() const noexcept { return _numPools; }
 
 			// Print statistics from each memory_pool
 			void PrintStat(std::ostream& os, bool skip_header = false);
@@ -89,16 +89,16 @@ namespace ops {
 			void Log(const char* message, std::exception& e);
 
 		private:
-			memory_pool_manager();
+			memory_pool_manager() noexcept;
 			memory_pool_manager(memory_pool_manager const&) = delete;
 			memory_pool_manager(memory_pool_manager&&) = delete;
 			memory_pool_manager& operator=(memory_pool_manager const&) = default;
 			memory_pool_manager& operator=(memory_pool_manager&&) = default;
 
 			Lockable _mtx;
-			node<memory_pool_abs> _root;
-			int _numPools;
-			memory_pool_logger* _client;
+            node<memory_pool_abs> _root{ nullptr };
+            int _numPools{ 0 };
+            memory_pool_logger* _client{ nullptr };
 		};
 
 		// ====================================================================
@@ -223,8 +223,8 @@ namespace ops {
 				delete[] _storage;
 			}
 
-			size_t capacity() { return _capacity; }
-			size_t size() { return _size; }
+			size_t capacity() const { return _capacity; }
+			size_t size() const { return _size; }
 
 		private:
 			memory_pool_base() = delete;
@@ -347,7 +347,7 @@ namespace ops {
 			std::vector<char *> _blocks;
 			Lockable _mtx;
 
-			void PrintStat(std::ostream& os)
+			void PrintStat(std::ostream& os) override
 			{
 				os << "[" << typeid(this).name() << "] ";
 				os <<
@@ -399,8 +399,8 @@ namespace ops {
 				ptr = nullptr;
 			}
 
-			size_t size() { return _blocks.size(); }
-			size_t capacity() { return _blocks.capacity(); }
+			size_t size() const { return _blocks.size(); }
+			size_t capacity() const { return _blocks.capacity(); }
 
 		private:
 			memory_pool_exp() = delete;

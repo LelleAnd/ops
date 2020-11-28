@@ -34,7 +34,7 @@ namespace ops
         private:
 			ExceptionMessage_T message;
         public:
-            CommException()
+            CommException() noexcept
             {
                 message = "CommException: empty";
             }
@@ -43,7 +43,7 @@ namespace ops
 				message = "CommException: ";
 				message += m;
             }
-			const char* what() const NOEXCEPT { return message.c_str(); }
+			const char* what() const noexcept { return message.c_str(); }
 		};
     }
 }

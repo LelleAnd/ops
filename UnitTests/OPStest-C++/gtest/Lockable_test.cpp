@@ -33,9 +33,9 @@ using namespace ops;
 
 using mytype = std::atomic<uint32_t>;
 
-static void wait_for(mytype& order, uint32_t value)
+static void wait_for(mytype& order, const uint32_t value)
 {
-    while (order < value) std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    while (order < value) { std::this_thread::sleep_for(std::chrono::milliseconds(1)); }
 }
 
 static void lockable_worker(Lockable& lock, mytype& order, mytype& state)
@@ -45,10 +45,10 @@ static void lockable_worker(Lockable& lock, mytype& order, mytype& state)
     wait_for(order, 1);
     state = 2;
     {
-        SafeLock lck1(&lock);
+        const SafeLock lck1(&lock);
         state = 3;
         {
-            SafeLock lck2(&lock);
+            const SafeLock lck2(&lock);
             state = 4;
 
             wait_for(order, 2);

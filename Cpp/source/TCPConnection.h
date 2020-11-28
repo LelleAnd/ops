@@ -42,7 +42,7 @@ namespace ops
 	{
 	public:
 		TCPConnection(TCPConnectionCallbacks* client) :
-			_connected(false), _client(client), _protocol(nullptr)
+			_client(client)
 		{}
 		
 		virtual ~TCPConnection()
@@ -74,7 +74,7 @@ namespace ops
 			return _protocol->sendData(buf, size);
 		}
 
-		bool isConnected()
+		bool isConnected() const noexcept
 		{
 			return _connected;
 		}
@@ -92,13 +92,13 @@ namespace ops
 			_protocol->connect(this);
 		}
 
-		TCPProtocol* getProtocol()
+		TCPProtocol* getProtocol() noexcept
 		{
 			return _protocol;
 		}
 
 	protected:
-		volatile bool _connected;
+        volatile bool _connected{ false };
 
 		virtual int send(const char* buf, const uint32_t size) = 0;
 		virtual void startAsyncRead(char* bytes, uint32_t size) = 0;
@@ -124,11 +124,11 @@ namespace ops
 		friend class TCPClientBase;
 
 		Lockable _clientMtx;
-		TCPConnectionCallbacks* _client;
-		TCPProtocol* _protocol;
+        TCPConnectionCallbacks* _client{ nullptr };
+        TCPProtocol* _protocol{ nullptr };
 
 		// Needed by protocol
-		bool isConnected(TCPProtocol&) override
+		bool isConnected(TCPProtocol&) noexcept override
 		{
 			return _connected;
 		}

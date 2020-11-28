@@ -58,3 +58,4 @@ then
 else
 	printf "\n\n   $exit_count TEST FAILED\n\n\n"
 fi
+exit $exit_count

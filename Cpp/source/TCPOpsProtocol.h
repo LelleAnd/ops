@@ -132,12 +132,12 @@ namespace ops
 			*((uint32_t*)(_probeBuffer + 8)) = protocol_version;
 		}
 
-		int detectedVersion() const
+		int detectedVersion() const noexcept
 		{
 			return _detectedVersion;
 		}
 
-		virtual void resetProtocol() override
+		virtual void resetProtocol() noexcept override
 		{
 			_detectedVersion = 1;
 			_hbSent = false;

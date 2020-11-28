@@ -58,9 +58,9 @@ namespace ops
 		}
 
     public:
-		ObjectKey_T getKey() const;
-		const TypeId_T& getTypeString() const;
-		void setKey(ObjectKey_T k);
+		ObjectKey_T getKey() const noexcept;
+		const TypeId_T& getTypeString() const noexcept;
+		void setKey(const ObjectKey_T& k) noexcept;
 		virtual void serialize(ArchiverInOut* archive) override;
 
 		///Bytes that hold unserialized data for this object.
@@ -84,7 +84,7 @@ namespace ops
         OPSObject& operator= (OPSObject&& other) = default;      // Move assignment operator
 
 #if defined(DEBUG_OPSOBJECT_COUNTER)
-        static uint32_t NumOpsObjects() { return _NumOpsObjects; }
+        static uint32_t NumOpsObjects() noexcept { return _NumOpsObjects; }
 #endif
     };
 }

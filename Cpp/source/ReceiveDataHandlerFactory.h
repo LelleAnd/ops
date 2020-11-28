@@ -47,7 +47,7 @@ namespace ops
         std::vector<std::shared_ptr<ReceiveDataHandler>> garbageReceiveDataHandlers;
         ops::Lockable garbageLock;
 
-        inline InternalKey_T makeKey(Topic& top, IOService* ioServ);
+        inline InternalKey_T makeKey(const Topic& top, IOService* ioServ);
 
     public:
         explicit ReceiveDataHandlerFactory();

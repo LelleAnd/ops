@@ -7,14 +7,10 @@ project(OPS VERSION 4.2.0)
 set (CMAKE_CXX_STANDARD 11)
 
 ################################################################################
-#
-#if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-#if (WIN32)
-#  set (CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/installed" CACHE PATH "default install path" FORCE )
-#endif()
-
-################################################################################
 # Find external dependencies
+
+## ----------------------------------------------------------------------------
+message("GOOGLETEST_HOME: " $ENV{GOOGLETEST_HOME})
 
 # help the FindGtest script locate gtest
 if(DEFINED ENV{GOOGLETEST_HOME})
@@ -23,6 +19,9 @@ if(DEFINED ENV{GOOGLETEST_HOME})
 endif()
 find_package(GTest)
 
+message("GTEST_INCLUDE_DIRS: " ${GTEST_INCLUDE_DIRS})
+
+## ----------------------------------------------------------------------------
 # We need Java 1.8 (JDK 8) or later since Java code uses lambda expressions
 find_package(Java 1.8 COMPONENTS Runtime Development)
 
@@ -40,7 +39,43 @@ else()
   message(WARNING "Could not find a Java compiler")
 endif()
 
+## ----------------------------------------------------------------------------
+message("BOOST_HOME: " $ENV{BOOST_HOME})
 
+# find Boost. If not found we can't build c++ libs
+option(Boost_DEBUG "Set to ON to debug Boost paths" OFF)
+
+# this prevents the FindBoost.cmake to search for cmake-built Boost
+set(Boost_NO_BOOST_CMAKE ON)
+
+# if the Boost home environment var is set, use it to hint the FindBoost.cmake about Boost location
+if(DEFINED ENV{BOOST_HOME})
+  set(BOOST_ROOT $ENV{BOOST_HOME})
+endif()
+message ("BOOST_ROOT: " ${BOOST_ROOT})
+
+if(MSVC)
+  set(Boost_USE_STATIC_LIBS ON)
+  find_package(Boost MODULE COMPONENTS system thread date_time regex chrono)
+else()
+  set(Boost_ARCHITECTURE "-x64")    ## Needed to work on GitHub CI test 
+  find_package(Boost MODULE COMPONENTS system thread)
+endif()
+
+message("Boost_INCLUDE_DIRS: " ${Boost_INCLUDE_DIRS})
+message("Boost_LIBRARY_DIRS: " ${Boost_LIBRARY_DIRS})
+message("Boost_LIBRARIES: " ${Boost_LIBRARIES})
+
+## ----------------------------------------------------------------------------
+# Python, we only support 2.7.x
+find_package(PythonInterp 2.7 EXACT)
+if(PYTHONINTERP_FOUND)
+  message("Found Python interpreter version " ${PYTHON_VERSION_STRING})
+else()
+  message(WARNING "Could not find a Python interpreter")
+endif()
+
+## ----------------------------------------------------------------------------
 # add compiler flags for C++11 / release / debug
 if(MSVC)
 #  set(warnings "/W4 /WX /EHsc")
@@ -64,30 +99,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${warnings}")
 message ("c Flags: " ${CMAKE_C_FLAGS})
 message ("cxx Flags: " ${CMAKE_CXX_FLAGS})
 
-# find Boost. If not found we can't build c++ libs
-option(Boost_DEBUG "Set to ON to debug Boost paths" OFF)
-# this prevents the FindBoost.cmake to search for cmake-built Boost
-set(Boost_NO_BOOST_CMAKE ON)
-# if the Boost home environment var is set, use it to hint the FindBoost.cmake about Boost location
-set(BOOST_ROOT $ENV{BOOST_HOME})
-
-if(MSVC)
-  set(Boost_USE_STATIC_LIBS ON)
-  find_package(Boost MODULE COMPONENTS system thread date_time regex chrono)
-else()
-  find_package(Boost MODULE COMPONENTS system thread)
-endif()
-
-
-# Python, we only support 2.7.x
-find_package(PythonInterp 2.7 EXACT)
-if(PYTHONINTERP_FOUND)
-  message("Found Python interpreter version " ${PYTHON_VERSION_STRING})
-else()
-  message(WARNING "Could not find a Python interpreter")
-endif()
-
-
+## ----------------------------------------------------------------------------
 # If we have java
 # we need ANother Tool for Language Recognition
 find_jar(ANTLR_JAR antlr
@@ -158,7 +170,7 @@ if(PYTHONINTERP_FOUND)
   add_subdirectory(Python)
 endif()
 
-  add_subdirectory(CSharp)
+add_subdirectory(CSharp)
 
   # add the C++ source, only if Boost is loaded
   if(Boost_FOUND)

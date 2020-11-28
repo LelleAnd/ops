@@ -54,7 +54,7 @@ __serialize
     }
 
     //Returns a deep copy of this object.
-    virtual ops::OPSObject* clone() override
+    virtual __className* clone() override
     {
 __clone
     }

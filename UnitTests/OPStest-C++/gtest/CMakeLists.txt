@@ -5,6 +5,7 @@ set(APP3_NAME gtest-mempool3)
 
 set(APP_SRCS
   ByteBuffer_test.cpp
+  ChecksumArchiver_test.cpp
   CreateTempOpsConfigFile.cpp
   CreateTempOpsConfigFile.h
   ErrorServiceWriter_test.cpp
@@ -26,6 +27,7 @@ set(APP_SRCS
   PubIdChecker_test.cpp
   RAII_ioServ.h
   Reservable_test.cpp
+  SerDesObjects.h
   Serialization_test.cpp
   SetupOPSConfig.cpp
   SetupOPSConfig.h

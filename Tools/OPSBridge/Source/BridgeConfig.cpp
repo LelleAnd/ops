@@ -75,7 +75,6 @@ int64_t BridgeConfig::parseSize(std::string s, int64_t const defaultValue)
 
 BridgeConfig::THandlingType BridgeConfig::ParseHandlingType(std::string const str, THandlingType const defaultValue)
 {
-	// enum THandlingType {discard, keepLatest, keepAll};
 	if (str == "Discard") {
 		return discard;
 	} else if (str == "KeepLatest") {
@@ -89,9 +88,9 @@ BridgeConfig::THandlingType BridgeConfig::ParseHandlingType(std::string const st
 std::string BridgeConfig::HandlingTypeToStr(THandlingType const value)
 {
 	switch (value) {
-		case discard:    return "Discard";
-		case keepLatest: return "KeepLatest";
-		case keepAll:    return "KeepAll";
+		case discard:    return "Discard"; break;
+        case keepLatest: return "KeepLatest"; break;
+        case keepAll:    return "KeepAll"; break;
 		default: break;
 	}
 	return "Unknown";
@@ -128,7 +127,8 @@ void BridgeConfig::ParseBridgeConfiguration(std::string const tracestr, Configur
 	bc.sBridgeName = s;
 	if (logConfig) BL_TRACE("# Bridge: name = %s\n", bc.sBridgeName.c_str());
 
-/*///TODO
+#ifdef NOT_USED_YET
+///TODO
 	s = config.getAttribute("bufferSize");
 	bc.iBufferSize = parseSize(s, bc.iBufferSize);
 	if (logConfig) BL_TRACE("# Bridge: maxBufferSize = %" PRId64 "\n", bc.iBufferSize);
@@ -136,7 +136,7 @@ void BridgeConfig::ParseBridgeConfiguration(std::string const tracestr, Configur
 	s = config.getAttribute("minPubTime");
 	bc.iMinPubTime_ms = config.parseInt64(s, bc.iMinPubTime_ms);
 	if (logConfig) BL_TRACE("# Bridge: minPubTime = %" PRId64 "\n", bc.iMinPubTime_ms);
-*/
+#endif
 
 	// Read Endpoint configuration
 	if (config.enter("endpoint")) {
@@ -354,7 +354,8 @@ BridgeConfig::BridgeConfig(std::string fileName)
 				logConfig = config.getAttribute("config") == "true";
 				logDebug  = config.getAttribute("debug") == "true";
 			}
-/*///TODO
+#ifdef NOT_USED_YET
+///TODO
 			// <memory maxWorkingSetSize="300MB"/> 
 			config.root();
 			if (config.enter("memory")) {
@@ -370,20 +371,21 @@ BridgeConfig::BridgeConfig(std::string fileName)
 			vDomains.clear();
 			vDomains.push_back(sDefaultDomain);
 			if (logConfig) BL_TRACE("# Default Domain: %s\n", sDefaultDomain.c_str());
-*/
+#endif
 
 			// Bridges
 			config.root();
 			if (config.enter("bridges")) {
-/*///TODO
+#ifdef NOT_USED_YET
+///TODO
 				// <bridges commandTopic="BridgeCommandTopic" statusTopic="BridgeStatusTopic">
 				sBridgeCommandTopic = config.getAttribute("commandTopic", sBridgeCommandTopic);
 				if (logConfig) BL_TRACE("# commandTopic: %s\n", sBridgeCommandTopic.c_str());
 
 				sBridgeStatusTopic = config.getAttribute("statusTopic", sBridgeStatusTopic);
 				if (logConfig) BL_TRACE("# statusTopic: %s\n", sBridgeStatusTopic.c_str());
-*/
-				if (logConfig) BL_TRACE("# Number of Bridges = %d\n", config.numEntries("bridge"));
+#endif
+                if (logConfig) BL_TRACE("# Number of Bridges = %d\n", config.numEntries("bridge"));
 				vBridges.resize(config.numEntries("bridge"));
 				for (int iBridge = 0; iBridge < config.numEntries("bridge"); iBridge++) {
 					if (config.enter("bridge", iBridge)) {

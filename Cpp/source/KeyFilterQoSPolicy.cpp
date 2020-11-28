@@ -3,33 +3,33 @@
 #include "OPSObject.h"
 namespace ops
 {
-	KeyFilterQoSPolicy::KeyFilterQoSPolicy()
+	KeyFilterQoSPolicy::KeyFilterQoSPolicy() noexcept
 	{
 	}
-	KeyFilterQoSPolicy::KeyFilterQoSPolicy(ObjectKey_T keyString)
+	KeyFilterQoSPolicy::KeyFilterQoSPolicy(ObjectKey_T const keyString)
 	{
 		keyStrings.push_back(keyString);
 	}
-	KeyFilterQoSPolicy::KeyFilterQoSPolicy(std::vector<ObjectKey_T> keyStrings)
+	KeyFilterQoSPolicy::KeyFilterQoSPolicy(std::vector<ObjectKey_T> const keyStrings)
 	{
 		this->keyStrings = keyStrings;
 	}
-	void KeyFilterQoSPolicy::setKeys(std::vector<ObjectKey_T> keyStrings)
+	void KeyFilterQoSPolicy::setKeys(std::vector<ObjectKey_T> const keyStrings)
 	{
-		SafeLock lock(this);
+		const SafeLock lock(this);
 
 		this->keyStrings = keyStrings;
 	}
-	void KeyFilterQoSPolicy::setKey(ObjectKey_T key)
+	void KeyFilterQoSPolicy::setKey(ObjectKey_T const key)
 	{
-		SafeLock lock(this);
+		const SafeLock lock(this);
 
 		this->keyStrings.clear();
 		this->keyStrings.push_back(key);
 	}
 	std::vector<ObjectKey_T> KeyFilterQoSPolicy::getKeys()
 	{
-		SafeLock lock(this);
+		const SafeLock lock(this);
 
 		return keyStrings;
 	}
@@ -38,9 +38,9 @@ namespace ops
     {
     }
     
-    bool KeyFilterQoSPolicy::applyFilter(OPSObject* o)
+    bool KeyFilterQoSPolicy::applyFilter(const OPSObject* const o)
 	{
-		SafeLock lock(this);
+		const SafeLock lock(this);
 
 		// An empty key filter is the same as no filter
 		if (keyStrings.size() == 0) { return true; }

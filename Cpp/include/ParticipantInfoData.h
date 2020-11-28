@@ -31,7 +31,7 @@ namespace ops
 	class ParticipantInfoData : public OPSObject
 	{
 	public:
-		ParticipantInfoData() : mc_udp_port(0), mc_tcp_port(0)
+		ParticipantInfoData()
 		{
 			appendType(TypeId_T("ops.ParticipantInfoData"));
 		}
@@ -62,8 +62,8 @@ namespace ops
 		Address_T ip;
 		InternalString_T languageImplementation;
 		InternalString_T opsVersion;
-		int mc_udp_port;
-		int mc_tcp_port;
+        int mc_udp_port{ 0 };
+        int mc_tcp_port{ 0 };
 
 		std::vector<TopicInfoData> subscribeTopics;
 		std::vector<TopicInfoData> publishTopics;

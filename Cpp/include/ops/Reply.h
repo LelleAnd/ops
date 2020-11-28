@@ -30,7 +30,7 @@ namespace ops
 	{
 	public:
 		std::string requestId;
-		bool requestAccepted;
+        bool requestAccepted{ false };
 		std::string message;
 
 		void serialize(ops::ArchiverInOut* archiver) override
@@ -41,7 +41,7 @@ namespace ops
 			archiver->inout("message", message);
 		}
 
-		OPSObject* clone() override
+		Reply* clone() override
 		{
 			Reply* obj = new Reply;
 			fillClone(obj);

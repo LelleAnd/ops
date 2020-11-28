@@ -48,7 +48,7 @@ Elements of _Domain_ contains:
 Elements of _Topic_ contains:
   * **name**, name of the topic as a string, must be unique within the domain.
   * **dataType**, the data type that samples on this topic must have (samples must be of this type or extend this type).
-  * **port**, the ip port that shall be used to communicate on this topic. Only used for some transports mechanisms, see description of *Transport Mechanisms* below.
+  * **port**, the ip port that shall be used to communicate on this topic. Only used for some transports mechanisms, see description of *Transport Mechanisms* below. It will also not be used when using _Channel Configuration_ as described below.
 
 For more flexibility in the configuration, the elements have several optional tags that can be specified. A description of these follows below.
 
@@ -67,11 +67,11 @@ Optional elements of _Domain_:
   * **heartbeatTimeout**, sets the TCP monitoring timeout in [ms], which defines the longest silent period on TCP before the socket is disconnected. Default value is 3000 [ms].
 
 Optional elements of _Topic_:
-  * **sampleMaxSize**, defines the maximum size of the data type when used in this topic. The value is used for reserving memory to be able to buffer data during reception. If this tag is omitted or is specified with a value < 60000, a value of 60000 is used. If a value > 60000 is specified, this topic MUST use its own port, see also [Sending Large Messages](LargeMessages.md).
+  * **sampleMaxSize**, defines the maximum size of the data type when used in this topic. The value is used for reserving memory to be able to buffer data during reception. The value is also used for a buffer in each publisher for a serialized version of the data type during sending. If this tag is omitted a value of 60000 is used. If a value < 60000 is specified, 60000 is still used for reception. If a value > 60000 is specified, this topic MUST use its own port, see also [Sending Large Messages](LargeMessages.md).
   * **inSocketBufferSize**, changes the underlying sockets buffer size if possible. If this tag is omitted, the _Domain_ value is used.
   * **outSocketBufferSize**, changes the underlying sockets buffer size if possible. If this tag is omitted, the _Domain_ value is used.
   * **transport**, configures which transport mechanism to be used for this topic. Supported values are *multicast*, *udp* and *tcp*. If tag is omitted, *multicast* is used.
-  * **address**, usage depends on the used transport mechanism, see description of *Transport Mechanisms* below.
+  * **address**, usage depends on the used transport mechanism, see description of *Transport Mechanisms* below. Please note that if specified for an UDP transport, it must be on the same subnet as the specified localInterface for the _Domain_.
 
 ## Channel Configuration (advanced) ###
 In a scenario where a lot of topics are used that use the same transport mechanism, it can be easier to separate the transport information from the topic definition to remove/reduce redundant infomation.
@@ -81,12 +81,13 @@ A _Channel_ element defines the transport mechanism, a _Transport_ element defin
 Elements of _Channel_ contains:
   * **name**, name of the channel as a string, must be unique within the domain.
   * **linktype**, configures which transport mechanism to be used for this channel. Supported values are *multicast*, *udp* and *tcp*. If tag is omitted, *multicast* is used.
-  * **address**, usage depends on the used transport mechanism, see description of *Transport Mechanisms* below.
+  * **address**, usage depends on the used transport mechanism, see description of *Transport Mechanisms* below. Please note that if specified for an UDP transport, it must be on the same subnet as the specified localInterface for the _Domain_.
   * **port**, usage depends on the used transport mechanism, see description of *Transport Mechanisms* below.
   * **localInterface**, see _Domain_ above for a description.
   * **timeToLive**, see _Domain_ above for a description.
   * **inSocketBufferSize**, changes the underlying sockets buffer size if possible. If this tag is omitted, the _Domain_ value is used.
   * **outSocketBufferSize**, changes the underlying sockets buffer size if possible. If this tag is omitted, the _Domain_ value is used.
+  * **sampleMaxSize**, see _Topic_ above for a description. If this tag is specified, this value will be used instead of eventual values specified for the topics used on this _Channel_.
 
 Elements of _Transport_ contains:
   * **channelID**, name of the channel as a string, must be defined in a _Channel_ element.

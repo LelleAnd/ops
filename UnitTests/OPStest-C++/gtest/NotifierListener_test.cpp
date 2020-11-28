@@ -51,7 +51,7 @@ public:
 	void notify(int const value) { notifyNewEvent(value); }
 
 	MyNotifier() = default;
-	~MyNotifier() = default;
+	virtual ~MyNotifier() = default;
 	MyNotifier(const MyNotifier& other) = delete;
 	MyNotifier& operator= (const MyNotifier& other) = delete;
 	MyNotifier(MyNotifier&& other) = delete;
@@ -135,16 +135,15 @@ public:
 	void notify() { notifyNewData(); }
 
 	MyDataNotifier() = default;
-	~MyDataNotifier() = default;
+	virtual ~MyDataNotifier() = default;
 	MyDataNotifier(const MyDataNotifier& other) = delete;
 	MyDataNotifier& operator= (const MyDataNotifier& other) = delete;
 	MyDataNotifier(MyDataNotifier&& other) = delete;
 	MyDataNotifier& operator =(MyDataNotifier&& other) = delete;
 };
 
-void MyCallback(DataNotifier* sender, void* userData)
+void MyCallback(DataNotifier* , void* const userData)
 {
-	UNUSED(sender);
 	MyDataListener* const listener = (MyDataListener*)userData;
 	listener->counter++;
 }

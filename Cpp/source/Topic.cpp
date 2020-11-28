@@ -27,154 +27,135 @@ namespace ops
 {
     using namespace opsidls;
 
-	Topic::Topic(ObjectName_T namee, int portt, TypeId_T typeIDd, Address_T domainAddresss)
-		: name(namee), 
+	Topic::Topic(ObjectName_T namee, int const portt, TypeId_T typeIDd, Address_T domainAddresss) :
+		name(namee), 
 		port(portt), 
-		timeToLive(-1),
 		typeID(typeIDd), 
 		domainAddress(domainAddresss),
 		participantID(OPSConstants::DEFAULT_PARTICIPANT_ID()),
-		sampleMaxSize(OPSConstants::PACKET_MAX_SIZE),
-		outSocketBufferSize(-1),
-		inSocketBufferSize(-1),
-		participant(nullptr)
+		sampleMaxSize(OPSConstants::PACKET_MAX_SIZE)
 	{
 		appendType(TypeId_T("Topic"));
 	}
-	Topic::Topic()
-		: name(""), 
-		port(0), 
-		timeToLive(-1),
-		typeID(""), 
-		domainAddress(""),
+	Topic::Topic() :
 		participantID(OPSConstants::DEFAULT_PARTICIPANT_ID()),
-		sampleMaxSize(OPSConstants::PACKET_MAX_SIZE),
-		outSocketBufferSize(-1),
-		inSocketBufferSize(-1),
-		participant(nullptr)
+		sampleMaxSize(OPSConstants::PACKET_MAX_SIZE)
 	{
 		appendType(TypeId_T("Topic"));
 	}
 
-	void Topic::setParticipantID(ObjectName_T partID)
+	void Topic::setParticipantID(ObjectName_T const partID) noexcept
 	{
 		participantID = partID;
 	}
 
-	ObjectName_T Topic::getParticipantID() const
+	ObjectName_T Topic::getParticipantID() const noexcept
 	{
 		return participantID;
 	}
 
-	void Topic::setDomainID(ObjectName_T domID)
+	void Topic::setDomainID(ObjectName_T const domID) noexcept
 	{
 		domainID = domID;
 	}
-	ObjectName_T Topic::getDomainID() const
+	ObjectName_T Topic::getDomainID() const noexcept
 	{
 		return domainID;
 	}
-	ObjectName_T Topic::getName() const
+	ObjectName_T Topic::getName() const noexcept
 	{
 		return name;
 	}
-	TypeId_T Topic::getTypeID() const
+	TypeId_T Topic::getTypeID() const noexcept
 	{
 		return typeID;
 	}
-	void Topic::setDomainAddress(Address_T domainAddr)
+	void Topic::setDomainAddress(Address_T const domainAddr) noexcept
 	{
 		domainAddress = domainAddr;
 	}
-	void Topic::setTransport(Transport_T transp)
+	void Topic::setTransport(Transport_T const transp) noexcept
 	{
 		transport = transp;
 	}
-	Address_T Topic::getDomainAddress() const
+	Address_T Topic::getDomainAddress() const noexcept
 	{
 		return domainAddress;
 	}
-	void Topic::setLocalInterface(Address_T localIf)
+	void Topic::setLocalInterface(Address_T const localIf) noexcept
 	{
 		localInterface = localIf;
 	}
-	Address_T Topic::getLocalInterface() const
+	Address_T Topic::getLocalInterface() const noexcept
 	{
 		return localInterface;
 	}
-	int Topic::getSampleMaxSize() const
+	int Topic::getSampleMaxSize() const noexcept
 	{
 		return sampleMaxSize;
 	}
-	void Topic::setSampleMaxSize(int size)
+	void Topic::setSampleMaxSize(int const size) noexcept
 	{
-		if(size < OPSConstants::PACKET_MAX_SIZE)
-		{
-			sampleMaxSize = OPSConstants::PACKET_MAX_SIZE;
-		}
-		else
-		{
-			sampleMaxSize = size;
-		}
+		sampleMaxSize = size;
 	}
-	int Topic::getPort() const
+	int Topic::getPort() const noexcept
 	{
 		return port;
 	}
-	void Topic::setPort(int port)
+	void Topic::setPort(int const port) noexcept
 	{
 		this->port = port;
 	}
-	void Topic::setTimeToLive(int ttl)
+	void Topic::setTimeToLive(int const ttl) noexcept
 	{
 		timeToLive = ttl;
 	}
-	int Topic::getTimeToLive() const
+	int Topic::getTimeToLive() const noexcept
 	{
 		return timeToLive;
 	}
-	Transport_T Topic::getTransport() const
+	Transport_T Topic::getTransport() const noexcept
 	{
 		return transport;
 	}
 
-	int64_t Topic::getOutSocketBufferSize() const
+	int64_t Topic::getOutSocketBufferSize() const noexcept
 	{
 		return outSocketBufferSize;
 	}
-	void Topic::setOutSocketBufferSize(int64_t size)
+	void Topic::setOutSocketBufferSize(int64_t const size) noexcept
 	{
 		outSocketBufferSize = size;
 	}
-	int64_t Topic::getInSocketBufferSize() const
+	int64_t Topic::getInSocketBufferSize() const noexcept
 	{
 		return inSocketBufferSize;
 	}
-	void Topic::setInSocketBufferSize(int64_t size)
+	void Topic::setInSocketBufferSize(int64_t const size) noexcept
 	{
 		inSocketBufferSize = size;
 	}
 
-	bool Topic::getOptNonVirt() const
+	bool Topic::getOptNonVirt() const noexcept
 	{
 		return optNonVirt;
 	}
 
-	int Topic::getHeartbeatPeriod() const
+	int Topic::getHeartbeatPeriod() const noexcept
 	{
 		return heartbeatPeriod;
 	}
-	int Topic::getHeartbeatTimeout() const
+	int Topic::getHeartbeatTimeout() const noexcept
 	{
 		return heartbeatTimeout;
 	}
 
-	ChannelId_T Topic::getChannelId() const
+	ChannelId_T Topic::getChannelId() const noexcept
 	{
 		return channelID;
 	}
 
-	void Topic::serialize(ArchiverInOut* archiver)
+	void Topic::serialize(ArchiverInOut* const archiver)
 	{
 		OPSObject::serialize(archiver);
 		archiver->inout("name", name);
@@ -185,11 +166,7 @@ namespace ops
 		archiver->inout("outSocketBufferSize", outSocketBufferSize);
 		archiver->inout("inSocketBufferSize", inSocketBufferSize);
 	
-
-		//Limit this value 
-		int tSampleMaxSize = getSampleMaxSize();
-		archiver->inout("sampleMaxSize", tSampleMaxSize);
-		setSampleMaxSize(tSampleMaxSize);
+		archiver->inout("sampleMaxSize", sampleMaxSize);
 
 		archiver->inout("transport", transport);
 		if(transport == "")

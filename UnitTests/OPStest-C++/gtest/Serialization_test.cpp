@@ -32,49 +32,12 @@
 #include "XMLArchiverIn.h"
 #include "XMLArchiverOut.h"
 
+#include "SerDesObjects.h"
+
 using namespace ops;
 
 // ===============================
 // Helper classes
-
-class SerDesObject_Core : public OPSObject
-{
-public:
-	static ops::TypeId_T getTypeName() { return ops::TypeId_T("SerDesObject_Core"); }
-	SerDesObject_Core() { appendType(getTypeName()); }
-	~SerDesObject_Core() = default;
-
-	bool bo;
-	char ch;
-	int16_t i16;
-	int i32;
-	int64_t i64;
-	float f32;
-	double d64;
-	std::string str;
-	strings::fixed_string<30> fstr;
-	char buffer[10];
-
-	virtual void serialize(ArchiverInOut* archive) override
-	{
-		OPSObject::serialize(archive);
-		archive->inout("bo", bo);
-		archive->inout("ch", ch);
-		archive->inout("i16", i16);
-		archive->inout("i32", i32);
-		archive->inout("i64", i64);
-		archive->inout("f32", f32);
-		archive->inout("d64", d64);
-		archive->inout("str", str);
-		archive->inout("fstr", fstr);
-		archive->inout("buffer", buffer, 10);
-	}
-
-	SerDesObject_Core(const SerDesObject_Core& r) = default;
-	SerDesObject_Core& operator= (const SerDesObject_Core& l) = default;
-	SerDesObject_Core(SerDesObject_Core&&) = default;
-	SerDesObject_Core& operator =(SerDesObject_Core&&) = default;
-};
 
 int InitObject(SerDesObject_Core& obj)
 {
@@ -160,43 +123,6 @@ TEST(Test_Serialization, TestCoreTypesXml) {
 // ===============================
 // Helper classes
 
-class SerDesObject_Vectors : public OPSObject
-{
-public:
-	static ops::TypeId_T getTypeName() { return ops::TypeId_T("SerDesObject_Vectors"); }
-	SerDesObject_Vectors() { appendType(getTypeName()); }
-	~SerDesObject_Vectors() = default;
-
-	std::vector<bool> bo;
-	std::vector<char> ch;
-	std::vector<int16_t> i16;
-	std::vector<int> i32;
-	std::vector<int64_t> i64;
-	std::vector<float> f32;
-	std::vector<double> d64;
-	std::vector<std::string> str;
-	std::vector<strings::fixed_string<30>> fstr;
-
-	virtual void serialize(ArchiverInOut* archive) override
-	{
-		OPSObject::serialize(archive);
-		archive->inout("bo", bo);
-		archive->inout("ch", ch);
-		archive->inout("i16", i16);
-		archive->inout("i32", i32);
-		archive->inout("i64", i64);
-		archive->inout("f32", f32);
-		archive->inout("d64", d64);
-		archive->inout("str", str);
-		archive->inout("fstr", fstr);
-	}
-
-	SerDesObject_Vectors(const SerDesObject_Vectors& r) = delete;
-	SerDesObject_Vectors& operator= (const SerDesObject_Vectors& l) = delete;
-	SerDesObject_Vectors(SerDesObject_Vectors&&) = delete;
-	SerDesObject_Vectors& operator =(SerDesObject_Vectors&&) = delete;
-};
-
 int InitObject(SerDesObject_Vectors& obj)
 {
 	int size = 4 + (int)obj.getKey().size();     // From OPSObject()
@@ -278,43 +204,6 @@ TEST(Test_Serialization, TestVectorTypesXml) {
 
 // ===============================
 // Helper classes
-
-class SerDesObject_Fixarrays : public OPSObject
-{
-public:
-	static ops::TypeId_T getTypeName() { return ops::TypeId_T("SerDesObject_Fixarrays"); }
-	SerDesObject_Fixarrays() { appendType(getTypeName()); }
-	~SerDesObject_Fixarrays() = default;
-
-	bool bo[4];
-	char ch[2];
-	int16_t i16[1];
-	int i32[3];
-	int64_t i64[2];
-	float f32[2];
-	double d64[2];
-	std::string str[2];
-	strings::fixed_string<30> fstr[2];
-
-	virtual void serialize(ArchiverInOut* archive) override
-	{
-		OPSObject::serialize(archive);
-		archive->inoutfixarr("bo", bo, 4, sizeof(bo));
-		archive->inoutfixarr("ch", ch, 2, sizeof(ch));
-		archive->inoutfixarr("i16", i16, 1, sizeof(i16));
-		archive->inoutfixarr("i32", i32, 3, sizeof(i32));
-		archive->inoutfixarr("i64", i64, 2, sizeof(i64));
-		archive->inoutfixarr("f32", f32, 2, sizeof(f32));
-		archive->inoutfixarr("d64", d64, 2, sizeof(d64));
-		archive->inoutfixarr("str", str, 2);
-		archive->inoutfixarr("fstr", fstr, 2);
-	}
-
-	SerDesObject_Fixarrays(const SerDesObject_Fixarrays& r) = delete;
-	SerDesObject_Fixarrays& operator= (const SerDesObject_Fixarrays& l) = delete;
-	SerDesObject_Fixarrays(SerDesObject_Fixarrays&&) = delete;
-	SerDesObject_Fixarrays& operator =(SerDesObject_Fixarrays&&) = delete;
-};
 
 int InitObject(SerDesObject_Fixarrays& obj)
 {
@@ -440,7 +329,7 @@ public:
 		return nullptr;
 	}
 	ObjectFactory_SerDesObjects() = default;
-	~ObjectFactory_SerDesObjects() = default;
+	virtual ~ObjectFactory_SerDesObjects() = default;
 
 	ObjectFactory_SerDesObjects(const ObjectFactory_SerDesObjects& r) = delete;
 	ObjectFactory_SerDesObjects& operator= (const ObjectFactory_SerDesObjects& l) = delete;
@@ -463,17 +352,21 @@ public:
 		// otherwise fact tries to delete it at exit!!
 		EXPECT_TRUE(fact.remove(&fact1));
 	}
+
+    RAII_FactoryHelper(const RAII_FactoryHelper&) = delete;
+    RAII_FactoryHelper(RAII_FactoryHelper&&) = delete;
+    RAII_FactoryHelper& operator=(const RAII_FactoryHelper&) = delete;
+    RAII_FactoryHelper& operator=(RAII_FactoryHelper&&) = delete;
 };
 
 class SerDesObject_Serializables : public OPSObject
 {
 public:
 	static ops::TypeId_T getTypeName() { return ops::TypeId_T("SerDesObject_Serializables"); }
-	SerDesObject_Serializables() 
+	SerDesObject_Serializables() :
+        obj2(new SerDesObject_Core()), obj3(new SerDesObject_Core())
 	{ 
 		appendType(getTypeName()); 
-		obj2 = new SerDesObject_Core();
-		obj3 = new SerDesObject_Core();
 		fixarr2[0] = new SerDesObject_Core();
 		fixarr2[1] = new SerDesObject_Core();
 	}

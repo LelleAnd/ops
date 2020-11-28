@@ -62,10 +62,10 @@ namespace ops
 			TCPBoostConnectionWConnect(TCPClient* owner, Address_T serverIP, uint16_t serverPort, IOService* ioServ, int inBufferSize) :
 				TCPBoostConnection(owner),
 				_owner(owner), _tryToConnect(false), _endpoint(nullptr), _inBufferSize(inBufferSize),
-				_timer(*dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService)
+				_timer(*BoostIOServiceImpl::get(ioServ))
 			{
-				boost::asio::io_service* ioService = dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService;
-				boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(serverIP.c_str()));
+				boost::asio::io_service* ioService = BoostIOServiceImpl::get(ioServ);
+				const boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(serverIP.c_str()));
 				_endpoint = new boost::asio::ip::tcp::endpoint(ipAddr, serverPort);
 				_sock = new boost::asio::ip::tcp::socket(*ioService);
 			}
@@ -138,7 +138,7 @@ namespace ops
 							_owner->connected(true);
 						}
 					}
-				} catch (std::exception& e) {
+				} catch (const std::exception& e) {
 					ExceptionMessage_T msg("Unknown exception: ");
 					msg += e.what();
 					ops::BasicWarning err("TCPClient", "handleConnect", msg);
@@ -154,7 +154,7 @@ namespace ops
 
 		bool start() override
 		{
-			bool res = TCPClientBase::start();
+			const bool res = TCPClientBase::start();
 			std::shared_ptr<TCPBoostConnectionWConnect> sp = std::dynamic_pointer_cast<TCPBoostConnectionWConnect>(_connection);
 			sp->start();
             return res;

@@ -64,7 +64,7 @@ namespace ops
 
 	ErrorService* Participant::getStaticErrorService()
 	{
-		SafeLock lock(&creationMutex);
+		const SafeLock lock(&creationMutex);
 		if (!staticErrorService) {
 			staticErrorService = new ErrorService();
 		}
@@ -74,7 +74,7 @@ namespace ops
 
 	// --------------------------------------------------------------------------------
 
-	ParticipantKey_T getKey(ObjectName_T domainID_, ObjectName_T participantID)
+	ParticipantKey_T getKey(const ObjectName_T& domainID_, const ObjectName_T& participantID)
 	{
 		ParticipantKey_T key = domainID_;
 		key += "::";
@@ -85,12 +85,12 @@ namespace ops
 	Participant* Participant::getInstanceInternal(ObjectName_T domainID_, ObjectName_T participantID, FileName_T configFile, execution_policy::Enum policy)
 	{
         if (participantID == "") { participantID = OPSConstants::DEFAULT_PARTICIPANT_ID(); }
-		ParticipantKey_T key = getKey(domainID_, participantID);
-		SafeLock lock(&creationMutex);
+		const ParticipantKey_T key = getKey(domainID_, participantID);
+		const SafeLock lock(&creationMutex);
 		if (instances.find(key) == instances.end()) {
 			try
 			{
-				Participant* newInst = new Participant(domainID_, participantID, configFile, policy);
+				Participant* const newInst = new Participant(domainID_, participantID, configFile, policy);
 				instances[key] = newInst;
 			}
 			catch(ops::ConfigException& ex)
@@ -120,39 +120,25 @@ namespace ops
 	///Remove this instance from the static instance map
 	void Participant::RemoveInstance()
 	{
-		ParticipantKey_T key = getKey(domainID, participantID);
-		SafeLock lock(&creationMutex);
+		const ParticipantKey_T key = getKey(domainID, participantID);
+		const SafeLock lock(&creationMutex);
 		instances.erase(key);
 	}
 
-	Participant::Participant(ObjectName_T domainID_, ObjectName_T participantID_, FileName_T configFile_, execution_policy::Enum policy):
+	Participant::Participant(ObjectName_T const domainID_, ObjectName_T const participantID_, FileName_T const configFile_, execution_policy::Enum const policy):
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 		debugHandler(*this),
 #endif
 		_policy(policy),
-		ioService(nullptr),
-		config(nullptr),
-		errorService(nullptr),
-		threadPool(nullptr),
-		aliveDeadlineTimer(nullptr),
-		partInfoPub(nullptr),
-		domain(nullptr),
-		partInfoListener(nullptr),
-		receiveDataHandlerFactory(nullptr),
-		sendDataHandlerFactory(nullptr),
 		domainID(domainID_),
-		participantID(participantID_),
-		keepRunning(true),
-		aliveTimeout(1000),
-		objectFactory(nullptr)
+		participantID(participantID_)
 	{
         ioService = IOService::create();
 
 		if(!ioService)
 		{
 			//Error, should never happen, throw?
-            exceptions::CommException ex("No config on rundirectory");
-			throw ex;
+            throw exceptions::CommException("No config on rundirectory");
 		}
 
 		//Should trow?
@@ -164,8 +150,7 @@ namespace ops
 		}
 		if(!config)
 		{
-			ops::ConfigException ex("No config on rundirectory?");
-			throw ex;
+			throw ops::ConfigException("No config on rundirectory?");
 		}
 
 		//Get the domain from config. Note should not be deleted, owned by config.
@@ -175,8 +160,7 @@ namespace ops
 			ExceptionMessage_T msg("Domain '");
 			msg += domainID;
 			msg += "' missing in config-file";
-			exceptions::CommException ex(msg);
-			throw ex;
+			throw exceptions::CommException(msg);
 		}
 
 		//Create a factory instance for each participant
@@ -236,7 +220,7 @@ namespace ops
 		RemoveInstance();
 
 		{
-			SafeLock lock(&serviceMutex);
+			const SafeLock lock(&serviceMutex);
 
 			// Indicate that shutdown is in progress
 			keepRunning = false;
@@ -322,13 +306,13 @@ namespace ops
 #endif
 
 	// Report an error via the participants ErrorService
-	void Participant::reportError(Error* err)
+	void Participant::reportError(Error* const err)
 	{
 		errorService->report(err);
 	}
 
 	// Report an error via all participants ErrorServices
-	void Participant::reportStaticError(Error* err)
+	void Participant::reportStaticError(Error* const err)
 	{
 		if (staticErrorService != nullptr) {
 			staticErrorService->report(err);
@@ -352,7 +336,7 @@ namespace ops
 	// Method to "drive" the Participant when the execution_policy is "polling"
 	bool Participant::Poll()
 	{
-		if (_policy != execution_policy::polling) return false;
+        if (_policy != execution_policy::polling) { return false; }
 		ioService->poll();
 		return true;
 	}
@@ -360,7 +344,7 @@ namespace ops
 	// This will be called by our threadpool (started in the constructor())
 	void Participant::run()
 	{
-		if (_policy != execution_policy::threading) return;
+        if (_policy != execution_policy::threading) { return; }
 		// Set name of current thread for debug purpose
 		InternalString_T name("OPSP_");
 		name += domainID;
@@ -369,11 +353,9 @@ namespace ops
 	}
 
 	// Called on aliveDeadlineTimer timeouts
-	void Participant::onNewEvent(Notifier<int>* sender, int message)
+	void Participant::onNewEvent(Notifier<int>* , int )
 	{
-		UNUSED(sender);
-		UNUSED(message);
-		SafeLock lock(&serviceMutex);
+		const SafeLock lock(&serviceMutex);
 		receiveDataHandlerFactory->cleanUpReceiveDataHandlers();
 
 		if (keepRunning) {
@@ -385,7 +367,7 @@ namespace ops
 					partInfoPub = new Publisher(createParticipantInfoTopic());
 				}
 				if (partInfoPub != nullptr) {
-					SafeLock lock(&partInfoDataMutex);
+					const SafeLock lck(&partInfoDataMutex);
 					partInfoPub->writeOPSObject(&partInfoData);
 				}
 			} catch (std::exception& ex)
@@ -413,33 +395,33 @@ namespace ops
 		aliveDeadlineTimer->start(aliveTimeout);
 	}
 
-	void Participant::setUdpTransportInfo(Address_T ip, int port)
+	void Participant::setUdpTransportInfo(Address_T const ip, int const port)
 	{
-		SafeLock lock(&partInfoDataMutex);
+		const SafeLock lock(&partInfoDataMutex);
 		partInfoData.ip = ip;
 		partInfoData.mc_udp_port = port;
 	}
 
-	void Participant::registerTcpTopic(ObjectName_T topicName, std::shared_ptr<ReceiveDataHandler> handler)
+	void Participant::registerTcpTopic(const ObjectName_T topicName, std::shared_ptr<ReceiveDataHandler> const handler)
 	{
 		if (partInfoListener != nullptr) {
 			partInfoListener->connectTcp(topicName, handler);
 		}
 	}
 
-	void Participant::unregisterTcpTopic(ObjectName_T topicName, std::shared_ptr<ReceiveDataHandler> handler)
+	void Participant::unregisterTcpTopic(const ObjectName_T topicName, std::shared_ptr<ReceiveDataHandler> const handler)
 	{
 		if (partInfoListener != nullptr) {
 			partInfoListener->disconnectTcp(topicName, handler);
 		}
 	}
 
-	void Participant::addTypeSupport(ops::SerializableFactory* typeSupport)
+	void Participant::addTypeSupport(ops::SerializableFactory* const typeSupport)
 	{
 		objectFactory->add(typeSupport);
 	}
 
-	Topic Participant::createTopic(ObjectName_T name)
+	Topic Participant::createTopic(ObjectName_T const name)
 	{
 		Topic topic = domain->getTopic(name);
 		topic.setParticipantID(participantID);
@@ -450,35 +432,35 @@ namespace ops
 	}
 
 	///Deprecated, use getErrorService()->addListener instead. Add a listener for OPS core reported Errors
-	void Participant::addListener(Listener<Error*>* listener)
+	void Participant::addListener(Listener<Error*>* const listener)
 	{
 		errorService->addListener(listener);
 	}
 
 	///Deprecated, use getErrorService()->removeListener instead. Remove a listener for OPS core reported Errors
-	void Participant::removeListener(Listener<Error*>* listener)
+	void Participant::removeListener(Listener<Error*>* const listener)
 	{
 		errorService->removeListener(listener);
 	}
 
-	bool Participant::hasPublisherOn(ObjectName_T topicName)
+	bool Participant::hasPublisherOn(const ObjectName_T& topicName)
 	{
-		SafeLock lock(&partInfoDataMutex);
+		const SafeLock lock(&partInfoDataMutex);
 		// Check if topic exist in partInfoData.publishTopics
 		std::vector<TopicInfoData>::iterator it;
 		for (it = partInfoData.publishTopics.begin(); it != partInfoData.publishTopics.end(); ++it) {
-			if (it->name == topicName) return true;
+            if (it->name == topicName) { return true; }
 		}
 		return false;
 	}
 
-	bool Participant::hasSubscriberOn(ObjectName_T topicName)
+	bool Participant::hasSubscriberOn(const ObjectName_T& topicName)
 	{
-		SafeLock lock(&partInfoDataMutex);
+		const SafeLock lock(&partInfoDataMutex);
 		// Check if topic exist in partInfoData.subscribeTopics
 		std::vector<TopicInfoData>::iterator it;
 		for (it = partInfoData.subscribeTopics.begin(); it != partInfoData.subscribeTopics.end(); ++it) {
-			if (it->name == topicName) return true;
+            if (it->name == topicName) { return true; }
 		}
 		return false;
 	}
@@ -487,7 +469,7 @@ namespace ops
 	{
         std::shared_ptr<ReceiveDataHandler> result = receiveDataHandlerFactory->getReceiveDataHandler(top, *this);
 		if (result != nullptr) {
-			SafeLock lock(&partInfoDataMutex);
+			const SafeLock lock(&partInfoDataMutex);
 			//Need to add topic to partInfoData.subscribeTopics (TODO ref count if same topic??)
             partInfoData.subscribeTopics.push_back(TopicInfoData(top));
 		}
@@ -498,7 +480,7 @@ namespace ops
 	{
 		receiveDataHandlerFactory->releaseReceiveDataHandler(top, *this);
 
-		SafeLock lock(&partInfoDataMutex);
+		const SafeLock lock(&partInfoDataMutex);
 		// Remove topic from partInfoData.subscribeTopics (TODO the same topic, ref count?)
 		std::vector<TopicInfoData>::iterator it;
 		for (it = partInfoData.subscribeTopics.begin(); it != partInfoData.subscribeTopics.end(); ++it) {
@@ -509,25 +491,25 @@ namespace ops
 		}
 	}
 
-	SendDataHandler* Participant::getSendDataHandler(Topic top)
+	std::shared_ptr<SendDataHandler> Participant::getSendDataHandler(Topic top)
 	{
-		SendDataHandler* result = sendDataHandlerFactory->getSendDataHandler(top, *this);
+		const std::shared_ptr<SendDataHandler> result = sendDataHandlerFactory->getSendDataHandler(top, *this);
 		// We can't update Participant Info here, delayed until updateSendPartInfo()
 		return result;
 	}
 
-	void Participant::updateSendPartInfo(Topic top)
+	void Participant::updateSendPartInfo(const Topic top)
 	{
-		SafeLock lock(&partInfoDataMutex);
+		const SafeLock lock(&partInfoDataMutex);
 		//Need to add topic to partInfoData.subscribeTopics (TODO ref count if same topic??)
 		partInfoData.publishTopics.push_back(TopicInfoData(top));
 	}
 
-	void Participant::releaseSendDataHandler(Topic top)
+	void Participant::releaseSendDataHandler(const Topic top)
 	{
 		sendDataHandlerFactory->releaseSendDataHandler(top, *this);
 
-		SafeLock lock(&partInfoDataMutex);
+		const SafeLock lock(&partInfoDataMutex);
 		// Remove topic from partInfoData.publishTopics (TODO the same topic, ref count?)
 		std::vector<TopicInfoData>::iterator it;
 		for (it = partInfoData.publishTopics.begin(); it != partInfoData.publishTopics.end(); ++it) {

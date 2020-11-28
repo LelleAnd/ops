@@ -11,13 +11,13 @@ namespace ops
     class ConfigException : public std::exception
     {
     public:
-        ConfigException(ExceptionMessage_T mess) : message(mess)
+        ConfigException(ExceptionMessage_T mess) noexcept : message(mess)
         {
         }
 
-		const char* what() const NOEXCEPT { return message.c_str(); }
+		const char* what() const noexcept { return message.c_str(); }
 
-        virtual ~ConfigException() throw ()
+        virtual ~ConfigException()
         {
         }
     private:

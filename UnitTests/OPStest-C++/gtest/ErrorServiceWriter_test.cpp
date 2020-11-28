@@ -41,9 +41,8 @@ public:
 	Error::Severity_T severity;
 	int errorCode;
 	MyErrorListener() : counter(0), severity(Error::warning), errorCode(0) {}
-	virtual void onNewEvent(Notifier<Error*>* sender, Error* arg)  override
+	virtual void onNewEvent(Notifier<Error*>* , Error* const arg)  override
 	{ 
-		(void)(sender);
 		counter++;
 		error = arg->getMessage();
 		severity = arg->getSeverity();

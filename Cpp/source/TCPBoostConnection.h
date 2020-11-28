@@ -41,7 +41,7 @@ namespace ops
 		uint16_t _remotePort = 0;
 
 		// Used for a connection created by TCPClient
-		TCPBoostConnection(TCPConnectionCallbacks* client) :
+		explicit TCPBoostConnection(TCPConnectionCallbacks* client) :
 			TCPConnection(client),
 			_sock(nullptr)
 		{
@@ -109,7 +109,7 @@ namespace ops
 		void disableNagleAlg()
 		{
 			if (_sock != nullptr) {
-				boost::asio::ip::tcp::no_delay option(true);
+				const boost::asio::ip::tcp::no_delay option(true);
 				boost::system::error_code error;
 				_sock->set_option(option, error);
 				if (error) {
@@ -158,7 +158,7 @@ namespace ops
 			try {
 				// Send the data
 				return (int)boost::asio::write(*_sock, boost::asio::buffer(buf, size));
-			} catch (std::exception& e) {
+			} catch (const std::exception& e) {
 				ErrorMessage_T msg("Exception: ");
 				msg += e.what();
 				BasicError err("TCPBoostConnection", "send", msg);

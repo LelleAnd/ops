@@ -40,47 +40,47 @@ namespace ops
         Topic(ObjectName_T namee, int portt, TypeId_T typeIDd, Address_T domainAddresss);
 		Topic();
 
-		void setDomainID(ObjectName_T domID);
-		ObjectName_T getDomainID() const;
+		void setDomainID(ObjectName_T domID) noexcept;
+		ObjectName_T getDomainID() const noexcept;
 
-        void setParticipantID(ObjectName_T partID);
-		ObjectName_T getParticipantID() const;
+        void setParticipantID(ObjectName_T partID) noexcept;
+		ObjectName_T getParticipantID() const noexcept;
 
-		void setTransport(Transport_T transp);
-		Transport_T getTransport() const;
+		void setTransport(Transport_T transp) noexcept;
+		Transport_T getTransport() const noexcept;
 
-		ObjectName_T getName() const;
-		TypeId_T getTypeID() const;
+		ObjectName_T getName() const noexcept;
+		TypeId_T getTypeID() const noexcept;
 
-		void setDomainAddress(Address_T domainAddr);
-		Address_T getDomainAddress() const;
+		void setDomainAddress(Address_T domainAddr) noexcept;
+		Address_T getDomainAddress() const noexcept;
 
-		void setLocalInterface(Address_T localIf);
-		Address_T getLocalInterface() const;
+		void setLocalInterface(Address_T localIf) noexcept;
+		Address_T getLocalInterface() const noexcept;
 
-		void setSampleMaxSize(int size);
-		int getSampleMaxSize() const;
+		void setSampleMaxSize(int size) noexcept;
+		int getSampleMaxSize() const noexcept;
 
-		void setPort(int port);
-		int getPort() const;
+		void setPort(int port) noexcept;
+		int getPort() const noexcept;
 
-		void setTimeToLive(int ttl);
-		int getTimeToLive() const;
+		void setTimeToLive(int ttl) noexcept;
+		int getTimeToLive() const noexcept;
 
 		void serialize(ArchiverInOut* archiver) override;
 
-		int64_t getOutSocketBufferSize() const;
-		void setOutSocketBufferSize(int64_t size);
+		int64_t getOutSocketBufferSize() const noexcept;
+		void setOutSocketBufferSize(int64_t size) noexcept;
 
-		int64_t getInSocketBufferSize() const;
-		void setInSocketBufferSize(int64_t size);
+		int64_t getInSocketBufferSize() const noexcept;
+		void setInSocketBufferSize(int64_t size) noexcept;
 
-		bool getOptNonVirt() const;
-		int getHeartbeatPeriod() const;
-		int getHeartbeatTimeout() const;
-		ChannelId_T getChannelId() const;
+		bool getOptNonVirt() const noexcept;
+		int getHeartbeatPeriod() const noexcept;
+		int getHeartbeatTimeout() const noexcept;
+		ChannelId_T getChannelId() const noexcept;
 
-		Participant* getParticipant() const
+		Participant* getParticipant() const noexcept
 		{
 			return participant;
 		}
@@ -92,8 +92,8 @@ namespace ops
 	private:
         ObjectName_T name;					// Serialized
 
-		int port;							// Serialized
-		int timeToLive;
+        int port{ 0 };						// Serialized
+        int timeToLive{ -1 };
 		TypeId_T typeID;					// Serialized
 		Address_T domainAddress;			// Serialized
 		Address_T localInterface;
@@ -101,14 +101,14 @@ namespace ops
 		ObjectName_T domainID;
 		int sampleMaxSize;					// Serialized
 		Transport_T transport;				// Serialized
-		int64_t outSocketBufferSize;		// Serialized
-		int64_t inSocketBufferSize;			// Serialized
+        int64_t outSocketBufferSize{ -1 };	// Serialized
+        int64_t inSocketBufferSize{ -1 };	// Serialized
 
-		Participant* participant;
+        Participant* participant{ nullptr };
 	
-		bool optNonVirt = false;
-		int heartbeatPeriod = 0;
-		int heartbeatTimeout = 0;
+        bool optNonVirt{ false };
+        int heartbeatPeriod{ 0 };
+        int heartbeatTimeout{ 0 };
 		ChannelId_T channelID;
 	};
 }

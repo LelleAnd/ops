@@ -89,12 +89,12 @@ namespace ops
             }
         }
 
-		virtual void setDataOwner(bool ownership)
+		virtual void setDataOwner(bool ownership) noexcept
 		{
 			dataOwner = ownership;
 		}
 
-		virtual bool isDataOwner() const
+		virtual bool isDataOwner() const noexcept
 		{
 			return dataOwner;
 		}
@@ -113,41 +113,41 @@ namespace ops
 		OPSObject* data{ nullptr };		// Serialized
 
 		// Hide these since we don't support Clone of an OPSMessage()
-		virtual OPSObject* clone() { return nullptr; }
+		virtual OPSMessage* clone() override { return nullptr; }
 		void fillClone(OPSMessage* obj) const { UNUSED(obj); }
 	
 	public:
-        int64_t getPublicationID() const
+        int64_t getPublicationID() const noexcept
         {
             return publicationID;
         }
 
-        void setPublicationID(int64_t pubID)
+        void setPublicationID(int64_t pubID) noexcept
         {
             publicationID = pubID;
         }
 
-		ObjectName_T getPublisherName() const
+		ObjectName_T getPublisherName() const noexcept
         {
             return publisherName;
         }
 
-        void setPublisherName(ObjectName_T pubName)
+        void setPublisherName(ObjectName_T pubName) noexcept
         {
             publisherName = pubName;
         }
 
-        ObjectName_T getTopicName() const
+        ObjectName_T getTopicName() const noexcept
         {
             return topicName;
         }
 
-        void setTopicName(ObjectName_T topName)
+        void setTopicName(ObjectName_T topName) noexcept
         {
             topicName = topName;
         }
 
-        void setData(OPSObject* d)
+        void setData(OPSObject* d) noexcept
         {
 			if (dataOwner) {
 				if ((data != nullptr) && (data != d)) { delete data; }
@@ -155,18 +155,18 @@ namespace ops
             data = d;
         }
 
-        OPSObject* getData() const
+        OPSObject* getData() const noexcept
         {
             return data;
         }
 
-		void setSource(Address_T addr, int port)
+		void setSource(Address_T addr, int port) noexcept
 		{
 			sourceIP = addr;
 			sourcePort = port;
 		}
 
-		void getSource(Address_T& addr, int& port) const
+		void getSource(Address_T& addr, int& port) const noexcept
 		{
 			addr = sourceIP;
 			port = sourcePort;

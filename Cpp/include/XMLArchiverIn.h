@@ -42,7 +42,7 @@ namespace ops
         private:
 			ExceptionMessage_T message;
         public:
-            XMLArchiverException()
+            XMLArchiverException() noexcept
             {
                 message = "XMLArchiverException: empty";
             }
@@ -51,7 +51,7 @@ namespace ops
 				message = "XMLArchiverException: ";
 				message += m;
             }
-			const char* what() const NOEXCEPT { return message.c_str(); }
+			const char* what() const noexcept { return message.c_str(); }
 		};
     }
     using namespace exceptions;
@@ -125,7 +125,7 @@ namespace ops
 		}
 
 		// Returns true if it's an output archiver
-		virtual bool isOut() override { return false; }
+		virtual bool isOut() noexcept override { return false; }
 
 		virtual void inout(InoutName_T name, bool& value) override
         {
@@ -280,7 +280,7 @@ namespace ops
 
             PushNode(currentNode);
             currentNode = currentNode.getChildNode("element", element);
-			TypeId_T types(currentNode.getAttribute("type"));
+			const TypeId_T types(currentNode.getAttribute("type"));
             Serializable* newSer = factory->create(types);
             if (newSer != nullptr)
             {
@@ -298,7 +298,7 @@ namespace ops
 			{
 				PushNode(currentNode);
 				currentNode = currentNode.getChildNode(NAME(name));
-				TypeId_T types(currentNode.getAttribute("type"));
+				const TypeId_T types(currentNode.getAttribute("type"));
 				///TODO check that type is correct
 
 				value.serialize(this);
@@ -315,7 +315,7 @@ namespace ops
             {
 				PushNode(currentNode);
 				currentNode = currentNode.getChildNode(NAME(name));
-				TypeId_T types(currentNode.getAttribute("type"));
+				const TypeId_T types(currentNode.getAttribute("type"));
                 Serializable* newSer = factory->create(types);
                 if (newSer != nullptr)
                 {
@@ -336,7 +336,7 @@ namespace ops
 				PushNode(currentNode);
 				currentNode = currentNode.getChildNode(NAME(name));
 
-                int size = currentNode.nChildNode("element");
+                const int size = currentNode.nChildNode("element");
                 value.reserve(size);
                 value.resize(size, false);
                 for (int i = 0; i < size; i++)
@@ -356,7 +356,7 @@ namespace ops
 				PushNode(currentNode);
 				currentNode = currentNode.getChildNode(NAME(name));
 
-                int size = currentNode.nChildNode("element");
+                const int size = currentNode.nChildNode("element");
                 value.reserve(size);
                 value.resize(size, 0);
                 for (int i = 0; i < size; i++)
@@ -380,7 +380,7 @@ namespace ops
 				PushNode(currentNode);
 				currentNode = currentNode.getChildNode(NAME(name));
 
-                int size = currentNode.nChildNode("element");
+                const int size = currentNode.nChildNode("element");
                 value.reserve(size);
                 value.resize(size, 0);
                 for (int i = 0; i < size; i++)
@@ -404,7 +404,7 @@ namespace ops
 				PushNode(currentNode);
 				currentNode = currentNode.getChildNode(NAME(name));
 
-                int size = currentNode.nChildNode("element");
+                const int size = currentNode.nChildNode("element");
                 value.reserve(size);
                 value.resize(size, 0);
                 for (int i = 0; i < size; i++)
@@ -428,7 +428,7 @@ namespace ops
 				PushNode(currentNode);
 				currentNode = currentNode.getChildNode(NAME(name));
 
-                int size = currentNode.nChildNode("element");
+                const int size = currentNode.nChildNode("element");
                 value.reserve(size);
                 value.resize(size, 0);
                 for (int i = 0; i < size; i++)
@@ -452,7 +452,7 @@ namespace ops
 				PushNode(currentNode);
 				currentNode = currentNode.getChildNode(NAME(name));
 
-                int size = currentNode.nChildNode("element");
+                const int size = currentNode.nChildNode("element");
                 value.reserve(size);
                 value.resize(size, 0.0);
                 for (int i = 0; i < size; i++)
@@ -476,7 +476,7 @@ namespace ops
 				PushNode(currentNode);
 				currentNode = currentNode.getChildNode(NAME(name));
 
-                int size = currentNode.nChildNode("element");
+                const int size = currentNode.nChildNode("element");
                 value.reserve(size);
                 value.resize(size, 0.0);
                 for (int i = 0; i < size; i++)
@@ -500,7 +500,7 @@ namespace ops
 				PushNode(currentNode);
 				currentNode = currentNode.getChildNode(NAME(name));
 
-                int size = currentNode.nChildNode("element");
+                const int size = currentNode.nChildNode("element");
                 value.reserve(size);
                 value.resize(size, "");
                 for (int i = 0; i < size; i++)
@@ -522,7 +522,7 @@ namespace ops
 				PushNode(currentNode);
 				currentNode = currentNode.getChildNode(NAME(name));
 
-				int size = currentNode.nChildNode("element");
+				const int size = currentNode.nChildNode("element");
 				if (size != numElements) throw ops::ArchiverException("Illegal size of fix bool array received. name: ", name);
 
 				for (int i = 0; i < size; i++)
@@ -544,7 +544,7 @@ namespace ops
 				PushNode(currentNode);
 				currentNode = currentNode.getChildNode(NAME(name));
 
-				int size = currentNode.nChildNode("element");
+				const int size = currentNode.nChildNode("element");
 				if (size != numElements) throw ops::ArchiverException("Illegal size of fix char array received. name: ", name);
 
 				for (int i = 0; i < size; i++)
@@ -570,7 +570,7 @@ namespace ops
 				PushNode(currentNode);
 				currentNode = currentNode.getChildNode(NAME(name));
 
-				int size = currentNode.nChildNode("element");
+				const int size = currentNode.nChildNode("element");
 				if (size != numElements) throw ops::ArchiverException("Illegal size of fix int array received. name: ", name);
 
 				for (int i = 0; i < size; i++)
@@ -596,7 +596,7 @@ namespace ops
 				PushNode(currentNode);
 				currentNode = currentNode.getChildNode(NAME(name));
 
-				int size = currentNode.nChildNode("element");
+				const int size = currentNode.nChildNode("element");
 				if (size != numElements) throw ops::ArchiverException("Illegal size of fix int16 array received. name: ", name);
 
 				for (int i = 0; i < size; i++)
@@ -622,7 +622,7 @@ namespace ops
 				PushNode(currentNode);
 				currentNode = currentNode.getChildNode(NAME(name));
 
-				int size = currentNode.nChildNode("element");
+				const int size = currentNode.nChildNode("element");
 				if (size != numElements) throw ops::ArchiverException("Illegal size of fix int64 array received. name: ", name);
 
 				for (int i = 0; i < size; i++)
@@ -648,7 +648,7 @@ namespace ops
 				PushNode(currentNode);
 				currentNode = currentNode.getChildNode(NAME(name));
 
-				int size = currentNode.nChildNode("element");
+				const int size = currentNode.nChildNode("element");
 				if (size != numElements) throw ops::ArchiverException("Illegal size of fix float array received. name: ", name);
 
 				for (int i = 0; i < size; i++)
@@ -674,7 +674,7 @@ namespace ops
 				PushNode(currentNode);
 				currentNode = currentNode.getChildNode(NAME(name));
 
-				int size = currentNode.nChildNode("element");
+				const int size = currentNode.nChildNode("element");
 				if (size != numElements) throw ops::ArchiverException("Illegal size of fix double array received. name: ", name);
 
 				for (int i = 0; i < size; i++)
@@ -698,7 +698,7 @@ namespace ops
 				PushNode(currentNode);
 				currentNode = currentNode.getChildNode(NAME(name));
 
-				int size = currentNode.nChildNode("element");
+				const int size = currentNode.nChildNode("element");
 				if (size != numElements) throw ops::ArchiverException("Illegal size of fix string array received. name: ", name);
 
 				for (int i = 0; i < size; i++)

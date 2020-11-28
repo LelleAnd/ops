@@ -41,12 +41,12 @@ namespace ops
 		virtual ~Reservable();
 
 		void setReferenceHandler(ReferenceHandler* refHandler);
-		ReferenceHandler* getReferenceHandler() const;
+		ReferenceHandler* getReferenceHandler() const noexcept;
 
 		void reserve();
 		void unreserve();
 
-		int getNrOfReservations() const;
+		int getNrOfReservations() const noexcept;
 	private:
 		std::atomic<int> nrOfReservations{ 0 };
 		ReferenceHandler* referenceHandler{ nullptr };

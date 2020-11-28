@@ -136,7 +136,7 @@ namespace ops
 			TCPServerBase(client, ioServ),
 			_serverPort(serverPort), _serverIP(serverIP), _outSocketBufferSize(outSocketBufferSize)
 		{
-			_ioService = dynamic_cast<BoostIOServiceImpl*>(ioServ)->boostIOService;
+			_ioService = BoostIOServiceImpl::get(ioServ);
 			//boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(serverIP));
 			_endpoint = new boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), serverPort);
 		}
@@ -151,7 +151,7 @@ namespace ops
 
 		bool open() override
 		{
-			if (_server) close();
+			if (_server != nullptr) close();
 			_server = std::make_shared<impl>(this, _ioService);
 			_server->start_accept();
 
@@ -164,7 +164,7 @@ namespace ops
 
 		void close() override
 		{
-			if (_server) {
+			if (_server != nullptr) {
 				_server->cancel();
 				_server.reset();
 			}
@@ -173,7 +173,7 @@ namespace ops
 
 		uint16_t getLocalPort() override
 		{
-			if ((_serverPort == 0) && (_server)) {
+			if ((_serverPort == 0) && (_server != nullptr)) {
 				Address_T addr;
 				uint16_t port;
 				_server->getLocal(addr, port);
@@ -182,7 +182,7 @@ namespace ops
 			return _serverPort;
 		}
         
-		Address_T getLocalAddress() override
+		Address_T getLocalAddress() noexcept override
 		{
 			return _serverIP;
 		}

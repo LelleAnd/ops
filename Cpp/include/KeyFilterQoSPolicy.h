@@ -45,7 +45,7 @@ namespace ops
 	{
     public:
         // Creates an empty filter that lets all objects thru
-        KeyFilterQoSPolicy();
+        KeyFilterQoSPolicy() noexcept;
 
         // Creates a filter with one key, that must match for objects to come thru
         KeyFilterQoSPolicy(ObjectKey_T keyString);
@@ -67,7 +67,7 @@ namespace ops
         virtual ~KeyFilterQoSPolicy();
 
         //Overides applyFilter(OPSObject* o) in FilterQoSPolicy
-        bool applyFilter(OPSObject* o);
+        bool applyFilter(const OPSObject* const o) override;
 
     private:
         std::vector<ObjectKey_T> keyStrings;

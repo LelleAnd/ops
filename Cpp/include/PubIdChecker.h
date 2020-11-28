@@ -38,13 +38,14 @@ namespace ops {
 	{
 	private:
 		typedef struct _Entry {
-			Address_T Addr;
-            int Port{ 0 };
+            uint32_t Addr{ 0 };
+            uint16_t Port{ 0 };
             int64_t expectedPubID{ 0 };
 			_Entry() noexcept {}
 		} Entry_T;
 
-		std::map<InternalKey_T, Entry_T> _map;
+        typedef std::pair<uint32_t, uint16_t> MyKey_t;
+		std::map<MyKey_t, Entry_T> _map;
         Entry_T* _prev{ nullptr };
 
 	public:
@@ -57,19 +58,17 @@ namespace ops {
 		virtual void Check(OPSMessage* message)
 		{
 			// Get sender info
-			Address_T addr;
-			int port;
+			uint32_t addr;
+			uint16_t port;
 			message->getSource(addr, port);
 
 			if ((_prev == nullptr) || (_prev->Port != port) || (_prev->Addr != addr)) {
 				// First or Another sender
 				// Make key
-				InternalKey_T key = addr;
-				key += "::";
-				key += NumberToString(port); 
+                MyKey_t key(addr, port);
 				
 				// Look up entry
-				std::map<InternalKey_T, Entry_T>::iterator result = _map.find(key);
+				std::map<MyKey_t, Entry_T>::iterator result = _map.find(key);
 				if (result != _map.end()) {
 					// found
 					_prev = &result->second;

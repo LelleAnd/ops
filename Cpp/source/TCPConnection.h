@@ -80,7 +80,9 @@ namespace ops
 		}
 		
 		virtual void getLocal(Address_T& address, uint16_t& port) = 0;
-		virtual void getRemote(Address_T& address, uint16_t& port) = 0;
+        virtual void getLocal(uint32_t& address, uint16_t& port) = 0;
+        virtual void getRemote(Address_T& address, uint16_t& port) = 0;
+        virtual void getRemote(uint32_t& address, uint16_t& port) = 0;
 
 		virtual void start() {};
 		virtual void stop() {};

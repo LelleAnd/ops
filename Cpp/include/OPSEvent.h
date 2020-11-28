@@ -32,6 +32,8 @@ namespace ops {
         Event();
         Event(const Event& rhs);
         Event& operator= (const Event& rhs);
+        Event(Event&&) = default;
+        Event& operator=(Event&&) = default;
         ~Event();
         
         bool waitFor(const std::chrono::milliseconds& timeout);

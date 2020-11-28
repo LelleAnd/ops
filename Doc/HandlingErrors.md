@@ -22,7 +22,7 @@ participant->addListener(&listener);
 
 ```
 
-For the purpose of only logging errors, OPS' C++ implementation comes with a predefined class called `ops::ErrorWriter` which can be used to print to any `std::o_stream`. This is how you use it:
+For the purpose of only logging errors, OPS' C++ implementation comes with a predefined class called `ops::ErrorWriter` which can be used to print to any `std::ostream`. This is how you use it:
 
 ```
 ops::ErrorWriter errorWriter(std::cout);

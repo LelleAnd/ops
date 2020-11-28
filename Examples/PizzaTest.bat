@@ -1,5 +1,5 @@
 @pushd %~dp0
-@start ..\deploy\bin\OPSListener.exe -c OPSIdls\PizzaProject\ops_config.xml -SA -d -j OPSIdls\PizzaProject\Generated\JSON\PizzaProject.json
+@start ..\deploy\bin\OPSListener.exe -c OPSIdls\PizzaProject\ops_config.xml -pA -t -SA -d -j OPSIdls\PizzaProject\Generated\JSON\PizzaProject.json
 @call :STARTTEST CSharpApps\OPSTest\OPSTest\ bin\debug\OPSTest.exe "start"
 @call :STARTTEST AdaApps\PizzaTest\ pizzatest_main.exe "start"
 @call :STARTTEST CppApps\PizzaTest\ debug\PizzaTest.exe "start"

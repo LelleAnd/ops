@@ -144,6 +144,8 @@
         <DCCReference Include="..\..\OPSIdls\TestAll\Generated\Delphi\TestAll\TestAll.NoData.pas"/>
         <DCCReference Include="..\..\OPSIdls\TestAll\Generated\Delphi\TestAll\TestAll.Definitions.pas"/>
         <DCCReference Include="..\..\..\Delphi\Source\uOps.ChecksumArchiver.pas"/>
+        <DCCReference Include="..\..\..\Common\idl\Generated\Delphi\opsidls\opsidls.OPSConstants.pas"/>
+        <DCCReference Include="..\..\..\Common\idl\Generated\Delphi\opsidls\opsidls.SendAckPatternData.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

@@ -48,8 +48,11 @@ namespace ops
         bool optNonVirt{ false };
         int heartbeatPeriod{ 1000 };
         int heartbeatTimeout{ 3000 };
+        int resendNum{ 0 };
+        int resendTimeMs{ 10 };
+        int registerTimeMs{ 1000 };
 
-		std::vector<Channel* > channels;
+        std::vector<Channel* > channels;
 		std::vector<Transport* > transports;
 
 		void checkTopicValues(Topic* top) const;

@@ -41,6 +41,7 @@ endif()
 
 ## ----------------------------------------------------------------------------
 message("BOOST_HOME: " $ENV{BOOST_HOME})
+message("BOOST_ARCH: " ${BOOST_ARCH})
 
 # find Boost. If not found we can't build c++ libs
 option(Boost_DEBUG "Set to ON to debug Boost paths" OFF)
@@ -54,11 +55,15 @@ if(DEFINED ENV{BOOST_HOME})
 endif()
 message ("BOOST_ROOT: " ${BOOST_ROOT})
 
+if(BOOST_ARCH)
+  ###  set(Boost_ARCHITECTURE "-x64")    ## Needed to work on GitHub CI test
+  set(Boost_ARCHITECTURE ${BOOST_ARCH})
+endif()
+
 if(MSVC)
   set(Boost_USE_STATIC_LIBS ON)
   find_package(Boost MODULE COMPONENTS system thread date_time regex chrono)
 else()
-  set(Boost_ARCHITECTURE "-x64")    ## Needed to work on GitHub CI test 
   find_package(Boost MODULE COMPONENTS system thread)
 endif()
 

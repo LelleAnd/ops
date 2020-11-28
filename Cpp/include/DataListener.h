@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -21,14 +22,10 @@
 #ifndef ops_DataListenerH
 #define ops_DataListenerH
 
-//#include "DataNotifier.h"
-#include "OPSObject.h"
-
 namespace ops
 {
-//Forward declaration//
-class DataNotifier;////
-///////////////////////
+    //Forward declaration
+    class DataNotifier;
     
     ///Interface that used in conjunction with DataNotifier 
     ///forms an implmentation of the Observer GoF-pattern.
@@ -36,8 +33,9 @@ class DataNotifier;////
     {
     public:
         ///If this interface is registred with a DataNotifier, this method will be called when the
-		///DataNotifier wants to inform its DataListeners that new data is available.
-		virtual void onNewData(ops::DataNotifier* sender) = 0;
+        ///DataNotifier wants to inform its DataListeners that new data is available.
+        virtual void onNewData(DataNotifier* sender) = 0;
     };
+
 }
 #endif

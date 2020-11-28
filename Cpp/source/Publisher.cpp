@@ -23,21 +23,121 @@
 #include "Participant.h"
 #include "Domain.h"
 #include "OPSArchiverOut.h"
+#include "Subscriber.h"
+#include "opsidls/SendAckPatternData.h"
 #include "opsidls/OPSConstants.h"
 #include "TimeHelper.h"
 #include "DataSegmentPool.h"
+#include "ConfigException.h"
 
 namespace ops
 {
+    // A subscriber for ACK messages
+    struct Publisher::AckSubscriber : public ops::SubscriberBase
+    {
+        explicit AckSubscriber(const ops::Topic& topic) :
+            SubscriberBase(topic)
+        {
+        }
+
+        // Note that the receiveDataHandler messageLock is held while executing this method
+        void onNewEvent(ops::Notifier<ops::OPSMessage*>*, ops::OPSMessage* const mess) override
+        {
+            //Check that this message is delivered on the same topic as this Subscriber use
+            if (mess->getTopicName() != topic.getName()) {
+                // This is a normal case when several Topics use the same port
+                return;
+            }
+            opsidls::SendAckPatternData* ackData = dynamic_cast<opsidls::SendAckPatternData*>(mess->getData());
+            if (ackData == nullptr) return;
+
+            uint32_t IP;
+            uint16_t port;
+            mess->getSource(IP, port);
+            MyKey_t subKey(IP, port);
+
+            ObjectName_T subName = mess->getPublisherName();
+
+            switch (ackData->messageType)
+            {
+            case opsidls::SendAckPatternData::MType::ACK:
+                // Got message (ACK) on Subscriber
+                // Check that ACK number is correct
+                if ((_sourceIP == (uint32_t)ackData->sourceIP) && (_sourcePort == (uint16_t)ackData->sourcePort)) {
+                    if (ackData->publicationID == _lastSentPubId) {
+                        // If so, mark Subscriber as "acked"
+                        _map[subKey].ack();
+                        // If it's an expected subscribers, set mark
+                        auto ent = _expectedSub.find(subName);
+                        if (ent != _expectedSub.end()) {
+                            _expectedSub[subName].ack();
+                        }
+                        OPS_ACK_TRACE(topic.getName() << ": CORRECT ACK from subscriber " << subName << "\n");
+                    } else {
+                        OPS_ACK_TRACE(topic.getName() << ": ACK on wrong number from subscriber " << subName << "\n");
+                    }
+                } else {
+                    //OPS_ACK_TRACE(topic.getName() << ": Got an ACK on data from another publisher. Skip.\n");
+                }
+                break;
+
+            case opsidls::SendAckPatternData::MType::REGISTER:
+                // Got message (REGISTER) on Subscriber
+                // Add publisher to expected ACK senders (and publish latest data if any)
+                OPS_ACK_TRACE(topic.getName() << ": REGISTER from subscriber " << subName << "\n");
+                if (_map.find(subKey) == _map.end()) {
+                    // Only set false if it's a new one, we don't want to clear an ACK mark
+                    _map[subKey].acked = false;
+                }
+                if (_map[subKey].acked == false) {
+                    if (_owner != nullptr) {
+                        _owner->resendLatest();
+                    }
+                }
+                break;
+
+            case opsidls::SendAckPatternData::MType::UNREGISTER:
+                // Got message (UNREGISTER) on Subscriber
+                // Remove publisher from expected ACK senders
+                OPS_ACK_TRACE(topic.getName() << ": UNREGISTER from subscriber " << subName << "\n");
+                _map.erase(subKey);
+                break;
+
+            default:
+                break;
+            }
+        }
+
+        // Callback for deadline timeouts, Needed but not used
+        void onNewEvent(ops::Notifier<int>*, int) override {}
+
+        typedef std::pair<uint32_t, uint16_t> MyKey_t;
+        struct entry_t {
+            bool acked{ false };
+            int32_t failed{ 0 };
+            void ack() { acked = true; }
+        };
+        std::map<ObjectName_T, entry_t> _expectedSub;
+        std::map<MyKey_t, entry_t> _map;
+        int64_t _lastSentPubId{ -1 };
+        Publisher* _owner{ nullptr };
+        uint32_t _sourceIP{ 0 };
+        uint16_t _sourcePort{ 0 };
+    };
+
+    // ==============================================================================
+
     using namespace opsidls;
 
     constexpr int UsableSize = OPSConstants::PACKET_MAX_SIZE - OPSConstants::SEGMENT_HEADER_SIZE;
 
     Publisher::Publisher(Topic t) :
-    topic(t),
-    memMap(1 + (t.getSampleMaxSize() / UsableSize),
-        (t.getSampleMaxSize() >= UsableSize) ? OPSConstants::PACKET_MAX_SIZE : t.getSampleMaxSize() + OPSConstants::SEGMENT_HEADER_SIZE,
-        &DataSegmentAllocator::Instance())
+        topic(t),
+        memMap(1 + (t.getSampleMaxSize() / UsableSize),
+            (t.getSampleMaxSize() >= UsableSize) ? OPSConstants::PACKET_MAX_SIZE : t.getSampleMaxSize() + OPSConstants::SEGMENT_HEADER_SIZE,
+            &DataSegmentAllocator::Instance()),
+        buf(memMap),
+        _ackTimeoutInc(t.getResendTimeMs() < 0 ? 0 : t.getResendTimeMs())
     {
         participant = Participant::getInstance(topic.getDomainID(), topic.getParticipantID());
         sendDataHandler = participant->getSendDataHandler(topic);
@@ -52,6 +152,20 @@ namespace ops
 		// If we let the OS define the port, the transport info isn't available until after start()
 		sendDataHandler->updateTransportInfo(topic);
 		participant->updateSendPartInfo(topic);
+
+        if (topic.getUseAck()) {
+            // Enable ACK's
+            // Check that SampleMaxSize is <= 60000-14
+            if (topic.getSampleMaxSize() > OPSConstants::PACKET_MAX_SIZE) {
+                throw ConfigException("SampleMaxSize to big for Publisher With Ack");
+            }
+
+            // Create Subscriber for ACK's
+            _ackSub = new AckSubscriber(Topic::CreateAckTopic(topic));
+            _ackSub->_sourceIP = sendDataHandler->getLocalAddressHost();
+            _ackSub->_sourcePort = sendDataHandler->getLocalPort();
+            _ackSub->start();
+        }
 
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 		participant->debugHandler.RegisterPub(this, topic.getName());
@@ -68,25 +182,34 @@ namespace ops
 		}
 #endif
 		stop();
+        if (_ackSub != nullptr) {
+            delete _ackSub;
+        }
 		participant->releaseSendDataHandler(topic);
 		OPS_DES_TRACE("Pub: Destructor() finished\n");
 	}
 
 	void Publisher::start()
 	{
-		sendDataHandler->addListener(this);
-		sendDataHandler->addPublisher(this, topic);
+        if (!started) {
+            sendDataHandler->addListener(this);
+            sendDataHandler->addPublisher(this, topic);
+            started = true;
+        }
 	}
 
 	void Publisher::stop()
 	{
-		sendDataHandler->removeListener(this);
-		sendDataHandler->removePublisher(this, topic);
-	}
+        if (started) {
+            sendDataHandler->removeListener(this);
+            sendDataHandler->removePublisher(this, topic);
+            started = false;
+        }
+    }
 
     Topic Publisher::getTopic() const
     {
-        return this->topic;
+        return topic;
     }
 
     void Publisher::setName(ObjectName_T const name)
@@ -102,12 +225,12 @@ namespace ops
 
     ObjectKey_T Publisher::getKey() const noexcept
     {
-        return this->key;
+        return key;
     }
 
 	ObjectName_T Publisher::getName() const noexcept
     {
-        return this->name;
+        return name;
     }
 
     bool Publisher::writeOPSObject(OPSObject* const obj)
@@ -117,9 +240,9 @@ namespace ops
 
 	bool Publisher::write(OPSObject* const data)
 	{
-        bool sendOK = true;
 #ifdef OPS_ENABLE_DEBUG_HANDLER
-		const SafeLock lck(&_dbgLock);
+        bool sendOK = true;
+        const SafeLock lck(&_dbgLock);
 		if (_dbgSkip > 0) {
 			_dbgSkip--;
 		} else {
@@ -136,16 +259,36 @@ namespace ops
 
 	bool Publisher::internalWrite(OPSObject* const data)
 	{
-        bool sendOK = true;
 #endif
         if (key != "") {
             data->setKey(key);
         }
 
-        ByteBuffer buf(memMap);
+        if (_ackSub != nullptr) {
+            // Clear ACK flag for each expected ACK sender, but not failed counter
+            ops::MessageLock lck(*_ackSub);
+            for (auto& element : _ackSub->_map) {
+                element.second.acked = false;
+            }
+            for (auto& element : _ackSub->_expectedSub) {
+                element.second.acked = false;
+            }
+            _ackSub->_owner = this;
+            _ackSub->_lastSentPubId = currentPublicationID;   // Will be sent with this number below
+            _sendState = SendState::sending;
+        } else {
+            _sendState = SendState::acked;
+        }
+
+        SafeLock lck(&_pubLock);
+        _resendsLeft = topic.getNumResends();
+
+        // Serialize message
+        buf.Reset();
 
         message.setData(data);
         message.setPublicationID(currentPublicationID);
+        currentPublicationID++;
 
         buf.writeNewSegment();
 
@@ -160,6 +303,13 @@ namespace ops
 
         buf.finish();
 
+        // Send serialized message
+        return writeSerializedBuffer();
+    }
+
+    bool Publisher::writeSerializedBuffer()
+    {
+        bool sendOK = true;
         for (int i = 0; i < buf.getNrOfSegments(); i++) {
             const int segSize = buf.getSegmentSize(i);
             // We need to continue even if a send fails, since it may work to some destinations
@@ -169,9 +319,102 @@ namespace ops
                 TimeHelper::sleep(sendSleepTime);
             }
         }
-
-        currentPublicationID++;
+        _ackTimeout = TimeHelper::currentTimeMillis() + _ackTimeoutInc;
         return sendOK;
+    }
+
+    bool Publisher::resendLatest()
+    {
+        if (_ackSub == nullptr) { return true; }
+        if (_ackSub->_lastSentPubId < 0) { return true; }
+        SafeLock lck(&_pubLock);
+        bool res = writeSerializedBuffer();
+        return res;
+    }
+
+    // One way for us to know which ACK's to expect
+    void Publisher::AddExpectedAckSender(const ObjectName_T& subname)
+    {
+        if (_ackSub == nullptr) { return; }
+        // Add Subscriber to expected ACK senders
+        MessageLock lck(*_ackSub);
+        _ackSub->_expectedSub[subname].acked = false;
+    }
+
+    // "" check all
+    bool Publisher::CheckAckSender(const ObjectName_T& subname)
+    {
+        if (_ackSub == nullptr) { return true; }
+        MessageLock lck(*_ackSub);
+        if (subname == "") {
+            for (auto& x : _ackSub->_expectedSub) {
+                if (!x.second.acked) { return false; }
+            }
+            return true;
+        } else {
+            for (auto& x : _ackSub->_expectedSub) {
+                if (x.first == subname) {
+                    if (x.second.acked) { return true; }
+                }
+            }
+            return false;
+        }
+    }
+
+    void Publisher::RemoveExpectedAckSender(const ObjectName_T& subname)
+    {
+        if (_ackSub == nullptr) { return; }
+        // Remove Subscriber from expected ACK senders
+        MessageLock lck(*_ackSub);
+        _ackSub->_expectedSub.erase(subname);
+    }
+
+    // Need to be called periodically
+    void Publisher::Activate()
+    {
+        if (_ackSub == nullptr) { return; }
+
+        //If we haven't sent anything yet or all is ACKED/no more resends, return
+        if (_resendsLeft < 0) { return; }
+
+        if (_ackTimeout > TimeHelper::currentTimeMillis()) { return; }
+
+        // If message isn't ACK'ed from all expected ACK senders, resend message with same Pub Id Counter
+        bool resend = false;
+        {
+            MessageLock lck(*_ackSub);
+            // Check if any of the expected hasn't responded to us
+            for (auto& element : _ackSub->_expectedSub) {
+                AckSubscriber::entry_t& ent = element.second;
+                if (!ent.acked) {
+                    ++ent.failed;
+                    resend = true;
+                }
+            }
+            // Also check all that has registered with us
+            for (auto& element : _ackSub->_map) {
+                AckSubscriber::entry_t& ent = element.second;
+                if (!ent.acked) {
+                    ++ent.failed;
+                    resend = true;
+                }
+            }
+        }
+        if (resend) {
+            if (_resendsLeft == 0) {
+                // Failed to get ACK from all, within number of configured ACK's
+                _sendState = SendState::failed;
+                OPS_ACK_TRACE("ACK FAILED (no more resends)\n");
+            } else {
+                resendLatest();
+                OPS_ACK_TRACE("RESEND\n");
+            }
+            --_resendsLeft;
+        } else {
+            _sendState = SendState::acked;
+            _resendsLeft = -1;
+            OPS_ACK_TRACE("DATA FULLY ACKED (no more resends)\n");
+        }
     }
 
 #ifdef OPS_ENABLE_DEBUG_HANDLER

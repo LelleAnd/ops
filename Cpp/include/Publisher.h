@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <atomic>
+
 #include "OPSTypeDefs.h"
 #include "OPSObject.h"
 #include "OPSMessage.h"
@@ -32,6 +34,7 @@
 #include "DebugHandler.h"
 #include "Listener.h"
 #include "ConnectStatus.h"
+#include "Lockable.h"
 
 namespace ops
 {
@@ -56,8 +59,29 @@ public:
 
 	bool writeOPSObject(OPSObject* obj);
 
+    // Ack specifics
+    void AddExpectedAckSender(const ObjectName_T& subname);
+    bool CheckAckSender(const ObjectName_T& subname);    // "" --> check all
+    void RemoveExpectedAckSender(const ObjectName_T& subname);
+
+    // Need to be called periodically to do resends and update SendState
+    void Activate();
+
+    enum class SendState : uint8_t {
+        init,       // Before anything is published
+        sending,    // When Ack is enabled, and waiting for Ack's and doing resends
+        acked,      // Message sent and acked (if Ack is enabled)
+        failed      // When Ack is enabled, and at least one expected Ack sender failed to send Ack after x resends
+    };
+    SendState getSendState() { return _sendState; }
+
 protected:
-	bool write(OPSObject* data);
+    int64_t currentPublicationID{ 0 };
+    std::shared_ptr<SendDataHandler> sendDataHandler{ nullptr };
+
+    virtual bool write(OPSObject* data);
+
+    bool writeSerializedBuffer();
 
 	// Called from SendDataHandler (TCPServer)
 	virtual void onNewEvent(Notifier<ConnectStatus>* sender, ConnectStatus arg) override
@@ -69,19 +93,18 @@ protected:
 
 private:
     Topic topic;
-
 	MemoryMap memMap;
-
-    std::shared_ptr<SendDataHandler> sendDataHandler{ nullptr };
+    ByteBuffer buf;
 
 	OPSMessage message;
  
     Participant* participant{ nullptr };
 
-    int64_t currentPublicationID{ 0 };
 	ObjectName_T name;
     ObjectKey_T key;
-	
+
+    bool started{ false };
+
 #ifdef OPS_ENABLE_DEBUG_HANDLER
     volatile int64_t _dbgSkip{ 0 };
 	Lockable _dbgLock;
@@ -89,6 +112,16 @@ private:
 	virtual void onRequest(opsidls::DebugRequestResponseData& req, opsidls::DebugRequestResponseData& resp) override;
 	bool internalWrite(OPSObject* data);
 #endif
+
+    // Ack specifics
+    struct AckSubscriber;
+    AckSubscriber* _ackSub{ nullptr };
+    Lockable _pubLock;
+    std::atomic<int64_t> _ackTimeout{ 0 };
+    const int64_t _ackTimeoutInc;
+    std::atomic<int> _resendsLeft{ -1 };
+    bool resendLatest();
+    SendState _sendState{ SendState::init };
 
 public:
 	//Send behavior parameters

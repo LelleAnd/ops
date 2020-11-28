@@ -23,6 +23,8 @@
 #include "Listener.h"
 #include "BytesSizePair.h"
 #include "ConnectStatus.h"
+#include "UDPReceiver.h"
+#include "TCPClient.h"
 
 class MyBSPListener : public ops::Listener<ops::BytesSizePair>
 {
@@ -64,7 +66,7 @@ public:
 
 	MyConnectListener(const std::string& mess) : cst(false, 0), msg(mess) {}
 
-	virtual void onNewEvent(ops::Notifier<ops::ConnectStatus>* sender, ops::ConnectStatus arg)
+	virtual void onNewEvent(ops::Notifier<ops::ConnectStatus>* , ops::ConnectStatus arg)
 	{
 		std::cout << msg << "IP: " << arg.addr << "::" << arg.port;
 		if (arg.connected) {

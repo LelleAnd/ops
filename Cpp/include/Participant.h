@@ -64,7 +64,7 @@ namespace ops
 
 	class OPS_EXPORT Participant : Runnable, Listener<int>
 	{
-		friend class Subscriber;
+		friend class SubscriberBase;
 		friend class Publisher;
 		friend class UDPReceiveDataHandler;
 		friend class TCPReceiveDataHandler;

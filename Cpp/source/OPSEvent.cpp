@@ -31,8 +31,8 @@ namespace ops {
     {
     public:
         InternalImpl() = default;
-        InternalImpl(const InternalImpl&) = default;
-        InternalImpl(InternalImpl&&) = default;
+        explicit InternalImpl(const InternalImpl&) = default;
+        explicit InternalImpl(InternalImpl&&) = default;
         InternalImpl& operator=(const InternalImpl&) = default;
         InternalImpl& operator=(InternalImpl&&) = default;
         virtual ~InternalImpl() = default;

@@ -1,7 +1,6 @@
 /**
-* 
-* Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2020 Lennart Andersson.
+*
+* Copyright (C) 2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -19,23 +18,8 @@
 * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "DataNotifier.h"
+#include "MocSendReceiveDataHelpers.h"
 
-namespace ops
-{
-    
-    DataNotifier::~DataNotifier() {}
-    
-    void DataNotifier::notifyNewData()
-    {
-        for (unsigned int i = 0; i < closureListeners.size(); i++) {
-            closureListeners[i](this);
-        }
-    }
+std::map<ops::ObjectName_T, std::shared_ptr<MocSendDataHandler>> RAII_SDHF::SDHS;
 
-    void DataNotifier::addDataListener(std::function<void(DataNotifier* sender)> callback)
-    {
-        closureListeners.push_back(callback);
-    }
-
-}
+std::map<ops::ObjectName_T, std::shared_ptr<MocReceiveDataHandler>> RAII_RDHF::RDHS;

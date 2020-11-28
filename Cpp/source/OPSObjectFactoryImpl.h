@@ -1,6 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
+ * Copyright (C) 2020 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -32,6 +33,7 @@
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 	#include "opsidls/DebugRequestResponseData.h"
 #endif
+#include "opsidls/SendAckPatternData.h"
 
 namespace ops
 {
@@ -42,6 +44,14 @@ namespace ops
 
         Serializable* create(const TypeId_T& type) override
         {
+            if (type == "opsidls.SendAckPatternData")
+            {
+                return new opsidls::SendAckPatternData();
+            }
+            if (type == ("ops.ParticipantInfoData"))
+            {
+                return new ParticipantInfoData();
+            }
             if (type == ("ops.protocol.OPSMessage"))
             {
                 return new OPSMessage();
@@ -69,10 +79,6 @@ namespace ops
             if (type == ("Domain"))
             {
                 return new Domain();
-            }
-            if (type == ("ops.ParticipantInfoData"))
-            {
-                return new ParticipantInfoData();
             }
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 			if (type == ("opsidls.DebugRequestResponseData"))

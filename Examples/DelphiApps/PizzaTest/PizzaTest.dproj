@@ -159,6 +159,8 @@
         <DCCReference Include="..\..\OPSIdls\PizzaProject\Generated\Delphi\sds\sds.MessageHeaderData.pas"/>
         <DCCReference Include="..\..\..\Delphi\Source\uOps.NetworkSupport.pas"/>
         <DCCReference Include="..\..\OPSIdls\PizzaProject\Generated\Delphi\pizza\special\pizza.special.Parmesan.pas"/>
+        <DCCReference Include="..\..\..\Common\idl\Generated\Delphi\opsidls\opsidls.OPSConstants.pas"/>
+        <DCCReference Include="..\..\..\Common\idl\Generated\Delphi\opsidls\opsidls.SendAckPatternData.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

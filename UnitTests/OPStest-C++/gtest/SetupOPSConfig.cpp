@@ -47,6 +47,8 @@ void SetupOPSConfig::InternalSetup()
 		"				<domainID>GTestDomain</domainID>"
 		"				<domainAddress>234.5.6.8</domainAddress>"
 		"				<localInterface>127.0.0.1</localInterface>"
+        "               <resendNum>5</resendNum>"
+        "               <registerTimeMs>100</registerTimeMs>"
 		"				<topics>"
 		"					<element type = \"Topic\">"
 		"						<name>TestTopic</name>"

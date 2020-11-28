@@ -35,13 +35,18 @@ TEST(Test_OPSMessage, Test) {
 	EXPECT_STREQ(obj1.getKey().c_str(), "");
 	EXPECT_TRUE(obj1.isDataOwner());
 
+    uint32_t addrRaw;
 	Address_T addr;
-	int port;
-	obj1.getSource(addr, port);
+	uint16_t port;
+	obj1.getSource(addrRaw, port);
 	EXPECT_EQ(port, 0);
-	EXPECT_STREQ(addr.c_str(), "");
+	EXPECT_EQ(addrRaw, 0u);
 
-	EXPECT_EQ(obj1.getPublicationID(), 0);
+    obj1.getSource(addr, port);
+    EXPECT_EQ(port, 0);
+    EXPECT_STREQ(addr.c_str(), "0.0.0.0");
+    
+    EXPECT_EQ(obj1.getPublicationID(), 0);
 	EXPECT_STREQ(obj1.getPublisherName().c_str(), "");
 	EXPECT_STREQ(obj1.getTopicName().c_str(), "");
 	EXPECT_EQ(obj1.getData(), nullptr);
@@ -54,7 +59,7 @@ TEST(Test_OPSMessage, Test) {
 	EXPECT_STREQ(obj1.getPublisherName().c_str(), "GTest");
 	EXPECT_STREQ(obj1.getTopicName().c_str(), "TestTopic");
 
-	obj1.setSource("127.0.0.1", 8765);
+	obj1.setSource(0x7F000001, 8765);
 	obj1.getSource(addr, port);
 	EXPECT_EQ(port, 8765);
 	EXPECT_STREQ(addr.c_str(), "127.0.0.1");

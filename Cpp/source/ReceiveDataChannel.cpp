@@ -67,10 +67,16 @@ namespace ops
 		receiver->stop();
 	}
 
-	static void ReportError(Participant& participant, ErrorMessage_T message, Address_T const addr, uint16_t const port)
+	static void ReportError(Participant& participant, ErrorMessage_T message, uint32_t const addr, uint16_t const port)
 	{
 		message += " [";
-		message += addr;
+        message += NumberToString((addr >> 24) & 0xFF);
+        message += ".";
+        message += NumberToString((addr >> 16) & 0xFF);
+        message += ".";
+        message += NumberToString((addr >>  8) & 0xFF);
+        message += ".";
+        message += NumberToString((addr      ) & 0xFF);
 		message += "::";
 		message += NumberToString(port);
 		message += ']';
@@ -99,7 +105,7 @@ namespace ops
         }
 
 		///TODO Check that all segments come from the same source (IP and port)
-		Address_T addr;
+		uint32_t addr;
 		uint16_t port;
 		receiver->getSource(addr, port);
 

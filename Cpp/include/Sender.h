@@ -48,6 +48,7 @@ namespace ops
 
 		virtual uint16_t getLocalPort() = 0;
 		virtual Address_T getLocalAddress() = 0;
+        virtual uint32_t getLocalAddressHost() = 0;
 
         static OPS_EXPORT Sender* create(IOService* ioService, Address_T localInterface = "0.0.0.0", int ttl = 1, int64_t outSocketBufferSize = 16000000);
         static OPS_EXPORT Sender* createUDPSender(IOService* ioService, Address_T localInterface = "0.0.0.0", int ttl = 1, int64_t outSocketBufferSize = 16000000);

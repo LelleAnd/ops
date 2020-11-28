@@ -121,12 +121,13 @@ namespace ops
 				}
 			}
 
-			void getLocal(Address_T& address, uint16_t& port)
+			void getLocal(Address_T& address, uint32_t& addressHost, uint16_t& port)
 			{
 				boost::system::error_code error;
 				boost::asio::ip::tcp::endpoint localEndPoint;
 				localEndPoint = _acceptor->local_endpoint(error);
 				address = localEndPoint.address().to_string().c_str();
+                addressHost = (uint32_t)localEndPoint.address().to_v4().to_ulong();
 				port = localEndPoint.port();
 			}
 		};
@@ -156,8 +157,8 @@ namespace ops
 			_server->start_accept();
 
 			Address_T addr;
-			uint16_t port;
-			_server->getLocal(addr, port);
+            uint16_t port;
+			_server->getLocal(addr, _serverIPHost, port);
 			OPS_PIFO_TRACE("TCP Server IP: " << addr << ", Port: " << port << "\n");
             return true;
 		}
@@ -176,7 +177,7 @@ namespace ops
 			if ((_serverPort == 0) && (_server != nullptr)) {
 				Address_T addr;
 				uint16_t port;
-				_server->getLocal(addr, port);
+				_server->getLocal(addr, _serverIPHost, port);
 				return port;
 			}
 			return _serverPort;
@@ -187,12 +188,23 @@ namespace ops
 			return _serverIP;
 		}
 
+        uint32_t getLocalAddressHost() noexcept override
+        {
+            if ((_serverIPHost == 0) && (_server != nullptr)) {
+                Address_T addr;
+                uint16_t port;
+                _server->getLocal(addr, _serverIPHost, port);
+            }
+            return _serverIPHost;
+        }
+
     private:
-		uint16_t _serverPort;
+        uint32_t _serverIPHost{ 0 };
+        uint16_t _serverPort{ 0 };
 		Address_T _serverIP;
-		int _outSocketBufferSize;
-		boost::asio::ip::tcp::endpoint* _endpoint;		// The local port to bind to.
-		boost::asio::io_service* _ioService;			// Boost io_service handles the asynchronous operations on the sockets
+        int _outSocketBufferSize{ 0 };
+        boost::asio::ip::tcp::endpoint* _endpoint{ nullptr };   // The local port to bind to.
+        boost::asio::io_service* _ioService{ nullptr };         // Boost io_service handles the asynchronous operations on the sockets
 
 		std::shared_ptr<impl> _server;
     };

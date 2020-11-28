@@ -57,7 +57,10 @@ namespace ops
 		bool cleanUpDone();
         bool dataAvailable();
         ~ReceiveDataHandlerFactory();
-    };
 
+        // If set, will be called for all unknown transports
+        typedef std::shared_ptr<ReceiveDataHandler>(*rcv_factory_t)(Topic top, Participant& part);
+        static void SetBackupHandler(rcv_factory_t f);
+    };
 }
 #endif

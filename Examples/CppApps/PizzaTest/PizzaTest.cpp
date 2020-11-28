@@ -32,19 +32,25 @@
 #include "PrintArchiverOut.h"
 #include "ChecksumArchiver.h"
 
-#ifdef _WIN32
-#include "SdsSystemTime.h"
-#endif
 
-#include "../ConfigFileHelper.h"
-
+///----- Configuration -----
 #define USE_LAMDAS
 #undef USE_MEMORY_POOLS
 #undef USE_MESSAGE_HEADER
 
 
+
+#ifdef USE_MESSAGE_HEADER
+#include "SdsSystemTime.h"
+#endif
+
+#include "../ConfigFileHelper.h"
+
+
 #ifdef USE_MEMORY_POOLS
+#ifdef USE_MESSAGE_HEADER
 sds::MessageHeaderData::memory_pool_type sds::MessageHeaderData::_pool(1);
+#endif
 pizza::PizzaData::memory_pool_type pizza::PizzaData::_pool(20);
 pizza::VessuvioData::memory_pool_type pizza::VessuvioData::_pool(20);
 pizza::CapricosaData::memory_pool_type pizza::CapricosaData::_pool(10);
@@ -126,6 +132,7 @@ public:
 	virtual void StartSubscriber() = 0;
 	virtual void StopSubscriber() = 0;
 	virtual void SetDeadlineQos(int64_t timeoutMs) = 0;
+    virtual void Activate() = 0;
 	virtual ~IHelper() {};
 	IHelper() = default;
 	IHelper(IHelper const&) = delete;
@@ -237,7 +244,7 @@ public:
 					;
 
 				//Create a publisher on that topic
-				pub = new DataTypePublisher(topic);
+                pub = new DataTypePublisher(topic);
 				pub->addListener(this);
 
 				std::ostringstream myStream;
@@ -290,7 +297,7 @@ public:
             try {
                 if (other == nullptr) {
                     WriteUpdate(data, message);
-#ifdef NOT_USED_NOW
+#ifdef TRUE
                     res = pub->writeOPSObject(&data);     // Write using pointer
 #else
                     res = pub->write(data);               // Write using ref
@@ -335,6 +342,14 @@ public:
 
 				//Create a subscriber on that topic.
 				sub = new DataTypeSubscriber(topic);
+
+                std::ostringstream myStream;
+#ifdef _WIN32
+                myStream << " Win(" << _getpid() << ")" << std::ends;
+#else
+                myStream << " Linux(" << getpid() << ")" << std::ends;
+#endif
+                sub->setName(std::string("C++Test " + myStream.str()).c_str());
 
 				// Setup listeners
 #ifdef USE_LAMDAS
@@ -416,7 +431,7 @@ public:
 	{
 		UNUSED(sender);
 		ops::Address_T address;
-		int port;
+		uint16_t port;
 		arg.mess->getSource(address, port);
 
 		std::string newPub = (arg.newPublisher) ? "NEW Publisher" : "SEQ ERROR";
@@ -483,10 +498,16 @@ public:
 	}
 #endif
 
+    virtual void Activate()
+    {
+        if (pub != nullptr) { pub->Activate(); }
+        if (sub != nullptr) { sub->Activate(); }
+    }
+
 private:
 	CHelperListener<DataType>* client;
 	DataTypePublisher* pub;
-	ops::Subscriber* sub;
+    ops::Subscriber* sub;
 };
 
 typedef CHelper<pizza::PizzaData, pizza::PizzaDataPublisher, pizza::PizzaDataSubscriber> TPizzaHelper;
@@ -543,7 +564,7 @@ public:
 		}
 
 		ops::Address_T addr = "";
-		int port = 0;
+		uint16_t port = 0;
 		sub->getMessage()->getSource(addr, port);
 
 		if (!beQuite) {
@@ -588,7 +609,7 @@ public:
 		}
 
 		ops::Address_T addr = "";
-		int port = 0;
+		uint16_t port = 0;
 		sub->getMessage()->getSource(addr, port);
 
 		if (!beQuite) {
@@ -610,7 +631,7 @@ public:
 	virtual void onData(ops::Subscriber* const sub, pizza::special::ExtraAllt* const data) override
 	{
 		ops::Address_T addr = "";
-		int port = 0;
+		uint16_t port = 0;
 		sub->getMessage()->getSource(addr, port);
 
 		if (!beQuite) {
@@ -656,6 +677,14 @@ private:
 	}
 };
 #endif
+
+void ActivateAll()
+{
+    for (unsigned int i = 0; i < ItemInfoList.size(); i++) {
+        ItemInfo* const info = ItemInfoList[i];
+        info->helper->Activate();
+    }
+}
 
 void WriteToAllSelected(ops::OPSObject* const other = nullptr)
 {
@@ -785,7 +814,9 @@ int main(const int argc, const char* argv[])
 	}
 	timeBeginPeriod(wTimerRes);
 
-	sds::sdsSystemTimeInit();
+  #ifdef USE_MESSAGE_HEADER
+    sds::sdsSystemTimeInit();
+  #endif
 #endif
 
 	// Setup the OPS static error service (common for all participants, reports errors during participant creation)
@@ -829,7 +860,7 @@ int main(const int argc, const char* argv[])
 	ops::Participant* const participant = ops::Participant::getInstance("PizzaDomain", "PizzaDomain", policy);
     if (participant == nullptr) {
 	    std::cout << "Failed to create Participant. Missing ops_config.xml ??" << std::endl;
-		exit(-1);
+		return -1;
     }
 	participant->addTypeSupport(new PizzaProject::PizzaProjectTypeFactory());
 	printDomainInfo(*participant);
@@ -843,7 +874,7 @@ int main(const int argc, const char* argv[])
 	ops::Participant* const otherParticipant = ops::Participant::getInstance("OtherPizzaDomain", "OtherPizzaDomain", policy);
 	if (otherParticipant == nullptr) {
 		std::cout << "Failed to create Participant. Missing ops_config.xml ??" << std::endl;
-        exit(-1);
+        return -1;
 	}
 	otherParticipant->addTypeSupport(new PizzaProject::PizzaProjectTypeFactory());
 	printDomainInfo(*otherParticipant);
@@ -907,6 +938,8 @@ int main(const int argc, const char* argv[])
 
 	while (!doExit) {
 		std::cout << std::endl << " (? = menu) > ";
+
+        ActivateAll();
 
 		// Repeated sends
 		if (doPeriodicSend || doPartPolling) {
@@ -1148,4 +1181,5 @@ int main(const int argc, const char* argv[])
 #ifdef USE_MEMORY_POOLS
 	ops::memory_pools::memory_pool_manager::Instance().PrintStat(std::cout);
 #endif
+    return 0;
 }

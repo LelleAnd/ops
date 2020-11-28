@@ -1,6 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
+ * Copyright (C) 2020 Lennart Andersson.
  *
  * This notice apply to all source files, *.cpp, *.h, *.java, and *.cs in this directory
  * and all its subdirectories if nothing else is explicitly stated within the source file itself.
@@ -28,18 +29,17 @@
 namespace ops
 {
     //Forward declaration//
-    template<typename T> class Notifier; ////
-    ///////////////////////
+    template<typename T> class Notifier;
 
-    ///Interface that used in conjunction with DataNotifier 
-    ///forms an implmentation of the Observer GoF-pattern.
+    ///Interface that used in conjunction with Notifier 
+    ///forms an implementation of the Observer GoF-pattern.
 
     template<typename ArgType>
     class Listener
     {
     public:
-        ///If this interface is registred with a DataNotifier, this method will be called when the
-        ///DataNotifier wants to inform its DataListeners that new data is available.
+        ///If this interface is registred with a Notifier, this method will be called when the
+        ///Notifier wants to inform its Listeners that new data is available.
         virtual void onNewEvent(Notifier<ArgType>* sender, ArgType arg) = 0;
     };
 }

@@ -107,8 +107,8 @@ namespace ops
 		char messageType{ 0 };			// Serialized (not used, always 0)
 		char publisherPriority{ 0 };	// Serialized (not used, always 0)
 		bool dataOwner{ true };
-		int sourcePort{ 0 };
-		Address_T sourceIP;
+		uint16_t sourcePort{ 0 };
+        uint32_t sourceIP{ 0 };
 		int64_t publicationID{ 0 };		// Serialized
 		ObjectName_T publisherName;		// Serialized
         ObjectName_T topicName;			// Serialized
@@ -164,17 +164,29 @@ namespace ops
             return data;
         }
 
-		void setSource(Address_T addr, int port) noexcept
+		void setSource(uint32_t addr, uint16_t port) noexcept
 		{
 			sourceIP = addr;
 			sourcePort = port;
 		}
 
-		void getSource(Address_T& addr, int& port) const noexcept
+		void getSource(Address_T& addr, uint16_t& port) const noexcept
 		{
-			addr = sourceIP;
+            addr = NumberToString((sourceIP >> 24) & 0xFF);
+            addr += ".";
+            addr += NumberToString((sourceIP >> 16) & 0xFF);
+            addr += ".";
+            addr += NumberToString((sourceIP >> 8) & 0xFF);
+            addr += ".";
+            addr += NumberToString((sourceIP) & 0xFF);
 			port = sourcePort;
 		}
+
+        void getSource(uint32_t& addr, uint16_t& port) const noexcept
+        {
+            addr = sourceIP;
+            port = sourcePort;
+        }
 
         virtual void serialize(ArchiverInOut* archive) override
         {

@@ -173,6 +173,11 @@ namespace ops
 		{
 			_connection->getRemote(address, port);
 		}
+        virtual void getSource(uint32_t& address, uint16_t& port) override
+        {
+            _connection->getRemote(address, port);
+        }
+
 
 		virtual bool asyncFinished() override
 		{

@@ -71,7 +71,9 @@ uses
   uOps.NetworkSupport in '..\..\..\Delphi\Source\uOps.NetworkSupport.pas',
   TestAll.NoData in '..\..\OPSIdls\TestAll\Generated\Delphi\TestAll\TestAll.NoData.pas',
   TestAll.Definitions in '..\..\OPSIdls\TestAll\Generated\Delphi\TestAll\TestAll.Definitions.pas',
-  uOps.ChecksumArchiver in '..\..\..\Delphi\Source\uOps.ChecksumArchiver.pas';
+  uOps.ChecksumArchiver in '..\..\..\Delphi\Source\uOps.ChecksumArchiver.pas',
+  opsidls.OPSConstants in '..\..\..\Common\idl\Generated\Delphi\opsidls\opsidls.OPSConstants.pas',
+  opsidls.SendAckPatternData in '..\..\..\Common\idl\Generated\Delphi\opsidls\opsidls.SendAckPatternData.pas';
 
 procedure Logger(str : string);
   begin

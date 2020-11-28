@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2019-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -37,6 +37,8 @@ namespace ops
 		Lockable();
 		Lockable(const Lockable& l);
 		Lockable& operator= (const Lockable& l);
+        Lockable(Lockable&&) = delete;
+        Lockable& operator=(Lockable&&) = delete;
 
 		bool lock();
         bool trylock();

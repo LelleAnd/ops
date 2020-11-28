@@ -30,7 +30,7 @@ Make sure you have boost installed, otherwise download pre-built binaries for bo
     * Boost System
     * Boost Thread
 
-OPS has been used with Boost versions 1.38, 1.48, 1.53, 1.55, 1.60, 1.64, 1.66, 1.67 and 1.71.
+OPS has been used with Boost versions 1.38, 1.48, 1.53, 1.55, 1.60, 1.64, 1.66, 1.67, 1.71 and 1.72.
 Versions older than 1.60 hasn't been used/tested for quite a while. It is recommended to use a more modern version.
 
 ## CMake ##

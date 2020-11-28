@@ -42,6 +42,9 @@ namespace ops
         int port{ 0 };
         int64_t outSocketBufferSize{ -1 };
         int64_t inSocketBufferSize{ -1 };
+        int resendNum{ -1 };
+        int resendTimeMs{ -1 };
+        int registerTimeMs{ -1 };
         int sampleMaxSize{ -1 };
 
         Channel();

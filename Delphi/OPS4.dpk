@@ -88,6 +88,8 @@ contains
   uOps.RequestReply in 'Source\RequestReply\uOps.RequestReply.pas',
   uOps.RequestReply.Reply in 'Source\RequestReply\uOps.RequestReply.Reply.pas',
   uOps.RequestReply.Request in 'Source\RequestReply\uOps.RequestReply.Request.pas',
-  uOps.NetworkSupport in 'Source\uOps.NetworkSupport.pas';
+  uOps.NetworkSupport in 'Source\uOps.NetworkSupport.pas',
+  opsidls.OPSConstants in '..\Common\idl\Generated\Delphi\opsidls\opsidls.OPSConstants.pas',
+  opsidls.SendAckPatternData in '..\Common\idl\Generated\Delphi\opsidls\opsidls.SendAckPatternData.pas';
 
 end.

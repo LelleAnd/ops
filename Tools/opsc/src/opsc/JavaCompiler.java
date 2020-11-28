@@ -277,6 +277,9 @@ public class JavaCompiler extends opsc.Compiler
     protected String getConstructorBody(IDLClass idlClass)
     {
         String ret = "";
+        if (idlClass.getVersion() > 0) {
+            ret += tab(2) + "idlVersionMask |= 1;" + endl();
+        }
         for (IDLField field : idlClass.getFields()) {
             if (field.isStatic()) continue;
             String iVal = "";
@@ -316,6 +319,7 @@ public class JavaCompiler extends opsc.Compiler
     protected String getCloneBody(IDLClass idlClass)
     {
         String ret = "";
+        ret += tab(2) + "cloneResult." + idlClass.getClassName() + "_version = this." + idlClass.getClassName() + "_version;" + endl();
         for (IDLField field : idlClass.getFields()) {
             if (field.isStatic()) continue;
             String fieldName = getFieldName(field);
@@ -378,6 +382,13 @@ public class JavaCompiler extends opsc.Compiler
     protected String getDeclarations(IDLClass idlClass)
     {
         String ret = getEnumTypeDeclarations(idlClass);
+
+        if (!isOnlyDefinition(idlClass)) {
+            int version = idlClass.getVersion();
+            if (version < 0) { version = 0; }
+            ret += tab(1) + "public static final byte " + idlClass.getClassName() + "_idlVersion = " + version + ";" + endl();
+        }
+
         for (IDLField field : idlClass.getFields()) {
             String fieldName = getFieldName(field);
             if (!field.getComment().equals("")) {
@@ -449,55 +460,96 @@ public class JavaCompiler extends opsc.Compiler
         return s;
     }
 
+    private String getFieldGuard(String versionName, IDLField field)
+    {
+        String ret = "";
+        Vector<VersionEntry> vec = getReducedVersions(field.getName(), field.getDirective());
+        if (vec != null) {
+            for (VersionEntry ent : vec) {
+                String cond = "(" + versionName + " >= " + ent.start + ")";
+                if (ent.stop != -1) {
+                    cond = "(" + cond + " && (" + versionName + " <= " + ent.stop + "))";
+                }
+                if (ret.length() > 0) {
+                    ret += " || ";
+                }
+                ret += cond;
+            }
+        }
+        return ret;
+    }
+
     protected String getSerialize(IDLClass idlClass)
     {
         String ret = "";
+        String versionName = idlClass.getClassName() + "_version";
+        String versionIdlName = idlClass.getClassName() + "_idlVersion";
+        // Need an implicit version field that may be [de]serialized
+        ret += tab(2) + "if (idlVersionMask != 0) {" + endl();
+        ret += tab(3) + "byte tmp = archive.inout(\"" + versionName + "\", " + versionName + ");" + endl();
+        ret += tab(3) + "if (tmp > " + versionIdlName + ") {" + endl();
+        ret += tab(4) + "throw new IOException(\"" + idlClass.getClassName() + ": received version '\" + tmp + \"' > known version '\" + " + versionIdlName + " + \"'\");" + endl();
+        ret += tab(3) + "}" + endl();
+        ret += tab(3) + versionName + " = tmp;" + endl();
+        ret += tab(2) + "} else {" + endl();
+        ret += tab(3) + versionName + " = 0;" + endl();
+        ret += tab(2) + "}" + endl();
         for (IDLField field : idlClass.getFields()) {
             if (field.isStatic()) continue;
             String fieldName = getFieldName(field);
+            String fieldGuard = getFieldGuard(versionName, field);
+            int tabCnt = 2;
+            if (fieldGuard.length() > 0) {
+                ret += tab(tabCnt) + "if (" + fieldGuard + ") {" + endl();
+                tabCnt += 1;
+            }
             if (field.isIdlType()) {
                 if (!field.isArray()) {
                   if (field.isAbstract()) {
-                    ret += tab(2) + fieldName + " = (" + field.getType() + ") archive.inout(\"" + field.getName() + "\", " + fieldName + ");" + endl();
+                    ret += tab(tabCnt) + fieldName + " = (" + field.getType() + ") archive.inout(\"" + field.getName() + "\", " + fieldName + ");" + endl();
                   } else {
-                    ret += tab(2) + fieldName + " = (" + field.getType() + ") archive.inout(\"" + field.getName() + "\", " + fieldName + ", " + field.getType() + ".class);" + endl();
+                    ret += tab(tabCnt) + fieldName + " = (" + field.getType() + ") archive.inout(\"" + field.getName() + "\", " + fieldName + ", " + field.getType() + ".class);" + endl();
                   }
                 } else {
                   if (field.isAbstract()) {
-                    ret += tab(2) + fieldName + " = (" + languageType(field.getType()) + ") archive.inoutSerializableList(\"" + field.getName() + "\", " + fieldName + ");" + endl();
+                    ret += tab(tabCnt) + fieldName + " = (" + languageType(field.getType()) + ") archive.inoutSerializableList(\"" + field.getName() + "\", " + fieldName + ");" + endl();
                   } else {
-                    ret += tab(2) + fieldName + " = (" + languageType(field.getType()) + ") archive.inoutSerializableList(\"" + field.getName() + "\", " + fieldName + ", " +
+                    ret += tab(tabCnt) + fieldName + " = (" + languageType(field.getType()) + ") archive.inoutSerializableList(\"" + field.getName() + "\", " + fieldName + ", " +
                             elementType(field.getType()) + ".class);" + endl();
                   }
                 }
             } else if (field.isEnumType()) {
                 if (!field.isArray()) {
-                    ret += tab(2) + fieldName + " = archive.inoutEnum(\"" + field.getName() + "\", " + fieldName + ", " + field.getType() + ".values());" + endl();
+                    ret += tab(tabCnt) + fieldName + " = archive.inoutEnum(\"" + field.getName() + "\", " + fieldName + ", " + field.getType() + ".values());" + endl();
                 } else {
-                  ret += tab(2) + fieldName + " = (" + languageType(field.getType()) + ") archive.inoutEnumList(\"" +
+                  ret += tab(tabCnt) + fieldName + " = (" + languageType(field.getType()) + ") archive.inoutEnumList(\"" +
                       field.getName() + "\", " + fieldName + ", " + elementType(field.getType()) + ".values());" + endl();
                 }
             } else if (field.isArray()) {
                 String fieldType = field.getType();
                 if (fieldType.equals("int[]")) {
-                    ret += tab(2) + fieldName + " = (" + languageType(fieldType) + ") archive.inoutIntegerList(\"" + field.getName() + "\", " + fieldName + ");" + endl();
+                    ret += tab(tabCnt) + fieldName + " = (" + languageType(fieldType) + ") archive.inoutIntegerList(\"" + field.getName() + "\", " + fieldName + ");" + endl();
                 } else if (fieldType.equals("byte[]")) {
-                    ret += tab(2) + fieldName + " = (" + languageType(fieldType) + ") archive.inoutByteList(\"" + field.getName() + "\", " + fieldName + ");" + endl();
+                    ret += tab(tabCnt) + fieldName + " = (" + languageType(fieldType) + ") archive.inoutByteList(\"" + field.getName() + "\", " + fieldName + ");" + endl();
                 } else if (fieldType.equals("short[]")) {
-                    ret += tab(2) + fieldName + " = (" + languageType(fieldType) + ") archive.inoutShortList(\"" + field.getName() + "\", " + fieldName + ");" + endl();
+                    ret += tab(tabCnt) + fieldName + " = (" + languageType(fieldType) + ") archive.inoutShortList(\"" + field.getName() + "\", " + fieldName + ");" + endl();
                 } else if (fieldType.equals("long[]")) {
-                    ret += tab(2) + fieldName + " = (" + languageType(fieldType) + ") archive.inoutLongList(\"" + field.getName() + "\", " + fieldName + ");" + endl();
+                    ret += tab(tabCnt) + fieldName + " = (" + languageType(fieldType) + ") archive.inoutLongList(\"" + field.getName() + "\", " + fieldName + ");" + endl();
                 } else if (fieldType.equals("boolean[]")) {
-                    ret += tab(2) + fieldName + " = (" + languageType(fieldType) + ") archive.inoutBooleanList(\"" + field.getName() + "\", " + fieldName + ");" + endl();
+                    ret += tab(tabCnt) + fieldName + " = (" + languageType(fieldType) + ") archive.inoutBooleanList(\"" + field.getName() + "\", " + fieldName + ");" + endl();
                 } else if (fieldType.equals("float[]")) {
-                    ret += tab(2) + fieldName + " = (" + languageType(fieldType) + ") archive.inoutFloatList(\"" + field.getName() + "\", " + fieldName + ");" + endl();
+                    ret += tab(tabCnt) + fieldName + " = (" + languageType(fieldType) + ") archive.inoutFloatList(\"" + field.getName() + "\", " + fieldName + ");" + endl();
                 } else if (fieldType.equals("double[]")) {
-                    ret += tab(2) + fieldName + " = (" + languageType(fieldType) + ") archive.inoutDoubleList(\"" + field.getName() + "\", " + fieldName + ");" + endl();
+                    ret += tab(tabCnt) + fieldName + " = (" + languageType(fieldType) + ") archive.inoutDoubleList(\"" + field.getName() + "\", " + fieldName + ");" + endl();
                 } else if (fieldType.equals("string[]")) {
-                    ret += tab(2) + fieldName + " = (" + languageType(fieldType) + ") archive.inoutStringList(\"" + field.getName() + "\", " + fieldName + ");" + endl();
+                    ret += tab(tabCnt) + fieldName + " = (" + languageType(fieldType) + ") archive.inoutStringList(\"" + field.getName() + "\", " + fieldName + ");" + endl();
                 }
             } else {
-                ret += tab(2) + fieldName + " = archive.inout(\"" + field.getName() + "\", " + fieldName + ");" + endl();
+                ret += tab(tabCnt) + fieldName + " = archive.inout(\"" + field.getName() + "\", " + fieldName + ");" + endl();
+            }
+            if (fieldGuard.length() > 0) {
+                tabCnt -= 1;
+                ret += tab(tabCnt) + "}" + endl();
             }
         }
         return ret;

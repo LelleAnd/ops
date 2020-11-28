@@ -113,11 +113,15 @@ void directive_declare():
 }
 
 String directive_value():
-{ String value = ""; Long val = 0L;}
+{ String value = ""; Long val = 0L; Long val2 = 0L; boolean range = false;}
 {
     value = <ID>.image {return value;}
 |
-    val = integer_literal() {return Long.toString(val);}
+    val = integer_literal() [ ".." val2 = integer_literal() {range=true;}]
+    {
+        if (!range) { return Long.toString(val); }
+        return Long.toString(val) + ".." + Long.toString(val2);
+    }
 |
     value = boolean_literal() {return value;}
 }
@@ -184,6 +188,8 @@ void member() :
 {String typeName = ""; String fieldName = ""; String comment = ""; String tComment = ""; }
 {
     {currentIDLField = new IDLField(fieldName, "");}
+
+    [ ( directive_declare() )+ ]
 
     typeName = type_spec() fieldName = declarators(currentIDLField) ";"
     {

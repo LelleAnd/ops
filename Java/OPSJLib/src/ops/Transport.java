@@ -1,6 +1,6 @@
 /**
  *
- * Copyright (C) 2016 Lennart Andersson.
+ * Copyright (C) 2016-2020 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -24,6 +24,9 @@ import java.io.IOException;
 
 public class Transport extends OPSObject
 {
+    public byte Transport_version = Transport_idlVersion;
+
+    public static final byte Transport_idlVersion = 0;
     public String channelID = "";
 		public java.util.Vector<String> topics = new java.util.Vector<String>();
 
@@ -39,6 +42,16 @@ public class Transport extends OPSObject
         // We need to serialize fields in the same order as C++.
         //OPSObject::serialize(archiver);
         super.serialize(archive);
+
+        if (idlVersionMask != 0) {
+            byte tmp = archive.inout("Transport_version", Transport_version);
+            if (tmp > Transport_idlVersion) {
+                throw new IOException("Transport: received version '" + tmp + "' > known version '" + Transport_idlVersion + "'");
+            }
+            Transport_version = tmp;
+        } else {
+            Transport_version = 0;
+        }
 
         //archiver->inout(std::string("channelID"), channelID);
         channelID = archive.inout("channelID", channelID);

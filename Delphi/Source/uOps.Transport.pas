@@ -2,7 +2,7 @@ unit uOps.Transport;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -29,6 +29,10 @@ uses uOps.Types,
 type
   TTransport = class(TOPSObject)
   public
+    const
+      Transport_idlVersion : Byte = 0;
+  public
+    Transport_version : Byte;
     channelID : AnsiString;
     topics : TDynAnsiStringArray;
 
@@ -45,19 +49,29 @@ type
 
 implementation
 
-uses SysUtils;
+uses SysUtils,
+     uOps.Exceptions;
 
 { TTransport }
 
 constructor TTransport.Create;
 begin
   inherited;
+  Transport_version := Transport_idlVersion;
   AppendType('Transport');
 end;
 
 procedure TTransport.Serialize(archiver: TArchiverInOut);
 begin
   inherited Serialize(archiver);
+  if FIdlVersionMask <> 0 then begin
+    archiver.inout('Transport_version', Transport_version);
+    if Transport_version > Transport_idlVersion then begin
+      raise EIdlVersionException.Create('Transport', Transport_version, Transport_idlVersion);
+    end;
+  end else begin
+    Transport_version := 0;
+  end;
   archiver.inout('channelID', channelID);
   archiver.inout('topics', topics);
 end;
@@ -74,6 +88,7 @@ var
 begin
 	inherited FillClone(obj);
   with obj as TTransport do begin
+    Transport_version := Self.Transport_version;
     channelID := Self.channelID;
     SetLength(topics, Length(Self.topics));
     for i := 0 to High(topics) do topics[i] := Self.topics[i];

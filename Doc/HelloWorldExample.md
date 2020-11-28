@@ -71,34 +71,28 @@ public class MainPublish
 
     public static void main(String[] args)
     {
-        try
-        {
+        try {
             Participant participant = Participant.getInstance("HelloDomain");
             participant.addTypeSupport(new HelloWorld.HelloWorldTypeFactory());
             HelloDataPublisher publisher = new HelloDataPublisher(participant.createTopic("HelloTopic"));
 
             HelloData data = new HelloData();
             data.helloString = "Hello World From Java!!!";
-            while(true)
-            {
+            while(true) {
                 publisher.write(data);
                 Thread.sleep(1000);
             }
 
-        } catch (InterruptedException ex)
-        {
+        } catch (InterruptedException ex) {
             Logger.getLogger(MainPublish.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (CommException ex)
-        {
+        } catch (CommException ex) {
             Logger.getLogger(MainPublish.class.getName()).log(Level.SEVERE, null, ex);
         }
-
     }
 }
 ```
 And in C++
 ```
-
 #include <ops.h>
 #include "hello/HelloDataPublisher.h"
 #include "HelloWorld/HelloWorldTypeFactory.h"
@@ -110,8 +104,7 @@ int main(int argc, const char* args[])
 	using namespace ops;
 
 	ops::Participant* participant = Participant::getInstance("HelloDomain");
-	if(!participant)
-	{
+	if (participant == nullptr) {
 		std::cout << "Create participant failed. do you have ops_config.xml on your rundirectory?" << std::endl;
 		Sleep(10000); exit(1);
 	}
@@ -128,12 +121,10 @@ int main(int argc, const char* args[])
 	data.helloString = "Hello World From C++!!";
 
 	int mainSleep = 1000;
-	while(true)
-	{
+	while (true) {
 		pub.write(&data);
 		std::cout << "Writing data"  <<  std::endl;
 		Sleep(mainSleep);
-
 	}
 
 	return 0;
@@ -159,7 +150,6 @@ import ops.Participant;
 
 public class MainSubscribe
 {
-
     public static void main(String[] args)
     {
         Participant participant = Participant.getInstance("HelloDomain");
@@ -169,7 +159,6 @@ public class MainSubscribe
 
         subscriber.addObserver(new Observer()
         {
-
             public void update(Observable sub, Object o)
             {
                 HelloData data = subscriber.getData();
@@ -179,24 +168,18 @@ public class MainSubscribe
         subscriber.start();
 
         //Just keep program alive, action takes place in update above...
-        while (true)
-        {
-            try
-            {
+        while (true) {
+            try {
                 Thread.sleep(100000);
-            } catch (InterruptedException ex)
-            {
+            } catch (InterruptedException ex) {
                 Logger.getLogger(MainSubscribe.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-
     }
 }
 ```
-
 And in C++:
 ```
-
 #include <ops.h>
 #include "hello/HelloDataSubscriber.h"
 #include "HelloWorld/HelloWorldTypeFactory.h"
@@ -211,14 +194,11 @@ public:
 	hello::HelloDataSubscriber* sub;
 
 public:
-
 	Main()
 	{
-
 		ops::Participant* participant = ops::Participant::getInstance("HelloDomain");
-		if(!participant)
-		{
-			std::cout << "Create participant failed. do you have ops_config.xml in your rundirectory?" << std::endl;
+		if (participant == nullptr) {
+			std::cout << "Create participant failed. Do you have ops_config.xml in your run directory?" << std::endl;
 			Sleep(10000); exit(1);
 		}
 
@@ -231,14 +211,13 @@ public:
 		sub->addDataListener(this);
 
 		sub->start();
-
 	}
+
 	///Override from ops::DataListener, called whenever new data arrives.
 	void onNewData(ops::DataNotifier* subscriber)
 	{
 		hello::HelloData data;
-		if(sub == subscriber)
-		{
+		if (sub == subscriber) {
 			sub->getData(&data);
 			std::cout << data.helloString << std::endl;
 		}
@@ -247,18 +226,16 @@ public:
 	{
 		delete sub;
 	}
-
 };
 
 //Application entry point
 int main(int argc, char* args)
-
+{
 	//Create an object that will listen to OPS events
 	Main m;
 
 	//Just keep program alive, action will take place in Main::onNewData()
-	while(true)
-	{
+	while (true) {
 		Sleep(10000);
 	}
 

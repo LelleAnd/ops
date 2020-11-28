@@ -12,17 +12,13 @@ sub.addFilterQoSPolicy(new FilterQoSPolicy()
    public boolean applyFilter(OPSObject o)
    {
       OPSMessage m = (OPSMessage)o;
-      if(m.getPublisherName().startsWith(fooPrefix))
-      {
+      if (m.getPublisherName().startsWith(fooPrefix)) {
          return true;
-      }
-      else
-      {
+      } else {
          return false;
       }
    }
 });
-
 ```
 
-Of course you are not restricted to use only use publisherName or key, lets say if FooData has a string field fooText, you could have used that one instead if you cast the data from m.getData() to FooData, or use what ever you like criteria for having the filter accept or reject the data. Note that applyFilter method has an OPSMessage as its parameter, you can read more about OPSMessage and OPSObject [here](OpsMessage.md).
+Of course you are not restricted to use only publisherName or key, lets say if FooData has a string field fooText, you could have used that one instead if you cast the data from m.getData() to FooData, or use what ever you like criteria for having the filter accept or reject the data. Note that applyFilter method has an OPSMessage as its parameter, you can read more about OPSMessage and OPSObject [here](OpsMessage.md).

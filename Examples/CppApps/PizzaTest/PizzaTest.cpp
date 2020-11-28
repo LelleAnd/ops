@@ -137,9 +137,16 @@ public:
 static int NumVessuvioBytes = 0;
 static std::string FillerStr("");
 int64_t sendPeriod = 1000;
+int PD_version = (int)pizza::PizzaData::PizzaData_idlVersion;
 
 void WriteUpdate(pizza::PizzaData& data, const std::string& message)
 {
+    if (PD_version < 0) {
+        data.setVersionMask(0);
+    } else {
+        data.setVersionMask(1);
+        data.PizzaData_version = (char)(PD_version & 0xFF);
+    }
     data.cheese = "Pizza from C++: " + message;
     data.tomatoSauce = "Tomato";
 #ifdef USE_MESSAGE_HEADER
@@ -524,7 +531,10 @@ public:
 	MyListener& operator =(MyListener&&) = delete;
 	MyListener& operator =(MyListener const&) = delete;
 
-    virtual void onData(ops::Subscriber* const sub, pizza::PizzaData* const data) override
+#if defined(_MSC_VER) && (_MSC_VER == 1900)
+#pragma warning( disable : 4373)
+#endif
+	virtual void onData(ops::Subscriber* const sub, pizza::PizzaData* const data) override
 	{
         // test for sending derived objects on same topic
 		if (dynamic_cast<pizza::VessuvioData*>(data) != nullptr) {
@@ -537,10 +547,16 @@ public:
 		sub->getMessage()->getSource(addr, port);
 
 		if (!beQuite) {
-			std::cout <<
-				"[Topic: " << sub->getTopic().getName() <<
-				"] (From " << addr << ":" << port <<
-				") PizzaData:: Cheese: " << data->cheese <<
+            std::cout <<
+                "[Topic: " << sub->getTopic().getName() <<
+                "] (From " << addr << ":" << port <<
+                ") PizzaData(v";
+            if (data->getVersionMask() != 0) {
+                std::cout << (int)data->PizzaData_version;
+            } else {
+                std::cout << "-";
+            }
+            std::cout << "):: Cheese: " << data->cheese <<
 				", Tomato sauce: " << data->tomatoSauce << 
 				", spareBytes: " << data->spareBytes.size() << 
 				std::endl;
@@ -560,6 +576,9 @@ public:
 #endif
 	}
 
+#if defined(_MSC_VER) && (_MSC_VER == 1900)
+#pragma warning( disable : 4373)
+#endif
 	virtual void onData(ops::Subscriber* const sub, pizza::VessuvioData* const data) override
 	{
 		// test for sending derived objects on same topic
@@ -585,6 +604,9 @@ public:
         }
     }
 
+#if defined(_MSC_VER) && (_MSC_VER == 1900)
+#pragma warning( disable : 4373)
+#endif
 	virtual void onData(ops::Subscriber* const sub, pizza::special::ExtraAllt* const data) override
 	{
 		ops::Address_T addr = "";
@@ -726,6 +748,7 @@ void menu()
 	std::cout << "\t T ms  Set deadline timeout [ms]" << std::endl;
 	std::cout << "\t V ms  Set send period [ms] [" << sendPeriod << "]" << std::endl;
 	std::cout << "\t A     Start/Stop periodical Write with set period" << std::endl;
+    std::cout << "\t M ver Set Pizzadata version [" << PD_version << "]" << std::endl;
 	std::cout << "\t W     Write data" << std::endl;
 	std::cout << "\t Q     Quite (minimize program output)" << std::endl;
 	std::cout << "\t X     Exit program" << std::endl;
@@ -1068,6 +1091,15 @@ int main(const int argc, const char* argv[])
                 {
                 pizza::special::ExtraAllt ext;
                 WriteToAllSelected(&ext);
+                }
+                break;
+
+            case 'm':
+            case 'M':
+                {
+                    num = atoi(line.c_str());
+                    if (num >= -1) { PD_version = num; }
+                    std::cout << "PB_version: " << PD_version << std::endl;
                 }
                 break;
 

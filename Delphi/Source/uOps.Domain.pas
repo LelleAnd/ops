@@ -2,7 +2,7 @@ unit uOps.Domain;
 
 (**
 *
-* Copyright (C) 2016-2019 Lennart Andersson.
+* Copyright (C) 2016-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -32,11 +32,14 @@ uses uOps.Types,
 type
 	TDomain = class(TOPSObject)
   public
+    const
+      Domain_idlVersion : Byte = 0;
     type
       TDynTopicArray = array of TTopic;
       TDynChannelArray = array of TChannel;
       TDynTransportArray = array of TTransport;
 	private
+    FDomain_version : Byte;
 		FDomainAddress : AnsiString;
 		FTimeToLive : Integer;
 		FLocalInterface : AnsiString;
@@ -77,6 +80,7 @@ type
 		// Fills the parameter obj with all values from this object.
 		procedure FillClone(var obj : TOPSObject); override;
 
+    property Domain_Version : Byte read FDomain_version write FDomain_version;
 		property DomainAddress : AnsiString read FDomainAddress;
 		property DomainID : AnsiString read FDomainID;
 		property MetaDataMcPort : Integer read FMetaDataMcPort;
@@ -100,6 +104,7 @@ uses SysUtils,
 constructor TDomain.Create;
 begin
   inherited;
+  FDomain_version := Domain_idlVersion;
 	FTimeToLive := 1;
 	FLocalInterface := '0.0.0.0';
 	FInSocketBufferSize := -1;    // Use OS default, Topics may override
@@ -171,6 +176,14 @@ end;
 procedure TDomain.Serialize(archiver : TArchiverInOut);
 begin
 	inherited Serialize(archiver);
+  if FIdlVersionMask <> 0 then begin
+    archiver.inout('Domain_version', FDomain_version);
+    if FDomain_version > Domain_idlVersion then begin
+      raise EIdlVersionException.Create('Domain', FDomain_version, Domain_idlVersion);
+    end;
+  end else begin
+    FDomain_version := 0;
+  end;
 	archiver.inout('domainID', FDomainID);
 	archiver.inout('topics', TDynSerializableArray(FTopics));
 	archiver.inout('domainAddress', FDomainAddress);
@@ -204,6 +217,7 @@ var
 begin
 	inherited FillClone(obj);
   with obj as TDomain do begin
+    FDomain_version := Self.FDomain_version;
 		FDomainAddress := Self.FDomainAddress;
 		FTimeToLive := Self.FTimeToLive;
 		FLocalInterface := Self.FLocalInterface;

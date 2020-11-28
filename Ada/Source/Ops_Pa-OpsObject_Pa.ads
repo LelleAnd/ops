@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2020 Lennart Andersson.
 --  
 -- This file is part of OPS (Open Publish Subscribe).
 --  
@@ -21,6 +21,8 @@ use Ops_Pa.ArchiverInOut_Pa;
 
 package Ops_Pa.OpsObject_Pa is
 
+  OPSObject_idlVersion : constant Byte := 0;
+  
 -- ==========================================================================
 --      C l a s s    D e c l a r a t i o n.
 -- ==========================================================================
@@ -40,7 +42,13 @@ package Ops_Pa.OpsObject_Pa is
 
   function SpareBytes( Self : OpsObject_Class ) return Byte_Arr_At;
   procedure SetSpareBytes( Self : in out OpsObject_Class; arr : Byte_Arr_At );
-  
+
+  function IdlVersionMask( Self : OpsObject_Class ) return UInt32;
+  procedure SetIdlVersionMask( Self : in out OpsObject_Class; VerMask : UInt32 );
+
+  function OPSObject_version( Self : OpsObject_Class ) return Byte;
+  procedure SetOPSObject_version( Self : in out OpsObject_Class; Version : Byte );
+
   -- Returns a newely allocated deep copy/clone of this object.
   function Clone( Self : OpsObject_Class ) return OpsObject_Class_At; 
 
@@ -48,16 +56,20 @@ package Ops_Pa.OpsObject_Pa is
   procedure FillClone( Self : OpsObject_Class; obj : OpsObject_Class_At );
 
 private
+  procedure ValidateVersion(typ : String; gotVer : Byte; maxVer : Byte);
+
 -- ==========================================================================
 --
 -- ==========================================================================
   type OpsObject_Class is new Serializable_Class with
     record
-      Key         : String_At := null;
-      TypesString : String_At := null;
+      IdlVersionMask    : UInt32 := 0;
+      OPSObject_Version : Byte := OPSObject_idlVersion;
+      Key               : String_At := null;
+      TypesString       : String_At := null;
       -- Bytes that hold unserialized data for this object.
       -- This happens if a type can not be fully understood by a participants type support.
-      SpareBytes : Byte_Arr_At := null;
+      SpareBytes        : Byte_Arr_At := null;
     end record;
 
   procedure AppendType( Self : in out OpsObject_Class; typ : String );

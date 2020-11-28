@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016-2017 Lennart Andersson.
+* Copyright (C) 2016-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -32,6 +32,12 @@ namespace ops
     void Transport::serialize(ArchiverInOut* const archiver)
     {
         OPSObject::serialize(archiver);
+        if (idlVersionMask != 0) {
+            archiver->inout("Transport_version", Transport_version);
+            ValidateVersion("Transport", Transport_version, Transport_idlVersion);
+        } else {
+            Transport_version = 0;
+        }
         archiver->inout("channelID", channelID);
         archiver->inout("topics", topics);
     }

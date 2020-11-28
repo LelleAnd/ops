@@ -11,8 +11,7 @@ This is how you create a subscriber that will only receive data on a certain key
 ```
 //Get a participant reference, this is your entry point to OPS
 Participant participant = Participant.getInstance("FooDomain");
-if(participant == null)
-{
+if (participant == null) {
     //Report error
     return;
 }
@@ -27,7 +26,6 @@ KeyFilterQoSPolicy myKeyFilter = new KeyFilterQoSPolicy("my_key")
 sub.addFilterQoS(myKeyFilter);
 
 sub.start();
-
 ```
 
 No matter whether you use polling or a listener, you will only be able to get data from the subscriber with the key "my\_key". The key can be changed at any time though.
@@ -43,8 +41,7 @@ On the publisher side, all that is required is to set the key on the data to be 
 ```
 //Get a participant reference, this is your entry point to OPS
 Participant* participant = Participant::getInstance("FooDomain");
-if(participant == NULL)
-{
+if (participant == nullptr) {
     //Report error
     return;
 }
@@ -62,5 +59,4 @@ data.setKey("my_key");
 
 //Publish the data
 pub.write(&data);
-
 ```

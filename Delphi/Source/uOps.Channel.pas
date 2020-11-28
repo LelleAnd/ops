@@ -2,7 +2,7 @@ unit uOps.Channel;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -30,11 +30,13 @@ type
   TChannel = class(TOPSObject)
   public
     const
+      Channel_idlVersion : Byte = 0;
       LINKTYPE_MC = 'multicast';
       LINKTYPE_TCP = 'tcp';
       LINKTYPE_UDP = 'udp';
 
   public
+    Channel_version : Byte;
     channelID : AnsiString;
     linktype : AnsiString;
     localInterface : AnsiString;     // If multicast, this specifies interface to use
@@ -67,6 +69,7 @@ uses SysUtils,
 constructor TChannel.Create;
 begin
   inherited;
+  Channel_version := Channel_idlVersion;
   timeToLive := -1;
   outSocketBufferSize := -1;
   inSocketBufferSize := -1;
@@ -76,6 +79,14 @@ end;
 procedure TChannel.Serialize(archiver: TArchiverInOut);
 begin
   inherited Serialize(archiver);
+  if FIdlVersionMask <> 0 then begin
+    archiver.inout('Channel_version', Channel_version);
+    if Channel_version > Channel_idlVersion then begin
+      raise EIdlVersionException.Create('Channel', Channel_version, Channel_idlVersion);
+    end;
+  end else begin
+    Channel_version := 0;
+  end;
   archiver.inout('name', channelID);
   archiver.inout('linktype', linktype);
   archiver.inout('localInterface', localInterface);
@@ -104,6 +115,7 @@ procedure TChannel.FillClone(var obj: TOPSObject);
 begin
 	inherited FillClone(obj);
   with obj as TChannel do begin
+    Channel_version := Self.Channel_version;
     channelID := Self.channelID;
     linktype := Self.linktype;
 		LocalInterface := Self.LocalInterface;

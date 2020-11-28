@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016-2019 Lennart Andersson.
+* Copyright (C) 2016-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -30,6 +30,9 @@ namespace ops
     class OPS_EXPORT Transport : public OPSObject
     {
     public:
+        char Transport_version = Transport_idlVersion;
+
+        static const char Transport_idlVersion = 0;
         ChannelId_T channelID;
         std::vector<ObjectName_T> topics;
 

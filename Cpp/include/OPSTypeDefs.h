@@ -1,6 +1,6 @@
 /**
  * Copyright (C) 2006-2010 Anton Gravestam.
- * Copyright (C) 2018-2019 Lennart Andersson.
+ * Copyright (C) 2018-2020 Lennart Andersson.
 *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -181,6 +181,10 @@ namespace ops {
 
 	constexpr uint64_t fixed_string_length_check_value = 0;
 #endif
+
+    // Other type helpers
+    typedef uint32_t VersionMask_T;
+    constexpr VersionMask_T MaxVersionMask = 0x7FFFFFFF;
 
 // -----------------------------------------------------------------------------
 // OPS uses Little Endian data serialization to improve the performance since

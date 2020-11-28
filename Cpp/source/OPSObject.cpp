@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2019-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -29,8 +29,7 @@ namespace ops
 	std::atomic<uint32_t> OPSObject::_NumOpsObjects{ 0 };
 #endif
 
-    OPSObject::OPSObject() :
-		key("")
+    OPSObject::OPSObject()
     {
 		OPS_OBJ_TRACE("OPSObject()\n");
 #if defined(DEBUG_OPSOBJECT_COUNTER)
@@ -42,8 +41,10 @@ namespace ops
     OPSObject::OPSObject(const OPSObject& other)
     {
 		OPS_OBJ_TRACE("OPSObject(const OPSObject& other)\n");
+        idlVersionMask = other.idlVersionMask;
 		key = other.key;
         typesString = other.typesString;
+        OPSObject_version = other.OPSObject_version;
         spareBytes = other.spareBytes;
 #if defined(DEBUG_OPSOBJECT_COUNTER)
         _NumOpsObjects++;
@@ -55,9 +56,11 @@ namespace ops
 	{
 		OPS_OBJ_TRACE("OPSObject(OPSObject&& other)\n");
 		// Take other's resources
-		key = std::move(other.key);
+        idlVersionMask = other.idlVersionMask;
+        key = std::move(other.key);
 		typesString = std::move(other.typesString);
-		spareBytes = std::move(other.spareBytes);
+        OPSObject_version = other.OPSObject_version;
+        spareBytes = std::move(other.spareBytes);
 #if defined(DEBUG_OPSOBJECT_COUNTER)
 		_NumOpsObjects++;
 #endif
@@ -80,9 +83,11 @@ namespace ops
 
 	void OPSObject::fillClone(OPSObject* obj) const
 	{
-		obj->key = key;
+        obj->idlVersionMask = idlVersionMask;
+        obj->key = key;
 		obj->typesString = typesString;
-		// Copy spareBytes vector
+        obj->OPSObject_version = OPSObject_version;
+        // Copy spareBytes vector
 		const size_t len = spareBytes.size();
 		obj->spareBytes.reserve(len);
 		obj->spareBytes.resize(len, 0);
@@ -106,6 +111,12 @@ namespace ops
 
 	void OPSObject::serialize(ArchiverInOut* archive)
 	{
-		archive->inout("key", key);
+        if (idlVersionMask != 0) {
+            archive->inout("OPSObject_version", OPSObject_version);
+            ValidateVersion("OPSObject", OPSObject_version, OPSObject_idlVersion);
+        } else {
+            OPSObject_version = 0;
+        }
+        archive->inout("key", key);
 	}
 }

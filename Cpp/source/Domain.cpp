@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2019-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -95,7 +95,13 @@ ObjectName_T Domain::getDomainID() const noexcept
 void Domain::serialize(ArchiverInOut* const archiver)
 {
 	OPSObject::serialize(archiver);
-	archiver->inout("domainID", domainID);
+    if (idlVersionMask != 0) {
+        archiver->inout("Domain_version", Domain_version);
+        ValidateVersion("Domain", Domain_version, Domain_idlVersion);
+    } else {
+        Domain_version = 0;
+    }
+    archiver->inout("domainID", domainID);
 	archiver->inout<Topic>("topics", topics);
 	archiver->inout("domainAddress", domainAddress);
 	archiver->inout("localInterface", localInterface);

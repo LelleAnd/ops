@@ -17,7 +17,7 @@ Open the solution/project for your version of Visual Studio in directory
 
 Please note that since OPS version 4.2.0 (~feb 2019), support has been dropped for VS versions earlier than VS2015 (due to C++11 requirements).
 
-Check that the include and library references to boost corresponds with your installation (see Visual Studio project properties).
+Check that the include and library references to the Boost library corresponds with your installation (see Visual Studio project properties).
 
 Build the solution for all configurations (both x86 and x64):
 

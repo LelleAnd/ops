@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2019 Lennart Andersson.
+-- Copyright (C) 2016-2020 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -37,6 +37,12 @@ package body Ops_Pa.OpsObject_Pa.Channel_Pa is
   overriding procedure Serialize( Self : in out Channel_Class; archiver : ArchiverInOut_Class_At) is
   begin
     Serialize( OpsObject_Class(Self), archiver );
+    if Self.IdlVersionMask /= 0 then
+      archiver.inout("Channel_version", Self.Channel_Version);
+      ValidateVersion("Channel", Self.Channel_version, Channel_idlVersion);
+    else
+      Self.Channel_Version := 0;
+    end if;
     archiver.Inout("name", Self.ChannelID);
     archiver.Inout("linktype", Self.Linktype);
     archiver.Inout("localInterface", Self.LocalInterface);
@@ -78,6 +84,7 @@ package body Ops_Pa.OpsObject_Pa.Channel_Pa is
   begin
     FillClone( OpsObject_Class(Self), obj );
     if obj.all in Channel_Class'Class then
+      Channel_Class(obj.all).Channel_version := Self.Channel_version;
       Replace(Channel_Class(obj.all).ChannelID, Self.ChannelID);
       Replace(Channel_Class(obj.all).Linktype, Self.Linktype);
       Replace(Channel_Class(obj.all).LocalInterface, Self.LocalInterface);

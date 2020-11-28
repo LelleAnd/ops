@@ -39,7 +39,7 @@
 
 #endif
 
-const char c_program_version[] = "OPSListener Version 2020-03-26";
+const char c_program_version[] = "OPSListener Version 2020-09-27";
 
 void showDescription()
 {
@@ -52,55 +52,57 @@ void showDescription()
 
 void ShowUsage()
 {
-	std::cout << std::endl << "Usage:" << std::endl;
-	std::cout << "  OPSListener [-v] [-?] [-c ops_cfg_file [-c ops_cfg_file [...]]]" << std::endl;
+    std::cout << std::endl << "Usage:" << std::endl;
+    std::cout << "  OPSListener [-v] [-?] [-c ops_cfg_file [-c ops_cfg_file [...]]]" << std::endl;
     std::cout << "              [-j json_file [-j json_file [...]]]" << std::endl;
-	std::cout << "              [-t] [-pA | -p<option_chars>] [-d [num]]" << std::endl;
-	std::cout << "              [-a arg_file [-a arg_file [...]]]" << std::endl;
-	std::cout << "              [-GA | -G domain [-G domain [...]]]" << std::endl;
-	std::cout << "              [-IA | -I domain [-I domain [...]] [-O]]" << std::endl;
-	std::cout << "              [-SA | -S domain [-S domain [...]]]" << std::endl;
-	std::cout << "              [-D default_domain] [-C [-E]] [-u] [-n] Topic [Topic ...]" << std::endl;
-	std::cout << std::endl;
-	std::cout << "    -?                 Shows a short description" << std::endl;
-	std::cout << "    -a arg_file        File with command line arguments" << std::endl;
-	std::cout << "    -c ops_config_file Specifies an OPS configuration file to use" << std::endl;
-	std::cout << "                       If none given, the default 'ops_config.xml' is used" << std::endl;
-	std::cout << "    -C                 Do a publication ID check" << std::endl;
+    std::cout << "              [-t] [-pA | -p<option_chars>] [-d [num]]" << std::endl;
+    std::cout << "              [-a arg_file [-a arg_file [...]]]" << std::endl;
+    std::cout << "              [-GA | -G domain [-G domain [...]]]" << std::endl;
+    std::cout << "              [-IA | -I domain [-I domain [...]] [-O]]" << std::endl;
+    std::cout << "              [-SA | -S domain [-S domain [...]]]" << std::endl;
+    std::cout << "              [-D default_domain] [-C [-E]] [-u] [-n] Topic [Topic ...]" << std::endl;
+    std::cout << std::endl;
+    std::cout << "    -?                 Shows a short description" << std::endl;
+    std::cout << "    -a arg_file        File with command line arguments" << std::endl;
+    std::cout << "    -c ops_config_file Specifies an OPS configuration file to use" << std::endl;
+    std::cout << "                       If none given, the default 'ops_config.xml' is used" << std::endl;
+    std::cout << "    -C                 Do a publication ID check" << std::endl;
     std::cout << "    -d [num]           Dump message content in hex (the part derived from OPSObject)" << std::endl;
-	std::cout << "    -D default_domain  Default domain name to use for topics given without domain name" << std::endl;
-	std::cout << "                       If none given, the default 'SDSDomain' is used" << std::endl;
-	std::cout << "                       A new default can be given between topics" << std::endl;
-	std::cout << "    -E                 If -C given, minimize normal output" << std::endl;
-	std::cout << "    -G domain          Subscribe to Debug Request/Response from given domain" << std::endl;
-	std::cout << "    -GA                Subscribe to Debug Request/Response from all domains in given configuration files" << std::endl;
-	std::cout << "    -I domain          Subscribe to Participant Info Data from given domain" << std::endl;
-	std::cout << "    -IA                Subscribe to Participant Info Data from all domains in given configuration files" << std::endl;
+    std::cout << "    -D default_domain  Default domain name to use for topics given without domain name" << std::endl;
+    std::cout << "                       If none given, the default 'SDSDomain' is used" << std::endl;
+    std::cout << "                       A new default can be given between topics" << std::endl;
+    std::cout << "    -E                 If -C given, minimize normal output" << std::endl;
+    std::cout << "    -G domain          Subscribe to Debug Request/Response from given domain" << std::endl;
+    std::cout << "    -GA                Subscribe to Debug Request/Response from all domains in given configuration files" << std::endl;
+    std::cout << "    -I domain          Subscribe to Participant Info Data from given domain" << std::endl;
+    std::cout << "    -IA                Subscribe to Participant Info Data from all domains in given configuration files" << std::endl;
     std::cout << "    -j json_file       Specifies a JSON-file with OPS Message descriptions (generated from opsc)" << std::endl;
-	std::cout << "    -n                 Don't subscribe to topics following" << std::endl;
-	std::cout << "    -O                 if -I or -IA given, only show arriving and timed out participants" << std::endl;
-	std::cout << "    -p<option_chars>   Defines for received messages, which fields to print and in which order" << std::endl;
-	std::cout << "                 n       Publisher Name" << std::endl;
-	std::cout << "                 i       Publication Id" << std::endl;
-	std::cout << "                 T       Topic Name" << std::endl;
-	std::cout << "                 y       Type" << std::endl;
-	std::cout << "                 s       Sparebytes Size" << std::endl;
-	std::cout << "                 k       Key" << std::endl;
-	std::cout << "                 S       Source IP::Port" << std::endl;
-	std::cout << "    -pA                Short for all option chars in the program default order" << std::endl;
-	std::cout << "    -S domain          Subscribe to all topics in given domain" << std::endl;
-	std::cout << "    -SA                Subscribe to all topics in all domains in given configuration files" << std::endl;
-	std::cout << "    -t                 Print receive time for each message" << std::endl;
-	std::cout << "    -u                 Force subscription to UDP static route topics (may interfere with real subscriber)" << std::endl;
-	std::cout << "    -v                 Verbose output during parsing of command line arguments" << std::endl;
-	std::cout << std::endl;
-	std::cout << std::endl;
+    std::cout << "    -n                 Don't subscribe to topics following" << std::endl;
+    std::cout << "    -O                 if -I or -IA given, only show arriving and timed out participants" << std::endl;
+    std::cout << "    -p<option_chars>   Defines for received messages, which fields to print and in which order" << std::endl;
+    std::cout << "                 n       Publisher Name" << std::endl;
+    std::cout << "                 i       Publication Id" << std::endl;
+    std::cout << "                 T       Topic Name" << std::endl;
+    std::cout << "                 y       Type" << std::endl;
+    std::cout << "                 s       Sparebytes Size" << std::endl;
+    std::cout << "                 k       Key" << std::endl;
+    std::cout << "                 S       Source IP::Port" << std::endl;
+    std::cout << "                 v       Version mask OPSMessage" << std::endl;
+    std::cout << "                 V       Version mask contained OPSObject" << std::endl;
+    std::cout << "    -pA                Short for all option chars in the program default order" << std::endl;
+    std::cout << "    -S domain          Subscribe to all topics in given domain" << std::endl;
+    std::cout << "    -SA                Subscribe to all topics in all domains in given configuration files" << std::endl;
+    std::cout << "    -t                 Print receive time for each message" << std::endl;
+    std::cout << "    -u                 Force subscription to UDP static route topics (may interfere with real subscriber)" << std::endl;
+    std::cout << "    -v                 Verbose output during parsing of command line arguments" << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
 }
 
 class CArguments
 {
 public:
-	static std::string getValidFormatChars() { return "TknisyS"; }
+	static std::string getValidFormatChars() { return "TknisySvV"; }
 	static ops::ObjectName_T getDefaultDomain() { return "SDSDomain"; }
 
 	std::vector<ops::FileName_T> cfgFiles;
@@ -451,8 +453,7 @@ public:
 			// Set default format
 			if ((topicNames.size() > 1) || (subscribeDomains.size() > 0) || allTopics) {
 				printFormat = "Tisky";
-			}
-			else {
+			} else {
 				printFormat = "isky";
 			}
 		}
@@ -575,6 +576,14 @@ std::string source(const ops::OPSMessage* const mess, const ops::OPSObject* cons
 	myPort << srcPort << std::ends;
 	return "Source: " + std::string(srcIP.c_str()) + "::" + myPort.str();
 }
+std::string messVersion(const ops::OPSMessage* const mess, const ops::OPSObject* const opsData)
+{
+    UNUSED(opsData);
+    if (mess == nullptr) { return ""; }
+    std::string myVer = "0";
+    if (mess->getVersionMask() != 0) { myVer = "1"; }
+    return "messVer: " + myVer;
+}
 
 // ---------------------------------------------------------------------------------------
 std::string spareBytes(const ops::OPSMessage* const mess, const ops::OPSObject* const opsData)
@@ -597,6 +606,14 @@ std::string typeString(const ops::OPSMessage* const mess, const ops::OPSObject* 
 	UNUSED(mess);
 	if (opsData == nullptr) { return ""; }
 	return "Type: " + std::string(opsData->getTypeString().c_str());
+}
+std::string objectVersion(const ops::OPSMessage* const mess, const ops::OPSObject* const opsData)
+{
+    UNUSED(mess);
+    if (opsData == nullptr) { return ""; }
+    std::string myVer = "0";
+    if (opsData->getVersionMask() != 0) { myVer = "1"; }
+    return "objVer: " + myVer;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -687,6 +704,8 @@ public:
 		formatMap['s'] = spareBytes;
 		formatMap['y'] = typeString;
 		formatMap['S'] = source;
+        formatMap['v'] = messVersion;
+        formatMap['V'] = objectVersion;
 
 		ErrorWriter* const errorWriter = new ErrorWriter(std::cout);
 
@@ -957,6 +976,9 @@ public:
 	Main& operator =(Main&& other) = delete;
 	//
 	///Override from ops::DataListener, called whenever new data arrives.
+#if defined(_MSC_VER) && (_MSC_VER == 1900)
+#pragma warning( disable : 4373)
+#endif
 	virtual void onNewData(ops::DataNotifier* const subscriber) override
 	{
 		ops::Subscriber* const sub = dynamic_cast<ops::Subscriber*>(subscriber);
@@ -1277,13 +1299,19 @@ public:
 				}
                 // Dump OPSData->spareBytes content in hex
                 dumpHex(&opsData->spareBytes[0], opsData->spareBytes.size());
+                // Dump OPSData->spareBytes content in clear text
                 if (MsgDump.Any()) {
                     std::string tname = opsData->getTypeString().c_str();
-                    const auto pos = tname.find(' ');
-                    if (pos != tname.npos) {
-                        tname = tname.substr(0, pos);
+                    // Skip ev leading spaces
+                    std::string::size_type const idx = tname.find_first_not_of(' ');
+                    if (idx != std::string::npos) {
+                        if (idx > 0) { tname.erase(0, idx); }
+                        const auto pos = tname.find(' ');
+                        if (pos != tname.npos) {
+                            tname = tname.substr(0, pos);
+                        }
+                        MsgDump.Dump(tname, opsData->getVersionMask(), &opsData->spareBytes[0]);
                     }
-                    MsgDump.Dump(tname, &opsData->spareBytes[0]);
                 }
                 
                 if (doPubIdCheck) {

@@ -1,6 +1,6 @@
 /**
  *
- * Copyright (C) 2016 Lennart Andersson.
+ * Copyright (C) 2016-2020 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -24,6 +24,9 @@ import java.io.IOException;
 
 public class Channel extends OPSObject
 {
+    public byte Channel_version = Channel_idlVersion;
+
+    public static final byte Channel_idlVersion = 0;
     public String channelID = "";
     public String linktype = "";
     public String localInterface = "";     // If multicast, this specifies interface to use
@@ -49,6 +52,16 @@ public class Channel extends OPSObject
         // We need to serialize fields in the same order as C++.
         //OPSObject::serialize(archiver);
         super.serialize(archive);
+
+        if (idlVersionMask != 0) {
+            byte tmp = archive.inout("Channel_version", Channel_version);
+            if (tmp > Channel_idlVersion) {
+                throw new IOException("Channel: received version '" + tmp + "' > known version '" + Channel_idlVersion + "'");
+            }
+            Channel_version = tmp;
+        } else {
+            Channel_version = 0;
+        }
 
         //archiver->inout(std::string("name"), channelID);
         //archiver->inout(std::string("linktype"), linktype);

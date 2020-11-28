@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2019 Lennart Andersson.
+-- Copyright (C) 2016-2020 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -15,6 +15,9 @@
 --
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
+
+with Ops_Pa.OpsObject_Pa;
+use  Ops_Pa.OpsObject_Pa;
 
 package body Ops_Pa.ArchiverInOut_Pa.ArchiverOut_Pa is
 
@@ -81,25 +84,25 @@ package body Ops_Pa.ArchiverInOut_Pa.ArchiverOut_Pa is
     if value = null then
       raise Null_Object_Not_Allowed;
     end if;
-    if Self.OptNonVirt then
-      Self.FBuf.WriteString( "" );
+    if OpsObject_Class_At(value).IdlVersionMask /= 0 then
+      if Self.OptNonVirt then
+        Self.FBuf.WriteString( "0 " );
+      else
+        Self.FBuf.WriteString( "0 " & value.TypesString );
+      end if;
     else
-      Self.FBuf.WriteString( value.TypesString );
+      if Self.OptNonVirt then
+        Self.FBuf.WriteString( "" );
+      else
+        Self.FBuf.WriteString( value.TypesString );
+      end if;
     end if;
     value.all.Serialize( ArchiverInOut_Class_At(Self.SelfAt) );
   end;
 
   procedure inout( Self : in out ArchiverOut_Class; name : String; value : in out Serializable_Class_At; element : Integer) is
   begin
-    if value = null then
-      raise Null_Object_Not_Allowed;
-    end if;
-    if Self.OptNonVirt then
-      Self.FBuf.WriteString( "" );
-    else
-      Self.FBuf.WriteString( value.TypesString );
-    end if;
-    value.all.Serialize( ArchiverInOut_Class_At(Self.SelfAt) );
+    inout( Self, name, value );
   end;
 
   function inout2( Self : in out ArchiverOut_Class; name : String; value : in out Serializable_Class_At) return Serializable_Class_At is
@@ -107,19 +110,18 @@ package body Ops_Pa.ArchiverInOut_Pa.ArchiverOut_Pa is
     if value = null then
       raise Null_Object_Not_Allowed;
     end if;
-    Self.FBuf.WriteString( value.TypesString );
+    if OpsObject_Class_At(value).IdlVersionMask /= 0 then
+      Self.FBuf.WriteString( "0 " & value.TypesString );
+    else
+      Self.FBuf.WriteString( value.TypesString );
+    end if;
     value.all.Serialize( ArchiverInOut_Class_At(Self.SelfAt) );
     return value;
   end;
 
   function inout( Self : in out ArchiverOut_Class; name : String; value : in out Serializable_Class_At; element : Integer) return Serializable_Class_At is
   begin
-    if value = null then
-      raise Null_Object_Not_Allowed;
-    end if;
-    Self.FBuf.WriteString( value.TypesString );
-    value.all.Serialize( ArchiverInOut_Class_At(Self.SelfAt) );
-    return value;
+    return inout2( Self, name, value );
   end;
 
   procedure inout( Self : in out ArchiverOut_Class; name : String; value : in out Boolean_Arr_At) is

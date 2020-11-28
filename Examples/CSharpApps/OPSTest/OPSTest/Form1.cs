@@ -133,6 +133,7 @@ namespace OPSTest
 
             }
             checkedListBoxTopics.SetItemChecked(0, true);
+            textBoxPizzaDataVersion.Text = "" + pizza.PizzaData.PizzaData_idlVersion;
         }
 
         private void Form_TestOps_FormClosed(object sender, FormClosedEventArgs e)
@@ -360,6 +361,18 @@ namespace OPSTest
                 int idx2 = info.Index;
                 if (info.TypeName == PizzaData.GetTypeName())
                 {
+                    int version = 0;
+                    int.TryParse(textBoxPizzaDataVersion.Text, out version);
+                    if (version < 0)
+                    {
+                        Pizza[idx2].Data.IdlVersionMask = 0;
+                        Pizza[idx2].Data.PizzaData_version = 0;
+                    }
+                    else
+                    {
+                        Pizza[idx2].Data.IdlVersionMask = 1;
+                        Pizza[idx2].Data.PizzaData_version = (byte)version;
+                    }
                     Pizza[idx2].Data.cheese = "From C# " + Convert.ToString(myMessageCounter);
                     Pizza[idx2].Data.tomatoSauce = "tomatosauce " + Convert.ToString(myMessageCounter);
                     // Setup spareBytes test
@@ -536,7 +549,7 @@ namespace OPSTest
         {
             OPSMessage mess = sender.GetMessage();
             
-            Log("[Topic: " + sender.GetTopic().GetName() + "] Pizza:: Cheese: " + data.cheese +
+            Log("[Topic: " + sender.GetTopic().GetName() + "] Pizza(v" + data.PizzaData_version + "):: Cheese: " + data.cheese +
                 ",  Tomato sauce: " + data.tomatoSauce + ", SpareBytes: " + data.spareBytes.Length +
                 ", From " + mess.GetSourceIP() + ":" + mess.GetSourcePort());
 

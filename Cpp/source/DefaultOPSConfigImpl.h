@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2019 Lennart Andersson.
+ * Copyright (C) 2019-2020 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -30,10 +30,13 @@
 
 namespace ops
 {
-
     class DefaultOPSConfigImpl : public OPSConfig
     {
     public:
+        char DefaultOPSConfigImpl_version = DefaultOPSConfigImpl_idlVersion;
+
+        static const char DefaultOPSConfigImpl_idlVersion = 0;
+
         DefaultOPSConfigImpl()
         {
             appendType(TypeId_T("DefaultOPSConfigImpl"));
@@ -42,6 +45,12 @@ namespace ops
         void serialize(ArchiverInOut* archiver) override
         {
             OPSConfig::serialize(archiver);
+            if (idlVersionMask != 0) {
+                archiver->inout("DefaultOPSConfigImpl_version", DefaultOPSConfigImpl_version);
+                ValidateVersion("DefaultOPSConfigImpl", DefaultOPSConfigImpl_version, DefaultOPSConfigImpl_idlVersion);
+            } else {
+                DefaultOPSConfigImpl_version = 0;
+            }
         }
 
     };

@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2020 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -22,6 +22,8 @@ with Ops_Pa.ArchiverInOut_Pa;
 use  Ops_Pa.ArchiverInOut_Pa;
 
 package Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
+
+  OPSMessage_idlVersion : constant Byte := 0;
 
 -- ==========================================================================
 --      C l a s s    D e c l a r a t i o n.
@@ -75,6 +77,9 @@ package Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
   function Data( Self : OPSMessage_Class ) return OPSObject_Class_At;
   procedure SetData( Self : in out OPSMessage_Class; value : OPSObject_Class_At );
 
+  function OPSMessage_version( Self : OpsMessage_Class ) return Byte;
+  procedure SetOPSMessage_version( Self : in out OpsMessage_Class; Version : Byte );
+
 private
 -- ==========================================================================
 --
@@ -84,6 +89,7 @@ private
       SelfAt : OPSMessage_Class_At := null;
 
       -- Serialized members
+      OPSMessage_version : Byte := OPSMessage_idlVersion;
       messageType : Byte := 0;
       publisherPriority : Byte := 0;
       publicationID : Int64 := 0;

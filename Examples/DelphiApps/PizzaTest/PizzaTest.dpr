@@ -67,7 +67,8 @@ uses
   uOps.Channel in '..\..\..\Delphi\Source\uOps.Channel.pas',
   uOps.Transport in '..\..\..\Delphi\Source\uOps.Transport.pas',
   sds.MessageHeaderData in '..\..\OPSIdls\PizzaProject\Generated\Delphi\sds\sds.MessageHeaderData.pas',
-  uOps.NetworkSupport in '..\..\..\Delphi\Source\uOps.NetworkSupport.pas';
+  uOps.NetworkSupport in '..\..\..\Delphi\Source\uOps.NetworkSupport.pas',
+  pizza.special.Parmesan in '..\..\OPSIdls\PizzaProject\Generated\Delphi\pizza\special\pizza.special.Parmesan.pas';
 
 {$R *.res}
 

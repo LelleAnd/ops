@@ -17,6 +17,8 @@ class __className :
 public:
   	static ops::TypeId_T getTypeName(){return ops::TypeId_T("__packageName.__className");}
 
+  	char __className_version = __className_idlVersion;
+
 __declarations
     ///Default constructor.
     __className()

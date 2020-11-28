@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2019-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -28,7 +28,7 @@
 
 namespace ops
 {
-	class Participant;
+    class Participant;
 
 	class OPS_EXPORT Topic : public OPSObject
     {
@@ -37,6 +37,10 @@ namespace ops
 		friend class Participant;
     
 	public:
+        char Topic_version = Topic_idlVersion;
+
+        static const char Topic_idlVersion = 0;
+
         Topic(ObjectName_T namee, int portt, TypeId_T typeIDd, Address_T domainAddresss);
 		Topic();
 

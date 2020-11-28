@@ -1,14 +1,21 @@
 
-@rem define build directories
-@set BOOTSTRAP_DIR=%~dp0\build.bootstrap-x64
-@set DBG_DIR=%~dp0\build.debug-x64
-@set OPT_DIR=%~dp0\build.opt-x64
-@set INSTALL_PREFIX=%~dp0\deploy-x64
+@SETLOCAL
 
-rmdir /S /Q %BOOTSTRAP_DIR%
-rmdir /S /Q %DBG_DIR%
-rmdir /S /Q %OPT_DIR%
-rmdir /S /Q %INSTALL_PREFIX%
+@rem define build directories if not already defined
+@IF NOT DEFINED OPS_BUILD_BOOTSTRAP_DIR set OPS_BUILD_BOOTSTRAP_DIR=%~dp0\build.bootstrap-x64
+@IF NOT DEFINED OPS_BUILD_DBG_DIR set OPS_BUILD_DBG_DIR=%~dp0\build.debug-x64
+@IF NOT DEFINED OPS_BUILD_OPT_DIR set OPS_BUILD_OPT_DIR=%~dp0\build.opt-x64
+@IF NOT DEFINED OPS_INSTALL_PREFIX set OPS_INSTALL_PREFIX=%~dp0\deploy-x64
+
+@echo Using OPS_BUILD_BOOTSTRAP_DIR = %OPS_BUILD_BOOTSTRAP_DIR%
+@echo Using OPS_BUILD_DBG_DIR = %OPS_BUILD_DBG_DIR%
+@echo Using OPS_BUILD_OPT_DIR = %OPS_BUILD_OPT_DIR%
+@echo Using OPS_INSTALL_PREFIX = %OPS_INSTALL_PREFIX%
+
+rmdir /S /Q %OPS_BUILD_BOOTSTRAP_DIR%
+rmdir /S /Q %OPS_BUILD_DBG_DIR%
+rmdir /S /Q %OPS_BUILD_OPT_DIR%
+rmdir /S /Q %OPS_INSTALL_PREFIX%
 
 rmdir /S /Q %~dp0\Common\idl\Generated
 rmdir /S /Q %~dp0\Tools\OPSBridge\idl\Generated

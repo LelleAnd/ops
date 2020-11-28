@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2019 Lennart Andersson.
+ * Copyright (C) 2019-2020 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -29,6 +29,9 @@ import java.io.IOException;
  */
 public class Topic<T> extends OPSObject
 {
+    public byte Topic_version = Topic_idlVersion;
+
+    public static final byte Topic_idlVersion = 0;
 
     public static final String TRANSPORT_MC = "multicast";
     public static final String TRANSPORT_TCP = "tcp";
@@ -171,6 +174,15 @@ public class Topic<T> extends OPSObject
     public void serialize(ArchiverInOut archive) throws IOException
     {
         super.serialize(archive);
+        if (idlVersionMask != 0) {
+            byte tmp = archive.inout("Topic_version", Topic_version);
+            if (tmp > Topic_idlVersion) {
+                throw new IOException("Topic: received version '" + tmp + "' > known version '" + Topic_idlVersion + "'");
+            }
+            Topic_version = tmp;
+        } else {
+            Topic_version = 0;
+        }
         name = archive.inout("name", name);
         typeID = archive.inout("dataType", typeID);
         port = archive.inout("port", port);

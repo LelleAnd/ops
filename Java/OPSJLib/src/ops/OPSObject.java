@@ -1,6 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -32,14 +33,16 @@ import java.util.Vector;
  */
 public class OPSObject implements Serializable
 {
+    public int idlVersionMask = 0;
+    public byte OPSObject_version = OPSObject_idlVersion;
+
+    public static final byte OPSObject_idlVersion = 0;
     protected String key = "";
     protected String typesString = "";
     public byte[] spareBytes = new byte[0];
 
-
     public OPSObject()
     {
-
     }
 
     protected void appendType(String type)
@@ -72,6 +75,8 @@ public class OPSObject implements Serializable
 
     public void fillClone(OPSObject cloneResult)
     {
+        cloneResult.idlVersionMask = this.idlVersionMask;
+        cloneResult.OPSObject_version = this.OPSObject_version;
         cloneResult.typesString = this.typesString;
         cloneResult.key = this.key;
         cloneResult.spareBytes = Arrays.copyOf(this.spareBytes, this.spareBytes.length);
@@ -79,6 +84,15 @@ public class OPSObject implements Serializable
 
     public void serialize(ArchiverInOut archive) throws IOException
     {
+        if (idlVersionMask != 0) {
+            byte tmp = archive.inout("OPSObject_version", OPSObject_version);
+            if (tmp > OPSObject_idlVersion) {
+                throw new IOException("OPSObject: received version '" + tmp + "' > known version '" + OPSObject_idlVersion + "'");
+            }
+            OPSObject_version = tmp;
+        } else {
+            OPSObject_version = 0;
+        }
         key = archive.inout("key", key);
     }
 
@@ -87,13 +101,5 @@ public class OPSObject implements Serializable
     {
         return getClass().getName();
     }
-
-
-
-
-
-
-
-
 
 }

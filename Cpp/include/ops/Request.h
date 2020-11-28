@@ -1,7 +1,7 @@
 /**
-* 
+*
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2019-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -29,11 +29,20 @@ namespace ops
 	class Request : public OPSObject
 	{
 	public:
-		std::string requestId;
+        char Request_version = Request_idlVersion;
+
+        static const char Request_idlVersion = 0;
+        std::string requestId;
 
 		void serialize(ops::ArchiverInOut* archiver) override
 		{
 			OPSObject::serialize(archiver);
+			if (idlVersionMask != 0) {
+				archiver->inout("Request_version", Request_version);
+                ValidateVersion("Request", Request_version, Request_idlVersion);
+            } else {
+				Request_version = 0;
+			}
 			archiver->inout("requestId", requestId);
 		}
 

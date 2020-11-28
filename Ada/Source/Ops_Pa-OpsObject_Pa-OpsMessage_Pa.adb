@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2019 Lennart Andersson.
+-- Copyright (C) 2016-2020 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -37,6 +37,12 @@ package body Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
   overriding procedure Serialize( Self : in out OPSMessage_Class; archiver : ArchiverInOut_Class_At) is
   begin
     Serialize( OpsObject_Class(Self), archiver );
+    if Self.IdlVersionMask /= 0 then
+      archiver.inout("OPSMessage_version", Self.OPSMessage_Version);
+      ValidateVersion("OPSMessage", Self.OPSMessage_version, OPSMessage_idlVersion);
+    else
+      Self.OPSMessage_Version := 0;
+    end if;
     archiver.Inout("messageType", Self.messageType);
     archiver.Inout("publisherPriority", Self.publisherPriority);
     archiver.Inout("publicationID", Self.publicationID);
@@ -134,6 +140,16 @@ package body Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
     Self.data := value;
   end;
 
+  function OPSMessage_version( Self : OpsMessage_Class ) return Byte is
+  begin
+    return Self.OPSMessage_version;
+  end;
+
+  procedure SetOPSMessage_version( Self : in out OpsMessage_Class; Version : Byte ) is
+  begin
+    Self.OPSMessage_version := Version;
+  end;
+
   -- Returns a newely allocated deep copy/clone of Self.
   overriding function Clone( Self : OPSMessage_Class ) return OpsObject_Class_At is
     Result : OPSMessage_Class_At := null;
@@ -148,6 +164,7 @@ package body Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
   begin
     FillClone( OpsObject_Class(Self), obj );
     if obj.all in OPSMessage_Class'Class then
+      OPSMessage_Class(obj.all).OPSMessage_version := Self.OPSMessage_version;
       OPSMessage_Class(obj.all).messageType := Self.messageType;
       OPSMessage_Class(obj.all).publisherPriority := Self.publisherPriority;
       OPSMessage_Class(obj.all).publicationID := Self.publicationID;

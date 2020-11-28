@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2019 Lennart Andersson.
+-- Copyright (C) 2016-2020 Lennart Andersson.
 --  
 -- This file is part of OPS (Open Publish Subscribe).
 --  
@@ -16,7 +16,24 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
+with Ops_Pa.Error_Pa;
+use Ops_Pa.Error_Pa;
+
 package body Ops_Pa.OpsObject_pa is
+
+  --------------------------------------------------------------------------
+  --
+  --------------------------------------------------------------------------
+  procedure ValidateVersion(typ : String; gotVer : Byte; maxVer : Byte) is
+  begin
+    if gotVer > maxVer then
+      StaticErrorService.Report( typ, "ValidateVersion", 
+                                 "received version '" & Byte'Image(gotVer) & 
+                                   "' > known version '" & Byte'Image(maxVer) & "'"
+                                );
+      raise EIdlVersionException;
+    end if;
+  end;
 
   --------------------------------------------------------------------------
   --
@@ -38,6 +55,12 @@ package body Ops_Pa.OpsObject_pa is
   --------------------------------------------------------------------------
   overriding procedure Serialize( Self : in out OpsObject_Class; archiver : ArchiverInOut_Class_At) is
   begin
+    if Self.IdlVersionMask /= 0 then
+      archiver.inout("OPSObject_version", Self.OPSObject_Version);
+      ValidateVersion("OPSObject", Self.OPSObject_version, OPSObject_idlVersion);
+    else
+      Self.OPSObject_Version := 0;
+    end if;
     archiver.inout("key", Self.Key);
   end Serialize;
   
@@ -80,7 +103,33 @@ package body Ops_Pa.OpsObject_pa is
     end if;
     Self.SpareBytes := arr;
   end;
+
+  --------------------------------------------------------------------------
+  --
+  --------------------------------------------------------------------------
+  function IdlVersionMask( Self : OpsObject_Class ) return UInt32 is
+  begin
+    return Self.IdlVersionMask;
+  end;
+
+  procedure SetIdlVersionMask( Self : in out OpsObject_Class; VerMask : UInt32 ) is
+  begin
+    Self.IdlVersionMask := VerMask;
+  end;
+
+  --------------------------------------------------------------------------
+  --
+  --------------------------------------------------------------------------
+  function OPSObject_version( Self : OpsObject_Class ) return Byte is
+  begin
+    return Self.OPSObject_Version;
+  end;
   
+  procedure SetOPSObject_version( Self : in out OpsObject_Class; Version : Byte ) is
+  begin
+    Self.OPSObject_Version := Version;
+  end;
+
   --------------------------------------------------------------------------
   -- Returns a newely allocated deep copy/clone of this object.
   --------------------------------------------------------------------------
@@ -97,6 +146,8 @@ package body Ops_Pa.OpsObject_pa is
   --------------------------------------------------------------------------
   procedure FillClone( Self : OpsObject_Class; obj : OpsObject_Class_At ) is
   begin
+    obj.all.IdlVersionMask := Self.IdlVersionMask;
+    obj.all.OpsObject_Version := Self.OpsObject_Version;
     Replace(obj.all.Key, Self.Key);
     Replace(obj.all.TypesString, Self.TypesString);
     if Self.SpareBytes /= null then

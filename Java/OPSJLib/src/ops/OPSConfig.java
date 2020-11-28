@@ -39,7 +39,9 @@ import ops.OPSConfigRepository;
  */
 public class OPSConfig extends OPSObject
 {
-    //Static------------------------
+    public byte OPSConfig_version = OPSConfig_idlVersion;
+
+    public static final byte OPSConfig_idlVersion = 0;
 
     //static OPSConfig theConfig = null;
     public static OPSConfig getConfig() throws IOException, FormatException
@@ -91,6 +93,15 @@ public class OPSConfig extends OPSObject
     public void serialize(ArchiverInOut archive) throws IOException
     {
         super.serialize(archive);
+        if (idlVersionMask != 0) {
+            byte tmp = archive.inout("OPSConfig_version", OPSConfig_version);
+            if (tmp > OPSConfig_idlVersion) {
+                throw new IOException("OPSConfig: received version '" + tmp + "' > known version '" + OPSConfig_idlVersion + "'");
+            }
+            OPSConfig_version = tmp;
+        } else {
+            OPSConfig_version = 0;
+        }
         domains = (Vector<Domain>) archive.inoutSerializableList("domains", domains);
     }
 

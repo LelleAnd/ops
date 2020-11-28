@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2020 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -34,6 +34,12 @@ package body Ops_Pa.OpsObject_Pa.Transport_Pa is
   overriding procedure Serialize( Self : in out Transport_Class; archiver : ArchiverInOut_Class_At) is
   begin
     Serialize( OpsObject_Class(Self), archiver );
+    if Self.IdlVersionMask /= 0 then
+      archiver.inout("Transport_version", Self.Transport_Version);
+      ValidateVersion("Transport", Self.Transport_version, Transport_idlVersion);
+    else
+      Self.Transport_Version := 0;
+    end if;
     archiver.Inout("channelID", Self.ChannelID);
     archiver.Inout("topics", Self.Topics);
   end;
@@ -52,6 +58,7 @@ package body Ops_Pa.OpsObject_Pa.Transport_Pa is
   begin
     FillClone( OpsObject_Class(Self), obj );
     if obj.all in Transport_Class'Class then
+      Transport_Class(obj.all).Transport_version := Self.Transport_version;
       Replace(Transport_Class(obj.all).ChannelID, Self.ChannelID);
 
       if Transport_Class(obj.all).Topics /= null then

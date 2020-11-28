@@ -7,8 +7,7 @@ This is how you do it, exemplified in C++ by polling:
 ```
 //Get a participant reference, this is your entry point to OPS
 Participant* participant = Participant::getInstance("FooDomain");
-if(participant == NULL)
-{
+if (participant == nullptr) {
     //Report error
     return;
 }
@@ -26,14 +25,11 @@ sub.start();
 ...
 
 //Check if deadline is missed
-if(sub.isDeadlineMissed())
-{
+if (sub.isDeadlineMissed()) {
     //do something about it
 }
 ```
-
 or you can do it by registering a listener like this:
-
 ```
 class MyDeadlineListener : public ops::DeadlineMissedListener
 {
@@ -45,20 +41,24 @@ class MyDeadlineListener : public ops::DeadlineMissedListener
    void onDeadlineMissed(ops::DeadlineMissedEvent*)
    {
        //React on deadline missed
-
    }
 }
 ```
-
 and in addition to your init code above register this listener with the subscriber
-
 ```
 MyDeadlineListener dListener(&sub);
-
+```
+An alternative way is to use C++ lamdas to setup a listener instead of creating a class inheriting from the DataListener
+```
+sub.deadlineMissedEvent.addDeadlineMissedListener(
+    [&](ops::DeadlineMissedEvent* /*sender*/) {
+        std::cout << "Deadline Missed for topic " << sub.getTopic().getName() << std::endl;
+    }
+);
 ```
 
-In Java we have the same approach but by using an Observer:
 
+In Java we have the same approach but by using an Observer:
 ```
 //Adding a deadline Observer inline
 sub.deadlineEvent.addObserver(new Observer()
@@ -68,16 +68,11 @@ sub.deadlineEvent.addObserver(new Observer()
       //React on deadline missed
    }
 });
-
 ```
-
 Or again, of course just:
-
 ```
-if(sub.isDeadlineMissed())
-{
+if (sub.isDeadlineMissed()) {
    //React!
 }
 ```
-
 You can change the value of the Deadline QoS at any time.

@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2019-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -31,9 +31,12 @@
 
 namespace ops
 {
-	class OPS_EXPORT Domain : public OPSObject
+    class OPS_EXPORT Domain : public OPSObject
 	{
-		Address_T domainAddress;
+        char Domain_version = Domain_idlVersion;
+
+        static const char Domain_idlVersion = 0;
+        Address_T domainAddress;
         int timeToLive{ 1 };
         Address_T localInterface{ "0.0.0.0" };
         int inSocketBufferSize{ -1 };		// Use OS default, Topics may override

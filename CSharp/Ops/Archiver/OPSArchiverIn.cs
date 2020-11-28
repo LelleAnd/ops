@@ -118,6 +118,10 @@ namespace Ops
         {
             string types = readBuf.ReadString();  // Skip string for non virtual objects, type is known by T
             ISerializable newSer = (ISerializable) new T();
+            if ((types.Length > 0) && (types[0] == '0'))
+            {
+                ((OPSObject)newSer).IdlVersionMask = 1;     // Some value != 0
+            }
             newSer.Serialize(this);
             return newSer;
         }
@@ -127,13 +131,20 @@ namespace Ops
         /// <param name="v"></param>
         public override ISerializable Inout(string name, ISerializable v)
         {
+            int verMask = 0;
             string types = readBuf.ReadString();
+            if ((types.Length > 0) && (types[0] == '0'))
+            {
+                verMask = 1;
+                types = types.Substring(2);
+            }
             ISerializable newSer = compositeFactory.Create(types);
             if (newSer != null)
             {
                 //Do this to preserve type information even if slicing has occured.
                 (newSer as OPSObject).SetTypesString(types);
 
+                (newSer as OPSObject).IdlVersionMask = verMask;
                 newSer.Serialize(this);
             }
             return newSer;
@@ -210,8 +221,16 @@ namespace Ops
             for (int i = 0; i < size; i++)
             {
                 // For each element
-                readBuf.ReadString();
+                string types = readBuf.ReadString();
+                int verMask = 0;
+                if ((types.Length > 0) && (types[0] == '0'))
+                {
+                    verMask = 1;
+                    types = types.Substring(2);
+                }
+
                 ISerializable obj = (ISerializable)Activator.CreateInstance<T>();
+                (obj as OPSObject).IdlVersionMask = verMask;
                 obj.Serialize(this);
                 list.Add(obj);
             }

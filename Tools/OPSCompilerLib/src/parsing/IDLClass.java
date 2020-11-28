@@ -27,6 +27,7 @@ public class IDLClass
     private String baseClassName;
     private String comment;
     private String directive;
+    private int version = -1;
     private ArrayList<IDLField> fields;
     private ArrayList<IDLEnumType> enumTypes;    // Used for enum types defined in a class
     private ArrayList<String> imports = new ArrayList<String>();
@@ -92,6 +93,16 @@ public class IDLClass
     public void setDirective(String directive)
     {
         this.directive = directive;
+    }
+
+    // ------------------------
+    public int getVersion()
+    {
+        return version;
+    }
+    public void setVersion(int version)
+    {
+        this.version = version;
     }
 
     // ------------------------

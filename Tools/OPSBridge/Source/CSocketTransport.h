@@ -56,18 +56,21 @@ namespace opsbridge {
 		CSocketTransport();
 		~CSocketTransport();
 
-		bool writeOpsMessage(ops::OPSObject* mess, 
+#if defined(_MSC_VER) && (_MSC_VER == 1900)
+#pragma warning( disable : 4373)
+#endif
+		bool writeOpsMessage(ops::OPSObject* mess,
 			const ops::ObjectName_T publisherName,
 			const ops::ObjectName_T topicName,
-			const uint64_t ackCounter);
-		bool writeAckNak(uint64_t ackCounter, uint32_t errorCode);
+			const uint64_t ackCounter) override;
+		bool writeAckNak(uint64_t ackCounter, uint32_t errorCode) override;
 
 		// The .Head field in cmd and status will be overwritten
-		bool writeCommand(TCommandMessage& cmd);
-		bool writeStatus(TStatusMessage& status);
+		bool writeCommand(TCommandMessage& cmd) override;
+		bool writeStatus(TStatusMessage& status) override;
 
 		// The .Head field in UdpMc will be overwritten
-		bool writeUdpMcMessage(TUdpMcMessage& udpMc, const char* data);
+		bool writeUdpMcMessage(TUdpMcMessage& udpMc, const char* data) override;
 
 		void disconnect();
 

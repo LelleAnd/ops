@@ -14,6 +14,21 @@ namespace Ops
     // NOTE. Must be kept in sync with C++
 	public class TopicInfoData : OPSObject
 	{
+        private byte _TopicInfoData_version = TopicInfoData_idlVersion;
+        public byte TopicInfoData_version
+        {
+            get { return _TopicInfoData_version; }
+            set {
+                if (value > TopicInfoData_idlVersion)
+                {
+                    throw new IdlVersionException(
+                        "TopicInfoData: received version '" + value + "' > known version '" + TopicInfoData_idlVersion + "'");
+                }
+                _TopicInfoData_version = value;
+            }
+        }
+
+        public const byte TopicInfoData_idlVersion = 0;
         public string name { get; set; }
         public string type { get; set; }
         public string transport { get; set; }
@@ -26,9 +41,6 @@ namespace Ops
             "System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
             typeof(System.Drawing.Design.UITypeEditor))]
         public List<string> keys { get { return _keys; } set { _keys = value; } }
-
-        // C++ version: //std::vector<OPSObject*> filters;
-		
 
 		public TopicInfoData()
 		{
@@ -50,14 +62,21 @@ namespace Ops
 		{
 			base.Serialize(archive);
 
-			name = archive.Inout("name", name);
+            if (IdlVersionMask != 0)
+            {
+                TopicInfoData_version = archive.Inout("TopicInfoData_version", TopicInfoData_version);
+            }
+            else
+            {
+                TopicInfoData_version = 0;
+            }
+
+            name = archive.Inout("name", name);
             type = archive.Inout("type", type);
             transport = archive.Inout("transport", transport);
             address = archive.Inout("address", address);
             port = archive.Inout("port", port);
             _keys = (List<string>)archive.InoutStringList("keys", _keys);
-
-            //archiver->inout(std::string("filters"), filters);
 		}
 		
 	};

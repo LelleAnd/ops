@@ -5,13 +5,10 @@ Given an IDL project FooProject with a data type FooData used by a topic FooTopi
 
 ## Java ##
 
-
 ```
-
 //Get a participant reference, this is your entry point to OPS
 Participant participant = Participant.getInstance("FooDomain");
-if(participant == null)
-{
+if (participant == null) {
     //Report error
     return;
 }
@@ -27,10 +24,7 @@ FooData data = new FooData();
 
 //Publish the data
 pub.write(data);
-
-
 ```
-
 
 
 ## C++ ##
@@ -38,8 +32,7 @@ pub.write(data);
 ```
 //Get a participant reference, this is your entry point to OPS
 Participant* participant = Participant::getInstance("FooDomain");
-if(participant == NULL)
-{
+if (participant == nullptr) {
     //Report error
     return;
 }
@@ -55,5 +48,4 @@ FooData data;
 
 //Publish the data
 pub.write(&data);
-
 ```

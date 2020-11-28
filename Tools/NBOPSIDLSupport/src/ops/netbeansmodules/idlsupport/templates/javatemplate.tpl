@@ -10,6 +10,8 @@ import java.io.IOException;
 
 public class __className extends __baseClassName
 {
+    public byte __className_version = __className_idlVersion;
+
 __declarations
 
     private static SerializableFactory factory = new TypeFactory();
@@ -45,7 +47,7 @@ __serialize
     {
         super.fillClone(cloneO);
         __className cloneResult = (__className)cloneO;
-        __cloneBody
+__cloneBody
     }
 
     private static class TypeFactory implements SerializableFactory
@@ -63,4 +65,3 @@ __serialize
         }
     }
 }
-

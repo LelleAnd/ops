@@ -2,7 +2,7 @@ unit uOps.Exceptions;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -49,6 +49,10 @@ type
     constructor Create(const Msg: string = '');
   end;
 
+  EIdlVersionException = class(Exception)
+    constructor Create(const Msg: string; gotVer : Byte; maxVer : Byte);
+  end;
+
 implementation
 
 { CommException }
@@ -91,6 +95,13 @@ end;
 constructor EArchiverException.Create(const Msg: string);
 begin
   inherited Create('ArchiverException: ' + Msg);
+end;
+
+constructor EIdlVersionException.Create(const Msg: string; gotVer : Byte; maxVer : Byte);
+begin
+  inherited Create('IdlVersionException: ' +
+                   Msg + ' received version "' + IntToStr(gotVer) +
+                   '" > known version "' + IntToStr(maxVer) + '"');
 end;
 
 end.

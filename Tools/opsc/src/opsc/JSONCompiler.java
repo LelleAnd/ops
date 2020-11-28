@@ -25,6 +25,7 @@ import parsing.IDLEnumType;
 public class JSONCompiler extends CompilerSupport
 {
     String res = "";
+    public boolean includeVersion = false;
 
     public JSONCompiler(String projname) {
         super(projname);
@@ -106,7 +107,7 @@ public class JSONCompiler extends CompilerSupport
 
         res += tab(t+2) + "\"non-coretypes\": {" + endl();
         res += tab(t+3) + "\"composed_of\": [" + endl();
-        res += tab(t+4) + "{ \"type_string\": \"string\" }," + endl();
+        res += tab(t+4) + "{ \"type_string\": \"string\", \"desc\": \"  TBD  \"}," + endl();
         res += tab(t+4) + "{ \"fields\": \"according to type\" }" + endl();
         res += tab(t+3) + "]" + endl();
         res += tab(t+2) + "}," + endl();
@@ -118,6 +119,11 @@ public class JSONCompiler extends CompilerSupport
         return res;
     }
 
+    private String getVersionField()
+    {
+        return "{ \"name\": \"version\", \"type\": \"byte\", \"optional\": \"type_is_version_tagged\" }";
+    }
+
     protected String generate_OPSObject_JSON(int t)
     {
         String res = "";
@@ -125,6 +131,9 @@ public class JSONCompiler extends CompilerSupport
         res += tab(t+1) + "\"type\": \"ops.OPSObject\"," + endl();
 
         res += tab(t+1) + "\"fields\": [" + endl();
+        if (includeVersion) {
+            res += tab(t+2) + getVersionField() + "," + endl();
+        }
         res += tab(t+2) + "{";
         res += " \"name\": \"key\",";
         res += " \"type\": \"string\"";
@@ -177,6 +186,27 @@ public class JSONCompiler extends CompilerSupport
       return ret;
     }
 
+    private String getFieldGuard(String versionName, IDLField field)
+    {
+        String ret = "";
+        Vector<VersionEntry> vec = getReducedVersions(field.getName(), field.getDirective());
+        if (vec != null) {
+            for (VersionEntry ent : vec) {
+                String cond = "{ \"low\": \"" + ent.start + "\", ";
+                if (ent.stop != -1) {
+                    cond += "\"high\": \"" + ent.stop + "\" }";
+                } else {
+                    cond += "\"high\": \"255\" }";
+                }
+                if (ret.length() > 0) {
+                    ret += ", ";
+                }
+                ret += cond;
+            }
+        }
+        return ret;
+    }
+
     protected String generateJSONobject(int t, IDLClass idlClass)
     {
         String res = "";
@@ -226,11 +256,17 @@ public class JSONCompiler extends CompilerSupport
 
           // Fields
           res += tab(t+1) + "\"fields\": [" + endl();
-          first = true;
+          boolean doneFirst = false;
+          if (includeVersion) {
+              res += tab(t+2) + getVersionField();
+              doneFirst = true;
+          }
           for (IDLField field : idlClass.getFields()) {
             if (field.isStatic()) continue;
-            if (!first) res += "," + endl();
-            first = false;
+            if (doneFirst) {
+                res += "," + endl();
+            }
+            doneFirst = true;
             res += tab(t+2) + "{";
             res += " \"name\": \"" + field.getName() + "\"";
             if (field.isArray()) {
@@ -245,6 +281,11 @@ public class JSONCompiler extends CompilerSupport
               ttype = field.getFullyQualifiedType().replace("[]", "");
             }
             res += "\"" + ttype + "\"";
+
+            String fieldGuard = getFieldGuard("version", field);
+            if (fieldGuard.length() > 0) {
+                res += ", \"version\": [" + fieldGuard + "]";
+            }
 
             String comment = field.getComment();
             comment = comment.replace("/*", "").replace("*/", "").replace("\n", " ").replace("\"", "'").trim();

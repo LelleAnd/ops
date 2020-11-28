@@ -31,10 +31,13 @@
 
 namespace ops
 {
-	class OPS_EXPORT OPSConfig : public OPSObject
+    class OPS_EXPORT OPSConfig : public OPSObject
 	{
 	public:
-		static std::shared_ptr<OPSConfig> getConfig();
+        char OPSConfig_version = OPSConfig_idlVersion;
+
+        static const char OPSConfig_idlVersion = 0;
+        static std::shared_ptr<OPSConfig> getConfig();
 		static std::shared_ptr<OPSConfig> getConfig(FileName_T configFile);
 		static std::shared_ptr<OPSConfig> getConfig(std::istream& inStream);
 
@@ -56,7 +59,12 @@ namespace ops
 		void serialize(ArchiverInOut* archiver) override
 		{
 			OPSObject::serialize(archiver);
-		
+            if (idlVersionMask != 0) {
+                archiver->inout("OPSConfig_version", OPSConfig_version);
+                ValidateVersion("OPSConfig", OPSConfig_version, OPSConfig_idlVersion);
+            } else {
+                OPSConfig_version = 0;
+            }
 			archiver->inout<Domain>("domains", domains);
 		}
 

@@ -169,6 +169,9 @@ namespace ops { namespace strings {
 		fixed_string& operator+= (char c)
 		{
 			if (_size == N) {
+#if defined(_MSC_VER) && (_MSC_VER == 1900)
+#pragma warning( disable : 4127)
+#endif
 				FIXED_IF_CONSTEXPR (POLICY == throw_exception) throw size_out_of_range();
 			} else {
 				_array[_size] = c;
@@ -184,6 +187,9 @@ namespace ops { namespace strings {
 		{
 			if (len > 0) {
 				if ((_size + len) > N) {
+#if defined(_MSC_VER) && (_MSC_VER == 1900)
+#pragma warning( disable : 4127)
+#endif
 					FIXED_IF_CONSTEXPR (POLICY == throw_exception) {
 						throw size_out_of_range();
 					} else {

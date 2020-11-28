@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2019 Lennart Andersson.
+-- Copyright (C) 2016-2020 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -53,7 +53,23 @@ package body Ops_Pa.OpsObject_Pa.OPSConfig_Pa is
   overriding procedure Serialize( Self : in out OPSConfig_Class; archiver : ArchiverInOut_Class_At) is
   begin
     Serialize( OpsObject_Class(Self), archiver );
+    if Self.IdlVersionMask /= 0 then
+      archiver.inout("OPSConfig_version", Self.OPSConfig_Version);
+      ValidateVersion("OPSConfig", Self.OPSConfig_version, OPSConfig_idlVersion);
+    else
+      Self.OPSConfig_Version := 0;
+    end if;
     Domain_Class_InoutDynArr(archiver, "domains", Self.domains, False);
+  end;
+
+  function OPSConfig_version( Self : OPSConfig_Class ) return Byte is
+  begin
+    return Self.OPSConfig_version;
+  end;
+
+  procedure SetOPSConfig_version( Self : in out OPSConfig_Class; Version : Byte ) is
+  begin
+    Self.OPSConfig_version := Version;
   end;
 
   -- Returns a newely allocated deep copy/clone of Self.
@@ -83,6 +99,7 @@ package body Ops_Pa.OpsObject_Pa.OPSConfig_Pa is
   begin
     FillClone( OpsObject_Class(Self), obj );
     if obj.all in OPSConfig_Class'Class then
+      OPSConfig_Class(obj.all).OPSConfig_version := Self.OPSConfig_version;
       if OPSConfig_Class(obj.all).domains /= null then
         Clear(OPSConfig_Class(obj.all).domains.all);
         Dispose(OPSConfig_Class(obj.all).domains);
@@ -149,6 +166,22 @@ package body Ops_Pa.OpsObject_Pa.OPSConfig_Pa is
   overriding procedure Serialize( Self : in out DefaultOPSConfigImpl_Class; archiver : ArchiverInOut_Class_At) is
   begin
     Serialize( OPSConfig_Class(Self), archiver );
+    if Self.IdlVersionMask /= 0 then
+      archiver.inout("DefaultOPSConfigImpl_version", Self.DefaultOPSConfigImpl_Version);
+      ValidateVersion("DefaultOPSConfigImpl", Self.DefaultOPSConfigImpl_version, DefaultOPSConfigImpl_idlVersion);
+    else
+      Self.DefaultOPSConfigImpl_Version := 0;
+    end if;
+  end;
+
+  function DefaultOPSConfigImpl_version( Self : DefaultOPSConfigImpl_Class ) return Byte is
+  begin
+    return Self.DefaultOPSConfigImpl_version;
+  end;
+
+  procedure SetDefaultOPSConfigImpl_version( Self : in out DefaultOPSConfigImpl_Class; Version : Byte ) is
+  begin
+    Self.DefaultOPSConfigImpl_version := Version;
   end;
 
   procedure InitInstance( Self : in out DefaultOPSConfigImpl_Class ) is

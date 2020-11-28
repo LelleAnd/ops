@@ -2,7 +2,7 @@ unit uOps.OpsObject;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -26,7 +26,13 @@ uses uOps.ArchiverInOut;
 
 type
   TOPSObject = class(TSerializable)
+    public
+      const
+        OPSObject_idlVersion : Byte = 0;
     protected
+      FIdlVersionMask : Int32;
+      FOPSObject_version : Byte;
+
       //Should only be set by the Publisher at publication time and by ByteBuffer at deserialization time.
       FKey : AnsiString;
       FTypesString : AnsiString;
@@ -58,16 +64,23 @@ type
       property Key : AnsiString read FKey write FKey;
 
       property TypesString : AnsiString read FTypesString;
+
+      property IdlVersionMask : Int32 read FIdlVersionMask write FIdlVersionMask;
+      property OPSObject_version : Byte read FOPSObject_version write FOPSObject_version;
   end;
 
 implementation
+
+uses uOps.Exceptions;
 
 { TOPSObject }
 
 constructor TOPSObject.Create;
 begin
-  Fkey         := '';
-  FTypesString := '';
+  FIdlVersionMask    := 0;
+  FOPSObject_version := OPSObject_idlVersion;
+  FKey               := '';
+  FTypesString       := '';
 end;
 
 destructor TOPSObject.Destroy;
@@ -99,12 +112,22 @@ end;
 procedure TOPSObject.FillClone(var obj : TOPSObject);
 begin
   obj.FKey := FKey;
+  obj.FIdlVersionMask := FIdlVersionMask;
+  obj.FOPSObject_version := FOPSObject_version;
   obj.FTypesString := FTypesString;
   obj.spareBytes := Copy(spareBytes);
 end;
 
 procedure TOPSObject.Serialize(archiver : TArchiverInOut);
 begin
+  if FIdlVersionMask <> 0 then begin
+    archiver.inout('OPSObject_version', FOPSObject_version);
+    if FOPSObject_version > OPSObject_idlVersion then begin
+      raise EIdlVersionException.Create('OPSObject', FOPSObject_version, OPSObject_idlVersion);
+    end;
+  end else begin
+    FOPSObject_version := 0;
+  end;
   archiver.inout('key', FKey);
 end;
 

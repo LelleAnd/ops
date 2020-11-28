@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2017 Lennart Andersson.
+-- Copyright (C) 2016-2020 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -46,6 +46,12 @@ package body Ops_Pa.OpsObject_Pa.TopicInfoData_Pa is
   overriding procedure Serialize( Self : in out TopicInfoData_Class; archiver : ArchiverInOut_Class_At) is
   begin
     Serialize( OpsObject_Class(Self), archiver );
+    if Self.IdlVersionMask /= 0 then
+      archiver.inout("TopicInfoData_version", Self.TopicInfoData_Version);
+      ValidateVersion("TopicInfoData", Self.TopicInfoData_version, TopicInfoData_idlVersion);
+    else
+      Self.TopicInfoData_Version := 0;
+    end if;
     archiver.Inout("name", Self.name);
     archiver.Inout("type", Self.dataType);
     archiver.Inout("transport", Self.transport);
@@ -68,6 +74,7 @@ package body Ops_Pa.OpsObject_Pa.TopicInfoData_Pa is
   begin
     FillClone( OpsObject_Class(Self), obj );
     if obj.all in TopicInfoData_Class'Class then
+      TopicInfoData_Class(obj.all).TopicInfoData_version := Self.TopicInfoData_version;
       Replace(TopicInfoData_Class(obj.all).name, Self.name);
       Replace(TopicInfoData_Class(obj.all).dataType, Self.dataType);
       Replace(TopicInfoData_Class(obj.all).transport, Self.transport);

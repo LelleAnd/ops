@@ -98,6 +98,7 @@
       <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <AdditionalDependencies>OPSCppLib_vc141_MTd.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>

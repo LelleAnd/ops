@@ -2,7 +2,7 @@ unit uOps.RequestReply.Reply;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -28,11 +28,17 @@ uses uOps.ArchiverInOut,
 type
   TReply = class(TOPSObject)
   public
+    const
+      Reply_idlVersion : Byte = 0;
+  public
+    Reply_version : Byte;
     requestId : AnsiString;
     requestAccepted : Boolean;
     mess : AnsiString;
 
-    procedure Serialize(archiver : TArchiverInOut); override;
+    constructor Create;
+
+    procedure Serialize(archiver : TArchiverInOut); override;
 
     // Returns a newely allocated deep copy/clone of this object.
     function Clone : TOPSObject; override;
@@ -43,9 +49,26 @@ type
 
 implementation
 
+uses uOps.Exceptions;
+
+constructor TReply.Create;
+begin
+  inherited;
+  Reply_version := Reply_idlVersion;
+  AppendType('Reply');
+end;
+
 procedure TReply.Serialize(archiver : TArchiverInOut);
 begin
   inherited Serialize(archiver);
+  if FIdlVersionMask <> 0 then begin
+    archiver.inout('Reply_version', Reply_version);
+    if Reply_version > Reply_idlVersion then begin
+      raise EIdlVersionException.Create('Reply', Reply_version, Reply_idlVersion);
+    end;
+  end else begin
+    Reply_version := 0;
+  end;
   archiver.inout('requestId', requestId);
   archiver.inout('requestAccepted', requestAccepted);
   archiver.inout('message', mess);
@@ -62,6 +85,7 @@ procedure TReply.FillClone(var obj : TOPSObject);
 begin
 	inherited FillClone(obj);
   with obj as TReply do begin
+    Reply_version := Self.Reply_version;
     requestId := Self.requestId;
     requestAccepted := Self.requestAccepted;
     mess := Self.mess;

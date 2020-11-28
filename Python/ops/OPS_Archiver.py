@@ -68,12 +68,19 @@ class OPS_Archiver_In(Archiver_In):
 		typename = zzz(struct.unpack_from(fmt,self.buffer,self.index)[0])
 		self.index += struct.calcsize(fmt)
 
+		verMask = 0
+		if len(typename) > 0:
+			if typename[0] == '0':
+				typename = typename[2:]
+				verMask = 1		## Just a value != 0
+
 		res = None
 		if prototype is not None:
 			res = prototype()
 		else:
 			res = self.factory.create(typename)
 		if res is not None:
+			res.idlVersionMask = verMask
 			res.serialize(self)
 		return res
 
@@ -189,10 +196,15 @@ class OPS_Archiver_Out(Archiver_Out):
 		self.index += struct.calcsize(fmt)
 		return value
 	def Ops(self,name,value,prototype=None):
-		if self.optNonVirt==True and prototype!=None:
-			typesString=""
+		if value.idlVersionMask != 0:
+			typesString="0 "
 		else:
-			typesString = value.typesString
+			typesString=""
+		if self.optNonVirt==True and prototype!=None:
+			##typesString=""
+			pass
+		else:
+			typesString += value.typesString
 		fmt = '<i%ss' % len(typesString)
 		struct.pack_into(fmt,self.buffer,self.index,len(typesString),b(typesString))
 		self.index += struct.calcsize(fmt)
@@ -238,10 +250,15 @@ class OPS_Archiver_Out(Archiver_Out):
 		struct.pack_into('<i',self.buffer,self.index,len(value))
 		self.index += struct.calcsize('<i')
 		for itr in value:
-			if self.optNonVirt==True and prototype!=None:
-				typesString=""
+			if itr.idlVersionMask != 0:
+				typesString="0 "
 			else:
-				typesString = itr.typesString
+				typesString=""
+			if self.optNonVirt==True and prototype!=None:
+				##typesString=""
+				pass
+			else:
+				typesString += itr.typesString
 			fmt = '<i%ss' % len(typesString)
 			struct.pack_into(fmt,self.buffer,self.index,len(typesString),b(typesString))
 			self.index += struct.calcsize(fmt)

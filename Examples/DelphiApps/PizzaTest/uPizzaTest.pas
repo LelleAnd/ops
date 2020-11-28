@@ -72,6 +72,7 @@ type
     Button_SetDeadline: TButton;
     LabeledEdit_SendPeriod: TLabeledEdit;
     Timer_Send: TTimer;
+    LabeledEdit_PizzadataVersion: TLabeledEdit;
     procedure FormCreate(Sender: TObject);
     procedure Button_CreateParticipantsClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -508,8 +509,9 @@ begin
   Sub.getMessage.getSource(addr, port);
 
   LogProc('[Topic: ' + string(Sub.Topic.Name) +
-          '] (From ' + string(addr) + ':' + IntTostr(port) +
-          ') PizzaData:: Cheese: ' + string(obj.cheese) +
+          '] (From ' + string(addr) + ':' + IntToStr(port) +
+          ') PizzaData(v' + IntToStr(obj.PizzaData_version) +
+          '):: Cheese: ' + string(obj.cheese) +
           ', Tomato sauce: ' + string(obj.tomatoSauce));
 end;
 
@@ -818,6 +820,8 @@ begin
 
   info := FItemInfoList[0];
   info.Selected := True;
+
+  LabeledEdit_PizzadataVersion.Text := IntToStr(pizza.PizzaData.PizzaData.PizzaData_idlVersion);
 end;
 
 procedure TForm1.UpdateListbox;
@@ -858,7 +862,9 @@ procedure TForm1.WriteToAllSelected;
 var
   i, j : Integer;
   info : TItemInfo;
+  pdver : Integer;
 begin
+  pdver := StrToIntDef(LabeledEdit_PizzadataVersion.Text, -1);
   for i := 0 to FItemInfoList.Count -1 do begin
     info := FItemInfoList[i];
     if not info.Selected then Continue;
@@ -866,6 +872,13 @@ begin
 
     if info.TypeName = PizzaData.getTypeName then begin
       with info.Helper as TPizzaHelper do begin
+        if pdver < 0 then begin
+          Data.IdlVersionMask := 0;
+          Data.PizzaData_version := 0;
+        end else begin
+          Data.IdlVersionMask := 1;
+          Data.PizzaData_version := pdver;
+        end;
         Data.cheese := AnsiString('Pizza from Delphi: ' + IntToStr(FCounter));
         Data.tomatoSauce := 'Tomato';
       end;

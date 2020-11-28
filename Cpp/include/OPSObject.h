@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2019-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -43,13 +43,19 @@ namespace ops
 
         friend class ByteBuffer;
         friend class OPSArchiverIn;
+        friend class OPSArchiverOut;
 
 	protected:
+        // Used to indicate if the use of version bytes are enabled or not for this object instance
+        VersionMask_T idlVersionMask = 0;
+
         //Should only be set by the Publisher at publication time and by ByteBuffer at deserialization time.
-		ObjectKey_T key;
+        ObjectKey_T key;
         TypeId_T typesString;
 
-		void appendType(const TypeId_T& type)
+        char OPSObject_version = OPSObject_idlVersion;
+
+        void appendType(const TypeId_T& type)
 		{
 			TypeId_T old = typesString;
 			typesString = type;
@@ -58,6 +64,8 @@ namespace ops
 		}
 
     public:
+        static const char OPSObject_idlVersion = 0;
+
 		ObjectKey_T getKey() const noexcept;
 		const TypeId_T& getTypeString() const noexcept;
 		void setKey(const ObjectKey_T& k) noexcept;
@@ -72,6 +80,29 @@ namespace ops
 
 		///Fills the parameter obj with all values from this object.
 		void fillClone(OPSObject* obj) const;
+
+        VersionMask_T getVersionMask() const
+        {
+            return idlVersionMask;
+        }
+
+        void setVersionMask(VersionMask_T verMask)
+        {
+            idlVersionMask = verMask;
+        }
+
+        inline void ValidateVersion(const char* msg, const char gotVer, const char maxVer) const
+        {
+            if (gotVer > maxVer) {
+                ExceptionMessage_T m(msg);
+                m += ": received version '";
+                m += NumberToString((int)gotVer);
+                m += "' > known version '";
+                m += NumberToString((int)maxVer);
+                m += "'";
+                throw exceptions::ArchiverException(m);
+            }
+        }
 
     public:
         OPSObject();

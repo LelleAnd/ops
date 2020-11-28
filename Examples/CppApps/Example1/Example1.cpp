@@ -131,7 +131,13 @@ void CallbackSubscriberExample(const ops::Topic& topic)
 
 void CallbackFunc(ops::DataNotifier* const sender, void* const userData)
 {
-	ChildDataSubscriber* const sub = dynamic_cast<ChildDataSubscriber*>(sender);
+    // NOTE: It's important that we keep this callback fast, it will block
+    // the receive for all topics belonging to the participant (currently a single
+    // thread for each participant instance, that does all receive handling).
+
+    // Message lock is held while in callback
+
+    ChildDataSubscriber* const sub = dynamic_cast<ChildDataSubscriber*>(sender);
 	size_t const user = (size_t)userData;
 
 	// The OPSMessage contains some metadata for the received message
@@ -201,6 +207,9 @@ public:
         sub.start();
     }
 
+#if defined(_MSC_VER) && (_MSC_VER == 1900)
+#pragma warning( disable : 4373)
+#endif
 	// Override from ops::DataListener, called whenever new data arrives.
 	virtual void onNewData(ops::DataNotifier* const subscriber) override
     {
@@ -253,10 +262,54 @@ void ObjectSubscriberExample(const ops::Topic& topic)
 	}
 }
 
+/// =======================================================================
+
+void SubscriberLamdaExample(const ops::Topic& topic)
+{
+    std::cout << "Subscribing to " << topic.getName() <<
+        " [" << topic.getTransport() <<
+        "::" << topic.getDomainAddress() <<
+        "::" << topic.getPort() <<
+        "] " << std::endl;
+
+    // Create a subscriber for ChildData
+    ChildDataSubscriber sub(topic);
+
+    // Setup any filters ...
+
+    // Setup listeners
+    sub.addDataListener(
+        [&](ops::DataNotifier* /*subscriber*/) {
+            // The same rules as for the callback example and for the listener onNewData() example applies
+            ops::OPSMessage* const newMess = sub.getMessage();
+
+            // Get the actual data object published
+            ChildData* const data = sub.getTypedDataReference();
+
+            // Use the data
+            std::cout << "Received ChildTopic from " << newMess->getPublisherName() << " with " << data->l << std::endl;
+        }
+    );
+
+    //sub.deadlineMissedEvent.addDeadlineMissedListener(
+    //    [&](ops::DeadlineMissedEvent* /*sender*/) {
+    //        std::cout << "Deadline Missed for topic " << sub.getTopic().getName() << std::endl;
+    //    }
+    //);
+
+    // Finally start the subscriber (tell it to start listening for data)
+    sub.start();
+
+    while (true) {
+        ops::TimeHelper::sleep(10);
+    }
+}
+
+
 void usage()
 {
 	std::cout << "" << std::endl;
-	std::cout << "Usage: Example1 pub|sub_poll|sub_object|sub_callback" << std::endl;
+	std::cout << "Usage: Example1 pub|sub_poll|sub_object|sub_callback|sub_lamda" << std::endl;
 	std::cout << "" << std::endl;
 }
 
@@ -292,6 +345,8 @@ int main(const int argc, const char* argv[])
 			ObjectSubscriberExample(topic);
 		} else if (arg == "sub_poll"){
 			PollingSubscriberExample(topic);
+        } else if (arg == "sub_lambda"){
+            SubscriberLamdaExample(topic);
 		} else {
 			usage();
 		}

@@ -1,9 +1,7 @@
 
 ```
 //Auto generated OPS-code. DO NOT MODIFY!
-
-#ifndef samples_SampleData_h
-#define samples_SampleData_h
+#pragma once
 
 #include "OPSObject.h"
 #include "ArchiverInOut.h"
@@ -12,19 +10,21 @@
 
 #include "UserData.h"
 
-
 namespace samples {
-
 
 class SampleData :
 	public ops::OPSObject
 {
 public:
-   static ops::TypeId_T getTypeName(){return ops::TypeId_T("samples.SampleData");}
+  	static ops::TypeId_T getTypeName(){return ops::TypeId_T("samples.SampleData");}
+
+  	char SampleData_version = SampleData_idlVersion;
 
     enum class Order {
         UNDEFINED, START, STOP
     };
+
+    static const char SampleData_idlVersion = 0;
 
     static const int max = 42;
     bool boo;
@@ -57,7 +57,6 @@ public:
     {
         OPSObject::appendType(ops::TypeId_T("samples.SampleData"));
         memset(&intarr[0], 0, sizeof(intarr));
-
     }
 
     ///Copy-constructor making full deep copy of a(n) SampleData object.
@@ -74,15 +73,23 @@ public:
     ///Assignment operator making full deep copy of a(n) SampleData object.
     SampleData& operator = (const SampleData& other)
     {
-        other.fillClone(this);
+        if (this != &other) {
+            other.fillClone(this);
+        }
         return *this;
     }
 
     ///This method acceptes an ops::ArchiverInOut visitor which will serialize or deserialize an
     ///instance of this class to a format dictated by the implementation of the ArchiverInout.
-    void serialize(ops::ArchiverInOut* archive)
+    virtual void serialize(ops::ArchiverInOut* archive) override
     {
         ops::OPSObject::serialize(archive);
+        if (idlVersionMask != 0) {
+            archive->inout("SampleData_version", SampleData_version);
+            ValidateVersion("SampleData", SampleData_version, SampleData_idlVersion);
+        } else {
+            SampleData_version = 0;
+        }
         archive->inout("boo", boo);
         archive->inout("b", b);
         archive->inout("sh", sh);
@@ -105,21 +112,20 @@ public:
         archive->inout("s43vect", s43vect);
         archive->inout<UserData>("uDatas", uDatas, UserData());
         archive->inoutfixarr("intarr", &intarr[0], 42, sizeof(intarr));
-
     }
 
     //Returns a deep copy of this object.
-    virtual ops::OPSObject* clone()
+    virtual SampleData* clone() override
     {
         SampleData* ret = new SampleData;
         fillClone(ret);
         return ret;
-
     }
 
     void fillClone(SampleData* obj) const
     {
         ops::OPSObject::fillClone(obj);
+        obj->SampleData_version = SampleData_version;
         obj->boo = boo;
         obj->b = b;
         obj->sh = sh;
@@ -142,19 +148,13 @@ public:
         obj->s43vect = s43vect;
         obj->uDatas = uDatas;
         memcpy(&obj->intarr[0], &intarr[0], sizeof(intarr));
-
     }
 
     ///Destructor: Note that all aggregated data and vectors are completely deleted.
     virtual ~SampleData(void)
     {
-
     }
 
-
 };
-
 }
-
-#endif
 ```

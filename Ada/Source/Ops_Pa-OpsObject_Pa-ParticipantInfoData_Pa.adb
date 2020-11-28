@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2019 Lennart Andersson.
+-- Copyright (C) 2016-2020 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -37,6 +37,12 @@ package body Ops_Pa.OpsObject_Pa.ParticipantInfoData_Pa is
   overriding procedure Serialize( Self : in out ParticipantInfoData_Class; archiver : ArchiverInOut_Class_At) is
   begin
     Serialize( OpsObject_Class(Self), archiver );
+    if Self.IdlVersionMask /= 0 then
+      archiver.inout("ParticipantInfoData_version", Self.ParticipantInfoData_Version);
+      ValidateVersion("ParticipantInfoData", Self.ParticipantInfoData_version, ParticipantInfoData_idlVersion);
+    else
+      Self.ParticipantInfoData_Version := 0;
+    end if;
     archiver.Inout("name", Self.name);
     archiver.Inout("domain", Self.domain);
     archiver.Inout("id", Self.id);
@@ -77,6 +83,7 @@ package body Ops_Pa.OpsObject_Pa.ParticipantInfoData_Pa is
   begin
     FillClone( OpsObject_Class(Self), obj );
     if obj.all in ParticipantInfoData_Class'Class then
+      ParticipantInfoData_Class(obj.all).ParticipantInfoData_version := Self.ParticipantInfoData_version;
       Replace(ParticipantInfoData_Class(obj.all).name, Self.name);
       Replace(ParticipantInfoData_Class(obj.all).domain, Self.domain);
       Replace(ParticipantInfoData_Class(obj.all).id, Self.id);

@@ -1,9 +1,22 @@
-///////////////////////////////////////////////////////////
-//  ParticipantInfoData.java
-//  Implementation of the Class ParticipantInfoData
-//  Created on:      10-jan-2013
-//  Author:
-///////////////////////////////////////////////////////////
+/**
+*
+* Copyright (C) 2013, 2020 Lennart Andersson.
+*
+* This file is part of OPS (Open Publish Subscribe).
+*
+* OPS (Open Publish Subscribe) is free software: you can redistribute it and/or modify
+* it under the terms of the GNU Lesser General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+
+* OPS (Open Publish Subscribe) is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU Lesser General Public License for more details.
+*
+* You should have received a copy of the GNU Lesser General Public License
+* along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 package ops;
 
@@ -16,6 +29,9 @@ import java.io.IOException;
 // NOTE. Must be kept in sync with C++
 public class ParticipantInfoData extends OPSObject
 {
+    public byte ParticipantInfoData_version = ParticipantInfoData_idlVersion;
+
+    public static final byte ParticipantInfoData_idlVersion = 0;
     public String name;
     public String id;
     public String domain;
@@ -32,30 +48,39 @@ public class ParticipantInfoData extends OPSObject
     // C++ version: std::vector<string> knownTypes;
     public java.util.Vector<String> knownTypes = new java.util.Vector<String>();
 
-		
+
     public ParticipantInfoData()
     {
         super();
-	appendType("ops.ParticipantInfoData");
+	      appendType("ops.ParticipantInfoData");
     }
 
     public void serialize(ArchiverInOut archive) throws IOException
     {
-	super.serialize(archive);
+        super.serialize(archive);
 
-	name = archive.inout("name", name);
-	domain = archive.inout("domain", domain);
-	id = archive.inout("id", id);
-	ip = archive.inout("ip", ip);
-	languageImplementation = archive.inout("languageImplementation", languageImplementation);
-	opsVersion = archive.inout("opsVersion", opsVersion);
-	mc_udp_port = archive.inout("mc_udp_port", mc_udp_port);
-	mc_tcp_port = archive.inout("mc_tcp_port", mc_tcp_port);
+        if (idlVersionMask != 0) {
+            byte tmp = archive.inout("ParticipantInfoData_version", ParticipantInfoData_version);
+            if (tmp > ParticipantInfoData_idlVersion) {
+                throw new IOException("ParticipantInfoData: received version '" + tmp + "' > known version '" + ParticipantInfoData_idlVersion + "'");
+            }
+            ParticipantInfoData_version = tmp;
+        } else {
+            ParticipantInfoData_version = 0;
+        }
+
+        name = archive.inout("name", name);
+        domain = archive.inout("domain", domain);
+        id = archive.inout("id", id);
+        ip = archive.inout("ip", ip);
+        languageImplementation = archive.inout("languageImplementation", languageImplementation);
+        opsVersion = archive.inout("opsVersion", opsVersion);
+        mc_udp_port = archive.inout("mc_udp_port", mc_udp_port);
+        mc_tcp_port = archive.inout("mc_tcp_port", mc_tcp_port);
         /// The following requires that TopicInfoData can be created by the OPSObjectFactory. Differs from C++ & C# that has a different solution.
         subscribeTopics = (java.util.Vector<TopicInfoData>)archive.inoutSerializableList("subscribeTopics", subscribeTopics);
         publishTopics = (java.util.Vector<TopicInfoData>)archive.inoutSerializableList("publishTopics", publishTopics);
-	knownTypes = (java.util.Vector<String>) archive.inoutStringList("knownTypes", knownTypes);
+        knownTypes = (java.util.Vector<String>) archive.inoutStringList("knownTypes", knownTypes);
     }
 
 }
-

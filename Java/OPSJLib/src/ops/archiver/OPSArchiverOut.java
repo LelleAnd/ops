@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2019-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -99,17 +99,25 @@ public class OPSArchiverOut extends ArchiverInOut
 
     public Serializable inout(String name, Serializable v) throws IOException
     {
-        writeBuf.write(((OPSObject)v).getTypesString());
+        String types = "";
+        if (((OPSObject)v).idlVersionMask != 0) {
+            types = "0 ";
+        }
+        writeBuf.write(types + ((OPSObject)v).getTypesString());
         v.serialize(this);
         return v;
     }
 
     public <T extends Serializable> Serializable inout(String name, Serializable v, Class<T> cls) throws IOException
     {
+        String types = "";
+        if (((OPSObject)v).idlVersionMask != 0) {
+            types = "0 ";
+        }
         if (optNonVirt) {
-            writeBuf.write("");
+            writeBuf.write(types);
         } else {
-            writeBuf.write(((OPSObject)v).getTypesString());
+            writeBuf.write(types + ((OPSObject)v).getTypesString());
         }
         v.serialize(this);
         return v;
@@ -166,9 +174,12 @@ public class OPSArchiverOut extends ArchiverInOut
     public List inoutSerializableList(String name, List v) throws IOException
     {
         writeBuf.write(v.size());
-        for (int i = 0; i < v.size(); i++)
-        {
-            writeBuf.write(((OPSObject)v.get(i)).getTypesString());
+        for (int i = 0; i < v.size(); i++) {
+            String types = "";
+            if (((OPSObject)v.get(i)).idlVersionMask != 0) {
+                types = "0 ";
+            }
+            writeBuf.write(types + ((OPSObject)v.get(i)).getTypesString());
             ((Serializable)v.get(i)).serialize(this);
         }
         return v;
@@ -177,12 +188,15 @@ public class OPSArchiverOut extends ArchiverInOut
     public <T extends Serializable> List inoutSerializableList(String name, List v, Class<T> cls) throws IOException
     {
         writeBuf.write(v.size());
-        for (int i = 0; i < v.size(); i++)
-        {
+        for (int i = 0; i < v.size(); i++) {
+            String types = "";
+            if (((OPSObject)v.get(i)).idlVersionMask != 0) {
+                types = "0 ";
+            }
             if (optNonVirt) {
-                writeBuf.write("");
+                writeBuf.write(types);
             } else {
-                writeBuf.write(((OPSObject)v.get(i)).getTypesString());
+                writeBuf.write(types + ((OPSObject)v.get(i)).getTypesString());
             }
             ((Serializable)v.get(i)).serialize(this);
         }

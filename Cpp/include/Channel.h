@@ -31,7 +31,10 @@ namespace ops
     class OPS_EXPORT Channel : public OPSObject
     {
     public:
-		ChannelId_T channelID;
+        char Channel_version = Channel_idlVersion;
+
+        static const char Channel_idlVersion = 0;
+        ChannelId_T channelID;
         Transport_T linktype;
         Address_T localInterface;     // If multicast, this specifies interface to use
         Address_T domainAddress;

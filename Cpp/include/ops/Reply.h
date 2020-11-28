@@ -1,7 +1,7 @@
 /**
-* 
+*
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2019-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -29,13 +29,22 @@ namespace ops
 	class Reply : public OPSObject
 	{
 	public:
-		std::string requestId;
+		char Reply_version = Reply_idlVersion;
+
+        static const char Reply_idlVersion = 0;
+        std::string requestId;
         bool requestAccepted{ false };
-		std::string message;
+        std::string message;
 
 		void serialize(ops::ArchiverInOut* archiver) override
 		{
 			OPSObject::serialize(archiver);
+			if (idlVersionMask != 0) {
+				archiver->inout("Reply_version", Reply_version);
+                ValidateVersion("Reply", Reply_version, Reply_idlVersion);
+            } else {
+				Reply_version = 0;
+			}
 			archiver->inout("requestId", requestId);
 			archiver->inout("requestAccepted", requestAccepted);
 			archiver->inout("message", message);

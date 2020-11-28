@@ -11,8 +11,7 @@ In Java, no matter what way you use to receive the data the setup of a subscript
 ```
 //Get a participant reference, this is your entry point to OPS
 Participant participant = Participant.getInstance("FooDomain");
-if(participant == null)
-{
+if (participant == null) {
     //Report error
     return;
 }
@@ -24,7 +23,6 @@ Topic topic = participant.createTopic("FooTopic");
 FooDataSubscriber sub = new FooDataSubscriber(topic);
 
 sub.start();
-
 ```
 
 If we want to poll the subscriber for data the most simple approach we can have is:
@@ -32,8 +30,7 @@ If we want to poll the subscriber for data the most simple approach we can have 
 ```
 FooData data = null;
 data = sub.getData();
-if(data != null)
-{
+if (data != null) {
     //Do something with the data...
 }
 ```
@@ -59,8 +56,7 @@ It is also possible to have an application thread wait for incoming data and pol
 ```
 FooData data = null;
 data = sub.waitForNextData(1000);
-if(data != null)
-{
+if (data != null) {
     //Do something with the data...
 }
 
@@ -74,8 +70,7 @@ Just as in Java, no matter what way (polling or listening) you use to receive th
 ```
 //Get a participant reference, this is your entry point to OPS
 Participant* participant = Participant::getInstance("FooDomain");
-if(participant == NULL)
-{
+if (participant == nullptr) {
     //Report error
     return;
 }
@@ -88,17 +83,14 @@ Topic topic = participant->createTopic("FooTopic");
 FooDataSubscriber sub(topic);
 
 sub.start();
-
 ```
 
 If we want to poll the subscriber for data the most simple approach we can have is:
 
 ```
 FooData data;
-if(sub.newDataExist())
-{
-  if(sub.getData(&data))
-  {
+if (sub.newDataExist()) {
+  if (sub.getData(&data)) {
     //Do something with the data...
   }
 }
@@ -109,7 +101,6 @@ newDataExist() will return false until we receive new data.
 If we want to use a listener approach we can use OPS DataListener and DataNotifier classes by creating a listener class in the following way:
 
 ```
-
 class MyListener : public ops::DataListener
 {
    FooDataSubscriber* fooSub;
@@ -122,12 +113,10 @@ class MyListener : public ops::DataListener
    void onNewData(ops::DataNotifier*)
    {
       FooData data;
-      if(fooSub->getData(&data))
-      {
+      if (fooSub->getData(&data)) {
           //Do something with the data...
       }    
    }
-
 }
 ```
 
@@ -138,16 +127,23 @@ MyListener listener(&sub);
 
 ```
 
+In a similar way as for the Java Observer example above, we can use C++ lamdas to setup a listener instead of creating a class inheriting from the DataListener
+
+```
+sub.addDataListener(
+    [&](ops::DataNotifier* /*subscriber*/) {
+        // Get the actual data object published
+        FooData* data = sub.getTypedDataReference();
+        //Do something with the data...
+    }
+```
+
 It is also possible to have an application thread wait for incoming data and poll it as soon as data is available, the following lines will wait for data for 1000 milliseconds and return true only if a new sample arrives within the timeout:
 
 ```
-
 FooData data;
-if(sub.waitForNewData(1000))
-{
+if (sub.waitForNewData(1000)) {
       sub.getData(&data);
       //Do something with the data...
-
 }
-
 ```

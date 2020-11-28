@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2019-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -27,11 +27,15 @@
 
 namespace ops
 {
-	/// NOTE. Must be kept in sync with other OPS language implementations
+    /// NOTE. Must be kept in sync with other OPS language implementations
 	class ParticipantInfoData : public OPSObject
 	{
 	public:
-		ParticipantInfoData()
+        char ParticipantInfoData_version = ParticipantInfoData_idlVersion;
+
+        static const char ParticipantInfoData_idlVersion = 0;
+
+        ParticipantInfoData()
 		{
 			appendType(TypeId_T("ops.ParticipantInfoData"));
 		}
@@ -39,7 +43,12 @@ namespace ops
 		void serialize(ArchiverInOut* archiver) override
 		{
 			OPSObject::serialize(archiver);
-
+            if (idlVersionMask != 0) {
+                archiver->inout("ParticipantInfoData_version", ParticipantInfoData_version);
+                ValidateVersion("ParticipantInfoData", ParticipantInfoData_version, ParticipantInfoData_idlVersion);
+            } else {
+                ParticipantInfoData_version = 0;
+            }
 			archiver->inout("name", name);
 			archiver->inout("domain", domain);
 			archiver->inout("id", id);

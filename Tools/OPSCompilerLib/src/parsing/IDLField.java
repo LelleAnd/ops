@@ -18,6 +18,7 @@ public class IDLField
     private String name;
     private String type;
     private String comment;
+    private String directive;
     private String value;
     private boolean idlType;
     private boolean enumType;
@@ -103,6 +104,15 @@ public class IDLField
     public void setComment(String comment)
     {
         this.comment = comment;
+    }
+
+    public String getDirective()
+    {
+        return directive;
+    }
+    public void setDirective(String directive)
+    {
+        this.directive = directive;
     }
 
     public String getValue()

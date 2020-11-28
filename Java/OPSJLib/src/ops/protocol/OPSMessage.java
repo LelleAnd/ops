@@ -1,6 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -30,6 +31,9 @@ import ops.*;
  */
 public class OPSMessage extends OPSObject
 {
+    public byte OPSMessage_version = OPSMessage_idlVersion;
+
+    public static final byte OPSMessage_idlVersion = 0;
     private byte messageType;
     private byte  endianness;
     private byte publisherPriority;
@@ -163,6 +167,17 @@ public class OPSMessage extends OPSObject
     public void serialize(ArchiverInOut archive) throws IOException
     {
         super.serialize(archive);
+
+        if (idlVersionMask != 0) {
+            byte tmp = archive.inout("OPSMessage_version", OPSMessage_version);
+            if (tmp > OPSMessage_idlVersion) {
+                throw new IOException("OPSMessage: received version '" + tmp + "' > known version '" + OPSMessage_idlVersion + "'");
+            }
+            OPSMessage_version = tmp;
+        } else {
+            OPSMessage_version = 0;
+        }
+
         messageType = archive.inout("messageType", messageType);
         publisherPriority = archive.inout("publisherPriority", publisherPriority);
         publicationID = archive.inout("publicationID", publicationID);
@@ -171,7 +186,6 @@ public class OPSMessage extends OPSObject
         topLevelKey = archive.inout("topLevelKey", topLevelKey);
         address = archive.inout("address", address);
         data = (OPSObject) archive.inout("data", data);
-
     }
 
     @Override
@@ -187,6 +201,7 @@ public class OPSMessage extends OPSObject
     {
         super.fillClone(cloneO);
         OPSMessage cloneResult = (OPSMessage) cloneO;
+        cloneResult.OPSMessage_version = OPSMessage_version;
         cloneResult.setKey(this.getKey());
         cloneResult.messageType = messageType;
         cloneResult.publisherPriority = publisherPriority;
@@ -198,8 +213,4 @@ public class OPSMessage extends OPSObject
         cloneResult.data = (OPSObject)data.clone();
     }
 
-
-    
-
-    
 }

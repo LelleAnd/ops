@@ -632,6 +632,11 @@ public class PythonCompiler extends opsc.CompilerSupport
     protected String getConstantDeclarations(IDLClass idlClass)
     {
         String ret = "";
+        if (!isOnlyDefinition(idlClass)) {
+            int version = idlClass.getVersion();
+            if (version < 0) { version = 0; }
+            ret += tab(1) + idlClass.getClassName().toUpperCase() + "_IDLVERSION = " + version + endl();
+        }
         for (IDLField field : idlClass.getFields()) {
             if (!field.isStatic()) continue;
             String fieldName = getFieldName(field);
@@ -668,6 +673,18 @@ public class PythonCompiler extends opsc.CompilerSupport
     {
         String packageName = idlClass.getPackageName() + ".";
         String ret = "";
+
+        if (!isOnlyDefinition(idlClass)) {
+            int version = idlClass.getVersion();
+            if (version < 0) { version = 0; }
+            // Need an implicit version field that should be [de]serialized
+            ret += tab(2) + "self." + idlClass.getClassName() + "_version = " +
+                idlClass.getClassName() + "." + idlClass.getClassName().toUpperCase() + "_IDLVERSION" + endl();
+        }
+        if (idlClass.getVersion() > 0) {
+            ret += tab(2) + "self.idlVersionMask |= 1" + endl();
+        }
+
         for (IDLField field : idlClass.getFields()) {
             if (field.isStatic()) continue;
             String fieldName = getFieldName(field);
@@ -722,7 +739,7 @@ public class PythonCompiler extends opsc.CompilerSupport
         return ret;
     }
 
-/*
+    /*
     protected String getDeclareVector(IDLField field)
     {
         System.out.println("PythonCompiler::getDeclareVector");
@@ -734,15 +751,52 @@ public class PythonCompiler extends opsc.CompilerSupport
         System.out.println("PythonCompiler::getSerialize");
         return "PythonCompiler::languageType";
     }
-*/
+    */
+
+    private String getFieldGuard(String versionName, IDLField field)
+    {
+        String ret = "";
+        Vector<VersionEntry> vec = getReducedVersions(field.getName(), field.getDirective());
+        if (vec != null) {
+            for (VersionEntry ent : vec) {
+                String cond = "(self." + versionName + " >= " + ent.start + ")";
+                if (ent.stop != -1) {
+                    cond = "(" + cond + " and (self." + versionName + " <= " + ent.stop + "))";
+                }
+                if (ret.length() > 0) {
+                    ret += " or ";
+                }
+                ret += cond;
+            }
+        }
+        return ret;
+    }
+
     protected String getSerialize(IDLClass idlClass)
     {
         String packageName = idlClass.getPackageName() + ".";
         String ret = "";
+        // Need an implicit version field that may be [de]serialized
+        String versionName = idlClass.getClassName() + "_version";
+        String versionNameIdl = idlClass.getClassName() + "." + idlClass.getClassName().toUpperCase() + "_IDLVERSION";
+        ret += tab(2) + "if self.idlVersionMask != 0:" + endl();
+        ret += tab(3) + "self." + versionName + " = archiver.Int8(\"" + versionName + "\", self." + versionName + ")" + endl();
+        ret += tab(3) + "if self." + versionName + " > " + versionNameIdl + ":" + endl();
+        ret += tab(4) + "raise IdlVersionError(\"" + idlClass.getClassName() + "\", self." + versionName + ", " + versionNameIdl + ")" + endl();
+        ret += tab(3) + "else:" + endl();
+        ret += tab(4) + "pass" + endl();
+        ret += tab(2) + "else:" + endl();
+        ret += tab(3) + "self." + versionName + " = 0" + endl();
         for (IDLField field : idlClass.getFields()) {
             if (field.isStatic()) continue;
             String seralizerString = "archiver.";
             String fieldName = getFieldName(field);
+            String fieldGuard = getFieldGuard(versionName, field);
+            int tabCnt = 2;
+            if (fieldGuard.length() > 0) {
+                ret += tab(tabCnt) + "if " + fieldGuard + ":" + endl();
+                tabCnt += 1;
+            }
             if (!field.isArray()) {
                 seralizerString = "self." + fieldName + " = " + seralizerString;
             }
@@ -770,7 +824,10 @@ public class PythonCompiler extends opsc.CompilerSupport
             } else {
                 seralizerString += getArchiverCall(field) + "(\"" + field.getName() + "\", self." + fieldName + ")";
             }
-            ret += tab(2) + seralizerString + endl();
+            ret += tab(tabCnt) + seralizerString + endl();
+            if (fieldGuard.length() > 0) {
+                tabCnt -= 1;
+            }
         }
         return ret;
     }

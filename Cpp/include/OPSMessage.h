@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2019 Lennart Andersson.
+ * Copyright (C) 2019-2020 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -31,14 +31,17 @@
 
 namespace ops
 {
-
     class OPSMessage : public OPSObject
 #ifndef OPSSLIM_NORESERVE
 	, public Reservable
 #endif
     {
     public:
-        OPSMessage() : 
+        char OPSMessage_version = OPSMessage_idlVersion;
+
+        static const char OPSMessage_idlVersion = 0;
+
+        OPSMessage() :
             OPSObject()
 #ifndef OPSSLIM_NORESERVE
             , Reservable()
@@ -57,6 +60,7 @@ namespace ops
 			, Reservable()
 #endif
 		{
+            OPSMessage_version = other.OPSMessage_version;
 			messageType = other.messageType;
 			publisherPriority = other.publisherPriority;
 			dataOwner = other.dataOwner;
@@ -175,8 +179,12 @@ namespace ops
         virtual void serialize(ArchiverInOut* archive) override
         {
             OPSObject::serialize(archive);
-			
-			// Can't change/addto these without breaking compatbility
+            if (idlVersionMask != 0) {
+                archive->inout("OPSMessage_version", OPSMessage_version);
+                ValidateVersion("OPSMessage", OPSMessage_version, OPSMessage_idlVersion);
+            } else {
+                OPSMessage_version = 0;
+            }
             archive->inout("messageType", messageType);
             archive->inout("publisherPriority", publisherPriority);
             archive->inout("publicationID", publicationID);

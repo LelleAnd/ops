@@ -1,6 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -29,6 +30,9 @@ import java.io.IOException;
  */
 public class DefaultOPSConfigImpl extends OPSConfig
 {
+    public byte DefaultOPSConfigImpl_version = DefaultOPSConfigImpl_idlVersion;
+
+    public static final byte DefaultOPSConfigImpl_idlVersion = 0;
 
     public DefaultOPSConfigImpl()
     {
@@ -39,6 +43,15 @@ public class DefaultOPSConfigImpl extends OPSConfig
     public void serialize(ArchiverInOut archive) throws IOException
     {
         super.serialize(archive);
+        if (idlVersionMask != 0) {
+            byte tmp = archive.inout("DefaultOPSConfigImpl_version", DefaultOPSConfigImpl_version);
+            if (tmp > DefaultOPSConfigImpl_idlVersion) {
+                throw new IOException("DefaultOPSConfigImpl: received version '" + tmp + "' > known version '" + DefaultOPSConfigImpl_idlVersion + "'");
+            }
+            DefaultOPSConfigImpl_version = tmp;
+        } else {
+            DefaultOPSConfigImpl_version = 0;
+        }
     }
-    
+
 }

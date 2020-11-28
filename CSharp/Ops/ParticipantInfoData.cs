@@ -14,6 +14,21 @@ namespace Ops
     // NOTE. Must be kept in sync with C++
 	public class ParticipantInfoData : OPSObject
 	{
+        private byte _ParticipantInfoData_version = ParticipantInfoData_idlVersion;
+        public byte ParticipantInfoData_version
+        {
+            get { return _ParticipantInfoData_version; }
+            set {
+                if (value > ParticipantInfoData_idlVersion)
+                {
+                    throw new IdlVersionException(
+                        "ParticipantInfoData: received version '" + value + "' > known version '" + ParticipantInfoData_idlVersion + "'");
+                }
+                _ParticipantInfoData_version = value;
+            }
+        }
+
+        public const byte ParticipantInfoData_idlVersion = 0;
         public string name { get; set; }
         public string id { get; set; }
         public string domain { get; set; }
@@ -46,7 +61,16 @@ namespace Ops
 		{
 			base.Serialize(archive);
 
-			name = archive.Inout("name", name);
+            if (IdlVersionMask != 0)
+            {
+                ParticipantInfoData_version = archive.Inout("ParticipantInfoData_version", ParticipantInfoData_version);
+            }
+            else
+            {
+                ParticipantInfoData_version = 0;
+            }
+
+            name = archive.Inout("name", name);
 			domain = archive.Inout("domain", domain);
 			id = archive.Inout("id", id);
 			ip = archive.Inout("ip", ip);

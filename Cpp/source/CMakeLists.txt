@@ -34,12 +34,7 @@ set(LIB_BOTTOM_LAYER_SRC
 # ide grouping, doesn't matter for makefile projects
 source_group("Header Files" FILES ${LIB_PUBLIC_HEADERS})
 
-# install headers separately to keep the include file hierarchy
-# Only done in Bootstrap phase
-set(INSTALL_INCDIR include)
-install(DIRECTORY ${OPS_HEADER_PATH}/ DESTINATION ${INSTALL_INCDIR}/${LIB_NAME})
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/Common/idl/Generated/Cpp/ DESTINATION ${INSTALL_INCDIR}/${LIB_NAME})
-
+if(NOT CMAKE_BUILD_TYPE MATCHES "Bootstrap")
 
 # generate the library target
 add_library(${LIB_NAME} SHARED
@@ -98,3 +93,12 @@ install(TARGETS ${LIB_NAME} ${LIB_STATIC}
   LIBRARY DESTINATION ${INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${INSTALL_ARCHIVEDIR}
   )
+
+else()
+  # install headers separately to keep the include file hierarchy
+  # Only done in Bootstrap phase
+  set(INSTALL_INCDIR include)
+  install(DIRECTORY ${OPS_HEADER_PATH}/ DESTINATION ${INSTALL_INCDIR}/${LIB_NAME})
+  install(DIRECTORY ${PROJECT_SOURCE_DIR}/Common/idl/Generated/Cpp/ DESTINATION ${INSTALL_INCDIR}/${LIB_NAME})
+
+endif()

@@ -1,5 +1,5 @@
 
-project (OPStest)
+##project (OPStest)
 
 if(NOT GTEST_FOUND)
   message(FATAL_ERROR "GOOGLETEST_HOME is undefined")

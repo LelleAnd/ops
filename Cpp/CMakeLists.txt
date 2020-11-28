@@ -67,9 +67,6 @@ endif()
 add_subdirectory(source)
 
 if(NOT CMAKE_BUILD_TYPE MATCHES "Bootstrap")
-  # Add tests
-  add_subdirectory(test)
-
   ################################################################################
   # Documentation
 

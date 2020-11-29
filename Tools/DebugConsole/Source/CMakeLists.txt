@@ -11,7 +11,7 @@ add_executable(${EXE_NAME}
     ${EXE_SRCS}
 )
 
-if(NOT EXISTS ${CMAKE_SOURCE_DIR}/Common/idl/Generated/Cpp)
+if(NOT EXISTS ${PROJECT_SOURCE_DIR}/Common/idl/Generated/Cpp)
   message(SEND_ERROR "Needed files not generated. Run bootstrap.")
 endif()
 

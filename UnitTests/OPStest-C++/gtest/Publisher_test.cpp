@@ -166,6 +166,46 @@ TEST(Test_Publisher, TestResends) {
         pub.RemoveExpectedAckSender("sub-one");
         EXPECT_FALSE(pub.CheckAckSender("sub-one"));
         EXPECT_TRUE(pub.CheckAckSender(""));
+
+        // Send data with expected ACK's using Activate with lamda
+        pub.AddExpectedAckSender("sub-one");
+        EXPECT_TRUE(pub.writeOPSObject(&obj));
+        EXPECT_EQ(sdh->send_cnt, 8);
+        EXPECT_EQ(pub.getSendState(), ops::Publisher::SendState::sending);
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        pub.Activate([](const ops::ObjectName_T& subname, int32_t totfail) { return ops::Publisher::ResendAlternative_T::yes; });
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        pub.Activate([](const ops::ObjectName_T& subname, int32_t totfail) { return ops::Publisher::ResendAlternative_T::yes; });
+
+        EXPECT_EQ(sdh->send_cnt, 10);
+        EXPECT_EQ(pub.getSendState(), ops::Publisher::SendState::sending);
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        pub.Activate([](const ops::ObjectName_T& subname, int32_t totfail) { return ops::Publisher::ResendAlternative_T::no; });
+
+        EXPECT_EQ(sdh->send_cnt, 10);
+        EXPECT_EQ(pub.getSendState(), ops::Publisher::SendState::acked);
+
+        EXPECT_TRUE(pub.writeOPSObject(&obj));
+        EXPECT_EQ(sdh->send_cnt, 11);
+        EXPECT_EQ(pub.getSendState(), ops::Publisher::SendState::sending);
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        pub.Activate([](const ops::ObjectName_T& subname, int32_t totfail) { return ops::Publisher::ResendAlternative_T::yes; });
+
+        EXPECT_EQ(sdh->send_cnt, 12);
+        EXPECT_EQ(pub.getSendState(), ops::Publisher::SendState::sending);
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        pub.Activate([](const ops::ObjectName_T& subname, int32_t totfail) { return ops::Publisher::ResendAlternative_T::no_remove; });
+
+        EXPECT_EQ(sdh->send_cnt, 12);
+        EXPECT_EQ(pub.getSendState(), ops::Publisher::SendState::acked);
+
+        EXPECT_FALSE(pub.CheckAckSender("sub-one"));
+        EXPECT_TRUE(pub.CheckAckSender(""));
     }
 }
 

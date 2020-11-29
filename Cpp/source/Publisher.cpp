@@ -113,6 +113,7 @@ namespace ops
 
         typedef std::pair<uint32_t, uint16_t> MyKey_t;
         struct entry_t {
+            bool valid{ true };
             bool acked{ false };
             int32_t failed{ 0 };
             void ack() { acked = true; }
@@ -339,6 +340,7 @@ namespace ops
         // Add Subscriber to expected ACK senders
         MessageLock lck(*_ackSub);
         _ackSub->_expectedSub[subname].acked = false;
+        _ackSub->_expectedSub[subname].valid = true;
     }
 
     // "" check all
@@ -348,12 +350,12 @@ namespace ops
         MessageLock lck(*_ackSub);
         if (subname == "") {
             for (auto& x : _ackSub->_expectedSub) {
-                if (!x.second.acked) { return false; }
+                if (!x.second.acked && x.second.valid) { return false; }
             }
             return true;
         } else {
             for (auto& x : _ackSub->_expectedSub) {
-                if (x.first == subname) {
+                if ((x.first == subname) && x.second.valid) {
                     if (x.second.acked) { return true; }
                 }
             }
@@ -369,8 +371,13 @@ namespace ops
         _ackSub->_expectedSub.erase(subname);
     }
 
-    // Need to be called periodically
     void Publisher::Activate()
+    {
+        Activate([](const ObjectName_T&, int32_t) { return ResendAlternative_T::yes; });
+    }
+
+    // Need to be called periodically
+    void Publisher::Activate(ShouldResendFunc_T shouldResend)
     {
         if (_ackSub == nullptr) { return; }
 
@@ -386,9 +393,19 @@ namespace ops
             // Check if any of the expected hasn't responded to us
             for (auto& element : _ackSub->_expectedSub) {
                 AckSubscriber::entry_t& ent = element.second;
-                if (!ent.acked) {
+                if (!ent.acked && ent.valid) {
                     ++ent.failed;
-                    resend = true;
+                    // Verify with owner that 'element.first' is still an expected AckSender.
+                    switch (shouldResend(element.first, ent.failed)) {
+                    case ResendAlternative_T::no:
+                        break;
+                    case ResendAlternative_T::no_remove:
+                        ent.valid = false;
+                        break;
+                    case ResendAlternative_T::yes:
+                        resend = true;
+                        break;
+                    }
                 }
             }
             // Also check all that has registered with us

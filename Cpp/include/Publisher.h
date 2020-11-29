@@ -22,6 +22,7 @@
 #pragma once
 
 #include <atomic>
+#include <functional>
 
 #include "OPSTypeDefs.h"
 #include "OPSObject.h"
@@ -64,8 +65,14 @@ public:
     bool CheckAckSender(const ObjectName_T& subname);    // "" --> check all
     void RemoveExpectedAckSender(const ObjectName_T& subname);
 
-    // Need to be called periodically to do resends and update SendState
+    // Defines return status for doResend question
+    enum class ResendAlternative_T : uint8_t { yes, no, no_remove };
+    using ShouldResendFunc_T = std::function<ResendAlternative_T(const ObjectName_T& subname, int32_t totfail)>;
+
+    // Need to be called periodically to do resends and update SendState.
+    // Optionally a callback can be made to decide on eventual resends (called with internal lock held).
     void Activate();
+    void Activate(ShouldResendFunc_T shouldResend);
 
     enum class SendState : uint8_t {
         init,       // Before anything is published

@@ -904,6 +904,7 @@ public:
             }
 		}
 
+#ifdef OPS_ENABLE_DEBUG_HANDLER
 		// Create subscribers to all DebugRequestResponseData
 		for (unsigned int i = 0; i < args.debugDomains.size(); i++) {
 			try {
@@ -932,6 +933,7 @@ public:
 			{
 			}
 		}
+#endif
 
 		// Create subscribers to all ParticipantInfoData
 		for (unsigned int i = 0; i < args.infoDomains.size(); i++) {

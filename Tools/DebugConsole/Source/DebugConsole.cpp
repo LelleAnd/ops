@@ -120,11 +120,15 @@ public:
 private:
 	bool setupSubscriber()
 	{
-		_sub = new ops::Subscriber(_part->createDebugTopic());
+#ifdef OPS_ENABLE_DEBUG_HANDLER
+        _sub = new ops::Subscriber(_part->createDebugTopic());
 		_sub->addDataListener(this);
 		_sub->start();
 		return true;
-	}
+#else
+        return false;
+#endif
+    }
 
 	void removeSubscriber()
 	{
@@ -181,10 +185,12 @@ void CommandLoop(const ops::Participant* const part)
 	request.Command = 1;
 	request.Param1 = 1;
 
-	ops::Topic const top = part->createDebugTopic();
+#ifdef OPS_ENABLE_DEBUG_HANDLER
+    ops::Topic const top = part->createDebugTopic();
 	opsidls::DebugRequestResponseDataPublisher pub(top);
 	pub.start();
 	pub.write(request);
+#endif
 
 	ops::TimeHelper::sleep(1000);
 }
@@ -192,7 +198,7 @@ void CommandLoop(const ops::Participant* const part)
 void Usage()
 {
 	std::cout << std::endl;
-	std::cout << "Version 2019-11-29" << std::endl;
+	std::cout << "Version 2020-11-28" << std::endl;
 	std::cout << std::endl;
 	std::cout << "  Usage:" << std::endl;
 	std::cout << "    DebugConsole [-?][-v] [-cfg file] -list" << std::endl;
@@ -239,7 +245,12 @@ int main(const int argc, const char* argv[])
 	std::string domain = "";
 	std::string key = "*";
 
-	// Helper variables
+#ifndef OPS_ENABLE_DEBUG_HANDLER
+    std::cout << "\n DebugConsole not working since OPS compiled without debug support (#define OPS_ENABLE_DEBUG_HANDLER)\n\n";
+    return 1;
+#endif
+    
+    // Helper variables
 	std::string* strp = nullptr;
 	int* intp = nullptr;
 	int64_t* int64p = nullptr;
@@ -374,7 +385,8 @@ int main(const int argc, const char* argv[])
 		DebugListener listener(participant);
 		listener.Start();
 
-		ops::Topic const top = participant->createDebugTopic();
+#ifdef OPS_ENABLE_DEBUG_HANDLER
+        ops::Topic const top = participant->createDebugTopic();
 		opsidls::DebugRequestResponseDataPublisher pub(top);
 		pub.start();
 		pub.write(request);
@@ -396,7 +408,7 @@ int main(const int argc, const char* argv[])
 			}
 			ops::TimeHelper::sleep(1000);
 		}
-
+#endif
 	}
     return 0;
 }

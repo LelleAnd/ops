@@ -43,8 +43,7 @@ add_library(${LIB_NAME} SHARED
     ${LIB_OPS_PUBLIC_HEADERS}
 )
 
-add_dependencies(${LIB_NAME}
-    opsidls)
+## add_dependencies(${LIB_NAME} opsidls)
 
 target_include_directories(${LIB_NAME} PUBLIC ../include)
 
@@ -68,8 +67,8 @@ add_library(${LIB_STATIC} STATIC
     ${LIB_BOTTOM_LAYER_SRC}
     ${LIB_OPS_PUBLIC_HEADERS}
 )
-add_dependencies(${LIB_STATIC}
-    opsidls)
+
+## add_dependencies(${LIB_STATIC} opsidls)
 
 set_target_properties(${LIB_STATIC} PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(${LIB_STATIC} PROPERTIES COMPILE_DEFINITIONS OPS_LIBRARY_STATIC)

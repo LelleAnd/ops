@@ -72,12 +72,12 @@ message("Boost_LIBRARY_DIRS: " ${Boost_LIBRARY_DIRS})
 message("Boost_LIBRARIES: " ${Boost_LIBRARIES})
 
 ## ----------------------------------------------------------------------------
-# Python, we only support 2.7.x
-find_package(PythonInterp 2.7 EXACT)
+# Python, v2.7 or 3.x
+find_package(PythonInterp)
 if(PYTHONINTERP_FOUND)
   message("Found Python interpreter version " ${PYTHON_VERSION_STRING})
 else()
-  message(WARNING "Could not find a Python interpreter")
+  message(STATUS "No Python interpreter found. Python package not built.")
 endif()
 
 ## ----------------------------------------------------------------------------
@@ -161,29 +161,39 @@ mark_as_advanced(CLEAR BUILD_DOCUMENTATION)
 # Build the source
 
 # common parts
-add_subdirectory(Common)
-
-# recurse into java source
-if(Java_JAVAC_EXECUTABLE)
-  # this builds ConfigurationLib and JarSearch
-  add_subdirectory(Libs)
-  # build OPSJLib
-  add_subdirectory(Java)
-  # build the rest
-  add_subdirectory(Tools)
-endif()
-
-if(PYTHONINTERP_FOUND)
-  add_subdirectory(Python)
-endif()
-
-add_subdirectory(CSharp)
-
 if(CMAKE_BUILD_TYPE MATCHES "Bootstrap")
+  # We only generate the source from the idls during the Bootstrap phase
+  # since it generates code into the source tree
+  add_subdirectory(Common)
+
+  # recurse into java source
+  # We only build Java during the Bootstrap phase, since it is needed during
+  # bootstrap and there isn't any difference between debug and opt builds
+  if(Java_JAVAC_EXECUTABLE)
+    # this builds ConfigurationLib and JarSearch
+    add_subdirectory(Libs)
+    # build OPSJLib
+    add_subdirectory(Java)
+    # build the rest
+    add_subdirectory(Tools)
+  endif()
+
+  # We only handle Python during the Bootstrap phase, since there isn't any
+  # difference between debug and opt builds
+  if(PYTHONINTERP_FOUND)
+    # Build python source distribution of ops
+    add_subdirectory(Python)
+  endif()
+
   # Need to add the install of C++ headers, which is independent on Debug or Opt builds
   add_subdirectory(Cpp)
 
 else()
+  add_subdirectory(CSharp)
+
+  # build the rest
+  add_subdirectory(Tools)
+
   # add the C++ source, only if Boost is loaded
   if(Boost_FOUND)
     add_subdirectory(Cpp)
@@ -197,7 +207,7 @@ else()
     message(WARNING "install Boost to build OPS C++ libraries")
   endif()
 
-################################################################################
+  ################################################################################
   # Build Examples
   # We need the opsc compiler from the Bootstrap phase to generate code for the examples
     option(OPS_BUILD_EXAMPLES "Enable to build the example applications" ON)

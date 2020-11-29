@@ -1,10 +1,4 @@
 
-if(CMAKE_BUILD_TYPE MATCHES "Bootstrap")
-
-  # We only handle Python during the Bootstrap phase, since there isn't any
-  # difference between debug and opt builds
-  # Build python source distribution of ops
-
   set(SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/ops/__init__.py
     ${CMAKE_CURRENT_SOURCE_DIR}/ops/Archiver.py
@@ -44,5 +38,3 @@ if(CMAKE_BUILD_TYPE MATCHES "Bootstrap")
   else()
     install(FILES ${SRC} DESTINATION ${OPS_PYTHON_INSTALL_PATH}/ops)
   endif()
-
-endif()

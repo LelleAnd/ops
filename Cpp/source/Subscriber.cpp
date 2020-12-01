@@ -110,7 +110,7 @@ namespace ops
         }
 
         // Not used, but must be implemeted
-        bool applyFilter(const OPSObject*) override
+        bool applyFilter(const OPSObject* const) override
         {
             return true;
         }
@@ -119,7 +119,7 @@ namespace ops
         // Applies a filter in the receiving process in Subscribers.
         // Returning false from a filter indicates that this data sample (OPSObject)
         // shall not be propagated to the application layer.
-        bool applyFilter(const OPSMessage* mess, const OPSObject*) override
+        bool applyFilter(const OPSMessage* const mess, const OPSObject* const) override
         {
             // Send ACK with Pub ID counter
             int64_t pubId = mess->getPublicationID();

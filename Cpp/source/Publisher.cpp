@@ -40,6 +40,11 @@ namespace ops
         {
         }
 
+#if defined(_MSC_VER) && (_MSC_VER == 1900)
+        // VS2015 gives a warning on onNewEvent() "... previous versions of the compiler did not override when ...", which later versions don't do.
+        // We want it to override so skip warning
+#pragma warning( disable : 4373 )
+#endif
         // Note that the receiveDataHandler messageLock is held while executing this method
         void onNewEvent(ops::Notifier<ops::OPSMessage*>*, ops::OPSMessage* const mess) override
         {

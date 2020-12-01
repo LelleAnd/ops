@@ -39,7 +39,7 @@ namespace ops
         ///shall not be propagated to the application layer.
         virtual bool applyFilter(const OPSObject* const o) = 0;
 
-        virtual bool applyFilter(const OPSMessage*, const OPSObject* const o)
+        virtual bool applyFilter(const OPSMessage* const, const OPSObject* const o)
         {
             return applyFilter(o);
         }

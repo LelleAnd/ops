@@ -8,6 +8,8 @@ Use a Git client of your choice to clone the OPS repository to a directory of yo
 
 ## Building with CMake ##
 #### Configuration ####
+See the beginning of the top level [CMakeLists.txt](../CMakeLists.txt) for some Environment and CMake symbols that can be set to affect the build process.
+
 Building the examples from the *Examples* directory can optionally be turned off using the *cmake-gui* or by editing CMakeLists.txt. If make is used, building examples can also be controlled from the command line.
 
 Building unit tests can also optionally be turned off in the same maner as building examples.

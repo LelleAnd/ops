@@ -27,7 +27,7 @@
   configure_file(setup.py.in ${CMAKE_CURRENT_SOURCE_DIR}/setup.py)
 
   add_custom_command(OUTPUT ${OUTPUT}
-                     COMMAND ${PYTHON_EXECUTABLE} setup.py sdist -d ${CMAKE_CURRENT_BINARY_DIR}/dist
+                     COMMAND ${Python_EXECUTABLE} setup.py sdist -d ${CMAKE_CURRENT_BINARY_DIR}/dist
                      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                      DEPENDS ${SRC} setup.py.in)
 

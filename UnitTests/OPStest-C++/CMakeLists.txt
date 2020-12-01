@@ -3,10 +3,6 @@ if(NOT GTEST_FOUND)
   message(FATAL_ERROR "GOOGLETEST_HOME is undefined")
 endif()
 
-if(NOT DEFINED ENV{GCOVR_HOME})
-  message(WARNING "GCOVR_HOME is undefined")
-endif()
-
 # We are going to need the boost headers
 include_directories(${Boost_INCLUDE_DIRS})
 # The ops C++ headers are at:

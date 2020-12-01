@@ -4,13 +4,39 @@ cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 # The main project name
 project(OPS VERSION 4.2.0)
 
+################################################################################
+#
+# Symbols that can be set to affect/control the build process:
+#   Environment:
+#     Help CMake find different tools/libs
+#       GOOGLETEST_HOME             -
+#       GOOGLETEST_LIB              -
+#       JAVA_HOME                   -
+#       Python_ROOT_DIR             -
+#       BOOST_HOME or BOOST_ROOT    -
+#
+#     When C++ has defined USE_FIXED_LENGTH_STRINGS:
+#       OPS_FIXED_OBJECT_NAME_SIZE  default: 50
+#       OPS_FIXED_MESSAGE_KEY_SIZE  default: 60
+#       OPS_FIXED_TYPE_ID_SIZE      default: 256
+#       OPS_FIXED_CHANNEL_ID_SIZE   default: 20
+#       OPS_FIXED_FILENAME_SIZE     default: 1024
+#
+#   CMAKE:
+#     CMAKE_BUILD_TYPE              Bootstrap / Debug / Opt
+#     BOOST_ARCH                    -
+#     OPS_BUILD_UNITTESTS           default: ON
+#     OPS_BUILD_EXAMPLES            default: ON
+#
+################################################################################
+
 set (CMAKE_CXX_STANDARD 11)
 
 ################################################################################
 # Find external dependencies
 
 ## ----------------------------------------------------------------------------
-message("GOOGLETEST_HOME: " $ENV{GOOGLETEST_HOME})
+message(STATUS "GOOGLETEST_HOME: " $ENV{GOOGLETEST_HOME})
 
 # help the FindGtest script locate gtest
 if(DEFINED ENV{GOOGLETEST_HOME})
@@ -19,7 +45,7 @@ if(DEFINED ENV{GOOGLETEST_HOME})
 endif()
 find_package(GTest)
 
-message("GTEST_INCLUDE_DIRS: " ${GTEST_INCLUDE_DIRS})
+message(STATUS "GTEST_INCLUDE_DIRS: " ${GTEST_INCLUDE_DIRS})
 
 ## ----------------------------------------------------------------------------
 # We need Java 1.8 (JDK 8) or later since Java code uses lambda expressions
@@ -40,8 +66,8 @@ else()
 endif()
 
 ## ----------------------------------------------------------------------------
-message("BOOST_HOME: " $ENV{BOOST_HOME})
-message("BOOST_ARCH: " ${BOOST_ARCH})
+message(STATUS "BOOST_HOME: " $ENV{BOOST_HOME})
+message(STATUS "BOOST_ARCH: " ${BOOST_ARCH})
 
 # find Boost. If not found we can't build c++ libs
 option(Boost_DEBUG "Set to ON to debug Boost paths" OFF)
@@ -53,7 +79,7 @@ set(Boost_NO_BOOST_CMAKE ON)
 if(DEFINED ENV{BOOST_HOME})
   set(BOOST_ROOT $ENV{BOOST_HOME})
 endif()
-message ("BOOST_ROOT: " ${BOOST_ROOT})
+message(STATUS "BOOST_ROOT: " ${BOOST_ROOT})
 
 if(BOOST_ARCH)
   ###  set(Boost_ARCHITECTURE "-x64")    ## Needed to work on GitHub CI test
@@ -67,17 +93,27 @@ else()
   find_package(Boost MODULE COMPONENTS system thread)
 endif()
 
-message("Boost_INCLUDE_DIRS: " ${Boost_INCLUDE_DIRS})
-message("Boost_LIBRARY_DIRS: " ${Boost_LIBRARY_DIRS})
-message("Boost_LIBRARIES: " ${Boost_LIBRARIES})
+message(STATUS "Boost_INCLUDE_DIRS: " ${Boost_INCLUDE_DIRS})
+message(STATUS "Boost_LIBRARY_DIRS: " ${Boost_LIBRARY_DIRS})
+message(STATUS "Boost_LIBRARIES: " ${Boost_LIBRARIES})
 
 ## ----------------------------------------------------------------------------
 # Python, v2.7 or 3.x
-find_package(PythonInterp)
-if(PYTHONINTERP_FOUND)
-  message("Found Python interpreter version " ${PYTHON_VERSION_STRING})
+if (${CMAKE_VERSION} VERSION_LESS "3.12")
+  find_package(PythonInterp)
+  if(PYTHONINTERP_FOUND)
+    message(STATUS "Found Python interpreter version " ${PYTHON_VERSION_STRING})
+    set(Python_EXECUTABLE ${PYTHON_EXECUTABLE})
+  else()
+    message(STATUS "No Python interpreter found. Python package will not be built.")
+  endif()
 else()
-  message(STATUS "No Python interpreter found. Python package not built.")
+  find_package(Python COMPONENTS Interpreter Development)
+  if(Python_FOUND)
+    message(STATUS "Found Python interpreter version " ${Python_VERSION} " ID: " ${Python_INTERPRETER_ID})
+  else()
+    message(STATUS "No Python interpreter found. Python package will not be built.")
+  endif()
 endif()
 
 ## ----------------------------------------------------------------------------
@@ -101,8 +137,8 @@ endif()
 set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} ${warnings}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${warnings}")
 
-message ("c Flags: " ${CMAKE_C_FLAGS})
-message ("cxx Flags: " ${CMAKE_CXX_FLAGS})
+message(STATUS "c Flags: " ${CMAKE_C_FLAGS})
+message(STATUS "cxx Flags: " ${CMAKE_CXX_FLAGS})
 
 ## ----------------------------------------------------------------------------
 # If we have java
@@ -180,7 +216,7 @@ if(CMAKE_BUILD_TYPE MATCHES "Bootstrap")
 
   # We only handle Python during the Bootstrap phase, since there isn't any
   # difference between debug and opt builds
-  if(PYTHONINTERP_FOUND)
+  if(PYTHONINTERP_FOUND OR Python_FOUND)
     # Build python source distribution of ops
     add_subdirectory(Python)
   endif()

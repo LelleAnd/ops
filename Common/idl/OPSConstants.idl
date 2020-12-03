@@ -19,4 +19,7 @@ class OPSConstants
           current segment number     4
     */
     const int SEGMENT_HEADER_SIZE = 14;
+
+    /* Usable size of a segement (PACKET_MAX_SIZE - SEGMENT_HEADER_SIZE) */
+    const int USABLE_SEGMENT_SIZE = 59986;
 }

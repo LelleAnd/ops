@@ -70,7 +70,7 @@ Optional elements of _Domain_:
   * **registerTimeMs**, sets the minimum time in [ms] between two REGISTER messages from a subscriber (if ACK's are enabled for a _Topic_). Default value is 1000 [ms].
 
 Optional elements of _Topic_:
-  * **sampleMaxSize**, defines the maximum size of the data type when used in this topic. The value is used for reserving memory to be able to buffer data during reception. The value is also used for a buffer in each publisher for a serialized version of the data type during sending. If this tag is omitted a value of 60000 is used. If a value < 60000 is specified, 60000 is still used for reception. If a value > 60000 is specified, this topic MUST use its own port, see also [Sending Large Messages](LargeMessages.md).
+  * **sampleMaxSize**, defines the maximum size of the data type when used in this topic. The value is used for reserving memory to be able to buffer data during reception. The value is also used for a buffer in each publisher for a serialized version of the data type during sending. If this tag is omitted a value of 60000-14 bytes is used. If a value < 60000-14 is specified, 60000 is still used for reception. If a value > 60000-14 is specified, this topic MUST use its own port, see also [Sending Large Messages](LargeMessages.md).
   * **inSocketBufferSize**, changes the underlying sockets buffer size if possible. If this tag is omitted, the _Domain_ value is used.
   * **outSocketBufferSize**, changes the underlying sockets buffer size if possible. If this tag is omitted, the _Domain_ value is used.
   * **transport**, configures which transport mechanism to be used for this topic. Supported values are *multicast*, *udp* and *tcp*. If tag is omitted, *multicast* is used.
@@ -100,7 +100,7 @@ Elements of _Transport_ contains:
   * **channelID**, name of the channel as a string, must be defined in a _Channel_ element.
   * **topics**, a list of topic names that shall use the channel. Each topic name must be defined in a _Topic_ element.
 
-Note that if a topic specify _sampleMaxSize_ > 60000, it MUST have its own _Channel_. See also [Sending Large Messages](LargeMessages.md).
+Note that if a topic specify _sampleMaxSize_ > 60000-14, it MUST have its own _Channel_. See also [Sending Large Messages](LargeMessages.md).
 
 ## Transport Mechanism specifics ##
   * *multicast*: Is a _many-to-many_ transport mechanism. The **port** tag is required. If the **address** tag is specified it overrides the **domainAddress** and lets this topic communicate on its own multicast address.

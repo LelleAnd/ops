@@ -3,7 +3,7 @@
 
 ---
 
-**Note**, with topics that specify a _sampleMaxSize_ > 60000 there can only be one publisher publishing at the same time. If two publishers write at the same time, there is a risk that messages will be lost and not delivered to the subscribers as expected.
+**Note**, with topics that specify a _sampleMaxSize_ > 60000-14, there can only be one publisher publishing at the same time. If two publishers write at the same time, there is a risk that messages will be lost and not delivered to the subscribers as expected.
 
 **Note also**, this feature requires the Topic to use its own port, see [Defining Topics and Configuration](OpsConfig.md).
 
@@ -12,9 +12,9 @@
 ---
 
 
-OPS is by default using a UDP multicast based transport. UDP is a message based technology that fits well with the communication model of OPS. UDP does however put some restriction on the communication including the fact that UDP messages have a limited size. What this exact size is varies from platform to platform but a common size limit is 65535 bytes. Because of this, OPS has a default size limit for messages at 60000 bytes of user data in an OPS message. OPS allows you to increase this size limit if desirable by specifying the topics _sampleMaxSize_.
+OPS is by default using a UDP multicast based transport. UDP is a message based technology that fits well with the communication model of OPS. UDP does however put some restriction on the communication including the fact that UDP messages have a limited size. What this exact size is varies from platform to platform but a common size limit is 65535 bytes. Because of this, OPS has a default size limit for message segments of 60000 bytes which gives 60000-14 bytes of user data in an OPS message. OPS allows you to increase this size limit if desirable by specifying the topics _sampleMaxSize_.
 
-This is how to configure a topic on which you wish to send data samples larger than the default 60000 byte limit:
+This is how to configure a topic on which you wish to send data samples larger than the default 60000-14 byte limit:
 
 ```
 <?xml version="1.0" encoding="UTF-8"?>

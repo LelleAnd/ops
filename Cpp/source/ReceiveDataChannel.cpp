@@ -35,8 +35,8 @@ namespace ops
     using namespace opsidls;
 
 	ReceiveDataChannel::ReceiveDataChannel(Topic top, Participant& part, Receiver* const recv) :
-        sampleMaxSize(top.getSampleMaxSize() > OPSConstants::PACKET_MAX_SIZE ? top.getSampleMaxSize() : OPSConstants::PACKET_MAX_SIZE),
-        memMap(sampleMaxSize / OPSConstants::PACKET_MAX_SIZE + 1, OPSConstants::PACKET_MAX_SIZE, &DataSegmentAllocator::Instance()),
+        sampleMaxSize(top.getSampleMaxSize() > OPSConstants::USABLE_SEGMENT_SIZE ? top.getSampleMaxSize() : OPSConstants::USABLE_SEGMENT_SIZE),
+        memMap(1 + ((sampleMaxSize - 1) / OPSConstants::USABLE_SEGMENT_SIZE), OPSConstants::PACKET_MAX_SIZE, &DataSegmentAllocator::Instance()),
         participant(part),
         receiver(recv)
     {

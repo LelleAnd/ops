@@ -135,12 +135,10 @@ namespace ops
 
     using namespace opsidls;
 
-    constexpr int UsableSize = OPSConstants::PACKET_MAX_SIZE - OPSConstants::SEGMENT_HEADER_SIZE;
-
     Publisher::Publisher(Topic t) :
         topic(t),
-        memMap(1 + (t.getSampleMaxSize() / UsableSize),
-            (t.getSampleMaxSize() >= UsableSize) ? OPSConstants::PACKET_MAX_SIZE : t.getSampleMaxSize() + OPSConstants::SEGMENT_HEADER_SIZE,
+        memMap(1 + ((t.getSampleMaxSize() - 1) / OPSConstants::USABLE_SEGMENT_SIZE),
+            (t.getSampleMaxSize() >= OPSConstants::USABLE_SEGMENT_SIZE) ? OPSConstants::PACKET_MAX_SIZE : t.getSampleMaxSize() + OPSConstants::SEGMENT_HEADER_SIZE,
             &DataSegmentAllocator::Instance()),
         buf(memMap),
         _ackTimeoutInc(t.getResendTimeMs() < 0 ? 0 : t.getResendTimeMs())
@@ -162,7 +160,7 @@ namespace ops
         if (topic.getUseAck()) {
             // Enable ACK's
             // Check that SampleMaxSize is <= 60000-14
-            if (topic.getSampleMaxSize() > OPSConstants::PACKET_MAX_SIZE) {
+            if (topic.getSampleMaxSize() > OPSConstants::USABLE_SEGMENT_SIZE) {
                 throw ConfigException("SampleMaxSize to big for Publisher With Ack");
             }
 

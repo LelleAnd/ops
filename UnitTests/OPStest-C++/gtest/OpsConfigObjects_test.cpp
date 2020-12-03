@@ -45,7 +45,7 @@ using namespace opsidls;
 
 TEST(Test_OPSConfigObjects, TestTopic) {
 
-    const int PACKET_MAX_SIZE = OPSConstants::PACKET_MAX_SIZE;
+    const int SAMPLE_MAX_SIZE = OPSConstants::USABLE_SEGMENT_SIZE;
 
 	// Default constructed
 	Topic obj1;
@@ -58,7 +58,7 @@ TEST(Test_OPSConfigObjects, TestTopic) {
 	EXPECT_STREQ(obj1.getLocalInterface().c_str(), "");
 	EXPECT_STREQ(obj1.getParticipantID().c_str(), OPSConstants::DEFAULT_PARTICIPANT_ID());
 	EXPECT_STREQ(obj1.getDomainID().c_str(), "");
-	EXPECT_EQ(obj1.getSampleMaxSize(), PACKET_MAX_SIZE);
+	EXPECT_EQ(obj1.getSampleMaxSize(), SAMPLE_MAX_SIZE);
 	EXPECT_STREQ(obj1.getTransport().c_str(), "");
 	//outsocketbuffersize
 	//insocketbuffersize
@@ -81,7 +81,7 @@ TEST(Test_OPSConfigObjects, TestTopic) {
 	EXPECT_STREQ(obj2.getLocalInterface().c_str(), "");
 	EXPECT_STREQ(obj2.getParticipantID().c_str(), OPSConstants::DEFAULT_PARTICIPANT_ID());
 	EXPECT_STREQ(obj2.getDomainID().c_str(), "");
-	EXPECT_EQ(obj2.getSampleMaxSize(), PACKET_MAX_SIZE);
+	EXPECT_EQ(obj2.getSampleMaxSize(), SAMPLE_MAX_SIZE);
 	EXPECT_STREQ(obj2.getTransport().c_str(), "");
 	//outsocketbuffersize
 	//insocketbuffersize

@@ -173,7 +173,7 @@ namespace ops
         if (topic.getUseAck()) {
             // Enable ACK's
             // Check that SampleMaxSize is <= 60000-14
-            if (topic.getSampleMaxSize() > opsidls::OPSConstants::PACKET_MAX_SIZE) {
+            if (topic.getSampleMaxSize() > opsidls::OPSConstants::USABLE_SEGMENT_SIZE) {
                 throw ConfigException("SampleMaxSize to big for SubscriberWithAck");
             }
 

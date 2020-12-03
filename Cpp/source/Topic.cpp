@@ -29,9 +29,11 @@ namespace ops
 {
     using namespace opsidls;
 
+    static_assert(OPSConstants::PACKET_MAX_SIZE - OPSConstants::SEGMENT_HEADER_SIZE == OPSConstants::USABLE_SEGMENT_SIZE, "Sizes don't compute");
+
     Topic::Topic() :
         participantID(OPSConstants::DEFAULT_PARTICIPANT_ID()),
-        sampleMaxSize(OPSConstants::PACKET_MAX_SIZE)
+        sampleMaxSize(OPSConstants::USABLE_SEGMENT_SIZE)
     {
         appendType(TypeId_T("Topic"));
     }
@@ -42,7 +44,7 @@ namespace ops
 		typeID(typeIDd), 
 		domainAddress(domainAddresss),
 		participantID(OPSConstants::DEFAULT_PARTICIPANT_ID()),
-		sampleMaxSize(OPSConstants::PACKET_MAX_SIZE)
+		sampleMaxSize(OPSConstants::USABLE_SEGMENT_SIZE)
 	{
 		appendType(TypeId_T("Topic"));
 	}

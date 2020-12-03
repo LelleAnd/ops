@@ -75,19 +75,19 @@ namespace ops
             // If we already have a ReceiveDataHandler for this topic, use it.
             std::shared_ptr<ReceiveDataHandler> rdh = receiveDataHandlerInstances[key];
 
-            // Check if any of the topics have a sample size larger than MAX_SEGMENT_SIZE
-            // This will lead to a problem when using the same port or using UDP, if samples becomes > MAX_SEGMENT_SIZE
-			if ((rdh->getSampleMaxSize() > OPSConstants::PACKET_MAX_SIZE) || (top.getSampleMaxSize() > OPSConstants::PACKET_MAX_SIZE))
+            // Check if any of the topics have a sample size larger than USABLE_SEGMENT_SIZE
+            // This will lead to a problem when using the same port or using UDP, if samples becomes > USABLE_SEGMENT_SIZE
+            if ((rdh->getSampleMaxSize() > OPSConstants::USABLE_SEGMENT_SIZE) || (top.getSampleMaxSize() > OPSConstants::USABLE_SEGMENT_SIZE))
             {
 				ErrorMessage_T msg;
 				if (top.getTransport() == Topic::TRANSPORT_UDP) {
 					msg = "Warning: UDP Transport is used with Topics with 'sampleMaxSize' > ";
-					msg += NumberToString(OPSConstants::PACKET_MAX_SIZE);
+					msg += NumberToString(OPSConstants::USABLE_SEGMENT_SIZE);
 				} else {
 					msg += "Warning: Same port (";
 					msg += NumberToString(top.getPort());
 					msg += ") is used with Topics with 'sampleMaxSize' > ";
-					msg += NumberToString(OPSConstants::PACKET_MAX_SIZE);
+					msg += NumberToString(OPSConstants::USABLE_SEGMENT_SIZE);
 				}
 				BasicError err("ReceiveDataHandlerFactory", "getReceiveDataHandler", msg);
 				participant.reportError(&err);

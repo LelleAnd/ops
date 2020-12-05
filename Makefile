@@ -1,3 +1,4 @@
+################################################################################
 ## Configurable defines
 BUILD_ROOT?=build
 BUILD_SUFFIX?=
@@ -16,6 +17,7 @@ OPS_BUILD_EXAMPLES?=ON
 
 BOOST_ARCH?=
 
+################################################################################
 # Common defines
 CCV=$(shell $(CC) -dumpversion)
 CXXV=$(shell $(CXX) -dumpversion)

@@ -7,10 +7,9 @@ Learn more about the OPS IDL language [here](IDLLanguage.md).
 
 To edit IDL files and to compile these files into target languages, OPS comes with a tool called **OPS IDL Builder**. The **OPS IDL Builder** can be seen as an IDE for OPS projects.
 
-Prerequisites for compiling IDL files with the tool **OPS IDL Builder** is to define the  
-environment symbol **OPS_OPSC_PATH** with the path to the **opsc.bat** file, e.g.:
+Prerequisites for compiling IDL files with the tool **OPS IDL Builder**, is to define the environment symbol **OPS_OPSC_PATH** with the path to the OPS commandline compiler [opsc](IDLCommandlineCompiler.md), on windows **opsc.bat** and on Linux **opsc.sh**, e.g.:
 ```
-OPS_OPSC_PATH=D:\OPS\OPS4\Tools\opsc
+set OPS_OPSC_PATH=D:\OPS\OPS4\Tools\opsc
 ```
 
 The OPS IDL Builder looks as follows, with some sample code open in a sample project:

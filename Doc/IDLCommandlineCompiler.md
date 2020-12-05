@@ -57,11 +57,12 @@ To compile IDL's for the TestAll example, run the following command:
 ```
 This creates a 'Generated' directory in the TestAll directory with all generated files.
 
-NOTE: For ***opsc*** to compile C# code with the 'correct' C# compiler, you may need to set the
-environment symbol **OPS_CSC_PATH** to the directory where the wanted compiler binary exist.
+NOTE: For ***opsc*** to compile C# code to dll's with the 'correct' C# compiler, you may need to set the environment symbol **OPS_CSC_PATH** to the directory where the wanted compiler binary exist.
+
+NOTE: For ***opsc*** to compile Java code to jar-files with the 'correct' Jaca compiler, you may need to set the environment symbol **OPS_JAVA_PATH** to the directory where the wanted ***javac*** binary exist.
 
 Example:
 
 ```
-OPS_CSC_PATH=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\Roslyn
+set OPS_CSC_PATH=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\Roslyn
 ```

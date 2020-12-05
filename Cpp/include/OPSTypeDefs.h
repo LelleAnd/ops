@@ -31,35 +31,38 @@
 #include <sstream>
 
 // -----------------------------------------------------------------------------
-// Macros used for trace of some functionality used during development 
+// Macros used for trace of some functionality during development
 //#define OPS_ENABLE_TRACE
 #ifdef OPS_ENABLE_TRACE
-	#include <iomanip>
-	#include <iostream>
-	#define OPS_TRACE(msg) { std::cout << msg << std::flush; }
-    #define OPS_TRACE_ERROR(msg) { std::cout << msg << std::flush; }
-	#define OPS_DUMP_MEMORY(addr, len) { \
+	#include "TraceStream.h"
+	#define OPS_TRACE(msg) { ops::trace::os_trace << msg << std::flush; }
+    #define OPS_TRACE_INFO(msg) { ops::trace::os_info << msg << std::flush; }
+    #define OPS_TRACE_ERROR(msg) { ops::trace::os_error << msg << std::flush; }
+    #define OPS_DUMP_MEMORY(msg, addr, len) { \
 	  uint8_t* Ptr__ = (uint8_t*)addr; \
-	  std::cout << std::setw(2) << std::hex; \
-	  for(int i=0; i<len; ++i) { std::cout << (int)*Ptr__++ << " "; } \
-	  std::cout << std::dec << std::endl;\
+	  ops::trace::os_trace << ops::trace::grp(msg) << std::setw(2) << std::hex; \
+	  for(int i=0; i<len; ++i) { ops::trace::os_trace << (int)*Ptr__++ << " "; } \
+	  ops::trace::os_trace << std::dec << std::endl;\
 	}
 #else
 	#define OPS_TRACE(msg) 
+    #define OPS_TRACE_INFO(msg)
     #define OPS_TRACE_ERROR(msg)
-	#define OPS_DUMP_MEMORY(addr, len)
+    #define OPS_DUMP_MEMORY(msg, addr, len)
 #endif
 #define OPS_NOTRACE(msg) 
 
-#define OPS_ACK_TRACE(msg)  { OPS_TRACE("ACK: " << msg); }
-#define OPS_DES_TRACE(msg)  { OPS_NOTRACE("DES: " << msg); }
-#define OPS_OBJ_TRACE(msg) { OPS_NOTRACE("OBJ: " << msg); }
-#define OPS_PIFO_TRACE(msg) { OPS_NOTRACE("PIFO: " << msg); }
-#define OPS_TCP_TRACE(msg) { OPS_NOTRACE("TCP: " << msg); }
+#define OPS_ACK_TRACE(msg)  { OPS_TRACE(ops::trace::grp("ACK") << msg); }
+#define OPS_DES_TRACE(msg)  { OPS_NOTRACE(ops::trace::grp("DES") << msg); }
+#define OPS_OBJ_TRACE(msg)  { OPS_NOTRACE(ops::trace::grp("OBJ") << msg); }
+#define OPS_PIFO_TRACE(msg) { OPS_NOTRACE(ops::trace::grp("PIFO") << msg); }
+#define OPS_TCP_TRACE(msg)  { OPS_NOTRACE(ops::trace::grp("TCP") << msg); }
 
-#define OPS_ACK_ERROR(msg)  { OPS_TRACE_ERROR("ACK: " << msg); }
-#define OPS_TCP_ERROR(msg)  { OPS_TRACE_ERROR("TCP: " << msg); }
-#define OPS_UDP_ERROR(msg)  { OPS_TRACE_ERROR("UDP: " << msg); }
+#define OPS_TCP_INFO(msg)   { OPS_TRACE_INFO(ops::trace::grp("TCP") << msg); }
+
+#define OPS_ACK_ERROR(msg)  { OPS_TRACE_ERROR(ops::trace::grp("ACK") << msg); }
+#define OPS_TCP_ERROR(msg)  { OPS_TRACE_ERROR(ops::trace::grp("TCP") << msg); }
+#define OPS_UDP_ERROR(msg)  { OPS_TRACE_ERROR(ops::trace::grp("UDP") << msg); }
 
 
 // -----------------------------------------------------------------------------

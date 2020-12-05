@@ -219,7 +219,7 @@ TEST(Test_TCPProtocol, TestTCPProtocolVer1) {
 	buffer[19] = 55;
 	buffer[20] = 0;
 	buffer[21] = 0;
-    OPS_TCP_ERROR("This test will trace an error from handleData() and a message dump\n");
+    OPS_TCP_INFO("This test will trace an error from handleData() and a message dump\n");
     EXPECT_FALSE(prot.handleReceivedData(0, 4));
 
 	// --------------------
@@ -277,13 +277,13 @@ TEST(Test_TCPProtocol, TestTCPProtocolVer1) {
 	// --------------------
 	// Send with failed write of header
 	client.sbuf_idx = sizeof(client.sbuf) - 10;
-    OPS_TCP_ERROR("This test will trace an error from sendData() with failed header write\n");
+    OPS_TCP_INFO("This test will trace an error from sendData() with failed header write\n");
     EXPECT_EQ(prot.sendData(buffer, 10), -1);
 
 	// --------------------
 	// Send with failed write of data
 	client.sbuf_idx = sizeof(client.sbuf) - 50;
-    OPS_TCP_ERROR("This test will trace an error from sendData() with failed data write\n");
+    OPS_TCP_INFO("This test will trace an error from sendData() with failed data write\n");
     EXPECT_EQ(prot.sendData(buffer, 60), -1);
 }
 

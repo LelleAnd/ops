@@ -74,13 +74,13 @@ namespace ops
 					// This is an error, we are not able to receive more than _maxLength bytes (the buffer size)
 					errorDetected = true;
 					OPS_TCP_ERROR("OpsProt: handleData(), Error: sizeInfo too large: " << sizeInfo << ", [" << _debugId << "]\n");
-					OPS_DUMP_MEMORY(_data, 23);
+					OPS_DUMP_MEMORY("TCP", _data, 23);
 				} else if (sizeInfo < 2) {
 					// Check that it is a probe/heartbeat message using 8 first bytes
 					if (memcmp(_probeBuffer, _data, 8) != 0) {
 						errorDetected = true;
 						OPS_TCP_ERROR("OpsProt: handleData(), Error: Not a probe/heartbeat, [" << _debugId << "]\n");
-						OPS_DUMP_MEMORY(_data, 23);
+						OPS_DUMP_MEMORY("TCP", _data, 23);
 					} else {
 						_detectedVersion = 2;
 						if (sizeInfo == 0) {

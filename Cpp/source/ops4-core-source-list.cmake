@@ -79,6 +79,8 @@ set(LIB_OPS_PUBLIC_HEADERS
   ${OPS_HEADER_PATH}/TimeHelper.h
   ${OPS_HEADER_PATH}/Topic.h
   ${OPS_HEADER_PATH}/TopicInfoData.h
+  ${OPS_HEADER_PATH}/Trace.h
+  ${OPS_HEADER_PATH}/TraceStream.h
   ${OPS_HEADER_PATH}/Transport.h
   ${OPS_HEADER_PATH}/xml/xmlParser.h
   ${OPS_HEADER_PATH}/XMLArchiverIn.h
@@ -146,6 +148,7 @@ set(LIB_OPS_CORE_SRCS
   ${OPS_SRC_PATH}/Thread.cpp
   ${OPS_SRC_PATH}/ThreadSupport.h
   ${OPS_SRC_PATH}/Topic.cpp
+  ${OPS_SRC_PATH}/Trace.cpp
   ${OPS_SRC_PATH}/Transport.cpp
   ${OPS_SRC_PATH}/UDPReceiveDataHandler.cpp
   ${OPS_SRC_PATH}/UDPReceiveDataHandler.h

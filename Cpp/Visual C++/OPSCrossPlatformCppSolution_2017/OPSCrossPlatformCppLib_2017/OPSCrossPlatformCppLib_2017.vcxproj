@@ -379,6 +379,8 @@
     <ClInclude Include="..\..\..\include\PubIdChecker.h" />
     <ClInclude Include="..\..\..\include\ReceiveDataChannel.h" />
     <ClInclude Include="..\..\..\include\SerializableInheritingTypeFactory.h" />
+    <ClInclude Include="..\..\..\include\Trace.h" />
+    <ClInclude Include="..\..\..\include\TraceStream.h" />
     <ClInclude Include="..\..\..\include\Transport.h" />
     <ClInclude Include="..\..\..\source\BasicError.h" />
     <ClInclude Include="..\..\..\source\BasicWarning.h" />
@@ -513,6 +515,7 @@
     <ClCompile Include="..\..\..\source\ThreadSupport.cpp" />
     <ClCompile Include="..\..\..\source\TimeHelper.cpp" />
     <ClCompile Include="..\..\..\source\Topic.cpp" />
+    <ClCompile Include="..\..\..\source\Trace.cpp" />
     <ClCompile Include="..\..\..\source\Transport.cpp" />
     <ClCompile Include="..\..\..\source\UDPReceiveDataHandler.cpp" />
     <ClCompile Include="..\..\..\source\UDPReceiver.cpp" />

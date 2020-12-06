@@ -156,7 +156,7 @@ namespace ops
             const static int ALIVE_TIMEOUT = 3000;
         };
 
-		typedef struct {
+		typedef struct entry {
 			bool staticRoute = false;
 			std::map<InternalKey_T, IpPortPair> portMap;
 		} Entry_T;

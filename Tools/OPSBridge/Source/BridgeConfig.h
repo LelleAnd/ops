@@ -75,18 +75,18 @@ namespace opsbridge {
 			THandlingType eDisconnectedHandling;
 		} TTopicConfig;
 
-		typedef struct {
+		typedef struct rawReceiveConfig_t {
 			ops::Address_T sIp;
-			int port = 0;
-			ops::Address_T sIfc = "127.0.0.1";
+			int port{ 0 };
+			ops::Address_T sIfc{ "127.0.0.1" };
 		} TRawReceiveConfig;
 
-		typedef struct {
+		typedef struct rawSendConfig_t {
 			TRawReceiveConfig rec;
 			ops::Address_T sNewIp;
-			int newPort = 0;
-			ops::Address_T sIfc = "127.0.0.1";
-			int ttl = 1;
+			int newPort{ 0 };
+			ops::Address_T sIfc{ "127.0.0.1" };
+			int ttl{ 1 };
 		} TRawSendConfig;
 
 		typedef struct {

@@ -188,12 +188,6 @@ if(NOT CMAKE_BUILD_TYPE MATCHES "Bootstrap")
 endif()
 
 ################################################################################
-# User Options
-
-include(${CMAKE_ROOT}/Modules/Documentation.cmake OPTIONAL)
-mark_as_advanced(CLEAR BUILD_DOCUMENTATION)
-
-################################################################################
 # Build the source
 
 # common parts

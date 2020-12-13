@@ -134,3 +134,69 @@ public:
     SerDesObject_Fixarrays& operator =(SerDesObject_Fixarrays&&) = delete;
 };
 
+class SerDesObject_Serializables : public ops::OPSObject
+{
+public:
+    static ops::TypeId_T getTypeName() { return ops::TypeId_T("SerDesObject_Serializables"); }
+    SerDesObject_Serializables() :
+        obj2(new SerDesObject_Core()), obj3(new SerDesObject_Core())
+    {
+        appendType(getTypeName());
+        fixarr2[0] = new SerDesObject_Core();
+        fixarr2[1] = new SerDesObject_Core();
+    }
+    virtual ~SerDesObject_Serializables()
+    {
+        if (obj2 != nullptr) { delete obj2; }
+        if (obj3 != nullptr) { delete obj3; }
+        for (unsigned int i = 0; i < vobj2.size(); i++) { delete vobj2[i]; }
+        if (fixarr2[0] != nullptr) { delete fixarr2[0]; }
+        if (fixarr2[1] != nullptr) { delete fixarr2[1]; }
+    }
+
+    SerDesObject_Core obj1;
+    SerDesObject_Core* obj2;
+    SerDesObject_Core* obj3;
+
+    std::vector<SerDesObject_Core> vobj1;
+    std::vector<SerDesObject_Core*> vobj2;
+
+    SerDesObject_Core fixarr1[2];
+    SerDesObject_Core* fixarr2[2];
+
+    int testException1 = 0;
+    int testException2 = 0;
+
+    virtual void serialize(ops::ArchiverInOut* archive) override
+    {
+        OPSObject::serialize(archive);
+        //virtual void inout(InoutName_T name, Serializable& value) = 0;
+        archive->inout("obj1", obj1);
+
+        //virtual Serializable* inout(InoutName_T name, Serializable* value) = 0;
+        obj2 = (SerDesObject_Core*)archive->inout("obj2", obj2);
+        obj3 = (SerDesObject_Core*)archive->inout("obj3", obj3);
+
+        //template <class SerializableType>
+        //void inout(InoutName_T name, std::vector<SerializableType>& vec, SerializableType prototype)
+        archive->inout("vobj1", vobj1, SerDesObject_Core());
+
+        //template <class SerializableType>
+        //void inout(InoutName_T name, std::vector<SerializableType*>& vec)
+        archive->inout("vobj2", vobj2);
+
+        //template <class SerializableType>
+        //void inoutfixarr(InoutName_T name, SerializableType* value, int numElements)
+        archive->inoutfixarr("fixarr1", &fixarr1[0], 2 + testException1);
+
+        //virtual Serializable* inout(InoutName_T name, Serializable* value, int element) = 0;
+        //template <class SerializableType>
+        //void inoutfixarr(InoutName_T name, SerializableType** value, int numElements)
+        archive->inoutfixarr("fixarr2", &fixarr2[0], 2 + testException2);
+    }
+
+    SerDesObject_Serializables(const SerDesObject_Serializables& r) = delete;
+    SerDesObject_Serializables& operator= (const SerDesObject_Serializables& l) = delete;
+    SerDesObject_Serializables(SerDesObject_Serializables&&) = delete;
+    SerDesObject_Serializables& operator =(SerDesObject_Serializables&&) = delete;
+};

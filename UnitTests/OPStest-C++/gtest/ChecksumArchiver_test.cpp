@@ -32,7 +32,7 @@
 using namespace ops;
 
 // ===============================
-// Helper classes
+// Helper
 
 void InitObjectChecksum(SerDesObject_Core& obj)
 {
@@ -59,10 +59,12 @@ TEST(Test_ChecksumArchiver, TestCoreTypes) {
     chk.calc.sum = 0;
     obj.serialize(&chk);
     EXPECT_EQ(chk.calc.sum, 0xD0);
+    EXPECT_EQ(chk.calc.totalbytes, 47);
+    EXPECT_EQ(chk.calc.totalfields, 11);
 }
 
 // ===============================
-// Helper classes
+// Helper
 
 void InitObjectChecksum(SerDesObject_Vectors& obj)
 {
@@ -94,10 +96,12 @@ TEST(Test_ChecksumArchiver, TestVectorTypes) {
     chk.calc.sum = 0;
     obj.serialize(&chk);
     EXPECT_EQ(chk.calc.sum, 0x6A);
+    EXPECT_EQ(chk.calc.totalbytes, 4+2+2+12+16+8+16+7+9);
+    EXPECT_EQ(chk.calc.totalfields, 1+4+6+2+2);  // boolean & string called for each element
 }
 
 // ===============================
-// Helper classes
+// Helper
 
 void InitObjectChecksum(SerDesObject_Fixarrays& obj)
 {
@@ -131,5 +135,41 @@ TEST(Test_ChecksumArchiver, TestFixedArrays) {
     chk.calc.sum = 0;
     obj.serialize(&chk);
     EXPECT_EQ(chk.calc.sum, 0x6A);
+    EXPECT_EQ(chk.calc.totalbytes, 4 + 2 + 2 + 12 + 16 + 8 + 16 + 7 + 9);
+    EXPECT_EQ(chk.calc.totalfields, 1 + 4 + 6 + 2 + 2);  // boolean & string called for each element
+}
+
+// ===============================
+// Helper
+
+void InitObjectChecksum(SerDesObject_Serializables& obj)
+{
+    InitObjectChecksum(obj.obj1);
+    InitObjectChecksum(*obj.obj2);
+    InitObjectChecksum(*obj.obj3);
+    obj.vobj1.push_back(SerDesObject_Core());
+    InitObjectChecksum(obj.vobj1[0]);
+    obj.vobj2.push_back(new SerDesObject_Core);
+    InitObjectChecksum(*obj.vobj2[0]);
+    InitObjectChecksum(obj.fixarr1[0]);
+    InitObjectChecksum(obj.fixarr1[1]);
+    InitObjectChecksum(*obj.fixarr2[0]);
+    InitObjectChecksum(*obj.fixarr2[1]);
+}
+
+TEST(Test_ChecksumArchiver, TestNonCoreTypes) {
+
+    ChecksumArchiver<example::calculator_xor_8> chk;
+
+    SerDesObject_Serializables obj;
+    InitObjectChecksum(obj);
+
+    chk.calc.sum = 0;
+    obj.serialize(&chk);
+    // Each SerDesObject_Core gives checksum = 0xD0
+    // Odd number of objects, gives the same checksum
+    EXPECT_EQ(chk.calc.sum, 0xD0);
+    EXPECT_EQ(chk.calc.totalbytes, 9*47);
+    EXPECT_EQ(chk.calc.totalfields, 1+(9*11));
 }
 

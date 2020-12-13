@@ -31,14 +31,20 @@ namespace ops {
 
         struct Sink
         {
-            static Sink* Instance();
-            virtual void Log(const level_t level, const char* grp, const char* msg) noexcept = 0;
+            static Sink* Instance() noexcept;
+            virtual void Log(const level_t level, const char* grp, const char* msg) = 0;
+            virtual ~Sink() {}
+            Sink() = default;
+            Sink(const Sink&) = default;
+            Sink(Sink&&) = default;
+            Sink& operator=(const Sink&) = default;
+            Sink& operator=(Sink&&) = default;
         };
 
         // Call vith a nullptr, restores the default Trace Sink
-        void InstallSink(Sink* s = nullptr);
+        void InstallSink(Sink* s = nullptr) noexcept;
 
         // Used to limit trace in the default Trace Sink, to given level and greater
-        void SetTraceLevel(level_t level);
+        void SetTraceLevel(level_t level) noexcept;
     }
 }

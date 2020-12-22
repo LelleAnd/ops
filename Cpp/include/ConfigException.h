@@ -15,11 +15,8 @@ namespace ops
         {
         }
 
-		const char* what() const noexcept { return message.c_str(); }
+		const char* what() const noexcept override { return message.c_str(); }
 
-        virtual ~ConfigException()
-        {
-        }
     private:
 		ExceptionMessage_T message;
     };

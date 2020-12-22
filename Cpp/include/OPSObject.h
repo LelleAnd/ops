@@ -57,7 +57,7 @@ namespace ops
 
         void appendType(const TypeId_T& type)
 		{
-			TypeId_T old = typesString;
+			const TypeId_T old = typesString;
 			typesString = type;
 			typesString += ' ';
 			typesString += old;
@@ -81,12 +81,12 @@ namespace ops
 		///Fills the parameter obj with all values from this object.
 		void fillClone(OPSObject* obj) const;
 
-        VersionMask_T getVersionMask() const
+        VersionMask_T getVersionMask() const noexcept
         {
             return idlVersionMask;
         }
 
-        void setVersionMask(VersionMask_T verMask)
+        void setVersionMask(VersionMask_T verMask) noexcept
         {
             idlVersionMask = verMask;
         }
@@ -96,9 +96,9 @@ namespace ops
             if (gotVer > maxVer) {
                 ExceptionMessage_T m(msg);
                 m += ": received version '";
-                m += NumberToString((int)gotVer);
+                m += NumberToString(static_cast<int>(gotVer));
                 m += "' > known version '";
-                m += NumberToString((int)maxVer);
+                m += NumberToString(static_cast<int>(maxVer));
                 m += "'";
                 throw exceptions::ArchiverException(m);
             }

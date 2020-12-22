@@ -44,7 +44,7 @@ namespace ops
             return applyFilter(o);
         }
 
-        virtual ~FilterQoSPolicy() {}
+        virtual ~FilterQoSPolicy() = default;
     };
 }
 #endif

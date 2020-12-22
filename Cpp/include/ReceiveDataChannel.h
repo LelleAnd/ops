@@ -44,6 +44,7 @@ namespace ops
 	{
 		virtual void onMessage(ReceiveDataChannel& rdc, OPSMessage* mess) = 0;
 		virtual void onStatusChange(ReceiveDataChannel& rdc, ConnectStatus& status) = 0;
+		virtual ~ReceiveDataChannelCallbacks() = default;
 	};
 
 	class OPS_EXPORT ReceiveDataChannel : 

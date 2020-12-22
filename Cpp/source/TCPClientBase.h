@@ -40,6 +40,8 @@ namespace ops
 		// Called from client when a connection is closed
 		// Ev. buffer used in asynchRead() is no longer in use
 		virtual void onDisconnect(TCPConnection& conn, ConnectStatus status) = 0;
+
+		virtual ~TCPClientCallbacks() = default;
 	};
 
     class TCPClientBase : public Receiver, Listener<int>, protected TCPConnectionCallbacks

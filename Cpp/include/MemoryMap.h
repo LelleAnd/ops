@@ -40,14 +40,14 @@ public:
 		message = "MemoryMapException: ";
 		message += m;
 	}
-	const char* what() const noexcept { return message.c_str(); }
+	const char* what() const noexcept override { return message.c_str(); }
 };
 
 // TODO: Replace this with a C++ allocator??
 struct MemoryMapAllocator {
 	virtual char* Allocate(unsigned int size) = 0;
 	virtual void Deallocate(char*& ptr) = 0;
-    virtual ~MemoryMapAllocator() {}
+	virtual ~MemoryMapAllocator() = default;
 };
 
 class OPS_EXPORT MemoryMap

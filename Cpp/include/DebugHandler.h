@@ -40,6 +40,7 @@ namespace ops {
 	{
 	public:
 		virtual void onRequest(opsidls::DebugRequestResponseData& req, opsidls::DebugRequestResponseData& resp) = 0;
+		virtual ~DebugNotifyInterface() = default;
 	};
 
 	class DebugHandler

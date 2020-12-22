@@ -35,6 +35,13 @@ namespace ops
         ///If this interface is registred with a DataNotifier, this method will be called when the
         ///DataNotifier wants to inform its DataListeners that new data is available.
         virtual void onNewData(DataNotifier* sender) = 0;
+
+        DataListener() = default;
+        DataListener(const DataListener&) = default;
+        DataListener(DataListener&&) = default;
+        DataListener& operator=(const DataListener&) = default;
+        DataListener& operator=(DataListener&&) = default;
+        virtual ~DataListener() = default;
     };
 
 }

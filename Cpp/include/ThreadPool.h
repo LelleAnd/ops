@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -32,7 +33,7 @@ namespace ops
 		virtual void addRunnable(Runnable* runnable) = 0;
 		virtual void removeRunnable(Runnable* runnable) = 0;
 		virtual void start() = 0;
-		virtual ~ThreadPool() {};
+		virtual ~ThreadPool() = default;
 	};
 
 }

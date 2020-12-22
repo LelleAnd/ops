@@ -34,16 +34,12 @@ namespace ops
         private:
 			ExceptionMessage_T message;
         public:
-            CommException() noexcept
-            {
-                message = "CommException: empty";
-            }
             CommException(ExceptionMessage_T m)
             {
 				message = "CommException: ";
 				message += m;
             }
-			const char* what() const noexcept { return message.c_str(); }
+			const char* what() const noexcept override { return message.c_str(); }
 		};
     }
 }

@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2019 Lennart Andersson.
+ * Copyright (C) 2019-2020 Lennart Andersson.
  *
  * This notice apply to all source files, *.cpp, *.h, *.java, and *.cs in this directory
  * and all its subdirectories if nothing else is explicitly stated within the source file itself.
@@ -41,11 +41,7 @@ namespace ops
         private:
 			ExceptionMessage_T message;
         public:
-            ArchiverException() noexcept
-            {
-                message = "ArchiverException: empty";
-            }
-            ArchiverException(ExceptionMessage_T m)
+            explicit ArchiverException(ExceptionMessage_T m)
             {
 				message = "ArchiverException: ";
 				message += m;

@@ -35,6 +35,7 @@ namespace ops
 	{
 		virtual void onEvent(TCPConnection& prot, BytesSizePair arg) = 0;
 		virtual void onReceiveError(TCPConnection& prot) = 0;
+		virtual ~TCPConnectionCallbacks() = default;
 	};
 
 	// Helper class for a connected TCP socket

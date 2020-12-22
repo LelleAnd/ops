@@ -37,7 +37,7 @@ namespace ops
 		uint16_t port;
 		bool connected;
 		int totalNo;
-		ConnectStatus(bool c, int no) : port(0), connected(c), totalNo(no) { }
+		ConnectStatus(bool c, int no) noexcept : port(0), connected(c), totalNo(no) { }
 	};
 
 }

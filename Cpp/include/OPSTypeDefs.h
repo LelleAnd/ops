@@ -136,15 +136,15 @@ namespace ops {
 
 	// Rest of lengths are internal or defined in relation to the above lengths
 	// Need to be able to handle Domain::ParticipantId
-	const static int FIXED_PART_KEY_SIZE = (FIXED_OBJECT_NAME_SIZE + 2 + FIXED_OBJECT_NAME_SIZE);
+	constexpr int FIXED_PART_KEY_SIZE = (FIXED_OBJECT_NAME_SIZE + 2 + FIXED_OBJECT_NAME_SIZE);
 	// xxx.xxx.xxx.xxx/xxx.xxx.xxx.xxx
-	const static int FIXED_ADDRESS_SIZE         = 32;
-	const static int FIXED_TRANSPORT_SIZE       = 10;
-	const static int FIXED_INTERNAL_STRING_SIZE = 64;
-	const static int FIXED_EXCEPTION_MSG_SIZE   = 256;
-	const static int FIXED_ERROR_MSG_SIZE       = 256;
+	constexpr int FIXED_ADDRESS_SIZE         = 32;
+	constexpr int FIXED_TRANSPORT_SIZE       = 10;
+	constexpr int FIXED_INTERNAL_STRING_SIZE = 64;
+	constexpr int FIXED_EXCEPTION_MSG_SIZE   = 256;
+	constexpr int FIXED_ERROR_MSG_SIZE       = 256;
 	// channelid::transport::xxx.xxx.xxx.xxx::port
-	const static int FIXED_INTERNAL_KEY_SIZE = (FIXED_CHANNEL_ID_SIZE + 2 + FIXED_TRANSPORT_SIZE + 2 + FIXED_ADDRESS_SIZE + 2 + 5);
+	constexpr int FIXED_INTERNAL_KEY_SIZE = (FIXED_CHANNEL_ID_SIZE + 2 + FIXED_TRANSPORT_SIZE + 2 + FIXED_ADDRESS_SIZE + 2 + 5);
 
 	typedef strings::fixed_string<FIXED_OBJECT_NAME_SIZE>     ObjectName_T;
 	typedef strings::fixed_string<FIXED_FILENAME_SIZE>        FileName_T;
@@ -163,11 +163,11 @@ namespace ops {
 
 	// Simple constant to be able to check that include file and compiled library has the same configurable constants
 	constexpr uint64_t fixed_string_length_check_value =
-		(uint64_t(FIXED_OBJECT_NAME_SIZE) << 0) +
-		(uint64_t(FIXED_MESSAGE_KEY_SIZE) << 8) +
-		(uint64_t(FIXED_TYPE_ID_SIZE)     << 16) +
-		(uint64_t(FIXED_CHANNEL_ID_SIZE)  << 24) +
-		(uint64_t(FIXED_FILENAME_SIZE)    << 32);
+		(static_cast<uint64_t>(FIXED_OBJECT_NAME_SIZE) << 0) +
+		(static_cast<uint64_t>(FIXED_MESSAGE_KEY_SIZE) << 8) +
+		(static_cast<uint64_t>(FIXED_TYPE_ID_SIZE)     << 16) +
+		(static_cast<uint64_t>(FIXED_CHANNEL_ID_SIZE)  << 24) +
+		(static_cast<uint64_t>(FIXED_FILENAME_SIZE)    << 32);
 
 #else
 namespace ops {

@@ -75,7 +75,7 @@ namespace ops
 		// -------------------------------------------------------------------
 		// Mismatched header and library detection
 		struct mismatched_headers_and_library : public std::exception {
-			const char* what() const noexcept { return "Mismatched headers and compiled library"; }
+			const char* what() const noexcept override { return "Mismatched headers and compiled library"; }
 		};
 		static InternalString_T LibraryCompileSignature();
 		static InternalString_T HeaderCompileSignature() { return InternalString_T(OPS_COMPILESIGNATURE) + NumberToString(fixed_string_length_check_value); }

@@ -41,6 +41,7 @@ namespace ops
         ///If this interface is registred with a Notifier, this method will be called when the
         ///Notifier wants to inform its Listeners that new data is available.
         virtual void onNewEvent(Notifier<ArgType>* sender, ArgType arg) = 0;
+        virtual ~Listener() = default;
     };
 }
 #endif

@@ -42,16 +42,12 @@ namespace ops
         private:
 			ExceptionMessage_T message;
         public:
-            XMLArchiverException() noexcept
-            {
-                message = "XMLArchiverException: empty";
-            }
             XMLArchiverException(ExceptionMessage_T m)
             {
 				message = "XMLArchiverException: ";
 				message += m;
             }
-			const char* what() const noexcept { return message.c_str(); }
+			const char* what() const noexcept override { return message.c_str(); }
 		};
     }
     using namespace exceptions;

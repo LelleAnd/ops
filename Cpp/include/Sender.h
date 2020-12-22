@@ -54,7 +54,7 @@ namespace ops
         static OPS_EXPORT Sender* createUDPSender(IOService* ioService, Address_T localInterface = "0.0.0.0", int ttl = 1, int64_t outSocketBufferSize = 16000000);
         static OPS_EXPORT Sender* createTCPServer(TCPServerCallbacks* client, IOService* ioService, Address_T ip, int port, int64_t outSocketBufferSize = 16000000);
 
-        virtual ~Sender() {}
+        virtual ~Sender() = default;
     };
 
 }

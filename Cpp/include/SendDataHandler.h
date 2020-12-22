@@ -36,7 +36,7 @@ namespace ops
         public std::enable_shared_from_this<SendDataHandler>
 	{
 	public:
-		virtual ~SendDataHandler() {}
+		virtual ~SendDataHandler() = default;
 
 		virtual bool sendData(char* buf, int bufSize, Topic& topic) = 0;
 

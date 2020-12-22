@@ -1,6 +1,6 @@
 /**
  * Copyright (C) 2006-2010 Anton Gravestam.
- * Copyright (C) 2018-2019 Lennart Andersson.
+ * Copyright (C) 2018-2020 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -31,18 +31,18 @@ namespace ops {
 
 	// Max name length for: DomainId, ParticipantId, TopicName, PublisherName, SubscriberName, ...
 	// If you use ops::utilities::nnn() the length need to be able to handle Domain::TopicName
-	const static int FIXED_OBJECT_NAME_SIZE = @FIXED_OBJECT_NAME_SIZE@;
+	constexpr int FIXED_OBJECT_NAME_SIZE = @FIXED_OBJECT_NAME_SIZE@;
 
 	// Max length of key set by user on publisher/message and subscriber filter
-	const static int FIXED_MESSAGE_KEY_SIZE = @FIXED_MESSAGE_KEY_SIZE@;
+	constexpr int FIXED_MESSAGE_KEY_SIZE = @FIXED_MESSAGE_KEY_SIZE@;
 
 	// Max TypeString length and depends on type names and inheritance depth
-	const static int FIXED_TYPE_ID_SIZE     = @FIXED_TYPE_ID_SIZE@;
+	constexpr int FIXED_TYPE_ID_SIZE     = @FIXED_TYPE_ID_SIZE@;
 
 	// Max name length for: ChannelId
-	const static int FIXED_CHANNEL_ID_SIZE  = @FIXED_CHANNEL_ID_SIZE@;
+	constexpr int FIXED_CHANNEL_ID_SIZE  = @FIXED_CHANNEL_ID_SIZE@;
 
 	// Max length for filename including path when giving ops configuration files
-	const static int FIXED_FILENAME_SIZE    = @FIXED_FILENAME_SIZE@;
+	constexpr int FIXED_FILENAME_SIZE    = @FIXED_FILENAME_SIZE@;
 
 }

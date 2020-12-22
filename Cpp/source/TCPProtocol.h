@@ -34,11 +34,12 @@ namespace ops
 		virtual void startAsyncRead(TCPProtocol& prot, char* bytes, uint32_t size) = 0;
 		virtual void onEvent(TCPProtocol& prot, BytesSizePair arg) = 0;
 		virtual int sendBuffer(TCPProtocol& prot, const char* bytes, const uint32_t size) = 0;
+		virtual ~TCPProtocolCallbacks() = default;
 	};
 
 	struct TCPUserBase
 	{
-		virtual ~TCPUserBase() {}
+		virtual ~TCPUserBase() = default;
 	};
 
 	class TCPProtocol

@@ -190,15 +190,15 @@ namespace ops {
 			// Exceptions:
 			struct out_of_space : public std::exception
 			{
-				const char* what() const noexcept { return "Out of Space"; }
+				const char* what() const noexcept override { return "Out of Space"; }
 			};
 			struct pool_corruption : public std::exception
 			{
-				const char* what() const noexcept { return "Pool integrity check failed"; }
+				const char* what() const noexcept override { return "Pool integrity check failed"; }
 			};
 			struct illegal_ref : public std::exception
 			{
-				const char* what() const noexcept { return "Reference not from this pool"; }
+				const char* what() const noexcept override { return "Reference not from this pool"; }
 			};
 
 			memory_pool_base(size_t capacity) : _capacity(capacity), _size(capacity), _minSize(capacity), _numAllocated(0)
@@ -291,7 +291,7 @@ namespace ops {
 			// Exceptions:
 			struct illegal_size : public std::exception
 			{
-				const char* what() const noexcept { return "Illegal size in allocation request"; }
+				const char* what() const noexcept override { return "Illegal size in allocation request"; }
 			};
 
 			memory_pool_nd(size_t capacity) : BaseClass(capacity) {}
@@ -359,7 +359,7 @@ namespace ops {
 		public:
 			struct illegal_ref : public std::exception
 			{
-				const char* what() const noexcept { return "Illegal reference"; }
+				const char* what() const noexcept override { return "Illegal reference"; }
 			};
 
 			memory_pool_exp(int initial_num_blocks)

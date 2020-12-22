@@ -13,7 +13,8 @@ namespace ops
 		virtual int getErrorCode() const = 0;
 		virtual ErrorMessage_T getMessage() const = 0;
 		virtual Severity_T getSeverity() const noexcept { return error; }
-		virtual ~Error(){}
+
+		virtual ~Error() = default;
 	};
 }
 #endif

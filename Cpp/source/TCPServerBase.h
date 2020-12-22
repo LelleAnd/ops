@@ -57,6 +57,8 @@ namespace ops
 		// Called from server when a connection has been deleted
 		// Ev. buffer used in asynchRead() is no longer in use
 		virtual void onDisconnect(TCPConnection& conn, ConnectStatus status) = 0;
+
+		virtual ~TCPServerCallbacks() = default;
 	};
 
 	class TCPServerBase : public Sender, Listener<int>, public TCPConnectionCallbacks

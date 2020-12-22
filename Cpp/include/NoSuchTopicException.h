@@ -14,11 +14,8 @@ namespace ops
 		NoSuchTopicException(ExceptionMessage_T mess) noexcept : message(mess)
 		{
 		}
-		const char* what() const noexcept { return message.c_str(); }
+		const char* what() const noexcept override { return message.c_str(); }
 
-		~NoSuchTopicException()
-        {
-        }
 	private:
 		ExceptionMessage_T message;
 	};

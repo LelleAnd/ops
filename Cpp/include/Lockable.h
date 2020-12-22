@@ -59,6 +59,11 @@ namespace ops
 		{
 			_lockable->unlock();
 		}
+		SafeLock() = delete;
+		SafeLock(const SafeLock&) = delete;
+		SafeLock& operator= (const SafeLock& l) = delete;
+		SafeLock(SafeLock&&) = delete;
+		SafeLock& operator=(SafeLock&&) = delete;
 	};
 
     class SafeTryLock
@@ -71,12 +76,17 @@ namespace ops
         {
             locked = _lockable->trylock();
         }
-        bool isLocked() { return locked; }
+        bool isLocked() noexcept { return locked; }
         ~SafeTryLock()
         {
-            if (locked) _lockable->unlock();
+			if (locked) { _lockable->unlock(); }
         }
-    };
+		SafeTryLock() = delete;
+		SafeTryLock(const SafeTryLock&) = delete;
+		SafeTryLock& operator= (const SafeTryLock& l) = delete;
+		SafeTryLock(SafeTryLock&&) = delete;
+		SafeTryLock& operator=(SafeTryLock&&) = delete;
+	};
 
 }
 #endif

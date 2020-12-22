@@ -33,7 +33,8 @@ namespace ops
 		virtual void run() = 0;
 		virtual void stop() = 0;
 		virtual	void poll() = 0;
-		virtual ~IOService(){};
+
+		virtual ~IOService() = default;
 
 		static std::unique_ptr<IOService> create();
 	};

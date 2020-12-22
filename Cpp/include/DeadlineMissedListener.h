@@ -35,6 +35,7 @@ class DeadlineMissedListener
 {
 public:
 	virtual void onDeadlineMissed(DeadlineMissedEvent* e) = 0;
+	virtual ~DeadlineMissedListener() = default;
 };
 
 class DeadlineMissedEvent

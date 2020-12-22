@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -31,7 +32,7 @@ namespace ops
 	public:
 		virtual void start(int64_t timeoutMs) = 0;
 		virtual void cancel() = 0;
-		virtual ~DeadlineTimer(){};
+		virtual ~DeadlineTimer() = default;
 
 		static DeadlineTimer* create(IOService* ioService);
 	};

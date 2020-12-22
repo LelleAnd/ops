@@ -35,7 +35,7 @@ namespace ops
 	class OPS_EXPORT Receiver : public Notifier<BytesSizePair>
 	{
 	public:
-		virtual ~Receiver() {}
+		virtual ~Receiver() = default;
 
 		static Receiver* createMCReceiver(Address_T ip, int bindPort, IOService* ioService, Address_T localInterface = "0.0.0.0", int64_t inSocketBufferSize = 16000000);
 		static Receiver* createTCPClient(TCPClientCallbacks* client, Address_T ip, int port, IOService* ioService, int64_t inSocketBufferSize = 16000000);

@@ -73,6 +73,8 @@ namespace ops { namespace strings {
 		// String operations
 		virtual const char* data() const noexcept = 0;
 		virtual const char* c_str() const noexcept = 0;
+
+		virtual ~basic_fixed_string() = default;
 	};
 
 	typedef enum { truncate_string, throw_exception } overrun_policy_t;
@@ -88,10 +90,10 @@ namespace ops { namespace strings {
 	public:
 		// Exceptions:
 		struct index_out_of_range : public std::exception {
-			const char* what() const noexcept { return "Index too large"; }
+			const char* what() const noexcept override { return "Index too large"; }
 		};
 		struct size_out_of_range : public std::exception {
-			const char* what() const noexcept { return "String too large"; }
+			const char* what() const noexcept override { return "String too large"; }
 		};
 
 		// Constructors:
@@ -124,8 +126,8 @@ namespace ops { namespace strings {
 		// ...
 
 		// Capacity:
-		size_type size() const noexcept { return _size; }
-		size_type length() const noexcept { return _size; }
+		size_type size() const noexcept override { return _size; }
+		size_type length() const noexcept override { return _size; }
 		size_type max_size() const noexcept { return N; }
 		void resize() noexcept
 		{
@@ -215,8 +217,8 @@ namespace ops { namespace strings {
 #endif
 
 		// String operations
-		const char* data() const noexcept { return &_array[0]; }
-		const char* c_str() const noexcept { return &_array[0]; }
+		const char* data() const noexcept override { return &_array[0]; }
+		const char* c_str() const noexcept override { return &_array[0]; }
 
 		size_type find(const fixed_string& str, size_type pos = 0) const
 		{
@@ -314,7 +316,7 @@ namespace ops { namespace strings {
 			return fixed_string<M, POL>(&_array[pos], len);
 		}
 
-		static const size_type npos = (size_type)(-1);
+		static const size_type npos = static_cast<size_type>(-1);
 	};
 
 	// Relational operators

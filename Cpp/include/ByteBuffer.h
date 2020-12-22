@@ -76,13 +76,13 @@ namespace ops
      
     public:
 		struct illformed_memmap : public std::exception {
-			const char* what() const noexcept { return "ByteBuffer(): Given MemoryMap is to small"; }
+			const char* what() const noexcept override { return "ByteBuffer(): Given MemoryMap is to small"; }
 		};
 		struct data_corrupted : public std::exception {
-			const char* what() const noexcept { return "ByteBuffer(): Data corrupted. Trying to read beyond buffer"; }
+			const char* what() const noexcept override { return "ByteBuffer(): Data corrupted. Trying to read beyond buffer"; }
 		};
 		struct fixed_string_to_small : public std::exception {
-			const char* what() const noexcept { return "ByteBuffer(): Fixed string to small"; }
+			const char* what() const noexcept override { return "ByteBuffer(): Fixed string to small"; }
 		};
 
         ///The Write Policy is default to preserve all written data (see description above).

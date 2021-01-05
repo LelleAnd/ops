@@ -489,6 +489,10 @@ public class DelphiCompiler extends opsc.Compiler
                 }
                 ret += tab(2) + "///" + comment.replace("/*", "").replace("*/", "") + endl();
             }
+            String vers = getVersionDescription(field.getDirective());
+            if (vers.length() > 0) {
+                ret += tab(2) + "/// " + vers + endl();
+            }
             String fieldType = field.getType(); ///TEST getLastPart(field.getType());
             if (field.isArray()) {
                 ret += tab(2) + getDeclareVector(field);

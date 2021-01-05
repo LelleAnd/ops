@@ -324,6 +324,21 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
         return vec;
     }
 
+    public static String getVersionDescription(String directiveStr)
+    {
+        String res = "";
+        Vector<VersionEntry> vec = getReducedVersions("", directiveStr);
+        if (vec != null) {
+            res += "Field valid for version(s): ";
+            for (VersionEntry ent : vec) {
+                int stop = ent.stop;
+                if (stop < 0) stop = 255;
+                res += "(" + ent.start + ".." + stop + "), ";
+            }
+        }
+        return res;
+    }
+
     public static int highestVersion(String msg, String directiveStr)
     {
         int version = -1;

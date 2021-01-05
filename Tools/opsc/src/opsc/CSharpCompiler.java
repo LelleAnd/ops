@@ -410,6 +410,10 @@ public class CSharpCompiler extends opsc.Compiler
 ///                ret += tab(2) + "///" + field.getComment().replace("/*", "").replace("*/", "") + endl();
 ///                ret += tab(2) + "///" + field.getComment() + endl();
             }
+            String vers = getVersionDescription(field.getDirective());
+            if (vers.length() > 0) {
+                ret += tab(2) + "/// " + vers + endl();
+            }
             if (field.isArray())
             {
                 ret += tab(2) + "private " + languageType(field.getType()) + " _" + fieldName +

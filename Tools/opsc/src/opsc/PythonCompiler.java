@@ -697,6 +697,10 @@ public class PythonCompiler extends opsc.CompilerSupport
                 }
                 ret += tab(2) + "#" + comment.replace("/*", "").replace("*/", "") + endl();
             }
+            String vers = getVersionDescription(field.getDirective());
+            if (vers.length() > 0) {
+                ret += tab(2) + "# " + vers + endl();
+            }
             // Get type initialization value
             String typeInit = "";
             if (field.isIdlType()) {

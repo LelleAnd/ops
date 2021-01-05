@@ -742,6 +742,10 @@ public class AdaCompiler extends opsc.Compiler
                 }
                 ret += tab(3) + "---" + comment.replace("/*", "").replace("*/", "") + endl();
             }
+            String vers = getVersionDescription(field.getDirective());
+            if (vers.length() > 0) {
+                ret += tab(3) + "--- " + vers + endl();
+            }
             String fieldType = getLastPart(field.getType());
             ret += tab(3) + getFieldName(field) + " : ";
             if (field.isArray()) {

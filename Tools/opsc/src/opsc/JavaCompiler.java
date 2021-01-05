@@ -400,6 +400,10 @@ public class JavaCompiler extends opsc.Compiler
                 }
                 ret += tab(1) + "///" + comment.replace("/*", "").replace("*/", "") + endl();
             }
+            String vers = getVersionDescription(field.getDirective());
+            if (vers.length() > 0) {
+                ret += tab(1) + "/// " + vers + endl();
+            }
             if (field.isArray()) {
                 ret += tab(1) + "public " + getDeclareVector(field);
             } else if (field.getType().equals("string")) {

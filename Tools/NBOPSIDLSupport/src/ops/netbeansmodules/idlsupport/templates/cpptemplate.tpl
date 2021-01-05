@@ -63,6 +63,7 @@ __clone
 
     void fillClone(__className* obj) const
     {
+        if (this == obj) { return; }
 __fillClone
     }
 

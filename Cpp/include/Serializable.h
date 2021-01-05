@@ -30,6 +30,12 @@ namespace ops
 	{
 	public:
 		virtual void serialize(ArchiverInOut* archiver) = 0;
+
+		Serializable() = default;
+		Serializable(const Serializable& l) = default;
+		Serializable& operator= (const Serializable& l) = default;
+		Serializable(Serializable&&) = default;
+		Serializable& operator=(Serializable&&) = default;
 		virtual ~Serializable() = default;
 	};
 }

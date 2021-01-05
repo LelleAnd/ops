@@ -42,6 +42,28 @@ namespace ops
             appendType(TypeId_T("DefaultOPSConfigImpl"));
         }
 
+        DefaultOPSConfigImpl(const DefaultOPSConfigImpl& other) = default;
+        DefaultOPSConfigImpl& operator= (const DefaultOPSConfigImpl& other) = default;
+        DefaultOPSConfigImpl(DefaultOPSConfigImpl&& other) = default;
+        DefaultOPSConfigImpl& operator= (DefaultOPSConfigImpl&& other) = default;
+        ~DefaultOPSConfigImpl() = default;
+
+        // Returns a newely allocated deep copy/clone of this object.
+        virtual DefaultOPSConfigImpl* clone() override
+        {
+            DefaultOPSConfigImpl* ret = new DefaultOPSConfigImpl;
+            fillClone(ret);
+            return ret;
+        }
+
+        // Fills the parameter obj with all values from this object.
+        void fillClone(DefaultOPSConfigImpl* obj) const
+        {
+            if (this == obj) { return; }
+            ops::OPSConfig::fillClone(obj);
+            obj->DefaultOPSConfigImpl_version = DefaultOPSConfigImpl_version;
+        }
+
         void serialize(ArchiverInOut* archiver) override
         {
             OPSConfig::serialize(archiver);
@@ -52,8 +74,6 @@ namespace ops
                 DefaultOPSConfigImpl_version = 0;
             }
         }
-
     };
 }
-
 #endif

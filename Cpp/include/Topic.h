@@ -42,11 +42,23 @@ namespace ops
         static const char Topic_idlVersion = 0;
 
         Topic();
-        Topic(ObjectName_T namee, int portt, TypeId_T typeIDd, Address_T domainAddresss);
-        Topic(ObjectName_T namee, TypeId_T typeIDd, int sampleMaxSize, bool useAck, const Topic& base);
+        Topic(const ObjectName_T namee, int portt, const TypeId_T typeIDd, const Address_T domainAddresss);
+        Topic(const ObjectName_T namee, const TypeId_T typeIDd, int sampleMaxSize, bool useAck, const Topic& base);
+
+        Topic(const Topic& other) = default;
+        Topic(Topic&& other) = default;
+        Topic& operator= (const Topic& other) = default;
+        Topic& operator= (Topic&& other) = default;
+        virtual ~Topic() = default;
 
         // Create ACK topic based on given topic
         static Topic CreateAckTopic(const Topic& base);
+
+        // Returns a newely allocated deep copy/clone of this object.
+        virtual Topic* clone() override;
+
+        // Fills the parameter obj with all values from this object.
+        void fillClone(Topic* obj) const;
 
 		void setDomainID(ObjectName_T domID) noexcept;
 		ObjectName_T getDomainID() const noexcept;

@@ -30,6 +30,33 @@ namespace ops
         appendType(TypeId_T("Channel"));
     }
 
+    // Returns a deep copy of this object.
+    Channel* Channel::clone()
+    {
+        Channel* ret = new Channel;
+        fillClone(ret);
+        return ret;
+    }
+
+    void Channel::fillClone(Channel* obj) const
+    {
+        if (this == obj) { return; }
+        ops::OPSObject::fillClone(obj);
+        obj->Channel_version = Channel_version;
+        obj->channelID = channelID;
+        obj->linktype = linktype;
+        obj->localInterface = localInterface;
+        obj->domainAddress = domainAddress;
+        obj->timeToLive = timeToLive;
+        obj->port = port;
+        obj->outSocketBufferSize = outSocketBufferSize;
+        obj->inSocketBufferSize = inSocketBufferSize;
+        obj->resendNum = resendNum;
+        obj->resendTimeMs = resendTimeMs;
+        obj->registerTimeMs = registerTimeMs;
+        obj->sampleMaxSize = sampleMaxSize;
+    }
+
     void Channel::serialize(ArchiverInOut* archiver)
     {
         OPSObject::serialize(archiver);

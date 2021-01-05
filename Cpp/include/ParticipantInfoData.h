@@ -40,6 +40,33 @@ namespace ops
 			appendType(TypeId_T("ops.ParticipantInfoData"));
 		}
 		
+		// Returns a newely allocated deep copy/clone of this object.
+		virtual ParticipantInfoData* clone() override
+		{
+			ParticipantInfoData* ret = new ParticipantInfoData;
+			fillClone(ret);
+			return ret;
+		}
+
+		// Fills the parameter obj with all values from this object.
+		void fillClone(ParticipantInfoData* obj) const
+		{
+			if (this == obj) { return; }
+			ops::OPSObject::fillClone(obj);
+			obj->ParticipantInfoData_version = ParticipantInfoData_version;
+			obj->name = name;
+			obj->id = id;
+			obj->domain = domain;
+			obj->ip = ip;
+			obj->languageImplementation = languageImplementation;
+			obj->opsVersion = opsVersion;
+			obj->mc_udp_port = mc_udp_port;
+			obj->mc_tcp_port = mc_tcp_port;
+			obj->subscribeTopics = subscribeTopics;
+			obj->publishTopics = publishTopics;
+			obj->knownTypes = knownTypes;
+		}
+
 		void serialize(ArchiverInOut* archiver) override
 		{
 			OPSObject::serialize(archiver);
@@ -62,7 +89,11 @@ namespace ops
 			archiver->inout("knownTypes", knownTypes);
 		}
 
-		virtual ~ParticipantInfoData(){}
+		ParticipantInfoData(const ParticipantInfoData& other) = default;
+		ParticipantInfoData(ParticipantInfoData&& other) = default;
+		ParticipantInfoData& operator= (const ParticipantInfoData& other) = default;
+		ParticipantInfoData& operator= (ParticipantInfoData&& other) = default;
+		virtual ~ParticipantInfoData() = default;
 
 	public:
 		InternalString_T name;

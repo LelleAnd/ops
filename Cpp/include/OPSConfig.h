@@ -35,26 +35,36 @@ namespace ops
 	{
 	public:
         char OPSConfig_version = OPSConfig_idlVersion;
-
         static const char OPSConfig_idlVersion = 0;
+
         static std::shared_ptr<OPSConfig> getConfig();
 		static std::shared_ptr<OPSConfig> getConfig(FileName_T configFile);
 		static std::shared_ptr<OPSConfig> getConfig(std::istream& inStream);
+
+		OPSConfig() = default;
+		OPSConfig(const OPSConfig & other);
+		OPSConfig& operator= (const OPSConfig & other);
+		OPSConfig(OPSConfig && other) = default;
+		OPSConfig& operator= (OPSConfig && other) = default;
 
 		// Should be used with care, since the above methods may return a singleton
 		virtual ~OPSConfig();
 
 		virtual Domain* getDomain(ObjectName_T domainID) const
 		{
-			for(unsigned int i = 0; i < domains.size(); i++)
-			{
-				if(domains[i]->getDomainID() == domainID)
-				{
-					return domains[i];
+			for (auto& x : domains) {
+				if (x->getDomainID() == domainID) {
+					return x;
 				}
 			}
 			return nullptr;
 		}
+
+		// Returns a newely allocated deep copy/clone of this object.
+		virtual OPSConfig* clone() override;
+
+		// Fills the parameter obj with all values from this object.
+		void fillClone(OPSConfig* obj) const;
 
 		void serialize(ArchiverInOut* archiver) override
 		{

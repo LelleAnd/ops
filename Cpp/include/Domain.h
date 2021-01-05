@@ -62,25 +62,35 @@ namespace ops
 
 	public:
 		Domain();
-		Address_T getDomainAddress() const;
+
+		Address_T getDomainAddress() const noexcept;
 		virtual std::vector<Topic* > getTopics() const;
 		virtual Topic getTopic(ObjectName_T name) const;
-		bool existsTopic(ObjectName_T name) const;
 		ObjectName_T getDomainID() const noexcept;
 		int getMetaDataMcPort() const noexcept;
 		int getDebugMcPort() const noexcept;
 		bool getOptNonVirt() const noexcept;
 		int getHeartbeatPeriod() const noexcept;
 		int getHeartbeatTimeout() const noexcept;
-
-		void serialize(ArchiverInOut* archiver) override;
 		int getTimeToLive() const noexcept;
-
 		Address_T getLocalInterface() const noexcept;
-
 		int getInSocketBufferSize() const noexcept;
 		int getOutSocketBufferSize() const noexcept;
 		
+		bool existsTopic(ObjectName_T name) const;
+
+		// Returns a newely allocated deep copy/clone of this object.
+		virtual Domain* clone() override;
+
+		// Fills the parameter obj with all values from this object.
+		void fillClone(Domain* obj) const;
+
+		void serialize(ArchiverInOut* archiver) override;
+
+		Domain(const Domain& other);
+		Domain& operator= (const Domain& other);
+		Domain(Domain&& other) = default;
+		Domain& operator= (Domain&& other) = default;
 		virtual ~Domain();
 	};
 }

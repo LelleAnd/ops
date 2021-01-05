@@ -66,14 +66,43 @@ namespace ops
     std::shared_ptr<OPSConfig> OPSConfig::getConfig(std::istream& inStream)
 	{
 		XMLArchiverIn archiver(inStream, "root", OPSObjectFactory::getInstance());
-		OPSConfig* const theConfig = nullptr;
-		return std::shared_ptr<OPSConfig>((OPSConfig*)archiver.inout("ops_config", theConfig));
+		return std::shared_ptr<OPSConfig>(dynamic_cast<OPSConfig*>(archiver.inout("ops_config", nullptr)));
+	}
+
+	OPSConfig::OPSConfig(const OPSConfig& other)
+	{
+		other.fillClone(this);
+	}
+
+	OPSConfig& OPSConfig::operator= (const OPSConfig& other)
+	{
+		if (this != &other) {
+			other.fillClone(this);
+		}
+		return *this;
+	}
+
+	// Returns a newely allocated deep copy/clone of this object.
+	OPSConfig* OPSConfig::clone()
+	{
+		OPSConfig* ret = new OPSConfig;
+		fillClone(ret);
+		return ret;
+	}
+
+	// Fills the parameter obj with all values from this object.
+	void OPSConfig::fillClone(OPSConfig* obj) const
+	{
+		if (this == obj) { return; }
+		ops::OPSObject::fillClone(obj);
+		obj->OPSConfig_version = OPSConfig_version;
+		cloneVectorPtr<Domain>(obj->domains, domains);
 	}
 
 	OPSConfig::~OPSConfig()
 	{
-		for (std::vector<Domain* >::iterator it = domains.begin(); it != domains.end(); ++it) {
-			delete (*it);
+		for (auto& x : domains) {
+			delete x;
 		}
 		domains.clear();
 	}

@@ -37,6 +37,17 @@ namespace ops
         std::vector<ObjectName_T> topics;
 
         Transport();
+        Transport(const Transport& other) = default;
+        Transport(Transport&& other) = default;
+        Transport& operator= (const Transport& other) = default;
+        Transport& operator= (Transport&& other) = default;
+        virtual ~Transport() = default;
+
+        // Returns a newely allocated deep copy/clone of this object.
+        virtual Transport* clone() override;
+
+        // Fills the parameter obj with all values from this object.
+        void fillClone(Transport* obj) const;
 
         void serialize(ArchiverInOut* archiver) override;
     };

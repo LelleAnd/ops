@@ -254,16 +254,13 @@ namespace ops
 	template <typename T>
 	void cloneVectorPtr(std::vector<T*>& dst, const std::vector<T*> src)
 	{
-		for (unsigned int i = 0; i < dst.size(); i++) {
-			if (dst[i]) delete dst[i];
+		for (auto& x : dst) {
+			if (x != nullptr) { delete x; }
 		}
-		dst.resize(src.size());
-		for (unsigned int i = 0; i < src.size(); i++) {
-			if (dst.size() >= i + 1) {
-				dst[i] = (T*)src[i]->clone();
-			} else {
-				dst.push_back((T*)src[i]->clone());
-			}
+		dst.clear();
+		dst.reserve(src.size());
+		for (const auto& x : src) {
+			dst.push_back(x->clone());
 		}
 	}
 
@@ -271,7 +268,7 @@ namespace ops
 	void cloneFixArrPtr(T* dst[], T* const src[])
 	{
 		for (unsigned int i = 0; i < N; i++) {
-			if (dst[i]) delete dst[i];
+			if (dst[i] != nullptr) { delete dst[i]; }
 			dst[i] = (T*)src[i]->clone();
 		}
 	}

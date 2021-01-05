@@ -24,9 +24,26 @@
 namespace ops
 {
     Transport::Transport()
-        : channelID("")
     {
         appendType(TypeId_T("Transport"));
+    }
+
+    // Returns a newely allocated deep copy/clone of this object.
+    Transport* Transport::clone()
+    {
+        Transport* ret = new Transport;
+        fillClone(ret);
+        return ret;
+    }
+
+    // Fills the parameter obj with all values from this object.
+    void Transport::fillClone(Transport* obj) const
+    {
+        if (this == obj) { return; }
+        ops::OPSObject::fillClone(obj);
+        obj->Transport_version = Transport_version;
+        obj->channelID = channelID;
+        obj->topics = topics;
     }
 
     void Transport::serialize(ArchiverInOut* const archiver)

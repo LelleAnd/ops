@@ -48,6 +48,28 @@ namespace ops
 			address = topic.getDomainAddress();
 			port = topic.getPort();
 		}
+
+		// Returns a newely allocated deep copy/clone of this object.
+		virtual TopicInfoData* clone() override
+		{
+			TopicInfoData* ret = new TopicInfoData;
+			fillClone(ret);
+			return ret;
+		}
+
+		// Fills the parameter obj with all values from this object.
+		void fillClone(TopicInfoData* obj) const
+		{
+			if (this == obj) { return; }
+			ops::OPSObject::fillClone(obj);
+			obj->TopicInfoData_version = TopicInfoData_version;
+			obj->name = name;
+			obj->type = type;
+			obj->transport = transport;
+			obj->address = address;
+			obj->port = port;
+			obj->keys = keys;
+		}
 		
 		void serialize(ArchiverInOut* archiver) override
 		{
@@ -66,7 +88,11 @@ namespace ops
 			archiver->inout("keys", keys);
 		}
 
-		virtual ~TopicInfoData() {}
+		TopicInfoData(const TopicInfoData& other) = default;
+		TopicInfoData(TopicInfoData&& other) = default;
+		TopicInfoData& operator= (const TopicInfoData& other) = default;
+		TopicInfoData& operator= (TopicInfoData&& other) = default;
+		virtual ~TopicInfoData() = default;
 
 	public:
 		ObjectName_T name;

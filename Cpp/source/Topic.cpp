@@ -38,7 +38,7 @@ namespace ops
         appendType(TypeId_T("Topic"));
     }
 
-    Topic::Topic(ObjectName_T namee, int const portt, TypeId_T typeIDd, Address_T domainAddresss) :
+    Topic::Topic(const ObjectName_T namee, int const portt, const TypeId_T typeIDd, const Address_T domainAddresss) :
 		name(namee), 
 		port(portt), 
 		typeID(typeIDd), 
@@ -49,7 +49,7 @@ namespace ops
 		appendType(TypeId_T("Topic"));
 	}
 
-    Topic::Topic(ObjectName_T namee, TypeId_T typeIDd, int sampleMaxSizee, bool useAckk, const Topic& base) :
+    Topic::Topic(const ObjectName_T namee, const TypeId_T typeIDd, int sampleMaxSizee, bool useAckk, const Topic& base) :
         name(namee),
         port(base.port),
         timeToLive(base.timeToLive),
@@ -68,6 +68,7 @@ namespace ops
         heartbeatTimeout(base.heartbeatTimeout),
         resendNum(base.resendNum),
         resendTimeMs(base.resendTimeMs),
+        registerTimeMs(base.registerTimeMs),
         channelID(base.channelID)
     {
         appendType(TypeId_T("Topic"));
@@ -78,9 +79,45 @@ namespace ops
     {
         ObjectName_T ackName(base.getName());
         ackName += "#ack";
-        int ackSampleMaxSize = 1024;
+        constexpr int ackSampleMaxSize = 1024;
         return Topic(ackName, opsidls::SendAckPatternData::getTypeName(), ackSampleMaxSize, false, base);
     }
+
+	// Returns a newely allocated deep copy/clone of this object.
+	Topic* Topic::clone()
+	{
+		Topic* ret = new Topic;
+		fillClone(ret);
+		return ret;
+	}
+
+	// Fills the parameter obj with all values from this object.
+	void Topic::fillClone(Topic* obj) const
+	{
+		if (this == obj) { return; }
+		ops::OPSObject::fillClone(obj);
+		obj->Topic_version = Topic_version;
+		obj->name = name;
+		obj->port = port;
+		obj->timeToLive = timeToLive;
+		obj->typeID = typeID;
+		obj->domainAddress = domainAddress;
+		obj->localInterface = localInterface;
+		obj->participantID = participantID;
+		obj->domainID = domainID;
+		obj->sampleMaxSize = sampleMaxSize;
+		obj->transport = transport;
+		obj->outSocketBufferSize = outSocketBufferSize;
+		obj->inSocketBufferSize = inSocketBufferSize;
+		obj->useAck = useAck;
+		obj->optNonVirt = optNonVirt;
+		obj->heartbeatPeriod = heartbeatPeriod;
+		obj->heartbeatTimeout = heartbeatTimeout;
+		obj->resendNum = resendNum;
+		obj->resendTimeMs = resendTimeMs;
+		obj->registerTimeMs = registerTimeMs;
+		obj->channelID = channelID;
+	}
 
 	void Topic::setParticipantID(ObjectName_T const partID) noexcept
 	{

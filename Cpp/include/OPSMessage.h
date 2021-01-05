@@ -170,7 +170,7 @@ namespace ops
 			sourcePort = port;
 		}
 
-		void getSource(Address_T& addr, uint16_t& port) const noexcept
+		void getSource(Address_T& addr, uint16_t& port) const
 		{
             addr = NumberToString((sourceIP >> 24) & 0xFF);
             addr += ".";
@@ -204,7 +204,7 @@ namespace ops
             archive->inout("topicName", topicName);
             archive->inout("topLevelKey", topLevelKey);
             archive->inout("address", address);
-            data = (OPSObject*) archive->inout("data", data);
+            data = dynamic_cast<OPSObject*>(archive->inout("data", data));
         }
     };
 

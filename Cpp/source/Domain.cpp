@@ -28,12 +28,59 @@
 namespace ops
 {
 
-Domain::Domain() 
+Domain::Domain()
 {
 	appendType(TypeId_T("Domain"));
 }
 
-Address_T Domain::getDomainAddress() const
+Domain::Domain(const Domain& other)
+{
+	other.fillClone(this);
+}
+
+Domain& Domain::operator= (const Domain& other)
+{
+	if (this != &other) {
+		other.fillClone(this);
+	}
+	return *this;
+}
+
+// Returns a newely allocated deep copy/clone of this object.
+Domain* Domain::clone()
+{
+	Domain* ret = new Domain;
+	fillClone(ret);
+	return ret;
+}
+
+// Fills the parameter obj with all values from this object.
+void Domain::fillClone(Domain* obj) const
+{
+	if (this == obj) { return; }
+	ops::OPSObject::fillClone(obj);
+	obj->Domain_version = Domain_version;
+	obj->domainAddress = domainAddress;
+	obj->timeToLive = timeToLive;
+	obj->localInterface = localInterface;
+	obj->inSocketBufferSize = inSocketBufferSize;
+	obj->outSocketBufferSize = outSocketBufferSize;
+	obj->domainID = domainID;
+	obj->metaDataMcPort = metaDataMcPort;
+	obj->debugMcPort = debugMcPort;
+	obj->optNonVirt = optNonVirt;
+	obj->heartbeatPeriod = heartbeatPeriod;
+	obj->heartbeatTimeout = heartbeatTimeout;
+	obj->resendNum = resendNum;
+	obj->resendTimeMs = resendTimeMs;
+	obj->registerTimeMs = registerTimeMs;
+
+	cloneVectorPtr<Topic>(obj->topics, topics);
+	cloneVectorPtr<Channel>(obj->channels, channels);
+	cloneVectorPtr<Transport>(obj->transports, transports);
+}
+
+Address_T Domain::getDomainAddress() const noexcept
 {
 	return domainAddress;
 }
@@ -55,21 +102,18 @@ void Domain::checkTopicValues(Topic* const top) const
 
 std::vector<Topic* > Domain::getTopics() const
 {
-	for(unsigned int i = 0 ; i < topics.size(); i++) 
-	{
-		checkTopicValues(topics[i]);
+	for (auto& x : topics) {
+		checkTopicValues(x);
 	}
 	return topics;
 }
 
 Topic Domain::getTopic(ObjectName_T const name) const
 {
-	for(unsigned int i = 0 ; i < topics.size(); i++)
-	{
-		if(topics[i]->getName() == name) 
-		{
-			checkTopicValues(topics[i]);
-			return *topics[i];
+	for (auto& x : topics) {
+		if (x->getName() == name) {
+			checkTopicValues(x);
+			return *x;
 		}
 	}
 	ExceptionMessage_T msg = "Topic ";
@@ -80,12 +124,8 @@ Topic Domain::getTopic(ObjectName_T const name) const
 
 bool Domain::existsTopic(ObjectName_T const name) const
 {
-	for(unsigned int i = 0 ; i < topics.size(); i++)
-	{
-		if(topics[i]->getName() == name)
-		{
-			return true;
-		}
+	for (auto& x : topics) {
+		if (x->getName() == name) { return true; }
 	}
 	return false;
 }
@@ -132,8 +172,8 @@ void Domain::serialize(ArchiverInOut* const archiver)
 Channel* Domain::findChannel(ChannelId_T const id) const
 {
 	if (id != "") {
-		for (unsigned int i = 0; i < channels.size(); i++) {
-			if (id == channels[i]->channelID) { return channels[i]; }
+		for (auto& x : channels) {
+			if (id == x->channelID) { return x; }
 		}
 	}
 	return nullptr;
@@ -142,8 +182,8 @@ Channel* Domain::findChannel(ChannelId_T const id) const
 Topic* Domain::findTopic(ObjectName_T const id) const
 {
 	if (id != "") {
-		for (unsigned int i = 0; i < topics.size(); i++) {
-			if (id == topics[i]->getName()) { return topics[i]; }
+		for (auto& x : topics) {
+			if (id == x->getName()) { return x; }
 		}
 	}
 	return nullptr;
@@ -153,20 +193,20 @@ void Domain::checkTransports() const
 {
 	// Now update topics with values from the transports and channels
 	// Loop over all transports and for each topic, see if it needs parameters from the channel
-	for (unsigned int i = 0; i < transports.size(); i++) {
+	for (auto& trans : transports) {
 		// Get channel
-		Channel* const channel = findChannel(transports[i]->channelID);
+		const Channel* channel = findChannel(trans->channelID);
 		if (channel == nullptr) {
 			ExceptionMessage_T msg("Non existing channelID: '");
-			msg += transports[i]->channelID;
+			msg += trans->channelID;
 			msg += "' used in transport specification.";
 			throw ops::ConfigException(msg);
 		} else {
-			for (unsigned int j = 0; j < transports[i]->topics.size(); j++) {
-				Topic* const top = findTopic(transports[i]->topics[j]);
+			for (auto& topname : trans->topics) {
+				Topic* const top = findTopic(topname);
 				if (top == nullptr) {
 					ExceptionMessage_T msg("Non existing topicID: '");
-					msg += transports[i]->topics[j];
+					msg += topname;
 					msg += "' used in transport specification.";
 					throw ops::ConfigException(msg);
 				} else {
@@ -222,17 +262,11 @@ int Domain::getHeartbeatTimeout() const noexcept
 
 Domain::~Domain()
 {
-	for (std::vector<Topic* >::iterator it = topics.begin(); it != topics.end(); ++it) {
-		delete (*it);
-	}
+	for (auto& x : topics) { delete x; }
 	topics.clear();
-	for (std::vector<Channel* >::iterator it = channels.begin(); it != channels.end(); ++it) {
-		delete (*it);
-	}
+	for (auto& x : channels) { delete x; }
 	channels.clear();
-	for (std::vector<Transport* >::iterator it = transports.begin(); it != transports.end(); ++it) {
-		delete (*it);
-	}
+	for (auto& x : transports) { delete x; }
 	transports.clear();
 }
 

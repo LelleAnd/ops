@@ -48,6 +48,17 @@ namespace ops
         int sampleMaxSize{ -1 };
 
         Channel();
+        Channel(const Channel& other) = default;
+        Channel(Channel&& other)= default;
+        Channel& operator= (const Channel& other) = default;
+        Channel& operator= (Channel&& other) = default;
+        virtual ~Channel() = default;
+
+        // Returns a newely allocated deep copy/clone of this object.
+        virtual Channel* clone() override;
+
+        // Fills the parameter obj with all values from this object.
+        void fillClone(Channel* obj) const;
 
         void serialize(ArchiverInOut* archiver) override;
 

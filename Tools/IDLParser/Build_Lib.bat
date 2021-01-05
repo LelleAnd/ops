@@ -9,6 +9,15 @@
 )
 
 @javac -cp "../OPSCompilerLib/dist/OPSCompilerLib.jar" @"src/files.txt" -d "build/classes"
+@IF ERRORLEVEL 1 goto :BUILD_FAILED
 
 @jar cf "dist/IDLParser.jar" -C "build/classes/" .
+@IF ERRORLEVEL 1 goto :BUILD_FAILED
+@goto :BUILD_OK
+
+:BUILD_FAILED
+@echo ------ BUILD FAILED ------
+@pause
+
+:BUILD_OK
 @popd

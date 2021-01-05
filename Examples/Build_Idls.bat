@@ -21,4 +21,5 @@ call ..\Tools\opsc\opsc.bat -P OPSIdls\WeatherStationExample -g ALL -gpr %OPS4_G
 
 :error
 @echo ERROR DETECTED
+@pause
 @popd

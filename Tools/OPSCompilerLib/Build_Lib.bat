@@ -9,6 +9,15 @@
 )
 
 @javac @"src/files.txt" -d "build/classes"
+@IF ERRORLEVEL 1 goto :BUILD_FAILED
 
 @jar cf "dist/OPSCompilerLib.jar" -C "build/classes/" .
+@IF ERRORLEVEL 1 goto :BUILD_FAILED
+@goto :BUILD_OK
+
+:BUILD_FAILED
+@echo ------ BUILD FAILED ------
+@pause
+
+:BUILD_OK
 @popd

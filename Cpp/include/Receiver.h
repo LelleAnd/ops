@@ -37,9 +37,9 @@ namespace ops
 	public:
 		virtual ~Receiver() = default;
 
-		static Receiver* createMCReceiver(Address_T ip, int bindPort, IOService* ioService, Address_T localInterface = "0.0.0.0", int64_t inSocketBufferSize = 16000000);
-		static Receiver* createTCPClient(TCPClientCallbacks* client, Address_T ip, int port, IOService* ioService, int64_t inSocketBufferSize = 16000000);
-		static Receiver* createUDPReceiver(int port, IOService* ioService, Address_T localInterface = "0.0.0.0", int64_t inSocketBufferSize = 16000000);
+		static std::unique_ptr<Receiver> createMCReceiver(Address_T ip, int bindPort, IOService* ioService, Address_T localInterface = "0.0.0.0", int64_t inSocketBufferSize = 16000000);
+		static std::unique_ptr<Receiver> createTCPClient(TCPClientCallbacks* client, Address_T ip, int port, IOService* ioService, int64_t inSocketBufferSize = 16000000);
+		static std::unique_ptr<Receiver> createUDPReceiver(int port, IOService* ioService, Address_T localInterface = "0.0.0.0", int64_t inSocketBufferSize = 16000000);
 		
 		// Set the receive buffer to use
 		virtual void asynchWait(char* bytes, int size) = 0;

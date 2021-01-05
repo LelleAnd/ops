@@ -68,13 +68,17 @@ struct MocReceiveDataHandler : public ops::ReceiveDataHandler
     {
         MocReceiveDataHandler& owner;
         MocReceiveDataChannel(MocReceiveDataHandler& o, ops::Topic top, ops::Participant& part) :
-            ops::ReceiveDataChannel(top, part, (ops::Receiver*)new MocReceiver(o)), owner(o)
+            ops::ReceiveDataChannel(top, part, std::unique_ptr<ops::Receiver>(new MocReceiver(o))), owner(o)
         {
             //std::cout << "MocReceiveDataChannel()\n";
         }
         ~MocReceiveDataChannel()
         {
             //std::cout << "~MocReceiveDataChannel()\n";
+        }
+        MocReceiver* getReceiver()
+        {
+            return dynamic_cast<MocReceiver*>(receiver.get());
         }
     };
 
@@ -99,7 +103,7 @@ struct MocReceiveDataHandler : public ops::ReceiveDataHandler
         //std::cout << "setData()\n";
         if ((dstBuffer != nullptr) && (dstSize >= size)) {
             memcpy(dstBuffer, buf, size);
-            ((MocReceiver*)rdc[0]->getReceiver())->IndicateNewData(size, address, port);
+            ((MocReceiveDataChannel*)rdc[0])->getReceiver()->IndicateNewData(size, address, port);
         }
         return true;
     }

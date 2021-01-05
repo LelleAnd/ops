@@ -45,7 +45,7 @@ namespace opsbridge {
 
 		// Stop and delete all Receivers
 		for (std::map<ops::InternalKey_T, entry_t>::iterator it = _receivers.begin(); it != _receivers.end(); ++it) {
-			delete it->second.receiver;
+			it->second.receiver.reset();
 		}
 
 		// Then we request the IO Service to stop the processing (it's running on the threadpool).

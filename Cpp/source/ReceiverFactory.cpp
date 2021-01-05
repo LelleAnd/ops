@@ -27,9 +27,9 @@
 
 namespace ops
 {
-    Receiver* ReceiverFactory::getReceiver(const Topic& top, Participant& participant)
+    std::unique_ptr<Receiver> ReceiverFactory::getReceiver(const Topic& top, Participant& participant)
     {
-        Receiver* receiver = nullptr;
+        std::unique_ptr<Receiver> receiver;
 
         IOService* const ioService = participant.getIOService();
 

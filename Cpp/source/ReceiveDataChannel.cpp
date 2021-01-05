@@ -34,24 +34,19 @@ namespace ops
 {
     using namespace opsidls;
 
-	ReceiveDataChannel::ReceiveDataChannel(Topic top, Participant& part, Receiver* const recv) :
+	ReceiveDataChannel::ReceiveDataChannel(Topic top, Participant& part, std::unique_ptr<Receiver> recv) :
         sampleMaxSize(top.getSampleMaxSize() > OPSConstants::USABLE_SEGMENT_SIZE ? top.getSampleMaxSize() : OPSConstants::USABLE_SEGMENT_SIZE),
         memMap(1 + ((sampleMaxSize - 1) / OPSConstants::USABLE_SEGMENT_SIZE), OPSConstants::PACKET_MAX_SIZE, &DataSegmentAllocator::Instance()),
         participant(part),
-        receiver(recv)
+        receiver(std::move(recv))
     {
-		if (receiver == nullptr) { receiver = ReceiverFactory::getReceiver(top, participant); }
+		if (receiver.get() == nullptr) { receiver = ReceiverFactory::getReceiver(top, participant); }
 
-        if (receiver == nullptr) {
+        if (receiver.get() == nullptr) {
             throw exceptions::CommException("Could not create receiver");
         }
 
         receiver->addListener(this);
-    }
-
-    ReceiveDataChannel::~ReceiveDataChannel()
-    {
-        delete receiver;
     }
 
 	void ReceiveDataChannel::start()
@@ -159,11 +154,7 @@ namespace ops
 
 				try {
 					message = dynamic_cast<OPSMessage*> (archiver.inout("message", message));
-				} catch (ops::ArchiverException& e) {
-					ErrorMessage_T msg("Invalid data on network. Exception: ");
-					msg += e.what();
-					ReportError(participant, msg, addr, port);
-				} catch (std::exception& e) {
+				} catch (const std::exception& e) {
 					ErrorMessage_T msg("Invalid data on network. Exception: ");
 					msg += e.what();
 					ReportError(participant, msg, addr, port);
@@ -231,8 +222,8 @@ namespace ops
     {
         //We must calculate how many unserialized segment headers we have and substract that total header size from the size of spareBytes.
         const int nrOfSerializedBytes = buf.GetSize();
-        const int totalNrOfSegments = (int) (currentMessageSize / memMap.getSegmentSize());
-        const int nrOfSerializedSegements = (int) (nrOfSerializedBytes / memMap.getSegmentSize());
+        const int totalNrOfSegments = currentMessageSize / memMap.getSegmentSize();
+        const int nrOfSerializedSegements = nrOfSerializedBytes / memMap.getSegmentSize();
         const int nrOfUnserializedSegments = totalNrOfSegments - nrOfSerializedSegements;
 
         const int nrOfSpareBytes = currentMessageSize - buf.GetSize() - (nrOfUnserializedSegments * segmentPaddingSize);

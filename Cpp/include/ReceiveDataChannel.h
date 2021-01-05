@@ -52,8 +52,8 @@ namespace ops
 		public Listener<ConnectStatus>
 	{
 	public:
-		ReceiveDataChannel(Topic top, Participant& part, Receiver* recv = nullptr);
-		virtual ~ReceiveDataChannel();
+		ReceiveDataChannel(Topic top, Participant& part, std::unique_ptr<Receiver> recv = nullptr);
+		virtual ~ReceiveDataChannel() = default;
 
 		void connect(ReceiveDataChannelCallbacks* client) noexcept {
 			_client = client;
@@ -69,9 +69,24 @@ namespace ops
             return sampleMaxSize;
         }
 
-		Receiver* getReceiver() const noexcept
+		bool asyncFinished()
 		{
-			return receiver;
+			return receiver->asyncFinished();
+		}
+
+		size_t bytesAvailable()
+		{
+			return receiver->bytesAvailable();
+		}
+
+		uint16_t getLocalPort()
+		{
+			return receiver->getLocalPort();
+		}
+
+		Address_T getLocalAddress()
+		{
+			return receiver->getLocalAddress();
 		}
 
 		virtual void topicUsage(Topic& top, bool used)
@@ -90,25 +105,25 @@ namespace ops
 
         void onNewEvent(Notifier<ConnectStatus>*, ConnectStatus arg) override;
 
-        int sampleMaxSize = 0;
+		int sampleMaxSize{ 0 };
 
         ///Preallocated MemoryMap for receiving data
         MemoryMap memMap;
-        int expectedSegment = 0;
+		int expectedSegment{ 0 };
 
         //The Participant to which this ReceiveDataChannel belongs.
         Participant& participant;
 
-    private:
-		ReceiveDataChannelCallbacks* _client = nullptr;
+		///The receiver used for this channel
+		std::unique_ptr<Receiver> receiver;
 
-		///The receiver used for this topic. 
-		Receiver* receiver = nullptr;
+	private:
+		ReceiveDataChannelCallbacks* _client{ nullptr };
 
 		///The accumulated size in bytes of the current message
-		int currentMessageSize = 0;
+		int currentMessageSize{ 0 };
 
-		bool firstReceived = false;
+		bool firstReceived{ false };
 	};
 	
 }

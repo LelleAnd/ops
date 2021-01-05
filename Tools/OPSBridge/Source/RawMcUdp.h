@@ -59,7 +59,7 @@ namespace opsbridge {
 		std::unique_ptr<ops::IOService> _ioService;
 		ops::ThreadPool* _threadPool = nullptr;
 		struct entry_t {
-			ops::Receiver* receiver = nullptr;
+			std::unique_ptr<ops::Receiver> receiver;
 			char buffer[65536];
 		};
 		std::map<ops::InternalKey_T, entry_t> _receivers;

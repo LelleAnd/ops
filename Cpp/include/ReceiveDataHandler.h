@@ -59,7 +59,7 @@ namespace ops
 		void addListener(Listener<OPSMessage*>* listener, Topic& top);
 		void removeListener(Listener<OPSMessage*>* listener, Topic& top);
 
-		int numReservedMessages() const
+		int numReservedMessages() const noexcept
 		{
 			return messageReferenceHandler.size();
 		}
@@ -68,8 +68,8 @@ namespace ops
 		{
 			bool finished = true;
 			SafeLock lock(&messageLock);
-			for (auto x : rdc) {
-				finished &= x->getReceiver()->asyncFinished();
+			for (auto& x : rdc) {
+				finished &= x->asyncFinished();
 			}
 			return finished;
 		}
@@ -82,8 +82,8 @@ namespace ops
         bool dataAvailable()
         {
             SafeLock lock(&messageLock);
-            for (auto x : rdc) {
-                if (x->getReceiver()->bytesAvailable() > 0) { return true; }
+            for (auto& x : rdc) {
+                if (x->bytesAvailable() > 0) { return true; }
             }
             return false;
         }

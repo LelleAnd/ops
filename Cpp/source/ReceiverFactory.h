@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2019-2020 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -33,7 +33,7 @@ namespace ops
     {
     public:
         //Creates a receiver based on topic transport information and ioService
-        static Receiver* getReceiver(const Topic& top, Participant& participant);
+        static std::unique_ptr<Receiver> getReceiver(const Topic& top, Participant& participant);
 
     };
 }

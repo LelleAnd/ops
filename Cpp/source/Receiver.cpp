@@ -33,17 +33,17 @@
 
 namespace ops
 {
-	Receiver* Receiver::createMCReceiver(Address_T ip, int bindPort, IOService* ioService, Address_T localInterface, int64_t inSocketBufferSize)
+	std::unique_ptr<Receiver> Receiver::createMCReceiver(Address_T ip, int bindPort, IOService* ioService, Address_T localInterface, int64_t inSocketBufferSize)
 	{
-		return new MulticastReceiver(ip, (uint16_t)bindPort, ioService, localInterface, (int)inSocketBufferSize);
+		return std::unique_ptr<Receiver>(new MulticastReceiver(ip, (uint16_t)bindPort, ioService, localInterface, (int)inSocketBufferSize));
 	}
-	Receiver* Receiver::createTCPClient(TCPClientCallbacks* client, Address_T ip, int port, IOService* ioService, int64_t inSocketBufferSize)
+	std::unique_ptr<Receiver> Receiver::createTCPClient(TCPClientCallbacks* client, Address_T ip, int port, IOService* ioService, int64_t inSocketBufferSize)
 	{
-		return new TCPClient(client, ip, (uint16_t)port, ioService, (int)inSocketBufferSize);
+		return std::unique_ptr<Receiver>(new TCPClient(client, ip, (uint16_t)port, ioService, (int)inSocketBufferSize));
 	}
-	Receiver* Receiver::createUDPReceiver(int port, IOService* ioService, Address_T localInterface, int64_t inSocketBufferSize)
+	std::unique_ptr<Receiver> Receiver::createUDPReceiver(int port, IOService* ioService, Address_T localInterface, int64_t inSocketBufferSize)
 	{
-		return new UDPReceiver((uint16_t)port, ioService, localInterface, (int)inSocketBufferSize);
+		return std::unique_ptr<Receiver>(new UDPReceiver((uint16_t)port, ioService, localInterface, (int)inSocketBufferSize));
 	}
 
 }

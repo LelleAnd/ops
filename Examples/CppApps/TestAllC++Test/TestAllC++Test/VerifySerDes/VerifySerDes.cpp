@@ -173,6 +173,9 @@ void checkEmpty(const TestAll::ChildData& data)
 
 void checkObjects(const TestAll::TestData& data, const TestAll::TestData& exp)
 {
+	// Check that objects are different
+	AssertNEQ(&data, &exp, "Error same object");
+
 	AssertEQ<std::string>(data.text, exp.text);
 	AssertEQ<double>(data.value, exp.value);
 }
@@ -180,6 +183,9 @@ void checkObjects(const TestAll::TestData& data, const TestAll::TestData& exp)
 void checkObjects(const TestAll::ChildData& data, const TestAll::ChildData& exp)
 {
 	std::cout << "Comparing objects object..." << std::endl;
+
+	// Check that objects are different
+	AssertNEQ(&data, &exp, "Error same object");
 
 	// Test fields in BaseData
 	AssertEQ<std::string>(data.baseText, exp.baseText, "baseText");
@@ -456,6 +462,11 @@ void SignalHandler(const int signal)
 	if (signal == SIGINT) { gTerminate = true; }
 }
 
+TestAll::ChildData f(TestAll::ChildData o)
+{
+	return o;
+}
+
 int main(const int argc, const char* args[])
 {
 #if defined(DEBUG_OPSOBJECT_COUNTER)
@@ -513,10 +524,31 @@ int main(const int argc, const char* args[])
 		checkObjects(cd1, cd2c);
 		std::cout << "Finished " << std::endl;
 
-		std::cout << "Test assignment..." << std::endl;
+		std::cout << "Test copy assignment..." << std::endl;
 		cd2a = cd1;
 		checkObjects(cd1, cd2a);
 		std::cout << "Finished " << std::endl;
+
+#if defined(DEBUG_OPSOBJECT_COUNTER)
+		std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
+#endif
+
+		{
+			std::cout << "Test move constructor..." << std::endl;
+			TestAll::ChildData obj4 = f(cd1);	// Makes a copy of cd1 which is given to f(), which is moved from
+			checkObjects(cd1, obj4);
+			std::cout << "Finished " << std::endl;
+
+			std::cout << "Test move assignment..." << std::endl;
+			TestAll::ChildData obj5;
+			obj5 = std::move(obj4);
+			checkObjects(cd1, obj5);
+			std::cout << "Finished " << std::endl;
+		}
+
+#if defined(DEBUG_OPSOBJECT_COUNTER)
+		std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
+#endif
 
 		std::cout << "Test cloning..." << std::endl;
 		cd1.fillClone(&cd2);

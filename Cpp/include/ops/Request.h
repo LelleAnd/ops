@@ -55,7 +55,9 @@ namespace ops
 
 		void fillClone(Request* obj) const
 		{
+			if (this == obj) { return; }
 			OPSObject::fillClone(obj);
+			obj->Request_version = Request_version;
 			obj->requestId = requestId;
 		}
 

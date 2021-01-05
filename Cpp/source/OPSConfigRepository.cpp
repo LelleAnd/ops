@@ -22,7 +22,6 @@
 #include "Participant.h" 
 #include "BasicError.h"
 #include "Domain.h"
-#include "DefaultOPSConfigImpl.h"
 #include "ConfigException.h"
 #include "TimeHelper.h"
 

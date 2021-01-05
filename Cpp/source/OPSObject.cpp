@@ -83,6 +83,7 @@ namespace ops
 
 	void OPSObject::fillClone(OPSObject* obj) const
 	{
+        if (this == obj) { return; }
         obj->idlVersionMask = idlVersionMask;
         obj->key = key;
 		obj->typesString = typesString;

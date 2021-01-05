@@ -674,15 +674,15 @@ public class CppCompiler extends opsc.Compiler
             if (field.isIdlType() && field.isAbstract()) {
                 ret += tab(2);
                 if (!field.isArray()) {
-                    ret += "if(" + fieldName + ") delete " + fieldName + ";" + endl();
+                    ret += "if (" + fieldName + " != nullptr) { delete " + fieldName + "; }" + endl();
                 } else {
-                    ret += "for(unsigned int __i = 0; __i < ";
                     if (field.getArraySize() > 0) {
+                        ret += "for (unsigned int __i = 0; __i < ";
                         ret += field.getArraySize();
+                        ret += "; __i++) { if (" + fieldName + "[__i] != nullptr) { delete " + fieldName + "[__i]; } }" + endl();
                     } else {
-                        ret += fieldName + ".size()";
+                        ret += "for (auto& x : " + fieldName + ") { if (x != nullptr) { delete x; } }" + endl();
                     }
-                    ret += "; __i++){ if(" + fieldName + "[__i]) delete " + fieldName + "[__i];}" + endl();
                 }
             }
         }

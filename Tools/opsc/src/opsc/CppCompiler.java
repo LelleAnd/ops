@@ -51,6 +51,8 @@ public class CppCompiler extends opsc.Compiler
     private static String BASE_CLASS_NAME_REGEX = "__baseClassName";
     private static String CREATE_BODY_REGEX = "__createBody";
     private static String MEMORYPOOL_DECL_REGX = "__memoryPoolDecl";
+    private static String MOVE_CONSTRUCTOR_REGEX = "__moveconstructor";
+    private static String MOVE_ASSIGNMENT_REGEX = "__moveassignment";
 
     //private String projectDirectory;
     String createdFiles = "";
@@ -150,6 +152,8 @@ public class CppCompiler extends opsc.Compiler
         templateText = templateText.replace(CLONE_REGEX, getClone(idlClass));
         templateText = templateText.replace(FILL_CLONE_REGEX, getFillClone(idlClass));
         templateText = templateText.replace(MEMORYPOOL_DECL_REGX, getMemoryPoolDeclaration(idlClass));
+        templateText = templateText.replace(MOVE_CONSTRUCTOR_REGEX, getMoveConstructor(idlClass));
+        templateText = templateText.replace(MOVE_ASSIGNMENT_REGEX, getMoveAssignment(idlClass));
 
         //Save the modified text to the output file.
         saveOutputText(templateText);
@@ -411,6 +415,109 @@ public class CppCompiler extends opsc.Compiler
                     }
                 } else {
                     ret += tab(2) + "obj->" + fieldName + " = " + fieldName + ";" + endl();
+                }
+            }
+        }
+        return ret;
+    }
+
+    protected String getMoveConstructor(IDLClass idlClass)
+    {
+        String ret = "";
+        ret += tab(2) + getClassName(idlClass) + "_version = std::move(other." + getClassName(idlClass) + "_version);" + endl();
+        for (IDLField field : idlClass.getFields()) {
+            if (field.isStatic()) continue;
+            String fieldName = getFieldName(field);
+            if (field.isIdlType()) {
+                if (!field.isArray()) {
+                    ret += tab(2) + fieldName + " = std::move(other." + fieldName + ");" + endl();
+                    if (field.isAbstract()) {
+                        ret += tab(2) + "other." + fieldName + " = nullptr;" + endl();
+                    }
+                } else {
+                    // isArray()
+                    if (field.getArraySize() > 0) {
+                        ret += tab(2) + "for(unsigned int __i = 0; __i < " + field.getArraySize() + "; __i++) {" + endl();
+                        ret += tab(3) +   fieldName + "[__i] = std::move(other." + fieldName + "[__i]);" + endl();
+                        if (field.isAbstract()) {
+                            ret += tab(3) + "other." + fieldName + "[__i] = nullptr;" + endl();
+                        }
+                        ret += tab(2) + "}" + endl();
+                    } else {
+                        ret += tab(2) + fieldName + " = std::move(other." + fieldName + ");" + endl();
+                    }
+                }
+            } else {
+                // core types
+                if (field.isArray()) {
+                    if (field.getArraySize() > 0) {
+                        if (!field.getType().equals("string[]")) {
+                            ret += tab(2) + "memcpy(&" + fieldName + "[0], &other." + fieldName + "[0], sizeof(" + fieldName + "));" + endl();
+                        } else {
+                            ret += tab(2) + "for(unsigned int __i = 0; __i < " + field.getArraySize() + "; __i++) {" + endl();
+                            ret += tab(3) +   fieldName + "[__i] = std::move(other." + fieldName + "[__i]);" + endl();
+                            ret += tab(2) + "}" + endl();
+                        }
+                    } else {
+                        ret += tab(2) + fieldName + " = std::move(other." + fieldName + ");" + endl();
+                    }
+                } else {
+                    ret += tab(2) + fieldName + " = std::move(other." + fieldName + ");" + endl();
+                }
+            }
+        }
+        return ret;
+    }
+
+    protected String getMoveAssignment(IDLClass idlClass)
+    {
+        String ret = "";
+        int pos = 3;
+        ret += tab(pos) + getClassName(idlClass) + "_version = other." + getClassName(idlClass) + "_version;" + endl();
+        for (IDLField field : idlClass.getFields()) {
+            if (field.isStatic()) continue;
+            String fieldName = getFieldName(field);
+            if (field.isIdlType()) {
+                if (!field.isArray()) {
+                    if (field.isAbstract()) {
+                        ret += tab(pos) + "std::swap(" + fieldName + ", other." + fieldName + ");" + endl();
+                    } else {
+                        ret += tab(pos) + fieldName + " = std::move(other." + fieldName + ");" + endl();
+                    }
+                } else {
+                    // isArray()
+                    if (field.getArraySize() > 0) {
+                        ret += tab(pos) + "for(unsigned int __i = 0; __i < " + field.getArraySize() + "; __i++) {" + endl();
+                        if (field.isAbstract()) {
+                            ret += tab(pos+1) + "std::swap(" + fieldName + "[__i], other." + fieldName + "[__i]);" + endl();
+                        } else {
+                            ret += tab(pos+1) + fieldName + "[__i] = std::move(other." + fieldName + "[__i]);" + endl();
+                        }
+                        ret += tab(pos) + "}" + endl();
+                    } else {
+                        ret += tab(pos) + "std::swap(" + fieldName + ", other." + fieldName + ");" + endl();
+                    }
+                }
+            } else {
+                // core types
+                if (field.isArray()) {
+                    if (field.getArraySize() > 0) {
+                        if (field.getType().equals("string[]")) {
+                            ret += tab(pos) + "for(unsigned int __i = 0; __i < " + field.getArraySize() + "; __i++) {" + endl();
+                            ret += tab(pos+1) +   fieldName + "[__i] = std::move(other." + fieldName + "[__i]);" + endl();
+                            ret += tab(pos) + "}" + endl();
+                        } else {
+                            ret += tab(pos) + "memcpy(&" + fieldName + "[0], &other." + fieldName + "[0], sizeof(" + fieldName + "));" + endl();
+                        }
+                    } else {
+                        ret += tab(pos) + "std::swap(" + fieldName + ", other." + fieldName + ");" + endl();
+                    }
+                } else {
+                    if (field.getType().equals("string")) {
+                        ret += tab(pos) + fieldName + " = std::move(other." + fieldName + ");" + endl();
+                    } else {
+                        ret += tab(pos) + fieldName + " = other." + fieldName + ";" + endl();
+                    }
                 }
             }
         }

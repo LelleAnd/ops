@@ -48,6 +48,22 @@ __constructorBody
         return *this;
     }
 
+    ///Move-constructor taking other's resources
+    __className(__className&& other) : __baseClassName(std::move(other))
+    {
+__moveconstructor
+    }
+
+    // Move assignment operator taking other's resources
+    __className& operator= (__className&& other)
+    {
+        if (this != &other) {
+            __baseClassName::operator=(std::move(other));
+__moveassignment
+        }
+        return *this;
+    }
+
     ///This method acceptes an ops::ArchiverInOut visitor which will serialize or deserialize an
     ///instance of this class to a format dictated by the implementation of the ArchiverInout.
     virtual void serialize(ops::ArchiverInOut* archive) override

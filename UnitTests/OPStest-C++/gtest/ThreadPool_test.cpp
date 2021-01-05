@@ -22,6 +22,7 @@
 
 #include <atomic>
 #include <exception>
+#include <thread>
 
 #include "SingleThreadPool.h"
 

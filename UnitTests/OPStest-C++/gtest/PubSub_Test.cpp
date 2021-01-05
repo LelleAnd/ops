@@ -20,6 +20,8 @@
 
 #include "gtest/gtest.h"
 
+#include <thread>
+
 #include "SetupOPSConfig.h"
 #include "Participant.h"
 #include "Subscriber.h"

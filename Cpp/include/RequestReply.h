@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2020-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -21,6 +22,7 @@
 #ifndef ops_RequestReplyH
 #define ops_RequestReplyH
 
+#include <memory>
 #include <sstream>
 
 #include "OPSTypeDefs.h"
@@ -37,48 +39,39 @@ namespace ops
     class RequestReply
     {
     public:
-		RequestReply(Topic reqTopic, Topic repTopic, ObjectKey_T key_) :keyFilter(key_), key(key_)
+		RequestReply(Topic reqTopic, Topic repTopic, ObjectKey_T key_) : keyFilter(key_), key(key_)
 		{
-			sub = new Subscriber(repTopic);
+			pub = std::unique_ptr<Publisher>(new Publisher(reqTopic));
+			sub = std::unique_ptr<Subscriber>(new Subscriber(repTopic));
 			sub->addFilterQoSPolicy(&keyFilter);
-
-			pub = new Publisher(reqTopic);
 			sub->start();
 		}
 	    RepType* request(ReqType* req, int timeout)
 		{
-			static int reqInt = 0;
 			reqInt++;
 			req->setKey(key);
 			std::stringstream ss;
 			ss << key << reqInt;
-			req->requestId = ss.str(); 
+			req->requestId = ss.str();
 			
 			int64_t requestLimit = TimeHelper::currentTimeMillis() + (int64_t)timeout;
 			sub->getDataReference();
 			pub->writeOPSObject(req);
-			while(TimeHelper::currentTimeMillis() < requestLimit)
-			{
-				if(sub->waitForNewData((int)(requestLimit - TimeHelper::currentTimeMillis())))
-				{
-					if(((RepType*)sub->getMessage()->getData())->requestId == req->requestId)
-					{
-						return (RepType*)sub->getMessage()->getData()->clone();
+			while (TimeHelper::currentTimeMillis() < requestLimit) {
+				if (sub->waitForNewData((int)(requestLimit - TimeHelper::currentTimeMillis()))) {
+					if (dynamic_cast<RepType*>(sub->getMessage()->getData())->requestId == req->requestId) {
+						return dynamic_cast<RepType*>(sub->getMessage()->getData()->clone());
 					}
 				}
 			}
 			return nullptr;
 		}
-		~RequestReply()
-		{
-			delete sub;
-			delete pub;
-		}
 	private:
-        Subscriber* sub{ nullptr };
-        Publisher* pub{ nullptr };
+        std::unique_ptr<Subscriber> sub;
+        std::unique_ptr<Publisher> pub;
 		KeyFilterQoSPolicy keyFilter;
 		ObjectKey_T key;
+		int reqInt{ 0 };
     };
 }
 #endif

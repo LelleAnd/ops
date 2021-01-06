@@ -80,7 +80,7 @@ public:
         acked,      // Message sent and acked (if Ack is enabled)
         failed      // When Ack is enabled, and at least one expected Ack sender failed to send Ack after x resends
     };
-    SendState getSendState() { return _sendState; }
+    SendState getSendState() const noexcept { return _sendState; }
 
 protected:
     int64_t currentPublicationID{ 0 };

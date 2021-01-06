@@ -36,7 +36,7 @@ Versions older than 1.60 hasn't been used/tested for quite a while. It is recomm
 ## CMake ##
 Version 3.1.0 or later is required to build OPS with CMake. Make sure the cmake command is in your path. CMake can be downloaded at https://cmake.org/.
 
-OPS has been used with CMake version 3.5.0 and later.
+OPS has been used with CMake version 3.5.0 and later. To use CMake to build C# libraries and examples, you need CMake later than version 3.8.0.
 
 ## Visual Studio (Windows) ##
 OPS for C++ requires a C++11 compiler and has therefore only support for VS2015, VS2017 and VS2019. Support for earlier VS versions has been dropped.

@@ -8,6 +8,9 @@ set(OPSIDL_SOURCE_DIR ${PROJECT_SOURCE_DIR}/Examples/OPSIdls)
 # Java example applications
 add_subdirectory(JavaApps)
 
+# CShrap examples
+add_subdirectory(CSharpApps)
+
 # C++ example applications
 # All will need the ops headers
 include_directories(

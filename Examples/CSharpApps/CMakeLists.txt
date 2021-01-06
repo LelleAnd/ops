@@ -35,8 +35,9 @@
     if (${csc_support_found} LESS 0)
       message(WARNING "CSharp compiler supporting required language version (7.3) not found...")
     else()
-      # add the source
-      add_subdirectory(Ops)
+      # add the examples
+      add_subdirectory(OPSTest)
+      add_subdirectory(TestAll)
     endif()
   else()
     message(WARNING "NO CSharp compiler found...")

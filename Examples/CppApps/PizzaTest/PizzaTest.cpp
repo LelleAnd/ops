@@ -621,7 +621,7 @@ public:
 				", Ham length: " << data->ham.size() << std::endl;
 		}
         if (gDoRcvDelay) {
-            ops::TimeHelper::sleep(1000);
+            ops::TimeHelper::sleep(std::chrono::milliseconds(1000));
         }
     }
 
@@ -956,7 +956,7 @@ int main(const int argc, const char* argv[])
                 if (participant->dataAvailable()) {
                     std::cout << "##### data is available\n";
                 }
-                ops::TimeHelper::sleep(1);
+                ops::TimeHelper::sleep(std::chrono::milliseconds(1));
 			}
 		}
 

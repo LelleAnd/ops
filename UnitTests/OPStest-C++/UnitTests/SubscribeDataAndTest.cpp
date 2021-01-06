@@ -288,7 +288,7 @@ int main(int argc, char**argv)
 	itemInfo->helper->CreateSubscriber(itemInfo->part, itemInfo->TopicName);
 	itemInfo->helper->StartSubscriber();
 	std::cout << "start linstening on normal data" << std::endl;
-	ops::TimeHelper::sleep(22000); //listen on data for 22 seconds
+	ops::TimeHelper::sleep(std::chrono::seconds(22)); //listen on data for 22 seconds
 
 
 	//delete objects

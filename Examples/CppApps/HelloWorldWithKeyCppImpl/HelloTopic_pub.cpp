@@ -7,7 +7,6 @@
 #include "HelloWorld/HelloWorldTypeFactory.h"
 //Include iostream to get std::cout
 #include <iostream>
-//Include windows to get Sleep()
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -30,11 +29,8 @@ int main(const int argc, const char* args[])
 	if(!participant)
 	{
 		std::cout << "Create participant failed. do you have ops_config.xml on your rundirectory?" << std::endl;
-#ifdef _WIN32
-		Sleep(10000); exit(1);
-#else
-                usleep(10000000); exit(1);
-#endif
+		ops::TimeHelper::sleep(std::chrono::seconds(10));
+		exit(1);
 	}
 
 	//Add type support for our types, to make this participant understand what we are talking
@@ -55,16 +51,11 @@ int main(const int argc, const char* args[])
 	data.setKey("cpp_sample");
 
 	//Publish the data peridically 
-	int const mainSleep = 1000;
 	while(true)
 	{
 		pub.write(&data);
 		std::cout << "Writing data"  <<  std::endl;
-#ifdef _WIN32
-		Sleep(mainSleep);
-#else
-                usleep(mainSleep*1000);
-#endif		
+		ops::TimeHelper::sleep(std::chrono::milliseconds(1000));
 	}
 
 	return 0;

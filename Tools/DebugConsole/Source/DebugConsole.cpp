@@ -173,7 +173,7 @@ void ForAllTopics(DebugListener& listener, opsidls::DebugRequestResponseDataPubl
 	for (const auto n : listener._topics) {
 		request.Name = n;
 		pub.write(request);
-		ops::TimeHelper::sleep(20);
+		ops::TimeHelper::sleep(std::chrono::milliseconds(20));
 	}
 }
 
@@ -192,7 +192,7 @@ void CommandLoop(const ops::Participant* const part)
 	pub.write(request);
 #endif
 
-	ops::TimeHelper::sleep(1000);
+	ops::TimeHelper::sleep(std::chrono::milliseconds(1000));
 }
 
 void Usage()
@@ -249,7 +249,7 @@ int main(const int argc, const char* argv[])
     std::cout << "\n DebugConsole not working since OPS compiled without debug support (#define OPS_ENABLE_DEBUG_HANDLER)\n\n";
     return 1;
 #endif
-    
+
     // Helper variables
 	std::string* strp = nullptr;
 	int* intp = nullptr;
@@ -393,7 +393,7 @@ int main(const int argc, const char* argv[])
 
 		request.Objs.clear();
 
-		ops::TimeHelper::sleep(1000);
+		ops::TimeHelper::sleep(std::chrono::milliseconds(1000));
 
 		if (allpubtopics || allsubtopics) {
 			if (allpubtopics) {
@@ -406,7 +406,7 @@ int main(const int argc, const char* argv[])
 				request.Command = 1;
 				ForAllTopics(listener, pub);
 			}
-			ops::TimeHelper::sleep(1000);
+			ops::TimeHelper::sleep(std::chrono::milliseconds(1000));
 		}
 #endif
 	}

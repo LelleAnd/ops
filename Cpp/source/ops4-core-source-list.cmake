@@ -13,7 +13,6 @@ set(LIB_OPS_PUBLIC_HEADERS
   ${OPS_HEADER_PATH}/Channel.h
   ${OPS_HEADER_PATH}/ChecksumArchiver.h
   ${OPS_HEADER_PATH}/CommException.h
-  ${OPS_HEADER_PATH}/Compatibility.h
   ${OPS_HEADER_PATH}/ConnectStatus.h
   ${OPS_HEADER_PATH}/ConfigException.h
   ${OPS_HEADER_PATH}/DataListener.h
@@ -95,7 +94,6 @@ set(LIB_OPS_CORE_SRCS
   ${OPS_SRC_PATH}/BasicWarning.h
   ${OPS_SRC_PATH}/ByteBuffer.cpp
   ${OPS_SRC_PATH}/Channel.cpp
-  ${OPS_SRC_PATH}/Compatibility.cpp
   ${OPS_SRC_PATH}/DataNotifier.cpp
   ${OPS_SRC_PATH}/DataSegmentPool.cpp
   ${OPS_SRC_PATH}/DataSegmentPool.h

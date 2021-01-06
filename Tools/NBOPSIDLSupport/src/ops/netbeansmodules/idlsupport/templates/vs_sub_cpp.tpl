@@ -22,7 +22,7 @@ public:
 		if(!participant)
 		{
 			std::cout << "Create participant failed. do you have ops_config.xml in your rundirectory?" << std::endl;
-			Sleep(10000); exit(1);
+			ops::TimeHelper::sleep(std::chrono::seconds(10)); exit(1);
 		}
 
 		//Add type support for our types, to make this participant understand what we are talking
@@ -81,9 +81,8 @@ int main(int argc, char* args)
 	//Just keep program alive, action will take place in Main::onNewData()
 	while(true)
 	{
-		Sleep(10000);
+		ops::TimeHelper::sleep(std::chrono::seconds(10));
 	}
 
 	return 0;
 }
-

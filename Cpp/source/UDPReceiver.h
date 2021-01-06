@@ -43,7 +43,7 @@
 #include "BoostIOServiceImpl.h"
 #include "BasicError.h"
 #include "BasicWarning.h"
-#include "Compatibility.h"
+#include "TimeHelper.h"
 
 namespace ops
 {
@@ -188,7 +188,7 @@ namespace ops
 			/// This approach works, but the recommended boost way is to use a shared pointer to the instance object
 			/// between the "normal" code and the callbacks, so the callbacks can check if the object exists.
 			while (m_working) { 
-				Sleep(1);
+                TimeHelper::sleep(std::chrono::milliseconds(1));
 			}
 
             if (sock != nullptr) { delete sock; }
@@ -256,7 +256,7 @@ namespace ops
 			/// This approach works, but the recommended boost way is to use a shared pointer to the instance object
 			/// between the "normal" code and the callbacks, so the callbacks can check if the object exists.
 			while (m_working) { 
-				Sleep(1);
+                TimeHelper::sleep(std::chrono::milliseconds(1));
 			}
         }
 

@@ -35,6 +35,16 @@ namespace ops
         return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     }
 
+    void TimeHelper::sleep(const std::chrono::milliseconds& sleep_duration)
+    {
+        std::this_thread::sleep_for(sleep_duration);
+    }
+
+    void TimeHelper::sleep(const std::chrono::seconds& sleep_duration)
+    {
+        std::this_thread::sleep_for(sleep_duration);
+    }
+
     ///Sleeps the given number of milliseconds (millis).
     void TimeHelper::sleep(const int64_t millis)
     {

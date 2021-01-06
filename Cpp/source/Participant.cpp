@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2020 Lennart Andersson.
+* Copyright (C) 2019-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -19,6 +19,7 @@
 * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <sstream>
+#include <thread>
 #ifdef _WIN32
 #include <process.h>
 #include <winsock.h>
@@ -246,10 +247,14 @@ namespace ops
 		// Our timer is required for ReceiveDataHandlers to be cleaned up so it shouldn't be stopped
 		// before receiveDataHandlerFactory is finished.
 		// Wait until receiveDataHandlerFactory has no more cleanup to do
-		while (!receiveDataHandlerFactory->cleanUpDone()) {
-			if (_policy == execution_policy::polling) { Poll(); }	// Need to drive timer in case the user forget
-			TimeHelper::sleep(1);
+		try {
+			while (!receiveDataHandlerFactory->cleanUpDone()) {
+				if (_policy == execution_policy::polling) { Poll(); }	// Need to drive timer in case the user forget
+				TimeHelper::sleep(std::chrono::milliseconds(1));
+			}
 		}
+		catch (...)
+		{}
 
 		// Now stop and delete our timer (NOTE requires ioService to be running).
 		// If the timer is in the callback, the delete will wait for it to finish and then the object is deleted.

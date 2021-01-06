@@ -53,7 +53,7 @@ void PublisherExample(const ops::Topic& topic)
 		std::cout << "Writing ChildTopic " << data.l <<  std::endl;
 		pub.write(data);
 
-		ops::TimeHelper::sleep(1000);
+		ops::TimeHelper::sleep(std::chrono::milliseconds(1000));
 	}
 }
 
@@ -92,7 +92,7 @@ void PollingSubscriberExample(const ops::Topic& topic)
 			sub.getData(data);
 			std::cout << "New data found: Received ChildTopic with " << data.l << std::endl;
 		}
-		ops::TimeHelper::sleep(10);
+		ops::TimeHelper::sleep(std::chrono::milliseconds(10));
 #endif
 	}
 }
@@ -125,7 +125,7 @@ void CallbackSubscriberExample(const ops::Topic& topic)
 	sub.start();
 
 	while(true) {
-		ops::TimeHelper::sleep(1000);
+		ops::TimeHelper::sleep(std::chrono::milliseconds(1000));
 	}
 }
 
@@ -258,7 +258,7 @@ void ObjectSubscriberExample(const ops::Topic& topic)
     handler.start();
 
 	while(true) {
-		ops::TimeHelper::sleep(1000);
+		ops::TimeHelper::sleep(std::chrono::milliseconds(1000));
 	}
 }
 
@@ -301,7 +301,7 @@ void SubscriberLamdaExample(const ops::Topic& topic)
     sub.start();
 
     while (true) {
-        ops::TimeHelper::sleep(10);
+        ops::TimeHelper::sleep(std::chrono::milliseconds(10));
     }
 }
 

@@ -338,11 +338,11 @@ int main(const int argc, const char**argv)
 		else if (i == 1) { hlpExtra->data = extraAlltNormalTCP; }
 		else if (i == 2) { hlpExtra->data = extraAlltNormalUDP; }
 
-		ops::TimeHelper::sleep(2000);
+		ops::TimeHelper::sleep(std::chrono::milliseconds(2000));
 
 		itemInfo->helper->Write();
 		std::cout << "should write first data" << std::endl;
-		ops::TimeHelper::sleep(1000);
+		ops::TimeHelper::sleep(std::chrono::milliseconds(1000));
 
 		if (i == 0) { hlpExtra->data = extraAlltLarge; }
 		else if (i == 1) { hlpExtra->data = extraAlltLargeTCP; }
@@ -351,7 +351,7 @@ int main(const int argc, const char**argv)
 		itemInfo->helper->Write();
 
 		std::cout << "should write second data" << std::endl;
-		ops::TimeHelper::sleep(1000);
+		ops::TimeHelper::sleep(std::chrono::milliseconds(1000));
 
 		if (i == 0) { hlpExtra->data = extraAlltNormal; }
 		else if (i == 1) { hlpExtra->data = extraAlltNormalTCP; }
@@ -361,10 +361,10 @@ int main(const int argc, const char**argv)
 		std::cout << "should write 3-12 data" << std::endl;
 		for(int j = 0 ; j < 10; ++j){
 			itemInfo->helper->Write();
-			ops::TimeHelper::sleep(10);
+			ops::TimeHelper::sleep(std::chrono::milliseconds(10));
 		}
 
-		ops::TimeHelper::sleep(1000);
+		ops::TimeHelper::sleep(std::chrono::milliseconds(1000));
 
 		if (i == 0) { hlpExtra->data = extraAlltLarge; }
 		else if (i == 1) { hlpExtra->data = extraAlltLargeTCP; }
@@ -373,7 +373,7 @@ int main(const int argc, const char**argv)
 		std::cout << "should write 13-22 data" << std::endl;
 		for(int k = 0 ; k < 10; ++k){
 			itemInfo->helper->Write();
-			ops::TimeHelper::sleep(100);
+			ops::TimeHelper::sleep(std::chrono::milliseconds(100));
 		}
 	}
 

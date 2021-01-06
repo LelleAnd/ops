@@ -289,7 +289,7 @@ int main(int argc, char**argv)
 	itemInfo->helper->CreateSubscriber(itemInfo->part, itemInfo->TopicName);
 	itemInfo->helper->StartSubscriber();
 	std::cout << "start linstening on TCP" << std::endl;
-	ops::TimeHelper::sleep(24000); //listen on data for 24 seconds
+	ops::TimeHelper::sleep(std::chrono::seconds(24)); //listen on data for 24 seconds
 
 
 	//delete objects

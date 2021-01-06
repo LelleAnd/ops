@@ -332,8 +332,7 @@ namespace ops
         if (_ackSub == nullptr) { return true; }
         if (_ackSub->_lastSentPubId < 0) { return true; }
         SafeLock lck(&_pubLock);
-        bool res = writeSerializedBuffer();
-        return res;
+        return writeSerializedBuffer();
     }
 
     // One way for us to know which ACK's to expect

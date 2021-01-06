@@ -40,7 +40,7 @@
 
 #endif
 
-const char c_program_version[] = "OPSListener Version 2020-10-18";
+const char c_program_version[] = "OPSListener Version 2020-11-28";
 
 void showDescription()
 {
@@ -1468,7 +1468,7 @@ int main(const int argc, const char* argv[])
 					}
 				}
 			}
-			ops::TimeHelper::sleep(10);
+			ops::TimeHelper::sleep(std::chrono::milliseconds(10));
 
 			if (doPause) {
 				printf("Queued %d\r", m->numQueued());

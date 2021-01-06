@@ -43,7 +43,6 @@
 #include "Participant.h"
 #include "BasicError.h"
 #include "BasicWarning.h"
-#include "Compatibility.h"
 #include "TCPBoostConnection.h"
 
 namespace ops

@@ -1,6 +1,7 @@
 
 //Auto generated code example for subscribing to RequestHelloTopic on domain HelloDomain generated from project HelloRequestReply
 #include <ops.h>
+#include <TimeHelper.h>
 #include "hello/RequestHelloDataSubscriber.h"
 #include "hello/HelloDataPublisher.h"
 #include "HelloRequestReply/HelloRequestReplyTypeFactory.h"
@@ -34,10 +35,9 @@ public:
 		{
 			std::cout << "Create participant failed. do you have ops_config.xml in your rundirectory?" << std::endl;
 #ifdef _WIN32
-			Sleep(10000); exit(1);
-#else
-      exit(1);
+			ops::TimeHelper::sleep(std::chrono::seconds(10));
 #endif
+			exit(1);
 		}
 
 		//Add type support for our types, to make this participant understand what we are talking
@@ -113,11 +113,7 @@ int main(const int argc, const char* args[])
 	//Just keep program alive, action will take place in Main::onNewData()
 	while(true)
 	{
-#ifdef _WIN32
-		Sleep(10000);
-#else
-		usleep(10000000);
-#endif
+		ops::TimeHelper::sleep(std::chrono::seconds(10)); 
 	}
 
 	return 0;

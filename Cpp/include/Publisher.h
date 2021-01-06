@@ -132,7 +132,7 @@ private:
 
 public:
 	//Send behavior parameters
-    int64_t sendSleepTime{ 1 };
+    std::chrono::milliseconds sendSleepTime{ 1 };
     int sleepEverySendPacket{ 100000 };
 };
 

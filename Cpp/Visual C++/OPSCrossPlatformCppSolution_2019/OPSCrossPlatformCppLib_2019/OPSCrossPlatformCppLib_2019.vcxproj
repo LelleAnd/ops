@@ -406,7 +406,6 @@
     <ClInclude Include="..\..\..\include\ByteBuffer.h" />
     <ClInclude Include="..\..\..\include\BytesSizePair.h" />
     <ClInclude Include="..\..\..\include\CommException.h" />
-    <ClInclude Include="..\..\..\include\Compatibility.h" />
     <ClInclude Include="..\..\..\include\ConfigException.h" />
     <ClInclude Include="..\..\..\include\DataListener.h" />
     <ClInclude Include="..\..\..\include\DataNotifier.h" />
@@ -464,7 +463,6 @@
     <ClCompile Include="..\..\..\source\ArchiverInOut.cpp" />
     <ClCompile Include="..\..\..\source\ByteBuffer.cpp" />
     <ClCompile Include="..\..\..\source\Channel.cpp" />
-    <ClCompile Include="..\..\..\source\Compatibility.cpp" />
     <ClCompile Include="..\..\..\source\DataNotifier.cpp" />
     <ClCompile Include="..\..\..\source\DataSegmentPool.cpp" />
     <ClCompile Include="..\..\..\source\DeadlineTimer.cpp" />

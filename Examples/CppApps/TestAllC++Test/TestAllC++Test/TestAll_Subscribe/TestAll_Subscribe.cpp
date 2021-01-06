@@ -81,7 +81,7 @@ public:
 #ifdef OLD_NOT_USED
         //while(true)
 		//{
-		//	Sleep(1000);
+		//	ops::TimeHelper::sleep(std::chrono::milliseconds(1000));
 		//	sub->aquireMessageLock();
 		//	onNewData(sub);
 		//	sub->releaseMessageLock();
@@ -216,7 +216,7 @@ int main(const int argc, const char* argv[])
 	//Make sure the OPS ioService never runs out of work.
 	//Run it on main application thread only.
 	for(int i = 0; i < 100; i++) {
-		ops::TimeHelper::sleep(100);
+		ops::TimeHelper::sleep(std::chrono::milliseconds(100));
 
 #ifdef OLD_NOT_USED
         //break;

@@ -1,13 +1,13 @@
 
 //Include ops
 #include <ops.h>
+#include <TimeHelper.h>
 //Include a publisher for the data type we want to publish, generated from our IDL project HelloWorld.
 #include "hello/HelloDataPublisher.h"
 //Include type support for the data types we have defined in our IDL project, generated from our IDL project HelloWorld.
 #include "HelloWorld/HelloWorldTypeFactory.h"
 //Include iostream to get std::cout
 #include <iostream>
-//Include windows to get Sleep()
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -30,11 +30,8 @@ int main(const int argc, const char* args[])
 	if(!participant)
 	{
 		std::cout << "Create participant failed. do you have ops_config.xml on your rundirectory?" << std::endl;
-#ifdef _WIN32
-		Sleep(10000); exit(1);
-#else
-                usleep(10000000); exit(1);
-#endif
+		ops::TimeHelper::sleep(std::chrono::seconds(10));
+		exit(1);
 	}
 
 	//Add type support for our types, to make this participant understand what we are talking
@@ -53,16 +50,11 @@ int main(const int argc, const char* args[])
 	data.helloString = "Hello World From C++!!";
 
 	//Publish the data peridically 
-	int const mainSleep = 1000;
 	while(true)
 	{
 		pub.write(&data);
 		std::cout << "Writing data"  <<  std::endl;
-#ifdef _WIN32
-		Sleep(mainSleep);
-#else
-                usleep(mainSleep*1000);
-#endif		
+		ops::TimeHelper::sleep(std::chrono::milliseconds(1000));
 	}
 
 	return 0;

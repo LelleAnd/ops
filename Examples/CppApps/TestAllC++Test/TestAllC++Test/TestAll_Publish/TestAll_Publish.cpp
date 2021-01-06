@@ -114,7 +114,7 @@ int main(const int argc, const char* args[])
 	if(!participant)
 	{
 		std::cout << "Create participant failed. do you have ops_config.xml on your rundirectory?" << std::endl;
-		ops::TimeHelper::sleep(10000); exit(1);
+		ops::TimeHelper::sleep(std::chrono::seconds(10)); exit(1);
 	}
 
 	//Add type support for our types, to make this participant understand what we are talking
@@ -129,7 +129,7 @@ int main(const int argc, const char* args[])
 	//Create a publisher on that topic
 	ChildDataPublisher pub(topic);
 	pub.setName("TestAllPublisher");
-	pub.sendSleepTime = sendSleepTime;
+	pub.sendSleepTime = std::chrono::milliseconds(sendSleepTime);
 	pub.sleepEverySendPacket = sleepEveryNrPackets;
 
 	Topic const baseTopic = participant->createTopic("BaseTopic");
@@ -211,7 +211,7 @@ int main(const int argc, const char* args[])
 		//	std::cout << "Writing BaseTopic " << std::endl;
 		}
 
-		ops::TimeHelper::sleep(mainSleep);
+		ops::TimeHelper::sleep(std::chrono::milliseconds(mainSleep));
 
 		if (_kbhit() != 0) {
 #ifdef _WIN32

@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -21,6 +22,7 @@
 #ifndef ops_TimeHelperH
 #define	ops_TimeHelperH
 
+#include <chrono>
 #include <string>
 #include "OPSExport.h"
 
@@ -31,8 +33,17 @@ namespace ops
 	public:
 		///Returns the current time as a number of milliseconds since Epoch 1970-01-01.
 		static int64_t currentTimeMillis() noexcept;
+
+		///Sleeps the given duration
+		static void sleep(const std::chrono::milliseconds& sleep_duration);
+		static void sleep(const std::chrono::seconds& sleep_duration);
+
+#ifdef OPS_C14_DETECTED
+		[[deprecated("Deprecated. Replaced by sleep() taking chrono duration")]]
+#endif
 		///Sleeps the given number of milliseconds (millis).
 	    static void sleep(int64_t millis);
+
 		///Returns current system time as a string to be used as user output, file names etc...
 	    static std::string getTimeToString();
 		///Returns the current time as a number of milliseconds since Epoch 1970-01-01.

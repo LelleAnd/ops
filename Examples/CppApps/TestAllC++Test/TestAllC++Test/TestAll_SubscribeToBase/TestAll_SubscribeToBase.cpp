@@ -101,7 +101,7 @@ int main(const int argc, const char* args[])
 	Main const m(configFile);
 
 	while(true) {
-		ops::TimeHelper::sleep(1000);
+		ops::TimeHelper::sleep(std::chrono::milliseconds(1000));
 	}
 	return 0;
 }

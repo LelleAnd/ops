@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2019-2020 Lennart Andersson.
+ * Copyright (C) 2019-2021 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -30,6 +30,7 @@
 #include "ThreadPool.h"
 #include "Lockable.h"
 #include "Runnable.h"
+#include "TimeHelper.h"
 
 namespace ops
 {
@@ -56,7 +57,7 @@ namespace ops
                         return;
                     }
                 }
-                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                TimeHelper::sleep(std::chrono::milliseconds(1));
             }
         }
 
@@ -79,7 +80,7 @@ namespace ops
                         return;
                     }
                 }
-                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                TimeHelper::sleep(std::chrono::milliseconds(1));
             }
         }
 

@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2017-2020 Lennart Andersson.
+* Copyright (C) 2017-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -114,13 +114,11 @@ namespace ops { namespace strings {
 		fixed_string(const T& str) { append(str.c_str(), str.size()); }
 
 		// all the special members can be defaulted
-#ifdef FIXED_C11_DETECTED
 		fixed_string(fixed_string const&) = default;
 		fixed_string(fixed_string&&) = default;
 		fixed_string& operator=(fixed_string&&) = default;
 		fixed_string& operator=(fixed_string const&) = default;
 		~fixed_string() = default;
-#endif
 
 		// Iterators:
 		// ...

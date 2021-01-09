@@ -39,13 +39,13 @@ namespace opsbridge {
 		_keepRunning = false;
 
 		// Stop and delete all Senders
-		for (std::map<ops::InternalKey_T, SEntry_t>::iterator it = _senders.begin(); it != _senders.end(); ++it) {
-			delete it->second.sender;
+		for (auto& x : _senders) {
+			x.second.sender.reset();
 		}
 
 		// Stop and delete all Receivers
-		for (std::map<ops::InternalKey_T, entry_t>::iterator it = _receivers.begin(); it != _receivers.end(); ++it) {
-			it->second.receiver.reset();
+		for (auto& x : _receivers) {
+			x.second.receiver.reset();
 		}
 
 		// Then we request the IO Service to stop the processing (it's running on the threadpool).

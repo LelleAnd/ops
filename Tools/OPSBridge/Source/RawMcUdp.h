@@ -71,7 +71,7 @@ namespace opsbridge {
 		};
 		std::map<ops::InternalKey_T, translation_t> _translations;
 		struct SEntry_t {
-			ops::Sender* sender = nullptr;
+			std::unique_ptr<ops::Sender> sender;
 			translation_t t;
 		};
 		std::map<ops::InternalKey_T, SEntry_t> _senders;

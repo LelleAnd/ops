@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2020 Lennart Andersson.
+* Copyright (C) 2018-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -90,7 +90,7 @@ namespace ops
 		}
 
 	protected:
-        Sender* sender = nullptr;
+		std::unique_ptr<Sender> sender;
         Lockable mutex;
 
 		// Called from senders (TCPServer)

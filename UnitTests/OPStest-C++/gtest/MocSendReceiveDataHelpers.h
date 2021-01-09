@@ -157,7 +157,7 @@ struct MocSendDataHandler : public ops::SendDataHandler
     MocSendDataHandler(ops::Topic top, ops::Participant& , uint16_t port) : topic(top), local_port(port)
     {
         //std::cout << "MocSendDataHandler()\n";
-        sender = (ops::Sender*)new MocSender(*this);
+        sender = std::unique_ptr<ops::Sender>(new MocSender(*this));
     }
 
     bool sendData(char* buf, int bufSize, ops::Topic& ) override
@@ -173,7 +173,6 @@ struct MocSendDataHandler : public ops::SendDataHandler
     virtual ~MocSendDataHandler()
     {
         //std::cout << "~MocSendDataHandler()\n";
-        delete sender;
     }
 };
 

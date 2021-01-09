@@ -1,6 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
+ * Copyright (C) 2021 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -25,7 +26,6 @@
 
 #include "OPSObject.h"
 
-
 namespace ops
 {
 
@@ -43,15 +43,9 @@ namespace ops
             return sender->sendTo(buf, bufSize, topic.getDomainAddress(), (uint16_t)topic.getPort());
         }
 
-        virtual ~McSendDataHandler()
-        {
-            SafeLock lock(&mutex);
-            delete sender;
-			sender = nullptr;
-        }
+        virtual ~McSendDataHandler() = default;
 
     };
 
 }
-
 #endif

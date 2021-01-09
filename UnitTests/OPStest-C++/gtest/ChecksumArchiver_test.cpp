@@ -59,7 +59,7 @@ TEST(Test_ChecksumArchiver, TestCoreTypes) {
     chk.calc.sum = 0;
     obj.serialize(&chk);
     EXPECT_EQ(chk.calc.sum, 0xD0);
-    EXPECT_EQ(chk.calc.totalbytes, 47);
+    EXPECT_EQ(chk.calc.totalbytes, (size_t)47);
     EXPECT_EQ(chk.calc.totalfields, 11);
 }
 

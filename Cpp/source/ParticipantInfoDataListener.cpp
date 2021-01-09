@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2020 Lennart Andersson.
+* Copyright (C) 2019-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -101,7 +101,7 @@ namespace ops
 			return false;
 		}
 
-		partInfoSub = new Subscriber(participant.createParticipantInfoTopic());
+		partInfoSub = std::unique_ptr<Subscriber>(new Subscriber(participant.createParticipantInfoTopic()));
 		partInfoSub->addDataListener(this);
 		partInfoSub->start();
 
@@ -110,15 +110,14 @@ namespace ops
 
 	void ParticipantInfoDataListener::removeSubscriber()
 	{
-		if (partInfoSub != nullptr) { delete partInfoSub; }
-		partInfoSub = nullptr;
+		partInfoSub.reset();
 	}
 
 	void ParticipantInfoDataListener::connectUdp(const Topic& top, std::shared_ptr<SendDataHandler> const handler)
 	{
         const ObjectName_T key = top.getName();
         const SafeLock lock(&mutex);
-		if (partInfoSub == nullptr) {
+		if (partInfoSub.get() == nullptr) {
 			if (!setupSubscriber()) {
 				if (!isValidNodeAddress(top.getDomainAddress())) {
 					// Generate an error message if we come here with domain->getMetaDataMcPort() == 0,
@@ -178,7 +177,7 @@ namespace ops
 	void ParticipantInfoDataListener::connectTcp(const ObjectName_T& top, std::shared_ptr<ReceiveDataHandler> const handler)
 	{
 		const SafeLock lock(&mutex);
-		if (partInfoSub == nullptr) {
+		if (partInfoSub.get() == nullptr) {
 			if (!setupSubscriber()) {
 				// Generate an error message if we come here with domain->getMetaDataMcPort() == 0,
 				// it means that we have TCP topics that require meta data but user has disabled it.

@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2020 Lennart Andersson.
+* Copyright (C) 2019-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -39,20 +39,19 @@ namespace ops
 
     Lockable::Lockable()
     {
-        _lock = new InternalLock();
+        _lock = std::unique_ptr<InternalLock>(new InternalLock());
     }
 
     Lockable::Lockable(const Lockable&)
     {
-        _lock = new InternalLock();
+        _lock = std::unique_ptr<InternalLock>(new InternalLock());
     }
 
     Lockable& Lockable::operator=(const Lockable& rhs)
     {
         if (this != &rhs) {
-            InternalLock* tmp = new InternalLock();
+            std::unique_ptr<InternalLock> tmp(new InternalLock());
             std::swap(_lock, tmp);
-            delete tmp;
         }
         return *this;
     }
@@ -75,7 +74,6 @@ namespace ops
 
     Lockable::~Lockable()
     {
-        delete _lock;
     }
 #endif
 }

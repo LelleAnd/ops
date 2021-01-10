@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2020 Lennart Andersson.
+* Copyright (C) 2019-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -35,19 +35,18 @@ namespace ops
     
     int Thread::start()
     {
-        if (thread == nullptr) {
-			thread = new std::thread(&Thread::EntryPoint, this);
+        if (thread.get() == nullptr) {
+			thread = std::unique_ptr<std::thread>(new std::thread(&Thread::EntryPoint, this));
 		}
         return 0;
     }
 
     bool Thread::join()
     {
-        if (thread != nullptr) {
+        if (thread.get() != nullptr) {
             // Wait for thread to exit before we delete it
             thread->join();
-            delete thread;
-            thread = nullptr;
+            thread.reset();
         }
         return true;
     }
@@ -56,9 +55,8 @@ namespace ops
     {
 	}
     
-    /*static */ void Thread::EntryPoint(void* const pthis)
+    void Thread::EntryPoint(Thread* const pt)
     {
-        Thread* const pt = (Thread*)pthis;
-        pt->run();
+        if (pt != nullptr) { pt->run(); }
     }
 }

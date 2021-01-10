@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2020 Lennart Andersson.
+* Copyright (C) 2020-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -39,10 +39,10 @@ namespace ops
         void stop();
         bool join();
         virtual void run() = 0;
-        static void EntryPoint(void* pthis);
+        static void EntryPoint(Thread* pt);
     
     protected:
-        std::thread* thread{ nullptr };
+        std::unique_ptr<std::thread> thread;
 	};
 }
 #endif

@@ -28,8 +28,8 @@ namespace ops
     
     void DataNotifier::notifyNewData()
     {
-        for (unsigned int i = 0; i < closureListeners.size(); i++) {
-            closureListeners[i](this);
+        for (auto& x : closureListeners) {
+            x(this);
         }
     }
 

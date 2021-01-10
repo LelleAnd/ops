@@ -22,6 +22,8 @@
 #ifndef ops_LockableH
 #define ops_LockableH
 
+#include <memory>
+
 #include "OPSExport.h"
 #include "OPSTypeDefs.h"
 

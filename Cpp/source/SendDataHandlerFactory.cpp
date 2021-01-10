@@ -104,7 +104,7 @@ namespace ops
         Address_T localIf = doSubnetTranslation(top.getLocalInterface(), participant.getIOService());
         const InternalKey_T key = getKey(top, localIf);
 
-		const SafeLock lock(&mutex);
+		const SafeLock lock(mutex);
 
         // Check if a suitable SendDataHandler already exist
         if (sendDataHandlers.find(key) != sendDataHandlers.end()) {
@@ -149,7 +149,7 @@ namespace ops
         const Address_T localIf = doSubnetTranslation(top.getLocalInterface(), participant.getIOService());
         const InternalKey_T key = getKey(top, localIf);
 
-		const SafeLock lock(&mutex);
+		const SafeLock lock(mutex);
 		
         if (top.getTransport() == Topic::TRANSPORT_UDP) {
             if (sendDataHandlers.find(key) != sendDataHandlers.end()) {

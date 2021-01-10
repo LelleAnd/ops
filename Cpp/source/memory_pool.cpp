@@ -43,7 +43,7 @@ namespace ops {
 
 		void memory_pool_manager::Add(node<memory_pool_abs>& nd)
 		{
-			const SafeLock lck(&_mtx);
+			const SafeLock lck(_mtx);
 
 			// last node = _root.prev
 			nd.next = _root.prev->next;
@@ -56,7 +56,7 @@ namespace ops {
 
 		void memory_pool_manager::Remove(node<memory_pool_abs>& nd)
 		{
-			const SafeLock lck(&_mtx);
+			const SafeLock lck(_mtx);
 
 			nd.prev->next = nd.next;
 			nd.next->prev = nd.prev;
@@ -75,7 +75,7 @@ namespace ops {
 					std::endl << "======================" << std::endl;
 			}
 
-			const SafeLock lck(&_mtx);
+			const SafeLock lck(_mtx);
 
 			node<memory_pool_abs>* Ptr = _root.next;
 			while (Ptr != &_root) {

@@ -53,7 +53,7 @@ namespace ops
 	void ReceiveDataHandler::addListener(Listener<OPSMessage*>* const listener, Topic& top)
     {
         {
-            const SafeLock lock(&messageLock);
+            const SafeLock lock(messageLock);
             Notifier<OPSMessage*>::addListener(listener);
             if (Notifier<OPSMessage*>::getNrOfListeners() == 1) {
                 for (auto const x : rdc) {
@@ -69,7 +69,7 @@ namespace ops
     {
         topicUsage(top, false);
 
-        const SafeLock lock(&messageLock);
+        const SafeLock lock(messageLock);
 		Notifier<OPSMessage*>::removeListener(listener);
 		if (Notifier<OPSMessage*>::getNrOfListeners() == 0) {
 			for (auto const x : rdc) {
@@ -81,7 +81,7 @@ namespace ops
 	///Called whenever the receiver has new data.
 	void ReceiveDataHandler::onMessage(ReceiveDataChannel&, OPSMessage* const mess)
 	{
-		const SafeLock lock(&messageLock);
+		const SafeLock lock(messageLock);
 
 		OPSMessage* const oldMessage = message;
 		message = mess;

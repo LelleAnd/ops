@@ -36,7 +36,7 @@ namespace ops
 
     void ParticipantInfoDataListener::handle(ParticipantInfoData* partInfo)
     {
-        const SafeLock lock(&mutex);
+        const SafeLock lock(mutex);
         if (partInfo->mc_udp_port != 0) {
             for (auto x : partInfo->subscribeTopics) {
                 if ((x.transport == Topic::TRANSPORT_UDP) && participant.hasPublisherOn(x.name)) {
@@ -86,7 +86,7 @@ namespace ops
 
 	void ParticipantInfoDataListener::prepareForDelete()
 	{
-		const SafeLock lock(&mutex);
+		const SafeLock lock(mutex);
 		// We can't remove the Subscriber in the destructor, since the delete of the Subscriber
 		// requires objects that already has been deleted when the participant delete us
 		// (for the case when user has subscribers left when deleting the participant. 
@@ -116,7 +116,7 @@ namespace ops
 	void ParticipantInfoDataListener::connectUdp(const Topic& top, std::shared_ptr<SendDataHandler> const handler)
 	{
         const ObjectName_T key = top.getName();
-        const SafeLock lock(&mutex);
+        const SafeLock lock(mutex);
 		if (partInfoSub.get() == nullptr) {
 			if (!setupSubscriber()) {
 				if (!isValidNodeAddress(top.getDomainAddress())) {
@@ -149,7 +149,7 @@ namespace ops
 
 	void ParticipantInfoDataListener::disconnectUdp(const Topic& top, std::shared_ptr<SendDataHandler> const handler)
 	{
-		const SafeLock lock(&mutex);
+		const SafeLock lock(mutex);
 
         // Remove from map
         const ObjectName_T key = top.getName();
@@ -176,7 +176,7 @@ namespace ops
 
 	void ParticipantInfoDataListener::connectTcp(const ObjectName_T& top, std::shared_ptr<ReceiveDataHandler> const handler)
 	{
-		const SafeLock lock(&mutex);
+		const SafeLock lock(mutex);
 		if (partInfoSub.get() == nullptr) {
 			if (!setupSubscriber()) {
 				// Generate an error message if we come here with domain->getMetaDataMcPort() == 0,
@@ -208,7 +208,7 @@ namespace ops
 
 	void ParticipantInfoDataListener::disconnectTcp(const ObjectName_T& top, std::shared_ptr<ReceiveDataHandler> const handler)
 	{
-		const SafeLock lock(&mutex);
+		const SafeLock lock(mutex);
 
 		// Remove from map
 		const auto result = rcvDataHandlers.find(top);

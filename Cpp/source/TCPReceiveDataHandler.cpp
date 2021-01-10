@@ -66,7 +66,7 @@ namespace ops
 			rdc_->key = key;
 			rdc_->connect(this);
 
-			const SafeLock lock(&messageLock);
+			const SafeLock lock(messageLock);
             sampleMaxSize = rdc_->getSampleMaxSize();   // Since topic params always is the same the size won't change
             rdc.push_back(rdc_);
 
@@ -79,7 +79,7 @@ namespace ops
 	void TCPReceiveDataHandler::topicUsage(Topic& top, bool const used)
 	{
         if (usingPartInfo) {
-            const SafeLock lock(&topicsLock);
+            const SafeLock lock(topicsLock);
             // We should only register unique topics
 			const auto it = topics.find(top.getName());
 			int32_t count = 0;

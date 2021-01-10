@@ -39,7 +39,7 @@ namespace ops
 
 		void addReservable(Reservable* res)
 		{
-			SafeLock lock(this);
+			SafeLock lock(*this);
 			references.push_back(res);
 			res->setReferenceHandler(this);
 		}
@@ -62,7 +62,7 @@ namespace ops
 
 		void removeReference(const Reservable* reservable)
 		{
-			SafeLock lock(this);
+			SafeLock lock(*this);
 			for(unsigned int i = 0; i < references.size(); i++)
 			{
 				if(references[i] == reservable)

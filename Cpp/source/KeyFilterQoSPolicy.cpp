@@ -16,20 +16,20 @@ namespace ops
 	}
 	void KeyFilterQoSPolicy::setKeys(std::vector<ObjectKey_T> const keyStrings)
 	{
-		const SafeLock lock(this);
+		const SafeLock lock(*this);
 
 		this->keyStrings = keyStrings;
 	}
 	void KeyFilterQoSPolicy::setKey(ObjectKey_T const key)
 	{
-		const SafeLock lock(this);
+		const SafeLock lock(*this);
 
 		this->keyStrings.clear();
 		this->keyStrings.push_back(key);
 	}
 	std::vector<ObjectKey_T> KeyFilterQoSPolicy::getKeys()
 	{
-		const SafeLock lock(this);
+		const SafeLock lock(*this);
 
 		return keyStrings;
 	}
@@ -40,7 +40,7 @@ namespace ops
     
     bool KeyFilterQoSPolicy::applyFilter(const OPSObject* const o)
 	{
-		const SafeLock lock(this);
+		const SafeLock lock(*this);
 
 		// An empty key filter is the same as no filter
 		if (keyStrings.size() == 0) { return true; }

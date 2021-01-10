@@ -65,7 +65,7 @@ namespace ops
 
 	ErrorService* Participant::getStaticErrorService()
 	{
-		const SafeLock lock(&creationMutex);
+		const SafeLock lock(creationMutex);
 		if (!staticErrorService) {
 			staticErrorService = new ErrorService();
 		}
@@ -87,7 +87,7 @@ namespace ops
 	{
         if (participantID == "") { participantID = OPSConstants::DEFAULT_PARTICIPANT_ID(); }
 		const ParticipantKey_T key = getKey(domainID_, participantID);
-		const SafeLock lock(&creationMutex);
+		const SafeLock lock(creationMutex);
 		if (instances.find(key) == instances.end()) {
 			try
 			{
@@ -122,7 +122,7 @@ namespace ops
 	void Participant::RemoveInstance()
 	{
 		const ParticipantKey_T key = getKey(domainID, participantID);
-		const SafeLock lock(&creationMutex);
+		const SafeLock lock(creationMutex);
 		instances.erase(key);
 	}
 
@@ -221,7 +221,7 @@ namespace ops
 		RemoveInstance();
 
 		{
-			const SafeLock lock(&serviceMutex);
+			const SafeLock lock(serviceMutex);
 
 			// Indicate that shutdown is in progress
 			keepRunning = false;
@@ -360,7 +360,7 @@ namespace ops
 	// Called on aliveDeadlineTimer timeouts
 	void Participant::onNewEvent(Notifier<int>* , int )
 	{
-		const SafeLock lock(&serviceMutex);
+		const SafeLock lock(serviceMutex);
 		receiveDataHandlerFactory->cleanUpReceiveDataHandlers();
 
 		if (keepRunning) {
@@ -372,7 +372,7 @@ namespace ops
 					partInfoPub = new Publisher(createParticipantInfoTopic());
 				}
 				if (partInfoPub != nullptr) {
-					const SafeLock lck(&partInfoDataMutex);
+					const SafeLock lck(partInfoDataMutex);
 					partInfoPub->writeOPSObject(&partInfoData);
 				}
 			} catch (std::exception& ex)
@@ -402,7 +402,7 @@ namespace ops
 
 	void Participant::setUdpTransportInfo(Address_T const ip, int const port)
 	{
-		const SafeLock lock(&partInfoDataMutex);
+		const SafeLock lock(partInfoDataMutex);
 		partInfoData.ip = ip;
 		partInfoData.mc_udp_port = port;
 	}
@@ -450,7 +450,7 @@ namespace ops
 
 	bool Participant::hasPublisherOn(const ObjectName_T& topicName)
 	{
-		const SafeLock lock(&partInfoDataMutex);
+		const SafeLock lock(partInfoDataMutex);
 		// Check if topic exist in partInfoData.publishTopics
 		std::vector<TopicInfoData>::iterator it;
 		for (it = partInfoData.publishTopics.begin(); it != partInfoData.publishTopics.end(); ++it) {
@@ -461,7 +461,7 @@ namespace ops
 
 	bool Participant::hasSubscriberOn(const ObjectName_T& topicName)
 	{
-		const SafeLock lock(&partInfoDataMutex);
+		const SafeLock lock(partInfoDataMutex);
 		// Check if topic exist in partInfoData.subscribeTopics
 		std::vector<TopicInfoData>::iterator it;
 		for (it = partInfoData.subscribeTopics.begin(); it != partInfoData.subscribeTopics.end(); ++it) {
@@ -474,7 +474,7 @@ namespace ops
 	{
         std::shared_ptr<ReceiveDataHandler> result = receiveDataHandlerFactory->getReceiveDataHandler(top, *this);
 		if (result != nullptr) {
-			const SafeLock lock(&partInfoDataMutex);
+			const SafeLock lock(partInfoDataMutex);
 			//Need to add topic to partInfoData.subscribeTopics (TODO ref count if same topic??)
             partInfoData.subscribeTopics.push_back(TopicInfoData(top));
 		}
@@ -485,7 +485,7 @@ namespace ops
 	{
 		receiveDataHandlerFactory->releaseReceiveDataHandler(top, *this);
 
-		const SafeLock lock(&partInfoDataMutex);
+		const SafeLock lock(partInfoDataMutex);
 		// Remove topic from partInfoData.subscribeTopics (TODO the same topic, ref count?)
 		std::vector<TopicInfoData>::iterator it;
 		for (it = partInfoData.subscribeTopics.begin(); it != partInfoData.subscribeTopics.end(); ++it) {
@@ -505,7 +505,7 @@ namespace ops
 
 	void Participant::updateSendPartInfo(const Topic top)
 	{
-		const SafeLock lock(&partInfoDataMutex);
+		const SafeLock lock(partInfoDataMutex);
 		//Need to add topic to partInfoData.subscribeTopics (TODO ref count if same topic??)
 		partInfoData.publishTopics.push_back(TopicInfoData(top));
 	}
@@ -514,7 +514,7 @@ namespace ops
 	{
 		sendDataHandlerFactory->releaseSendDataHandler(top, *this);
 
-		const SafeLock lock(&partInfoDataMutex);
+		const SafeLock lock(partInfoDataMutex);
 		// Remove topic from partInfoData.publishTopics (TODO the same topic, ref count?)
 		std::vector<TopicInfoData>::iterator it;
 		for (it = partInfoData.publishTopics.begin(); it != partInfoData.publishTopics.end(); ++it) {

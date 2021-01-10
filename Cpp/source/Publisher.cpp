@@ -246,7 +246,7 @@ namespace ops
 	{
 #ifdef OPS_ENABLE_DEBUG_HANDLER
         bool sendOK = true;
-        const SafeLock lck(&_dbgLock);
+        const SafeLock lck(_dbgLock);
 		if (_dbgSkip > 0) {
 			_dbgSkip--;
 		} else {
@@ -284,7 +284,7 @@ namespace ops
             _sendState = SendState::acked;
         }
 
-        SafeLock lck(&_pubLock);
+        SafeLock lck(_pubLock);
         _resendsLeft = topic.getNumResends();
 
         // Serialize message
@@ -331,7 +331,7 @@ namespace ops
     {
         if (_ackSub == nullptr) { return true; }
         if (_ackSub->_lastSentPubId < 0) { return true; }
-        SafeLock lck(&_pubLock);
+        SafeLock lck(_pubLock);
         return writeSerializedBuffer();
     }
 
@@ -439,7 +439,7 @@ namespace ops
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 	void Publisher::onRequest(opsidls::DebugRequestResponseData& req, opsidls::DebugRequestResponseData& resp)
 	{
-		const SafeLock lck(&_dbgLock);
+		const SafeLock lck(_dbgLock);
 		switch (req.Command) {
 		case 1: // Request status
 			break;

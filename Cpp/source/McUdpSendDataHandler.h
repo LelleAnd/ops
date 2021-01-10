@@ -47,7 +47,7 @@ namespace ops
             bool result = true;
             std::stack<InternalKey_T> sinksToDelete;
 
-            SafeLock lock(&mutex);
+            SafeLock lock(mutex);
 
             Entry_T& topicSinks = topicSinkMap[topic.getName()];
 
@@ -73,7 +73,7 @@ namespace ops
 
 		void addSink(ObjectName_T& topic, Address_T& ip, int& port, bool staticRoute = false)
 		{
-            SafeLock lock(&mutex);
+            SafeLock lock(mutex);
 
 			const IpPortPair ipPort(ip, port, staticRoute);
 

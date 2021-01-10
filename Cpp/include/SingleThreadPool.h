@@ -51,7 +51,7 @@ namespace ops
         {
             for (;;) {
                 {
-                    SafeLock lock(&mutex);
+                    SafeLock lock(mutex);
                     if (!running.load()) {
                         runnables.push_back(runnable);
                         return;
@@ -67,7 +67,7 @@ namespace ops
         {
             for (;;) {
                 {
-                    SafeLock lock(&mutex);
+                    SafeLock lock(mutex);
                     if (!running.load()) {
                         std::vector<Runnable*>::iterator it = runnables.begin();
                         for (unsigned int i = 0; i < runnables.size(); i++) {
@@ -95,7 +95,7 @@ namespace ops
         {
             // Take mutex to make sure add/remove isn't in process of updating the runnables container
             {
-                SafeLock lock(&mutex);
+                SafeLock lock(mutex);
                 running.store(true);
             }
             // We don't want to hold the mutex while executing runnables, so the runnables

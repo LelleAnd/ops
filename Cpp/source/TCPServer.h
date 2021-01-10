@@ -82,7 +82,7 @@ namespace ops
 				// By holding the mutex while clearing _owner, we ensure that we can't 
 				// be in a callback while clearing it. This also means that when this method returns
 				// we can't call the _owner anymore and it's OK for the owner to vanish.
-				SafeLock lck(&_ownerMtx);
+				SafeLock lck(_ownerMtx);
 				_owner = nullptr;
 				OPS_TCP_TRACE("Server: Callbacks Cleared\n");
 			}
@@ -112,7 +112,7 @@ namespace ops
 				if (!_canceled) {
 					if (!error) {
 						// By holding the mutex while in the callback, we are synchronized with clearCallbacks()
-						SafeLock lck(&_ownerMtx);
+						SafeLock lck(_ownerMtx);
 						if (_owner) _owner->AddSocket(std::make_shared<TCPBoostConnection>(_owner, _sock, _outSocketBufferSize));
 						_sock = new boost::asio::ip::tcp::socket(*_ioService);
 					}

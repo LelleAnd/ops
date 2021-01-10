@@ -42,7 +42,7 @@ namespace ops
 
 		virtual void addPublisher(void* client, Topic& top)
 		{
-            SafeLock lock(&mutex);
+            SafeLock lock(mutex);
 			// Check that it isn't already in the list
 			for (unsigned int i = 0; i < publishers.size(); i++) {
 				if (publishers[i] == client) return;
@@ -56,7 +56,7 @@ namespace ops
 
 		virtual void removePublisher(void* client, Topic& top)
 		{
-            SafeLock lock(&mutex);
+            SafeLock lock(mutex);
 			// Remove it from the list
 			std::vector<void*>::iterator Iter;
 			for (Iter = publishers.begin(); Iter != publishers.end(); Iter++) {

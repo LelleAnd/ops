@@ -56,7 +56,7 @@ namespace ops
 			// By holding the mutex while clearing _client, we ensure that we can't 
 			// be in a callback while clearing it. This also means that when this method returns
 			// the connection can't call the _client anymore and it's OK for the client to vanish.
-			SafeLock lck(&_clientMtx);
+			SafeLock lck(_clientMtx);
 			_client = nullptr;
 		}
 
@@ -117,7 +117,7 @@ namespace ops
 			if (!_protocol->handleReceivedData(error, nrBytesReceived)) {
 				// If we come here the protocol can't receive any longer and we need to disconnect
 				// By holding the mutex while in the callback, we are synchronized with clearCallbacks()
-				SafeLock lck(&_clientMtx);
+				SafeLock lck(_clientMtx);
 				if (_client) _client->onReceiveError(*this);
 			}
 		}
@@ -146,7 +146,7 @@ namespace ops
 		void onEvent(TCPProtocol&, BytesSizePair arg) override
 		{
 			// By holding the mutex while in the callback, we are synchronized with clearCallbacks()
-			SafeLock lck(&_clientMtx);
+			SafeLock lck(_clientMtx);
 			if (_client) _client->onEvent(*this, arg);
 		}
 

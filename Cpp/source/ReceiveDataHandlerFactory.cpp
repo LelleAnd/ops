@@ -69,7 +69,7 @@ namespace ops
 		// Make a key with the transport info that uniquely defines the receiver.
 		const InternalKey_T key = makeKey(top, participant.getIOService());
 
-        const SafeLock lock(&garbageLock);
+        const SafeLock lock(garbageLock);
         if (receiveDataHandlerInstances.find(key) != receiveDataHandlerInstances.end())
         {
             // If we already have a ReceiveDataHandler for this topic, use it.
@@ -145,7 +145,7 @@ namespace ops
 		// Make a key with the transport info that uniquely defines the receiver.
 		const InternalKey_T key = makeKey(top, participant.getIOService());
 
-		const SafeLock lock(&garbageLock);
+		const SafeLock lock(garbageLock);
         if (receiveDataHandlerInstances.find(key) != receiveDataHandlerInstances.end())
         {
             const std::shared_ptr<ReceiveDataHandler> rdh = receiveDataHandlerInstances[key];
@@ -167,7 +167,7 @@ namespace ops
 
     void ReceiveDataHandlerFactory::cleanUpReceiveDataHandlers()
     {
-        const SafeLock lock(&garbageLock);
+        const SafeLock lock(garbageLock);
         
         for (int i = (int)garbageReceiveDataHandlers.size() - 1; i >= 0; i--)
         {
@@ -183,13 +183,13 @@ namespace ops
 
 	bool ReceiveDataHandlerFactory::cleanUpDone()
 	{
-        const SafeLock lock(&garbageLock);
+        const SafeLock lock(garbageLock);
 		return garbageReceiveDataHandlers.size() == 0;
 	}
 
     bool ReceiveDataHandlerFactory::dataAvailable()
     {
-        const SafeLock lock(&garbageLock);
+        const SafeLock lock(garbageLock);
         for (const auto& rdh : receiveDataHandlerInstances) {
             if (rdh.second->dataAvailable()) { return true; }
         }

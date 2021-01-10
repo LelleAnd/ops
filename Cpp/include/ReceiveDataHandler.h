@@ -67,7 +67,7 @@ namespace ops
 		bool asyncFinished()
 		{
 			bool finished = true;
-			SafeLock lock(&messageLock);
+			SafeLock lock(messageLock);
 			for (auto& x : rdc) {
 				finished &= x->asyncFinished();
 			}
@@ -81,7 +81,7 @@ namespace ops
 
         bool dataAvailable()
         {
-            SafeLock lock(&messageLock);
+            SafeLock lock(messageLock);
             for (auto& x : rdc) {
                 if (x->bytesAvailable() > 0) { return true; }
             }

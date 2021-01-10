@@ -300,7 +300,7 @@ namespace ops
         }
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 		{
-			const SafeLock lck(&_dbgLock);
+			const SafeLock lck(_dbgLock);
 			if (_dbgSkip > 0) {
 				_dbgSkip--;
 				return;
@@ -412,19 +412,19 @@ namespace ops
 
     void Subscriber::addFilterQoSPolicy(FilterQoSPolicy* const fqos)
     {
-        const SafeLock lock(&filterQoSPolicyMutex);
+        const SafeLock lock(filterQoSPolicyMutex);
         filterQoSPolicies.push_back(fqos);
     }
 
     void Subscriber::removeFilterQoSPolicy(FilterQoSPolicy* const fqos)
     {
-        const SafeLock lock(&filterQoSPolicyMutex);
+        const SafeLock lock(filterQoSPolicyMutex);
         filterQoSPolicies.remove(fqos);
     }
 
     bool Subscriber::applyFilterQoSPolicies(OPSMessage* const message, OPSObject* const obj)
     {
-        const SafeLock lock(&filterQoSPolicyMutex);
+        const SafeLock lock(filterQoSPolicyMutex);
         for (auto filter : filterQoSPolicies) {
             if (filter->applyFilter(message, obj) == false) {
                 return false;
@@ -497,7 +497,7 @@ namespace ops
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 	void Subscriber::onRequest(opsidls::DebugRequestResponseData& req, opsidls::DebugRequestResponseData& resp)
 	{
-		const SafeLock lck(&_dbgLock);
+		const SafeLock lck(_dbgLock);
 		switch (req.Command) {
 		case 1: // Request
 			break;

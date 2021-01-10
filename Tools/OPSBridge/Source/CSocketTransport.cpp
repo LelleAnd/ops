@@ -130,7 +130,7 @@ bool CSocketTransport::writeOpsMessage(ops::OPSObject* const mess,
 
 	// Send on transport
 	// We need to lock the writes since the complete message requires 3 writes
-	ops::SafeLock const lock(&m_writeLock);
+	ops::SafeLock const lock(m_writeLock);
 	if (!write((char *)&head, sizeof(head))) { return false; }
 	if (!write(memMap.getSegment(0), buf.GetSize())) { return false; }
 	return write(&mess->spareBytes[0], head.DataLength);
@@ -146,7 +146,7 @@ bool CSocketTransport::writeAckNak(uint64_t const ackCounter, uint32_t const err
 	
 	// Send on transport
 	// We need to lock the writes
-	ops::SafeLock const lock(&m_writeLock);
+	ops::SafeLock const lock(m_writeLock);
 	return write((char *)&AckNak, sizeof(AckNak));
 }
 
@@ -170,7 +170,7 @@ bool CSocketTransport::writeCommand(TCommandMessage& cmd)
 
 	// Send on transport
 	// We need to lock the writes
-	ops::SafeLock const lock(&m_writeLock);
+	ops::SafeLock const lock(m_writeLock);
 	if (!write((char *)&cmd.Head, sizeof(cmd.Head))) { return false; }
 	return write(memMap.getSegment(0), buf.GetSize());
 }
@@ -181,7 +181,7 @@ bool CSocketTransport::writeStatus(TStatusMessage& status)
 	status.Head.Length = sizeof(status);
 	// Send on transport
 	// We need to lock the writes
-	ops::SafeLock const lock(&m_writeLock);
+	ops::SafeLock const lock(m_writeLock);
 	return write((char *)&status, sizeof(status));
 }
 
@@ -193,7 +193,7 @@ bool CSocketTransport::writeUdpMcMessage(TUdpMcMessage& udpMc, const char* const
 
 	// Send on transport
 	// We need to lock the writes
-	ops::SafeLock const lock(&m_writeLock);
+	ops::SafeLock const lock(m_writeLock);
 	if (!write((const char *)&udpMc, sizeof(udpMc))) { return false; }
 	return write(data, udpMc.DataLength);
 }

@@ -156,7 +156,7 @@ namespace ops {
 			{
 				entry_t* ret = nullptr;
 				{
-					SafeLock lck(&_mtx);
+					SafeLock lck(_mtx);
 					ret = _freePtr;
 					if (ret == nullptr) throw out_of_space();
 #ifdef OPS_MEMORY_POOL_INTEGRITY_CHECK
@@ -179,7 +179,7 @@ namespace ops {
 				check_integrity(ret);
 #endif
 				if (ret->inUse != inUse_c) throw pool_corruption();
-				SafeLock lck(&_mtx);
+				SafeLock lck(_mtx);
 				ret->next = _freePtr;
 				_freePtr = ret;
 				++_size;
@@ -380,7 +380,7 @@ namespace ops {
 			inline char* getEntry()
 			{
 				char* ptr;
-				SafeLock lck(&_mtx);
+				SafeLock lck(_mtx);
 				if (_blocks.size() > 0) {
 					ptr = _blocks.back();
 					_blocks.pop_back();
@@ -394,7 +394,7 @@ namespace ops {
 			{
 				if (ptr == nullptr) throw illegal_ref();
 
-				SafeLock lck(&_mtx);
+				SafeLock lck(_mtx);
 				_blocks.push_back(ptr);
 				ptr = nullptr;
 			}

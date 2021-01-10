@@ -57,14 +57,14 @@ namespace ops {
 		// Used by application to set a handler for "Generic Command" (50)
 		void SetAppCallback(DebugNotifyInterface* client)
 		{
-			const SafeLock lck(&_mapLock);
+			const SafeLock lck(_mapLock);
 			_appCallback = client;
 		}
 
 		// Register/Unregister with the debug handler
 		void RegisterPub(DebugNotifyInterface* const client, const ObjectName_T& topicName)
 		{
-            const SafeLock lck(&_mapLock);
+            const SafeLock lck(_mapLock);
             if (_pubMap.find(topicName) == _pubMap.end()) {
 				_pubMap[topicName] = client;
 			}
@@ -72,7 +72,7 @@ namespace ops {
 
 		void UnregisterPub(const DebugNotifyInterface* const client, const ObjectName_T& topicName)
 		{
-            const SafeLock lck(&_mapLock);
+            const SafeLock lck(_mapLock);
             const std::map<ObjectName_T, DebugNotifyInterface*>::iterator it = _pubMap.find(topicName);
             if (it == _pubMap.end()) { return; }
             if (it->second != client) { return; }
@@ -81,7 +81,7 @@ namespace ops {
 
 		void RegisterSub(DebugNotifyInterface* const client, const ObjectName_T& topicName)
 		{
-            const SafeLock lck(&_mapLock);
+            const SafeLock lck(_mapLock);
             if (_subMap.find(topicName) == _subMap.end()) {
 				_subMap[topicName] = client;
 			}
@@ -89,7 +89,7 @@ namespace ops {
 
 		void UnregisterSub(const DebugNotifyInterface* const client, const ObjectName_T& topicName)
 		{
-            const SafeLock lck(&_mapLock);
+            const SafeLock lck(_mapLock);
             const std::map<ObjectName_T, DebugNotifyInterface*>::iterator it = _subMap.find(topicName);
             if (it == _subMap.end()) { return; }
             if (it->second != client) { return; }
@@ -127,7 +127,7 @@ namespace ops {
                     if (req->Command == 0) { return; }  // We don't care about responses
 
 					{
-                        const SafeLock lck(&_mapLock);
+                        const SafeLock lck(_mapLock);
 
 						switch (req->Entity) {
 						case 0: // Debug

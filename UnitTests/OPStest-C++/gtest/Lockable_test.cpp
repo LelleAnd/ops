@@ -45,10 +45,10 @@ static void lockable_worker(Lockable& lock, mytype& order, mytype& state)
     wait_for(order, 1);
     state = 2;
     {
-        const SafeLock lck1(&lock);
+        const SafeLock lck1(lock);
         state = 3;
         {
-            const SafeLock lck2(&lock);
+            const SafeLock lck2(lock);
             state = 4;
 
             wait_for(order, 2);
@@ -143,11 +143,11 @@ static void lockable_try_worker(Lockable& lock, mytype& order, mytype& state)
     wait_for(order, 1);
     state = 2;
     while (true) {
-        SafeTryLock lck1(&lock);
+        SafeTryLock lck1(lock);
         if (lck1.isLocked()) {
             state = 3;
             while (true) {
-                SafeTryLock lck2(&lock);
+                SafeTryLock lck2(lock);
                 if (lck2.isLocked()) {
                     state = 4;
 

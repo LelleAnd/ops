@@ -80,7 +80,7 @@ namespace ops
 
 		void close() override
 		{
-			SafeLock lck(&_mtx);
+			SafeLock lck(_mtx);
 			OPS_TCP_TRACE("Server: Close() #connected: " << _connectedSockets.size() << '\n');
 			for (int i = (int)_connectedSockets.size() - 1; i >= 0; i--) {
 				deleteConnection(i);
@@ -94,7 +94,7 @@ namespace ops
 		/// buf == nullptr or size == 0, is handled by connection/protocol
         bool sendTo(const char* buf, const int size, const Address_T&, const uint16_t) override
 		{
-			SafeLock lck(&_mtx);
+			SafeLock lck(_mtx);
             sendToInternal(buf, size);
             if (_doPeriodic) {
                 _doPeriodic = false;
@@ -107,7 +107,7 @@ namespace ops
 
 		int numConnected()
 		{
-			SafeLock lck(&_mtx);
+			SafeLock lck(_mtx);
 			return (int)_connectedSockets.size();
 		}
 
@@ -115,7 +115,7 @@ namespace ops
 		// Called from derived classes
 		void AddSocket(std::shared_ptr<TCPConnection> sock)
 		{
-			SafeLock lck(&_mtx);
+			SafeLock lck(_mtx);
 			_connectedSockets.push_back(sock);
 			OPS_TCP_TRACE("Server: New socket connected. Total: " << _connectedSockets.size() << '\n');
 			// Connected status callback with new address::port and total sockets connected
@@ -160,7 +160,7 @@ namespace ops
 		void onNewEvent(Notifier<int>*, int) override
 		{
             _doPeriodic = true;
-            SafeTryLock lck(&_mtx);
+            SafeTryLock lck(_mtx);
             if (lck.isLocked()) {
                 _doPeriodic = false;
                 // We use a size 0 to force a periodic check (heartbeat handling in protocol)

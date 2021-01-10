@@ -49,15 +49,22 @@ namespace ops
 	class SafeLock
 	{
 	private:
-		Lockable* _lockable;
+		Lockable& _lockable;
 	public:
-		SafeLock(Lockable* lockable) : _lockable(lockable)
+#ifdef OPS_C14_DETECTED
+		[[deprecated("Deprecated. Use constructor taking reference instead")]]
+#endif
+		explicit SafeLock(Lockable* lockable) : _lockable(*lockable)
 		{
-			_lockable->lock();
+			_lockable.lock();
+		}
+		explicit SafeLock(Lockable& lockable) : _lockable(lockable)
+		{
+			_lockable.lock();
 		}
 		~SafeLock()
 		{
-			_lockable->unlock();
+			_lockable.unlock();
 		}
 		SafeLock() = delete;
 		SafeLock(const SafeLock&) = delete;
@@ -69,17 +76,24 @@ namespace ops
     class SafeTryLock
     {
     private:
-        Lockable* _lockable;
-        bool locked = false;
+        Lockable& _lockable;
+		bool locked{ false };
     public:
-        SafeTryLock(Lockable* lockable) : _lockable(lockable)
+#ifdef OPS_C14_DETECTED
+		[[deprecated("Deprecated. Use constructor taking reference instead")]]
+#endif
+		explicit SafeTryLock(Lockable* lockable) : _lockable(*lockable)
         {
-            locked = _lockable->trylock();
+            locked = _lockable.trylock();
         }
-        bool isLocked() noexcept { return locked; }
+		explicit SafeTryLock(Lockable& lockable) : _lockable(lockable)
+		{
+			locked = _lockable.trylock();
+		}
+		bool isLocked() noexcept { return locked; }
         ~SafeTryLock()
         {
-			if (locked) { _lockable->unlock(); }
+			if (locked) { _lockable.unlock(); }
         }
 		SafeTryLock() = delete;
 		SafeTryLock(const SafeTryLock&) = delete;

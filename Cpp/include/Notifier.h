@@ -57,7 +57,7 @@ namespace ops
             // Methods addListener(), removeListener() and calling of registered callback need to be protected.
             // This also ensures that when a client returns from removeListener(), he can't be called
             // anymore and there can't be an ongoing call in his callback.
-            SafeLock lock(&mutex);
+            SafeLock lock(mutex);
             for (auto& x : listeners) {
                 x->onNewEvent(this, arg);
             }
@@ -68,7 +68,7 @@ namespace ops
 
         virtual void addListener(Listener<ArgType>* listener)
         {
-            SafeLock lock(&mutex);
+            SafeLock lock(mutex);
             listeners.push_back(listener);
             if (lateArrivals && valueValid) {
                 listener->onNewEvent(this, value);
@@ -77,7 +77,7 @@ namespace ops
 
         virtual void removeListener(Listener<ArgType>* listener)
         {
-            SafeLock lock(&mutex);
+            SafeLock lock(mutex);
             for (auto it = listeners.begin(); it != listeners.end(); ) {
                 if (*it == listener) {
                     it = listeners.erase(it);
@@ -89,13 +89,13 @@ namespace ops
 
         int getNrOfListeners()
         {
-            SafeLock lock(&mutex);
+            SafeLock lock(mutex);
             return (int)listeners.size();
         }
 
         virtual ~Notifier()
         {
-            SafeLock lock(&mutex);
+            SafeLock lock(mutex);
             listeners.clear();
         }
     };

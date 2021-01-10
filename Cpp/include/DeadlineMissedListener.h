@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -28,7 +28,7 @@
 
 namespace ops
 {
-//Forward declaration
+
 class DeadlineMissedEvent;
 
 class DeadlineMissedListener
@@ -41,24 +41,20 @@ public:
 class DeadlineMissedEvent
 {
 private:
-	std::vector<DeadlineMissedListener*> listeners;
-	std::vector<std::function<void(ops::DeadlineMissedEvent* sender)>> closureListeners;
+	std::vector<std::function<void(DeadlineMissedEvent* sender)>> closureListeners;
 public:
 	void addDeadlineMissedListener(DeadlineMissedListener* listener)
 	{
-		listeners.push_back(listener);
+		addDeadlineMissedListener([=](DeadlineMissedEvent* sender) { listener->onDeadlineMissed(sender); });
 	}
-	void addDeadlineMissedListener(std::function<void(ops::DeadlineMissedEvent* sender)> callback)
+	void addDeadlineMissedListener(std::function<void(DeadlineMissedEvent* sender)> callback)
 	{
 		closureListeners.push_back(callback);
 	}
 	void notifyDeadlineMissed()
 	{
-		for(unsigned int i = 0; i < listeners.size() ; i++) {
-			listeners[i]->onDeadlineMissed(this);
-		}
-		for (unsigned int i = 0; i < closureListeners.size(); i++) {
-			closureListeners[i](this);
+		for (auto& x : closureListeners) {
+			x(this);
 		}
 	}
 };

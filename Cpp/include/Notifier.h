@@ -1,6 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
+ * Copyright (C) 2021 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -40,40 +41,48 @@ namespace ops
         //
         Lockable mutex;
 
+        /// 
+        const bool lateArrivals;
+        ArgType value{ };
+        bool valueValid{ false };
+
     protected:
         ///Called by subclasses that wishes to notify its listeners of the arrival of new events.
         virtual void notifyNewEvent(ArgType arg)
         {
+            if (lateArrivals) {
+                value = arg;
+                valueValid = true;
+            }
             // Methods addListener(), removeListener() and calling of registered callback need to be protected.
             // This also ensures that when a client returns from removeListener(), he can't be called
             // anymore and there can't be an ongoing call in his callback.
             SafeLock lock(&mutex);
-            for (unsigned int i = 0; i < listeners.size(); i++)
-            {
-                listeners[i]->onNewEvent(this, arg);
+            for (auto& x : listeners) {
+                x->onNewEvent(this, arg);
             }
         }
-    public:
 
-        ///Register a Listener
+    public:
+        explicit Notifier(bool lateArrivals_ = false) : lateArrivals(lateArrivals_) {}
+
         virtual void addListener(Listener<ArgType>* listener)
         {
             SafeLock lock(&mutex);
             listeners.push_back(listener);
+            if (lateArrivals && valueValid) {
+                listener->onNewEvent(this, value);
+            }
         }
 
         virtual void removeListener(Listener<ArgType>* listener)
         {
             SafeLock lock(&mutex);
-            for (unsigned int i = 0; i < listeners.size(); i++)
-            {
-                if (listeners[i] == listener)
-                {
-                    typename std::vector<Listener< ArgType> * >::iterator p;
-
-                    p = listeners.begin();
-                    p += i;
-                    listeners.erase(p);
+            for (auto it = listeners.begin(); it != listeners.end(); ) {
+                if (*it == listener) {
+                    it = listeners.erase(it);
+                } else {
+                    ++it;
                 }
             }
         }
@@ -84,7 +93,6 @@ namespace ops
             return (int)listeners.size();
         }
 
-        //Destructor:
         virtual ~Notifier()
         {
             SafeLock lock(&mutex);

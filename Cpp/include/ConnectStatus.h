@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2018-2020 Lennart Andersson.
+* Copyright (C) 2018-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -33,11 +33,12 @@ namespace ops
 	//       while in the callback, since that may lead to a deadlock.
 	struct ConnectStatus
 	{
+		ConnectStatus() = default;
+		ConnectStatus(bool c, int no) noexcept : port(0), connected(c), totalNo(no) {}
 		Address_T addr;
-		uint16_t port;
-		bool connected;
-		int totalNo;
-		ConnectStatus(bool c, int no) noexcept : port(0), connected(c), totalNo(no) { }
+		uint16_t port{ 0 };
+		bool connected{ false };
+		int totalNo{ 0 };
 	};
 
 }

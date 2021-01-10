@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -26,14 +27,10 @@ namespace ops
 	class BytesSizePair
 	{
 	public:
-		BytesSizePair(char* b, int s) noexcept :
-		  bytes(b),
-		  size(s)
-		{
-			
-		}
-		char* bytes;
-		int size;
+		BytesSizePair() = default;
+		BytesSizePair(char* b, int s) noexcept : bytes(b), size(s) {}
+		char* bytes{ nullptr };
+		int size{ 0 };
 	};
 
 }

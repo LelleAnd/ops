@@ -51,6 +51,7 @@ public:
 	void notify(int const value) { notifyNewEvent(value); }
 
 	MyNotifier() = default;
+	explicit MyNotifier(bool lateArrivals) : Notifier<int>(lateArrivals) {};
 	virtual ~MyNotifier() = default;
 	MyNotifier(const MyNotifier& other) = delete;
 	MyNotifier& operator= (const MyNotifier& other) = delete;
@@ -110,6 +111,57 @@ TEST(Test_NotifierListener, TestNotifierListener) {
 
 	EXPECT_EQ(listener1.value, 20);
 	EXPECT_EQ(listener2.value, 30);
+
+	MyListener listener3;
+
+	notifier.addListener(&listener1);
+	notifier.addListener(&listener3);
+	notifier.addListener(&listener3);
+	notifier.addListener(&listener3);
+	notifier.addListener(&listener3);
+	notifier.addListener(&listener2);
+
+	EXPECT_EQ(notifier.getNrOfListeners(), 6);
+
+	notifier.removeListener(&listener3);
+
+	EXPECT_EQ(notifier.getNrOfListeners(), 2);
+}
+
+TEST(Test_NotifierListener, TestNotifierListener_lateArrivals) {
+
+	MyListener listener1;
+	MyListener listener2;
+	MyNotifier notifier(true);
+
+	EXPECT_EQ(notifier.getNrOfListeners(), 0);
+	EXPECT_EQ(listener1.value, 0);
+	EXPECT_EQ(listener2.value, 0);
+
+	notifier.notify(1);
+
+	EXPECT_EQ(listener1.value, 0);
+	EXPECT_EQ(listener2.value, 0);
+
+	notifier.addListener(&listener1);
+
+	EXPECT_EQ(notifier.getNrOfListeners(), 1);
+	EXPECT_EQ(listener1.value, 1);
+
+	notifier.notify(10);
+
+	EXPECT_EQ(listener1.value, 10);
+	EXPECT_EQ(listener2.value, 0);
+
+	notifier.addListener(&listener2);
+
+	EXPECT_EQ(notifier.getNrOfListeners(), 2);
+	EXPECT_EQ(listener2.value, 10);
+
+	notifier.notify(20);
+
+	EXPECT_EQ(listener1.value, 20);
+	EXPECT_EQ(listener2.value, 20);
 }
 
 // ===============================

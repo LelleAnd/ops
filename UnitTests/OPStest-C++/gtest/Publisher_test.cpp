@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018-2020 Lennart Andersson.
+* Copyright (C) 2018-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -174,16 +174,16 @@ TEST(Test_Publisher, TestResends) {
         EXPECT_EQ(pub.getSendState(), ops::Publisher::SendState::sending);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
-        pub.Activate([](const ops::ObjectName_T& subname, int32_t totfail) { return ops::Publisher::ResendAlternative_T::yes; });
+        pub.Activate([](const ops::ObjectName_T& , int32_t ) { return ops::Publisher::ResendAlternative_T::yes; });
 
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
-        pub.Activate([](const ops::ObjectName_T& subname, int32_t totfail) { return ops::Publisher::ResendAlternative_T::yes; });
+        pub.Activate([](const ops::ObjectName_T& , int32_t ) { return ops::Publisher::ResendAlternative_T::yes; });
 
         EXPECT_EQ(sdh->send_cnt, 10);
         EXPECT_EQ(pub.getSendState(), ops::Publisher::SendState::sending);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
-        pub.Activate([](const ops::ObjectName_T& subname, int32_t totfail) { return ops::Publisher::ResendAlternative_T::no; });
+        pub.Activate([](const ops::ObjectName_T& , int32_t ) { return ops::Publisher::ResendAlternative_T::no; });
 
         EXPECT_EQ(sdh->send_cnt, 10);
         EXPECT_EQ(pub.getSendState(), ops::Publisher::SendState::acked);
@@ -193,13 +193,13 @@ TEST(Test_Publisher, TestResends) {
         EXPECT_EQ(pub.getSendState(), ops::Publisher::SendState::sending);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
-        pub.Activate([](const ops::ObjectName_T& subname, int32_t totfail) { return ops::Publisher::ResendAlternative_T::yes; });
+        pub.Activate([](const ops::ObjectName_T& , int32_t ) { return ops::Publisher::ResendAlternative_T::yes; });
 
         EXPECT_EQ(sdh->send_cnt, 12);
         EXPECT_EQ(pub.getSendState(), ops::Publisher::SendState::sending);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
-        pub.Activate([](const ops::ObjectName_T& subname, int32_t totfail) { return ops::Publisher::ResendAlternative_T::no_remove; });
+        pub.Activate([](const ops::ObjectName_T& , int32_t ) { return ops::Publisher::ResendAlternative_T::no_remove; });
 
         EXPECT_EQ(sdh->send_cnt, 12);
         EXPECT_EQ(pub.getSendState(), ops::Publisher::SendState::acked);

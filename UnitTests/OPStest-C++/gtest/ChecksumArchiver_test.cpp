@@ -60,7 +60,7 @@ TEST(Test_ChecksumArchiver, TestCoreTypes) {
     obj.serialize(&chk);
     EXPECT_EQ(chk.calc.sum, 0xD0);
     EXPECT_EQ(chk.calc.totalbytes, (size_t)47);
-    EXPECT_EQ(chk.calc.totalfields, 11);
+    EXPECT_EQ(chk.calc.totalfields, 11u);
 }
 
 // ===============================
@@ -96,8 +96,8 @@ TEST(Test_ChecksumArchiver, TestVectorTypes) {
     chk.calc.sum = 0;
     obj.serialize(&chk);
     EXPECT_EQ(chk.calc.sum, 0x6A);
-    EXPECT_EQ(chk.calc.totalbytes, 4+2+2+12+16+8+16+7+9);
-    EXPECT_EQ(chk.calc.totalfields, 1+4+6+2+2);  // boolean & string called for each element
+    EXPECT_EQ(chk.calc.totalbytes, (size_t)( 4+2+2+12+16+8+16+7+9));
+    EXPECT_EQ(chk.calc.totalfields, (uint32_t)(1+4+6+2+2));  // boolean & string called for each element
 }
 
 // ===============================
@@ -135,8 +135,8 @@ TEST(Test_ChecksumArchiver, TestFixedArrays) {
     chk.calc.sum = 0;
     obj.serialize(&chk);
     EXPECT_EQ(chk.calc.sum, 0x6A);
-    EXPECT_EQ(chk.calc.totalbytes, 4 + 2 + 2 + 12 + 16 + 8 + 16 + 7 + 9);
-    EXPECT_EQ(chk.calc.totalfields, 1 + 4 + 6 + 2 + 2);  // boolean & string called for each element
+    EXPECT_EQ(chk.calc.totalbytes, (size_t)(4 + 2 + 2 + 12 + 16 + 8 + 16 + 7 + 9));
+    EXPECT_EQ(chk.calc.totalfields, (uint32_t)(1 + 4 + 6 + 2 + 2));  // boolean & string called for each element
 }
 
 // ===============================
@@ -169,7 +169,7 @@ TEST(Test_ChecksumArchiver, TestNonCoreTypes) {
     // Each SerDesObject_Core gives checksum = 0xD0
     // Odd number of objects, gives the same checksum
     EXPECT_EQ(chk.calc.sum, 0xD0);
-    EXPECT_EQ(chk.calc.totalbytes, 9*47);
-    EXPECT_EQ(chk.calc.totalfields, 1+(9*11));
+    EXPECT_EQ(chk.calc.totalbytes, (size_t)(9*47));
+    EXPECT_EQ(chk.calc.totalfields, (uint32_t)(1+(9*11)));
 }
 

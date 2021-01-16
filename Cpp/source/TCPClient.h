@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2020 Lennart Andersson.
+ * Copyright (C) 2018-2021 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -53,26 +53,23 @@ namespace ops
 		{
 			TCPClient* _owner;
 			volatile bool _tryToConnect;
-			boost::asio::ip::tcp::endpoint* _endpoint;
+			std::unique_ptr<boost::asio::ip::tcp::endpoint> _endpoint;
 			int _inBufferSize;
 			boost::asio::deadline_timer _timer;
 
 		public:
 			TCPBoostConnectionWConnect(TCPClient* owner, Address_T serverIP, uint16_t serverPort, IOService* ioServ, int inBufferSize) :
 				TCPBoostConnection(owner),
-				_owner(owner), _tryToConnect(false), _endpoint(nullptr), _inBufferSize(inBufferSize),
+				_owner(owner), _tryToConnect(false), _inBufferSize(inBufferSize),
 				_timer(*BoostIOServiceImpl::get(ioServ))
 			{
 				boost::asio::io_service* ioService = BoostIOServiceImpl::get(ioServ);
 				const boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(serverIP.c_str()));
-				_endpoint = new boost::asio::ip::tcp::endpoint(ipAddr, serverPort);
-				_sock = new boost::asio::ip::tcp::socket(*ioService);
+				_endpoint = std::unique_ptr<boost::asio::ip::tcp::endpoint>(new boost::asio::ip::tcp::endpoint(ipAddr, serverPort));
+				_sock = std::unique_ptr<boost::asio::ip::tcp::socket>(new boost::asio::ip::tcp::socket(*ioService));
 			}
 
-			~TCPBoostConnectionWConnect()
-			{
-				if (_endpoint) delete _endpoint;
-			}
+			~TCPBoostConnectionWConnect() = default;
 
 			void start() override
 			{

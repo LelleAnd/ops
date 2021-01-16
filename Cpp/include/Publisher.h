@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2020 Lennart Andersson.
+* Copyright (C) 2018-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -122,7 +122,7 @@ private:
 
     // Ack specifics
     struct AckSubscriber;
-    AckSubscriber* _ackSub{ nullptr };
+    std::unique_ptr<AckSubscriber> _ackSub;
     Lockable _pubLock;
     std::atomic<int64_t> _ackTimeout{ 0 };
     const int64_t _ackTimeoutInc;

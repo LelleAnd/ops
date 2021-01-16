@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2020 Lennart Andersson.
+ * Copyright (C) 2018-2021 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -50,14 +50,13 @@ namespace ops
         TCPClientBase(TCPClientCallbacks* client, IOService* ioServ, std::shared_ptr<TCPConnection> connection) :
 			_connection(connection), _client(client), _cs(false, 0), _started(false)
         {
-			_timer = DeadlineTimer::create(ioServ);
+			_timer = std::unique_ptr<DeadlineTimer>(DeadlineTimer::create(ioServ));
 			_timer->addListener(this);
 			_timer->start(period);
 		}
 
 		virtual ~TCPClientBase()
 		{
-			delete _timer;
 			// Make sure ev. callbacks are finished and no new ones can be called
 			_connection->clearCallbacks();
 			// Delete connection
@@ -156,7 +155,7 @@ namespace ops
 		TCPClientCallbacks* _client;
 		ConnectStatus _cs;
 		volatile bool _started;
-		DeadlineTimer* _timer;
+		std::unique_ptr<DeadlineTimer> _timer;
 		const int64_t period = 1000;
 	};
 }

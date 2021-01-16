@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2020 Lennart Andersson.
+ * Copyright (C) 2018-2021 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -165,7 +165,7 @@ namespace ops
             }
 
             // Create Subscriber for ACK's
-            _ackSub = new AckSubscriber(Topic::CreateAckTopic(topic));
+            _ackSub = std::unique_ptr<AckSubscriber>(new AckSubscriber(Topic::CreateAckTopic(topic)));
             _ackSub->_sourceIP = sendDataHandler->getLocalAddressHost();
             _ackSub->_sourcePort = sendDataHandler->getLocalPort();
             _ackSub->start();
@@ -186,9 +186,7 @@ namespace ops
 		}
 #endif
 		stop();
-        if (_ackSub != nullptr) {
-            delete _ackSub;
-        }
+        _ackSub.reset();
 		participant->releaseSendDataHandler(topic);
 		OPS_DES_TRACE("Pub: Destructor() finished\n");
 	}

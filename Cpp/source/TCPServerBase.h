@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2020 Lennart Andersson.
+* Copyright (C) 2018-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -67,14 +67,13 @@ namespace ops
 		TCPServerBase(TCPServerCallbacks* client, IOService* ioServ) :
 			_client(client)
 		{
-			_timer = DeadlineTimer::create(ioServ);
+			_timer = std::unique_ptr<DeadlineTimer>(DeadlineTimer::create(ioServ));
 			_timer->addListener(this);
 			_timer->start(period);
 		}
 
 		virtual ~TCPServerBase()
 		{
-			delete _timer;
 			close();
 		}
 
@@ -199,7 +198,7 @@ namespace ops
 		std::vector<std::shared_ptr<TCPConnection>> _connectedSockets;
 		std::vector<ConnectStatus> _connectedStatus;
 		Lockable _mtx;
-        DeadlineTimer* _timer{ nullptr };
+        std::unique_ptr<DeadlineTimer> _timer;
 		const int64_t period = 1000;
 
 	private:

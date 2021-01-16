@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2020 Lennart Andersson.
+ * Copyright (C) 2018-2021 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -39,15 +39,13 @@ namespace ops
         deadlineTimeout(TimeHelper::infinite)
     {
         participant = Participant::getInstance(topic.getDomainID(), topic.getParticipantID());
-        deadlineTimer = DeadlineTimer::create(participant->getIOService());
+        deadlineTimer = std::unique_ptr<DeadlineTimer>(DeadlineTimer::create(participant->getIOService()));
     }
 
     SubscriberBase::~SubscriberBase()
     {
         // Make sure subscriber is stopped and no more notifications can call us
         stop();
-
-        delete deadlineTimer;
     }
 
     void SubscriberBase::start()
@@ -96,17 +94,12 @@ namespace ops
     /// =======================================================================================
     
     // Helper class that handles sending of ACK's if that is enabled in the Topic
-    struct ACKFilter : public FilterQoSPolicy
+    struct Subscriber::ACKFilter : public FilterQoSPolicy
     {
         explicit ACKFilter(const Topic& ackTopic)
         {
             // Create Publisher for sending REGISTER, ACK, UNREGISTER
-            _pub = new Publisher(ackTopic);
-        }
-
-        ~ACKFilter()
-        {
-            delete _pub;
+            _pub = std::unique_ptr<Publisher>(new Publisher(ackTopic));
         }
 
         // Not used, but must be implemeted
@@ -130,7 +123,7 @@ namespace ops
 
             _expectedPub[mess->getPublisherName()] = true;
 
-            MyKey_t pubKey((uint32_t)_data.sourceIP, (uint16_t)_data.sourcePort);
+            const MyKey_t pubKey((uint32_t)_data.sourceIP, (uint16_t)_data.sourcePort);
 
             auto it = _lastReceivedPubId.find(pubKey);
             if (it != _lastReceivedPubId.end()) {
@@ -156,7 +149,7 @@ namespace ops
 
         typedef std::pair<uint32_t, uint16_t> MyKey_t;
 
-        Publisher* _pub{ nullptr };
+        std::unique_ptr<Publisher> _pub;
         opsidls::SendAckPatternData _data;
         std::map<MyKey_t, int64_t> _lastReceivedPubId;
         std::map<ObjectName_T, bool> _expectedPub;
@@ -178,7 +171,7 @@ namespace ops
             }
 
             // Add a filter that will handle ACK sending and remove duplicates
-            _ackFilter = new ACKFilter(Topic::CreateAckTopic(topic));
+            _ackFilter = std::unique_ptr<ACKFilter>(new ACKFilter(Topic::CreateAckTopic(topic)));
         }
 
 #ifdef OPS_ENABLE_DEBUG_HANDLER
@@ -196,8 +189,8 @@ namespace ops
 
         if (_ackFilter != nullptr) {
             // Send UNREGISTER
-            ((ACKFilter*)_ackFilter)->send(opsidls::SendAckPatternData::MType::UNREGISTER);
-            delete _ackFilter;
+            _ackFilter->send(opsidls::SendAckPatternData::MType::UNREGISTER);
+            _ackFilter.reset();
         }
         
         while (messageBuffer.size() > 0) {
@@ -211,7 +204,7 @@ namespace ops
     {
         if (_ackFilter == nullptr) { return; }
         MessageLock lck(*this);
-        ((ACKFilter*)_ackFilter)->_expectedPub[pubname] = false;
+        _ackFilter->_expectedPub[pubname] = false;
     }
 
     // nullptr check all
@@ -220,13 +213,13 @@ namespace ops
         if (_ackFilter == nullptr) { return true; }
         MessageLock lck(*this);
         if (pubname == "") {
-            for (auto& x : ((ACKFilter*)_ackFilter)->_expectedPub) {
+            for (auto& x : _ackFilter->_expectedPub) {
                 if (x.second == false) return false;
             }
             return true;
         }
         else {
-            for (auto& x : ((ACKFilter*)_ackFilter)->_expectedPub) {
+            for (auto& x : _ackFilter->_expectedPub) {
                 if (x.first == pubname) {
                     if (x.second == true) return true;
                 }
@@ -239,7 +232,7 @@ namespace ops
     {
         if (_ackFilter == nullptr) { return; }
         MessageLock lck(*this);
-        ((ACKFilter*)_ackFilter)->_expectedPub.erase(pubname);
+        _ackFilter->_expectedPub.erase(pubname);
     }
 
     // Activate (need to be called periodically)
@@ -249,7 +242,7 @@ namespace ops
         if (_ackFilter == nullptr) { return; }
 
         // Send REGISTER (~1Hz)
-        int64_t now = ops::TimeHelper::currentTimeMillis();
+        const int64_t now = ops::TimeHelper::currentTimeMillis();
         if (_nextRegisterTime > now) { return; }
 
         bool sendRegister = false;
@@ -257,7 +250,7 @@ namespace ops
         MessageLock lck(*this);
 
         // Only until we got a message from all expected publishers
-        for (auto& x : ((ACKFilter*)_ackFilter)->_expectedPub) {
+        for (auto& x : _ackFilter->_expectedPub) {
             if (x.second == false) {
                 sendRegister = true;
                 break;
@@ -265,10 +258,10 @@ namespace ops
         }
         // or if no expected until we get a message
         if (sendRegister == false) {
-            sendRegister = !((ACKFilter*)_ackFilter)->_gotMessage;
+            sendRegister = !_ackFilter->_gotMessage;
         }
         if (sendRegister) {
-            ((ACKFilter*)_ackFilter)->send(opsidls::SendAckPatternData::MType::REGISTER);
+            _ackFilter->send(opsidls::SendAckPatternData::MType::REGISTER);
             _nextRegisterTime = now + topic.getRegisterTimeMs();
         }
     }
@@ -404,7 +397,7 @@ namespace ops
     {
         this->name = name;
         if (_ackFilter != nullptr) {
-            ((ACKFilter*)_ackFilter)->_pub->setName(name);
+            _ackFilter->_pub->setName(name);
         }
     }
 

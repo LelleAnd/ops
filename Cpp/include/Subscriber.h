@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2020 Lennart Andersson.
+ * Copyright (C) 2018-2021 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -100,7 +100,7 @@ namespace ops
         ///ReceiveDataHandler delivering new data samples to this Subscriber
         std::shared_ptr<ReceiveDataHandler> receiveDataHandler{ nullptr };
 
-        DeadlineTimer* deadlineTimer{ nullptr };
+        std::unique_ptr<DeadlineTimer> deadlineTimer;
         int64_t deadlineTimeout{ 0 };
 
         // Called from ReceiveDataHandler (TCPClient)
@@ -245,7 +245,8 @@ namespace ops
         bool deadlineMissed{ false };
 
         // ACK handling
-        ops::FilterQoSPolicy* _ackFilter{ nullptr };
+        struct ACKFilter;
+        std::unique_ptr<ACKFilter> _ackFilter;
         int64_t _nextRegisterTime{ 0 };
 
 #ifdef OPS_ENABLE_DEBUG_HANDLER

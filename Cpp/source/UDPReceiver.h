@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2020 Lennart Andersson.
+ * Copyright (C) 2020-2021 Lennart Andersson.
 *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -51,6 +51,8 @@ namespace ops
 
     class UDPReceiver : public Receiver
     {
+        using endpoint_t = boost::asio::ip::udp::endpoint;
+        using socket_t = boost::asio::ip::udp::socket;
     public:
         UDPReceiver(uint16_t bindPort, IOService* ioServ, Address_T localInterface = "0.0.0.0", int inSocketBufferSizent = 16000000)
         {
@@ -65,18 +67,18 @@ namespace ops
                     const boost::asio::ip::address addr = it->endpoint().address();
                     if (addr.is_v4()) {
                         ipaddress = addr.to_string().c_str();
-                        localEndpoint = new udp::endpoint(addr, bindPort);
+                        localEndpoint = std::unique_ptr<endpoint_t>(new endpoint_t(addr, bindPort));
                         break;
                     }
                     ++it;
                 }
             } else {
                 const boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(localInterface.c_str()));
-                localEndpoint = new boost::asio::ip::udp::endpoint(ipAddr, bindPort);
+                localEndpoint = std::unique_ptr<endpoint_t>(new endpoint_t(ipAddr, bindPort));
 				ipaddress = localInterface;
             }
 
-            sock = new boost::asio::ip::udp::socket(*ioService);
+            sock = std::unique_ptr<socket_t>(new socket_t(*ioService));
 
             sock->open(localEndpoint->protocol());
 
@@ -190,9 +192,6 @@ namespace ops
 			while (m_working) { 
                 TimeHelper::sleep(std::chrono::milliseconds(1));
 			}
-
-            if (sock != nullptr) { delete sock; }
-            if (localEndpoint != nullptr) { delete localEndpoint; }
         }
 
         int receive(char* buf, int size)
@@ -269,10 +268,10 @@ namespace ops
     private:
         uint16_t port = 0;
 		Address_T ipaddress;
-        boost::asio::ip::udp::socket* sock = nullptr;
-        boost::asio::ip::udp::endpoint* localEndpoint = nullptr;
-        boost::asio::ip::udp::endpoint lastEndpoint;
-		boost::asio::ip::udp::endpoint sendingEndPoint;
+        std::unique_ptr<socket_t> sock;
+        std::unique_ptr<endpoint_t> localEndpoint;
+        endpoint_t lastEndpoint;
+        endpoint_t sendingEndPoint;
 
         int max_length = 65535; 
         char* data = nullptr;

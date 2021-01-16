@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2020 Lennart Andersson.
+* Copyright (C) 2018-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -28,6 +28,7 @@
 #include "OPSTypeDefs.h"
 #include "BasicError.h"
 #include "BasicWarning.h"
+#include "Participant.h"
 #include "TCPConnection.h"
 
 namespace ops
@@ -36,24 +37,23 @@ namespace ops
 	class TCPBoostConnection : public TCPConnection
 	{
 	protected:
-		boost::asio::ip::tcp::socket* _sock;
+		std::unique_ptr<boost::asio::ip::tcp::socket> _sock;
 		Address_T _remoteAddress;
         uint32_t _remoteAddressHost = 0;
 		uint16_t _remotePort = 0;
 
 		// Used for a connection created by TCPClient
 		explicit TCPBoostConnection(TCPConnectionCallbacks* client) :
-			TCPConnection(client),
-			_sock(nullptr)
+			TCPConnection(client)
 		{
 		}
 
 	public:
 		// Used for connections created by TCPServer
 		// In this case the socket is already connected
-		explicit TCPBoostConnection(TCPConnectionCallbacks* client, boost::asio::ip::tcp::socket* sock, int outSocketBufferSize) :
+		explicit TCPBoostConnection(TCPConnectionCallbacks* client, std::unique_ptr<boost::asio::ip::tcp::socket>& sock, int outSocketBufferSize) :
 			TCPConnection(client),
-			_sock(sock)
+			_sock(std::move(sock))
 		{
 			_connected = true;
 			setOutSize(outSocketBufferSize);
@@ -63,7 +63,6 @@ namespace ops
 		virtual ~TCPBoostConnection()
 		{
 			close();
-			if (_sock != nullptr) delete _sock;
 		}
 
 		void close() override

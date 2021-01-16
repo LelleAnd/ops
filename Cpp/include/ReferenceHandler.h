@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2019-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -33,10 +33,6 @@ namespace ops
 	class ReferenceHandler : Lockable
 	{
 	public:
-		ReferenceHandler() noexcept
-		{
-		}
-
 		void addReservable(Reservable* res)
 		{
 			SafeLock lock(*this);
@@ -44,10 +40,9 @@ namespace ops
 			res->setReferenceHandler(this);
 		}
 
-		void onNewEvent(Reservable* notifier, ReserveInfo reserveInfo)
+		void onNewEvent(Reservable* notifier, const ReserveInfo& reserveInfo)
 		{
-			if(reserveInfo.nrOfReservations == 0)
-			{
+			if (reserveInfo.nrOfReservations == 0) {
 				removeReference(notifier);
 			}
 		}
@@ -62,20 +57,13 @@ namespace ops
 
 		void removeReference(const Reservable* reservable)
 		{
-			SafeLock lock(*this);
-			for(unsigned int i = 0; i < references.size(); i++)
-			{
-				if(references[i] == reservable)
-				{
-					if(references[i])
-					{
-						delete references[i];
-						references[i] = nullptr;
-					}
+			if (reservable == nullptr) { return; }
 
-					std::vector<Reservable*>::iterator p = references.begin();
-					p += i;
-					references.erase(p);
+			SafeLock lock(*this);
+			for (auto it = references.begin(); it != references.end(); ++it) {
+				if (*it == reservable) {
+					delete reservable;
+					references.erase(it);
 					return;
 				}
 			}

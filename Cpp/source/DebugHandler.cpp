@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018-2020 Lennart Andersson.
+* Copyright (C) 2018-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -45,7 +45,7 @@ namespace ops {
 	class DebugHandler::InternalDebugListener : public DataListener
 	{
 	public:
-		explicit InternalDebugListener(Participant& part) : _part(part), _sub(nullptr), _pub(nullptr), _appCallback(nullptr) {}
+		explicit InternalDebugListener(Participant& part) : _part(part) {}
 		virtual ~InternalDebugListener() { remove(); }
 
         InternalDebugListener() = delete;
@@ -180,24 +180,30 @@ namespace ops {
 	private:
 		void setup()
 		{
-			_sub = new Subscriber(_part.createDebugTopic());
+#ifdef OPS_C14_DETECTED
+			_sub = std::make_unique<Subscriber>(_part.createDebugTopic());
+#else
+			_sub = std::unique_ptr<Subscriber>(new Subscriber(_part.createDebugTopic()));
+#endif
 			_sub->addDataListener(this);
 			std::vector<ObjectKey_T> keyStrings;
 			keyStrings.push_back(gKey);
 			keyStrings.push_back("*");
 			_sub->addFilterQoSPolicy(new KeyFilterQoSPolicy(keyStrings));
 			_sub->start();
-			_pub = new Publisher(_part.createDebugTopic());
+#ifdef OPS_C14_DETECTED
+			_pub = std::make_unique<Publisher>(_part.createDebugTopic());
+#else
+			_pub = std::unique_ptr<Publisher>(new Publisher(_part.createDebugTopic()));
+#endif
 			_pub->setKey(gKey);
 			_pub->start();
 		}
 
 		void remove() noexcept
 		{
-            if (_sub != nullptr) { delete _sub; }
-			_sub = nullptr;
-            if (_pub != nullptr) { delete _pub; }
-			_pub = nullptr;
+            _sub.reset();
+            _pub.reset();
 		}
 
 		// Called with _mapLock held
@@ -212,13 +218,13 @@ namespace ops {
 					resp.Result1 = 1;
 				}
 				if (req.Param1 == 2) {
-					for (std::map<ObjectName_T, DebugNotifyInterface*>::iterator it = _pubMap.begin(); it != _pubMap.end(); ++it) {
+					for (auto it = _pubMap.begin(); it != _pubMap.end(); ++it) {
 						resp.Param3.push_back(it->first.c_str());
 					}
 					resp.Result1 = 2;
 				}
 				if (req.Param1 == 3) {
-					for (std::map<ObjectName_T, DebugNotifyInterface*>::iterator it = _subMap.begin(); it != _subMap.end(); ++it) {
+					for (auto it = _subMap.begin(); it != _subMap.end(); ++it) {
 						resp.Param3.push_back(it->first.c_str());
 					}
 					resp.Result1 = 3;
@@ -237,15 +243,15 @@ namespace ops {
 		}
 
 		Participant& _part;
-		Subscriber* _sub;
-		Publisher* _pub;
+		std::unique_ptr<Subscriber> _sub;
+		std::unique_ptr<Publisher> _pub;
 
 		opsidls::DebugRequestResponseData _response;
 
 		Lockable _mapLock;
 		std::map<ObjectName_T, DebugNotifyInterface*> _pubMap;
 		std::map<ObjectName_T, DebugNotifyInterface*> _subMap;
-		DebugNotifyInterface* _appCallback;
+		DebugNotifyInterface* _appCallback{ nullptr };
 	};
 
 	DebugHandler::DebugHandler(Participant& part) :

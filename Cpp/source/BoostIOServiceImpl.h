@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2020 Lennart Andersson.
+* Copyright (C) 2020-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -33,40 +33,38 @@
 #pragma GCC diagnostic pop
 #endif
 
+#include "IOService.h"
+
 namespace ops
 {
 	class BoostIOServiceImpl : public IOService
 	{
 	public:
-		boost::asio::io_service* boostIOService;
-		BoostIOServiceImpl() : boostIOService(new boost::asio::io_service())
-		{
-		}
+		boost::asio::io_service boostIOService;
 	
 		virtual void run() override
 		{
-			boostIOService->run();
+			boostIOService.run();
 		}
 
 		virtual void stop() override
 		{
-			boostIOService->stop();
+			boostIOService.stop();
 		}
 
 		virtual void poll() override
 		{
-			boostIOService->poll();
+			boostIOService.poll();
 		}
 
 		virtual ~BoostIOServiceImpl()
 		{
-			boostIOService->stop();
-			delete boostIOService;
+			boostIOService.stop();
 		}
 
         static boost::asio::io_service* get(IOService* ioService)
         {
-            return dynamic_cast<BoostIOServiceImpl*>(ioService)->boostIOService; 
+            return &dynamic_cast<BoostIOServiceImpl*>(ioService)->boostIOService;
         }
 	};
 }

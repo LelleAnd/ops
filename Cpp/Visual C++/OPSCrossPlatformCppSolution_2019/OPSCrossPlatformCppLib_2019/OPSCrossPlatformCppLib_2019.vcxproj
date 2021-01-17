@@ -142,7 +142,32 @@
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">OPSCppLib_vc142_x64_MD</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <CodeAnalysisRuleSet>CppCoreCheckRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>OPSCrossPlatformCppLib_2019.ruleset</CodeAnalysisRuleSet>
+    <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
+    <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
+    <ClangTidyChecks>
+    </ClangTidyChecks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">
+    <CodeAnalysisRuleSet>OPSCrossPlatformCppLib_2019.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">
+    <CodeAnalysisRuleSet>OPSCrossPlatformCppLib_2019.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">
+    <CodeAnalysisRuleSet>OPSCrossPlatformCppLib_2019.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">
+    <CodeAnalysisRuleSet>OPSCrossPlatformCppLib_2019.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <CodeAnalysisRuleSet>OPSCrossPlatformCppLib_2019.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <CodeAnalysisRuleSet>OPSCrossPlatformCppLib_2019.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <CodeAnalysisRuleSet>OPSCrossPlatformCppLib_2019.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -425,7 +450,6 @@
     <ClInclude Include="..\..\..\include\OPSArchiverIn.h" />
     <ClInclude Include="..\..\..\include\OPSArchiverOut.h" />
     <ClInclude Include="..\..\..\include\OPSConfig.h" />
-    <ClInclude Include="..\..\..\include\OPSConstants.h" />
     <ClInclude Include="..\..\..\include\OPSMessage.h" />
     <ClInclude Include="..\..\..\include\OPSObject.h" />
     <ClInclude Include="..\..\..\include\OPSObjectFactory.h" />
@@ -513,6 +537,9 @@
     <ClCompile Include="..\..\..\source\XMLArchiverIn.cpp" />
     <ClCompile Include="..\..\..\source\XMLArchiverOut.cpp" />
     <ClCompile Include="..\..\..\source\xml\xmlParser.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="OPSCrossPlatformCppLib_2019.ruleset" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

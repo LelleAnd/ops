@@ -248,7 +248,7 @@ namespace ops
 		~MulticastReceiver()
 		{
 			// Make sure socket is closed
-			stop();
+			MulticastReceiver::stop();
 
 			/// We must handle asynchronous callbacks that haven't finished yet.
 			/// This approach works, but the recommended boost way is to use a shared pointer to the instance object

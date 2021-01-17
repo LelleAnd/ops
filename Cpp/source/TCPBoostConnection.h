@@ -62,7 +62,7 @@ namespace ops
 
 		virtual ~TCPBoostConnection()
 		{
-			close();
+			TCPBoostConnection::close();
 		}
 
 		void close() override

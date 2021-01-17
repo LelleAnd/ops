@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2017-2020 Lennart Andersson.
+* Copyright (C) 2017-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -54,7 +54,7 @@ namespace thread_support {
 	void SetThreadName(const char* const name)
 	{
 #ifdef _WIN32
-		THREADNAME_INFO info;
+		THREADNAME_INFO info{};
 		info.dwType = 0x1000;
 		info.szName = name;
 		info.dwThreadID = (DWORD)-1;

@@ -138,7 +138,7 @@ namespace ops
 		virtual ~TCPServer()
 		{
 			OPS_TCP_TRACE("Server: Destructor...\n");
-			close();
+			TCPServer::close();
 			OPS_TCP_TRACE("Server: Destructor finished\n");
 		}
 

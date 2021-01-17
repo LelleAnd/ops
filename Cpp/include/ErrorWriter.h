@@ -5,6 +5,7 @@
 #include <ostream>
 #include "OPSTypeDefs.h"
 #include "Listener.h"
+#include <Error.h>
 #include "TimeHelper.h"
 
 namespace ops

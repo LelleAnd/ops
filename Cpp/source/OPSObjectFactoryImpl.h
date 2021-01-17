@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2020 Lennart Andersson.
+ * Copyright (C) 2020-2021 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -30,6 +30,8 @@
 #include "DefaultOPSConfigImpl.h"
 #include "Domain.h"
 #include "ParticipantInfoData.h"
+#include "SerializableFactory.h"
+#include "OPSObjectFactory.h"
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 	#include "opsidls/DebugRequestResponseData.h"
 #endif

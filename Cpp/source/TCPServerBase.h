@@ -74,7 +74,7 @@ namespace ops
 
 		virtual ~TCPServerBase()
 		{
-			close();
+			TCPServerBase::close();
 		}
 
 		void close() override

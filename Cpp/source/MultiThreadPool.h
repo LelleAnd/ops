@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -36,7 +37,7 @@ namespace ops
 		}
 		virtual void addRunnable(Runnable* runnable)
 		{
-			SafeLock lock(&mutex);
+			SafeLock lock(mutex);
 			t1.addRunnable(runnable);
 			t2.addRunnable(runnable);
 			t3.addRunnable(runnable);
@@ -48,7 +49,7 @@ namespace ops
 		}
 		virtual void removeRunnable(Runnable* runnable)
 		{
-			SafeLock lock(&mutex);
+			SafeLock lock(mutex);
 			t1.removeRunnable(runnable);
 			t2.removeRunnable(runnable);
 			t3.removeRunnable(runnable);

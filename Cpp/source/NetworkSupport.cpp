@@ -151,7 +151,7 @@ Address_T doSubnetTranslation(const Address_T addr, IOService* const ioServ)
 
 InternalString_T GetHostName()
 {
-	char hname[1024];
+	char hname[1024]{};
 	hname[0] = '\0';
 	gethostname(hname, sizeof(hname));
 	return hname;

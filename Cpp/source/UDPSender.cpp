@@ -50,12 +50,12 @@ namespace ops
 		io_service(BoostIOServiceImpl::get(ioServ)),
 		_localInterface(localInterface), _ttl(ttl), _outSocketBufferSize(outSocketBufferSize), _multicastSocket(multicastSocket)
     {
-		open();
+        UDPSender::open();
     }
 
     UDPSender::~UDPSender()
     {
-		close();
+        UDPSender::close();
     }
 
 	bool UDPSender::open()

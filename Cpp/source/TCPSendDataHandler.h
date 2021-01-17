@@ -30,6 +30,7 @@
 #include "TCPServerBase.h"
 #include "TCPOpsProtocol.h"
 #include "NetworkSupport.h"
+#include "TimeHelper.h"
 
 namespace ops
 {
@@ -68,7 +69,7 @@ namespace ops
 			sender = Sender::createTCPServer(this, ioService, topic.getDomainAddress(), topic.getPort(), topic.getOutSocketBufferSize());
         }
 
-        bool sendData(char* buf, int bufSize, Topic& topic)
+        bool sendData(char* buf, int bufSize, Topic& topic) override
         {
             UNUSED(topic);
             SafeLock lock(mutex);

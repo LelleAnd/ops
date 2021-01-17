@@ -99,7 +99,7 @@ namespace ops
 
 		virtual ~impl()
 		{
-			cancel();
+			impl::cancel();
 		}
 	};
 
@@ -113,7 +113,7 @@ namespace ops
 
     BoostDeadlineTimerImpl::~BoostDeadlineTimerImpl()
     {
-        cancel();
+        BoostDeadlineTimerImpl::cancel();
         // The removeListener() and the calling of our callback "onNewEvent()" are protected so when
         // we return from removeListener() we know that there can't be anyone in the callback.
         pimpl_->removeListener(this);

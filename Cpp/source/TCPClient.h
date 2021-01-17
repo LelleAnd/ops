@@ -183,7 +183,7 @@ namespace ops
 		virtual ~TCPClient()
 		{
 			// Make sure socket is closed
-			stop();
+			TCPClient::stop();
         }
 
 		bool isConnected() override

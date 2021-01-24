@@ -92,8 +92,8 @@ namespace ops {
 			memory_pool_manager() noexcept;
 			memory_pool_manager(memory_pool_manager const&) = delete;
 			memory_pool_manager(memory_pool_manager&&) = delete;
-			memory_pool_manager& operator=(memory_pool_manager const&) = default;
-			memory_pool_manager& operator=(memory_pool_manager&&) = default;
+			memory_pool_manager& operator=(memory_pool_manager const&) = delete;
+			memory_pool_manager& operator=(memory_pool_manager&&) = delete;
 
 			Lockable _mtx;
             node<memory_pool_abs> _root{ nullptr };

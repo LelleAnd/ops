@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2019-2020 Lennart Andersson.
+ * Copyright (C) 2019-2021 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -31,10 +31,10 @@ namespace ops {
     {
     public:
         InternalImpl() = default;
-        explicit InternalImpl(const InternalImpl&) = default;
-        explicit InternalImpl(InternalImpl&&) = default;
-        InternalImpl& operator=(const InternalImpl&) = default;
-        InternalImpl& operator=(InternalImpl&&) = default;
+        InternalImpl(const InternalImpl&) = delete;
+        InternalImpl(InternalImpl&&) = delete;
+        InternalImpl& operator=(const InternalImpl&) = delete;
+        InternalImpl& operator=(InternalImpl&&) = delete;
         virtual ~InternalImpl() = default;
 
         bool waitFor(const std::chrono::milliseconds& timeout)

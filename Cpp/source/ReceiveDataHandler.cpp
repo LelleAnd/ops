@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2020 Lennart Andersson.
+ * Copyright (C) 2018-2021 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -49,7 +49,6 @@ namespace ops
 		}
     }
 
-	// Overridden from Notifier<OPSMessage*>
 	void ReceiveDataHandler::addListener(Listener<OPSMessage*>* const listener, Topic& top)
     {
         {
@@ -64,7 +63,6 @@ namespace ops
 		topicUsage(top, true);
 	}
 
-	// Overridden from Notifier<OPSMessage*>
     void ReceiveDataHandler::removeListener(Listener<OPSMessage*>* const listener, Topic& top)
     {
         topicUsage(top, false);

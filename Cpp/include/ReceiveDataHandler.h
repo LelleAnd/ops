@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2020 Lennart Andersson.
+* Copyright (C) 2018-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -54,8 +54,7 @@ namespace ops
 
 		void clear();
 
-		// We need to act on these localy
-		// overridden from Notifier<OPSMessage*>
+		// Add/Remove listener to received messages
 		void addListener(Listener<OPSMessage*>* listener, Topic& top);
 		void removeListener(Listener<OPSMessage*>* listener, Topic& top);
 

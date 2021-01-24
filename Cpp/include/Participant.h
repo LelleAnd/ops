@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2020 Lennart Andersson.
+* Copyright (C) 2020-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -150,7 +150,7 @@ namespace ops
 		
 		ErrorService* getErrorService() const
 		{
-			return errorService;
+			return errorService.get();
 		}
 
 		// A static error service that user could create, by calling getStaticErrorService(), and connect to. 
@@ -168,7 +168,7 @@ namespace ops
 		//TODO: Rename?
 		OPSObjectFactory* getObjectFactory() const
 		{
-			return objectFactory;
+			return objectFactory.get();
 		}
 
 		///Deprecated, use getErrorService()->addListener instead. Add a listener for OPS core reported Errors
@@ -205,17 +205,17 @@ namespace ops
 		std::shared_ptr<OPSConfig> config;
 
 		///The ErrorService
-        ErrorService* errorService{ nullptr };
+        std::unique_ptr<ErrorService> errorService;
 
 		///The threadPool drives ioService. By default Participant use a SingleThreadPool i.e. only one thread drives ioService.
-        ThreadPool* threadPool{ nullptr };
+        std::unique_ptr<ThreadPool> threadPool;
 
 		///A timer that fires with a certain periodicity, it keeps this Participant alive in the system by publishing ParticipantInfoData
-        DeadlineTimer* aliveDeadlineTimer{ nullptr };
+        std::unique_ptr<DeadlineTimer> aliveDeadlineTimer;
 
 		//------------------------------------------------------------------------
 		///A publisher of ParticipantInfoData
-        Publisher* partInfoPub{ nullptr };
+        std::unique_ptr<Publisher> partInfoPub;
                 
 		///The ParticipantInfoData that partInfoPub will publish periodically
 		ParticipantInfoData partInfoData;
@@ -232,12 +232,12 @@ namespace ops
 
 		//------------------------------------------------------------------------
 		///A listener and handler for ParticipantInfoData
-        ParticipantInfoDataListener* partInfoListener{ nullptr };
+        std::unique_ptr<ParticipantInfoDataListener> partInfoListener;
 
 		//------------------------------------------------------------------------
 		//
-        ReceiveDataHandlerFactory* receiveDataHandlerFactory{ nullptr };
-        SendDataHandlerFactory* sendDataHandlerFactory{ nullptr };
+        std::unique_ptr<ReceiveDataHandlerFactory> receiveDataHandlerFactory;
+        std::unique_ptr<SendDataHandlerFactory> sendDataHandlerFactory;
 
 		//Visible to friends only
 		//TODO: Deprecate and delegate to receiveDataHandlerFactory???
@@ -265,7 +265,7 @@ namespace ops
         int64_t aliveTimeout{ 1000 };
 
 		///The data type factory used in this Participant. 
-        OPSObjectFactory* objectFactory{ nullptr };
+        std::unique_ptr<OPSObjectFactory> objectFactory;
 
 		///Static Mutex used by factory methods getInstance()
 		static Lockable creationMutex;

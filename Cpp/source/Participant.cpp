@@ -165,7 +165,7 @@ namespace ops
 		}
 
 		//Create a factory instance for each participant
-		objectFactory = new OPSObjectFactoryImpl();
+		objectFactory = std::unique_ptr<OPSObjectFactory>(new OPSObjectFactoryImpl());
 
 		// Initialize static data in partInfoData (ReceiveDataHandlerFactory() will set some more fields)
 		InternalString_T Name = GetHostName();
@@ -182,13 +182,13 @@ namespace ops
         partInfoData.domain = domainID;
 
 		//-----------Create delegate helper classes---
-		errorService = new ErrorService();
-		receiveDataHandlerFactory = new ReceiveDataHandlerFactory();
-		sendDataHandlerFactory = new SendDataHandlerFactory();
+		errorService = std::unique_ptr<ErrorService>(new ErrorService());
+		receiveDataHandlerFactory = std::unique_ptr<ReceiveDataHandlerFactory>(new ReceiveDataHandlerFactory());
+		sendDataHandlerFactory = std::unique_ptr<SendDataHandlerFactory>(new SendDataHandlerFactory());
 		//--------------------------------------------
 
 		//------------Create timer for periodic events-
-		aliveDeadlineTimer = DeadlineTimer::create(ioService.get());
+		aliveDeadlineTimer = std::unique_ptr<DeadlineTimer>(DeadlineTimer::create(ioService.get()));
 		aliveDeadlineTimer->addListener(this);
 		// Start our timer. Calls onNewEvent(Notifier<int>* sender, int message) on timeout
 		aliveDeadlineTimer->start(aliveTimeout);
@@ -196,7 +196,7 @@ namespace ops
 
 		//------------Create thread pool--------------
 		if (_policy == execution_policy::threading) {
-			threadPool = thread_support::CreateThreadPool();
+			threadPool = std::unique_ptr<ThreadPool>(thread_support::CreateThreadPool());
 			threadPool->addRunnable(this);
 			threadPool->start();
 		}
@@ -206,7 +206,7 @@ namespace ops
 		// The actual subscriber won't be created until some one needs it.
 		// We use the information for topics with UDP as transport, to know the destination for UDP sends
 		// ie. we extract ip and port from the information and add it to our McUdpSendDataHandler.
-		partInfoListener = new ParticipantInfoDataListener(*this);
+		partInfoListener = std::unique_ptr<ParticipantInfoDataListener>(new ParticipantInfoDataListener(*this));
 	}
 
 	Participant::~Participant()
@@ -228,8 +228,7 @@ namespace ops
 
 			// We have indicated shutdown in progress. Delete the partInfoData Publisher.
 			// Note that this uses our sendDataHandlerFactory.
-			if (partInfoPub != nullptr) { delete partInfoPub; }
-			partInfoPub = nullptr;
+			partInfoPub.reset();
 
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 			debugHandler.Stop();
@@ -241,8 +240,7 @@ namespace ops
 		if (partInfoListener != nullptr) { partInfoListener->prepareForDelete(); }
 
 		// Now delete our send factory
-		if (sendDataHandlerFactory != nullptr) { delete sendDataHandlerFactory; }
-		sendDataHandlerFactory = nullptr;
+		sendDataHandlerFactory.reset();
 
 		// Our timer is required for ReceiveDataHandlers to be cleaned up so it shouldn't be stopped
 		// before receiveDataHandlerFactory is finished.
@@ -258,12 +256,10 @@ namespace ops
 
 		// Now stop and delete our timer (NOTE requires ioService to be running).
 		// If the timer is in the callback, the delete will wait for it to finish and then the object is deleted.
-		if (aliveDeadlineTimer != nullptr) { delete aliveDeadlineTimer; }
-		aliveDeadlineTimer = nullptr;
+		aliveDeadlineTimer.reset();
 
 		// Now time to delete our receive factory
-		if (receiveDataHandlerFactory != nullptr) { delete receiveDataHandlerFactory; }
-		receiveDataHandlerFactory = nullptr;
+		receiveDataHandlerFactory.reset();
 
 		// There should now not be anything left requiring the ioService to be running.
 
@@ -272,13 +268,12 @@ namespace ops
 		if (ioService != nullptr) { ioService->stop(); }
 
 		// Now we delete the threadpool, which will wait for the thread(s) to finish
-		if (threadPool != nullptr) { delete threadPool; }
-		threadPool = nullptr;
+		threadPool.reset();
 
 		// Now when the threads are gone, it's safe to delete the rest of our objects
-		if (partInfoListener != nullptr) { delete partInfoListener; }
-		if (objectFactory != nullptr) { delete objectFactory; }
-		if (errorService != nullptr) { delete errorService; }
+		partInfoListener.reset();
+		objectFactory.reset();
+		errorService.reset();
 		config.reset();
 		// All objects connected to our ioservice should now be deleted, so it should be safe to delete it
         ioService.reset();
@@ -369,7 +364,7 @@ namespace ops
 				// The meta data publisher is only necessary if we have topics using transport UDP.
 				if ( (partInfoPub == nullptr) && (domain->getMetaDataMcPort() > 0) )
 				{
-					partInfoPub = new Publisher(createParticipantInfoTopic());
+					partInfoPub = std::unique_ptr<Publisher>(new Publisher(createParticipantInfoTopic()));
 				}
 				if (partInfoPub != nullptr) {
 					const SafeLock lck(partInfoDataMutex);

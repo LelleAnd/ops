@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2020 Lennart Andersson.
+* Copyright (C) 2018-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -32,6 +32,7 @@
 #include "BytesSizePair.h"
 #include "OPSExport.h"
 #include "ConnectStatus.h"
+#include "opsidls/OPSConstants.h"
 
 namespace ops
 {
@@ -63,6 +64,13 @@ namespace ops
 
 		void start();
 		void stop();
+
+		static int calcSampleMaxSize(Topic& top)
+		{
+			return top.getSampleMaxSize() > opsidls::OPSConstants::USABLE_SEGMENT_SIZE ?
+					top.getSampleMaxSize() :
+					opsidls::OPSConstants::USABLE_SEGMENT_SIZE;
+		}
 
 		int getSampleMaxSize() const noexcept
         {

@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2020 Lennart Andersson.
+* Copyright (C) 2018-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -70,27 +70,25 @@ namespace ops
 		const InternalKey_T key = makeKey(top, participant.getIOService());
 
         const SafeLock lock(garbageLock);
-        if (receiveDataHandlerInstances.find(key) != receiveDataHandlerInstances.end())
-        {
-            // If we already have a ReceiveDataHandler for this topic, use it.
+        if (receiveDataHandlerInstances.find(key) != receiveDataHandlerInstances.end()) {
+            // If we already have a ReceiveDataHandler for this transport, use it.
             std::shared_ptr<ReceiveDataHandler> rdh = receiveDataHandlerInstances[key];
 
             // Check if any of the topics have a sample size larger than USABLE_SEGMENT_SIZE
             // This will lead to a problem when using the same port or using UDP, if samples becomes > USABLE_SEGMENT_SIZE
-            if ((rdh->getSampleMaxSize() > OPSConstants::USABLE_SEGMENT_SIZE) || (top.getSampleMaxSize() > OPSConstants::USABLE_SEGMENT_SIZE))
-            {
-				ErrorMessage_T msg;
-				if (top.getTransport() == Topic::TRANSPORT_UDP) {
-					msg = "Warning: UDP Transport is used with Topics with 'sampleMaxSize' > ";
-					msg += NumberToString(OPSConstants::USABLE_SEGMENT_SIZE);
-				} else {
-					msg += "Warning: Same port (";
-					msg += NumberToString(top.getPort());
-					msg += ") is used with Topics with 'sampleMaxSize' > ";
-					msg += NumberToString(OPSConstants::USABLE_SEGMENT_SIZE);
-				}
-				BasicError err("ReceiveDataHandlerFactory", "getReceiveDataHandler", msg);
-				participant.reportError(&err);
+            if ((rdh->getSampleMaxSize() > OPSConstants::USABLE_SEGMENT_SIZE) || (top.getSampleMaxSize() > OPSConstants::USABLE_SEGMENT_SIZE)) {
+                ErrorMessage_T msg;
+                if (top.getTransport() == Topic::TRANSPORT_UDP) {
+                    msg = "Warning: UDP Transport is used with Topics with 'sampleMaxSize' > ";
+                    msg += NumberToString(OPSConstants::USABLE_SEGMENT_SIZE);
+                } else {
+                    msg += "Warning: Same port (";
+                    msg += NumberToString(top.getPort());
+                    msg += ") is used with Topics with 'sampleMaxSize' > ";
+                    msg += NumberToString(OPSConstants::USABLE_SEGMENT_SIZE);
+                }
+                BasicError err("ReceiveDataHandlerFactory", "getReceiveDataHandler", msg);
+                participant.reportError(&err);
             }
 
             if (top.getSampleMaxSize() > rdh->getSampleMaxSize()) {
@@ -101,28 +99,24 @@ namespace ops
                 participant.reportError(&err);
             }
             return rdh;
-        }
-        else if (top.getTransport() == Topic::TRANSPORT_MC)
-        {
+
+        } else if (top.getTransport() == Topic::TRANSPORT_MC) {
             std::shared_ptr<ReceiveDataHandler> rdh = std::make_shared<MCReceiveDataHandler>(top, participant);
             receiveDataHandlerInstances[key] = rdh;
             return rdh;
-        }
-		else if (top.getTransport() == Topic::TRANSPORT_TCP)
-		{
+
+        } else if (top.getTransport() == Topic::TRANSPORT_TCP) {
             std::shared_ptr<ReceiveDataHandler> rdh = std::make_shared<TCPReceiveDataHandler>(top, participant);
             receiveDataHandlerInstances[key] = rdh;
             return rdh;
-        }
-		else if (top.getTransport() == Topic::TRANSPORT_UDP)
-        {
+
+        } else if (top.getTransport() == Topic::TRANSPORT_UDP) {
             bool commonReceiver = (key == Topic::TRANSPORT_UDP);
             std::shared_ptr<ReceiveDataHandler> rdh = std::make_shared<UDPReceiveDataHandler>(top, participant, commonReceiver);
 			receiveDataHandlerInstances[key] = rdh;
             return rdh;
-        }
-        else //For now we can not handle more transports
-        {
+
+        } else {
             // See if an installed factory exist
             if (backupfact != nullptr) {
                 std::shared_ptr<ReceiveDataHandler> rdh = backupfact(top, participant);
@@ -131,7 +125,7 @@ namespace ops
                     return rdh;
                 }
             }
-            //Signal an error by returning nullptr.
+            // Signal an error by returning nullptr.
 			ErrorMessage_T msg = "Unknown transport for Topic: ";
 			msg += top.getName();
 			BasicError err("ReceiveDataHandlerFactory", "getReceiveDataHandler", msg);
@@ -146,11 +140,10 @@ namespace ops
 		const InternalKey_T key = makeKey(top, participant.getIOService());
 
 		const SafeLock lock(garbageLock);
-        if (receiveDataHandlerInstances.find(key) != receiveDataHandlerInstances.end())
-        {
+        if (receiveDataHandlerInstances.find(key) != receiveDataHandlerInstances.end()) {
             const std::shared_ptr<ReceiveDataHandler> rdh = receiveDataHandlerInstances[key];
-            if (rdh->Notifier<OPSMessage*>::getNrOfListeners() == 0)
-            {
+
+            if (rdh->Notifier<OPSMessage*>::getNrOfListeners() == 0) {
                 //Time to mark this receiveDataHandler as garbage.
                 receiveDataHandlerInstances.erase(receiveDataHandlerInstances.find(key));
 

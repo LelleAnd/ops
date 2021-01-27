@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2020 Lennart Andersson.
+ * Copyright (C) 2018-2021 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -37,6 +37,9 @@ namespace ops
             sampleMaxSize = rdc_->getSampleMaxSize();
             rdc.push_back(rdc_);
 			usingPartInfo = false;
+		} else {
+			// Since we use the same "topic" parameters for all created RDC's, we can set the sampleMaxSize here
+			sampleMaxSize = ReceiveDataChannel::calcSampleMaxSize(top);
 		}
 	}
 
@@ -67,7 +70,6 @@ namespace ops
 			rdc_->connect(this);
 
 			const SafeLock lock(messageLock);
-            sampleMaxSize = rdc_->getSampleMaxSize();   // Since topic params always is the same the size won't change
             rdc.push_back(rdc_);
 
 			if (Notifier<OPSMessage*>::getNrOfListeners() > 0) {

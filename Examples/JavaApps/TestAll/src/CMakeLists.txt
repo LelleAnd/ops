@@ -12,13 +12,13 @@ add_jar(VerifySerDesJava ${APP_SRC}
   ENTRY_POINT VerifySerDes
   MANIFEST ${CMAKE_CURRENT_BINARY_DIR}/MANIFEST.MF
   VERSION ${PROJECT_VERSION}
-  OUTPUT_DIR ${CMAKE_BINARY_DIR}/bin
+  OUTPUT_DIR ${PROJECT_BINARY_DIR}/bin
 )
 
 add_dependencies(VerifySerDesJava TestAll)
 
 install(FILES
-  ${CMAKE_BINARY_DIR}/bin/VerifySerDesJava-${PROJECT_VERSION}.jar
+  ${PROJECT_BINARY_DIR}/bin/VerifySerDesJava-${PROJECT_VERSION}.jar
   ${OPSJAR_PATH}/OPSJLib-${PROJECT_VERSION}.jar
   ${OPSJAR_PATH}/ConfigurationLib-${PROJECT_VERSION}.jar
   ${PROJECT_BINARY_DIR}/bin/TestAll.jar

@@ -11,13 +11,13 @@ add_jar(TestAllSubscriberJavaImpl ${APP_SRC}
   ENTRY_POINT testalljavatestsubscriber/Main
   MANIFEST ${CMAKE_CURRENT_BINARY_DIR}/MANIFEST.MF
   VERSION ${PROJECT_VERSION}
-  OUTPUT_DIR ${CMAKE_BINARY_DIR}/bin
+  OUTPUT_DIR ${PROJECT_BINARY_DIR}/bin
 )
 
 add_dependencies(TestAllSubscriberJavaImpl TestAll)
 
 install(FILES
-  ${CMAKE_BINARY_DIR}/bin/TestAllSubscriberJavaImpl-${PROJECT_VERSION}.jar
+  ${PROJECT_BINARY_DIR}/bin/TestAllSubscriberJavaImpl-${PROJECT_VERSION}.jar
   ${OPSJAR_PATH}/OPSJLib-${PROJECT_VERSION}.jar
   ${OPSJAR_PATH}/ConfigurationLib-${PROJECT_VERSION}.jar
   ${PROJECT_BINARY_DIR}/bin/TestAll.jar

@@ -110,7 +110,7 @@ set(OPSJLIB_SRC
 add_jar(OPSJLib ${OPSJLIB_SRC}
   INCLUDE_JARS ConfigurationLib
   VERSION ${OPS_VERSION}
-  OUTPUT_DIR ${CMAKE_BINARY_DIR}/bin
+  OUTPUT_DIR ${PROJECT_BINARY_DIR}/bin
 )
 
 # in cmake-3.1 (at least) the install_jar is broken for Windows
@@ -118,7 +118,7 @@ if(UNIX)
   install_jar(OPSJLib ${OPS_JAR_REL_INSTALL_PATH})
 else()
   # install manually
-  set(JAR_OUTPUT ${CMAKE_BINARY_DIR}/bin/OPSJLib-${OPS_VERSION}.jar)
+  set(JAR_OUTPUT ${PROJECT_BINARY_DIR}/bin/OPSJLib-${OPS_VERSION}.jar)
   install(FILES ${JAR_OUTPUT} DESTINATION ${OPS_JAR_REL_INSTALL_PATH})
   install(FILES ${JAR_OUTPUT} DESTINATION ${OPS_JAR_REL_INSTALL_PATH} RENAME OPSJLib.jar)
 endif()

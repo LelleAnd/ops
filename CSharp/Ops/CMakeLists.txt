@@ -9,6 +9,8 @@ set(OPSIDLS_SOURCE
   ${OPSIDLS_GEN_PATH}/SendAckPatternData.cs
 )
 
+set_source_files_properties(${OPSIDLS_SOURCE} PROPERTIES GENERATED TRUE)
+
 set(OPS_CS_SOURCE
   ${OPSIDLS_SOURCE}
   AckData.cs
@@ -100,6 +102,10 @@ if(WIN32)
 
     # Define the DLL target, including all relevant project files.
     add_library(${OPS_LIB_NAME} SHARED ${OPS_CS_SOURCE})
+
+    if(DEFINED OPS_NO_SEPARATE_BOOTSTRAP)
+      add_dependencies(${OPS_LIB_NAME} opsidls)
+    endif()
 
     # Set the .NET Framework version for the target.
     set_property(TARGET ${OPS_LIB_NAME} PROPERTY VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.6.1")

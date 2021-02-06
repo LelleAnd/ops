@@ -28,11 +28,11 @@ add_subdirectory(UnitTests)
 
 #if(CMAKE_BUILD_TYPE MATCHES "Debug")
   add_custom_target(UnitTests DEPENDS
-	publishBin
-	test-subscribeTCP
-	test-subscribeUDP
-	test-subscribe
-	test-serialize-and-deserialize
-  gtest-main
+    publishBin
+    test-subscribeTCP
+    test-subscribeUDP
+    test-subscribe
+    test-serialize-and-deserialize
+    gtest-main
 	)
 #endif()

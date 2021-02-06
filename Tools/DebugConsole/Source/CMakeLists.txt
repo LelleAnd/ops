@@ -11,8 +11,10 @@ add_executable(${EXE_NAME}
     ${EXE_SRCS}
 )
 
-if(NOT EXISTS ${PROJECT_SOURCE_DIR}/Common/idl/Generated/Cpp)
-  message(SEND_ERROR "Needed files not generated. Run bootstrap.")
+if (NOT DEFINED OPS_NO_SEPARATE_BOOTSTRAP)
+  if(NOT EXISTS ${PROJECT_SOURCE_DIR}/Common/idl/Generated/Cpp)
+    message(SEND_ERROR "Needed files not generated. Run bootstrap.")
+  endif()
 endif()
 
 target_link_libraries(${EXE_NAME} ${Boost_LIBRARIES} ops-static)

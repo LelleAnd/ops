@@ -1,27 +1,28 @@
 
-if(CMAKE_BUILD_TYPE MATCHES "Bootstrap")
+if((OPS_BOOTSTRAP_BUILD) OR (DEFINED OPS_NO_SEPARATE_BOOTSTRAP))
 
   # We only build Java during the Bootstrap phase, since it is needed during
   # bootstrap and there isn't any difference between debug and opt builds
-  add_subdirectory(OPSCompilerLib)
-  add_subdirectory(IDLParser)
-  add_subdirectory(OPSReflectionLib)
-  add_subdirectory(opsc)
+  if(Java_JAVAC_EXECUTABLE)
+    add_subdirectory(OPSCompilerLib)
+    add_subdirectory(IDLParser)
+    add_subdirectory(OPSReflectionLib)
+    add_subdirectory(opsc)
+  endif()
+endif()
 
-else()
-
+if(NOT OPS_BOOTSTRAP_BUILD)
   # Tools written in C++ is compiled for both debug and opt builds
   add_subdirectory(OPSListener)
   add_subdirectory(VerifyOPSConfig)
   add_subdirectory(DebugConsole)
   add_subdirectory(OPSBridge)
-
 endif()
 
 # Install the latest template files
 # Only during the Bootstrap phase, since it is needed during
 # bootstrap and there isn't any difference between debug and opt builds
-if(CMAKE_BUILD_TYPE MATCHES "Bootstrap")
+if((OPS_BOOTSTRAP_BUILD) OR (DEFINED OPS_NO_SEPARATE_BOOTSTRAP))
 
   set(TMPL_PATH NBOPSIDLSupport/src/ops/netbeansmodules/idlsupport/templates)
   set(OPS_TEMPLATE_FILES

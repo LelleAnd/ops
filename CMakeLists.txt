@@ -28,9 +28,32 @@ project(OPS VERSION 4.2.0)
 #     OPS_BUILD_UNITTESTS           default: ON
 #     OPS_BUILD_EXAMPLES            default: ON
 #
+#     When using OPS as a sub project, the following CMAKE vars is set in the parent scope:
+#       OPSC_COMPILER               Full path to the opsc compiler (also set as an opsc target property)
+#
 ################################################################################
 
 set (CMAKE_CXX_STANDARD 11)
+
+message(STATUS ">>> CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE})
+message(STATUS ">>> OPS_BUILD_UNITTESTS: " ${OPS_BUILD_UNITTESTS})
+message(STATUS ">>> OPS_BUILD_EXAMPLES: " ${OPS_BUILD_EXAMPLES})
+
+if(CMAKE_BUILD_TYPE MATCHES "Bootstrap")
+  set(OPS_BOOTSTRAP_BUILD TRUE)
+else()
+  set(OPS_BOOTSTRAP_BUILD FALSE)
+endif()
+
+get_directory_property(hasParent PARENT_DIRECTORY)
+if(hasParent)
+  message(STATUS "Has a parent scope.")
+  set(OPS_NO_SEPARATE_BOOTSTRAP TRUE)
+  message(STATUS "Building OPS without a separate Bootstrap phase")
+else()
+  message(STATUS "Doesn't have a parent scope.")
+  message(STATUS "Building OPS with a separate Bootstrap phase")
+endif()
 
 ################################################################################
 # Find external dependencies
@@ -169,29 +192,47 @@ find_jar(SWINGLAYOUT_JAR swing-layout
 # set path to where jars should be installed
 set(OPS_JAR_REL_INSTALL_PATH lib/ops)
 
-if(NOT CMAKE_BUILD_TYPE MATCHES "Bootstrap")
+## ----------------------------------------------------------------------------
+
+if((OPS_BOOTSTRAP_BUILD) OR (DEFINED OPS_NO_SEPARATE_BOOTSTRAP))
+  # use opsc script from build tree, will be used in all subdirs under this one
+  if(WIN32)
+    set(OPSC_COMPILER ${PROJECT_BINARY_DIR}/bin/opsc.bat)
+  else()
+    set(OPSC_COMPILER ${PROJECT_BINARY_DIR}/bin/opsc.sh)
+  endif()
+  if(hasParent)
+    set(OPSC_COMPILER ${OPSC_COMPILER} PARENT_SCOPE)
+  endif()
+
+  set(OPSJAR_PATH ${PROJECT_BINARY_DIR}/bin)
+
+  set(OPSJLIB_JAR ${OPSJAR_PATH}/OPSJLib-${PROJECT_VERSION}.jar)
+  set(CONFIGURATIONLIB_JAR ${OPSJAR_PATH}/ConfigurationLib-${PROJECT_VERSION}.jar)
+
+else()
   # Use opsc script from Bootstrap phase, will be used in all subdirs under this one
   if(WIN32)
     find_file(OPSC_COMPILER NAMES opsc.bat PATHS ${CMAKE_INSTALL_PREFIX}/lib/ops NO_DEFAULT_PATH)
   else()
     find_file(OPSC_COMPILER NAMES opsc.sh PATHS ${CMAKE_INSTALL_PREFIX}/lib/ops NO_DEFAULT_PATH)
   endif()
-  message(">>>> OPSC_COMPILER= " ${OPSC_COMPILER})
 
   # Find Java libraries built during the Bootstrap phase
   set(OPSJAR_PATH ${CMAKE_INSTALL_PREFIX}/${OPS_JAR_REL_INSTALL_PATH})
 
   find_jar(OPSJLIB_JAR OPSJLib PATHS ${OPSJAR_PATH})
-  message(">>>> OPSJLIB_JAR= " ${OPSJLIB_JAR})
   find_jar(CONFIGURATIONLIB_JAR ConfigurationLib PATHS ${OPSJAR_PATH})
-  message(">>>> CONFIGURATIONLIB_JAR= " ${CONFIGURATIONLIB_JAR})
 endif()
+message(">>>> OPSC_COMPILER= " ${OPSC_COMPILER})
+message(">>>> OPSJLIB_JAR= " ${OPSJLIB_JAR})
+message(">>>> CONFIGURATIONLIB_JAR= " ${CONFIGURATIONLIB_JAR})
 
 ################################################################################
 # Build the source
 
 # common parts
-if(CMAKE_BUILD_TYPE MATCHES "Bootstrap")
+if((OPS_BOOTSTRAP_BUILD) OR (DEFINED OPS_NO_SEPARATE_BOOTSTRAP))
   # We only generate the source from the idls during the Bootstrap phase
   # since it generates code into the source tree
   add_subdirectory(Common)
@@ -204,8 +245,6 @@ if(CMAKE_BUILD_TYPE MATCHES "Bootstrap")
     add_subdirectory(Libs)
     # build OPSJLib
     add_subdirectory(Java)
-    # build the rest
-    add_subdirectory(Tools)
   endif()
 
   # We only handle Python during the Bootstrap phase, since there isn't any
@@ -214,35 +253,34 @@ if(CMAKE_BUILD_TYPE MATCHES "Bootstrap")
     # Build python source distribution of ops
     add_subdirectory(Python)
   endif()
+endif()
 
-  # Need to add the install of C++ headers, which is independent on Debug or Opt builds
+# add the C++ source, only if Boost is loaded
+if(Boost_FOUND)
   add_subdirectory(Cpp)
-
 else()
+  message(WARNING "install Boost to build OPS for C++")
+endif()
+
+# Tools
+add_subdirectory(Tools)
+
+if(NOT OPS_BOOTSTRAP_BUILD)
   add_subdirectory(CSharp)
 
-  # build the rest
-  add_subdirectory(Tools)
-
-  # add the C++ source, only if Boost is loaded
-  if(Boost_FOUND)
-    add_subdirectory(Cpp)
-
-    option(OPS_BUILD_UNITTESTS "Enable to build the UnitTest app(s)" ON)
-    if(OPS_BUILD_UNITTESTS AND GTEST_FOUND AND CMAKE_BUILD_TYPE MATCHES "Debug")
-      add_subdirectory(UnitTests)
-    endif()
-
-  else()
-    message(WARNING "install Boost to build OPS C++ libraries")
+  ################################################################################
+  # Build Unittests
+  option(OPS_BUILD_UNITTESTS "Enable to build the UnitTest app(s)" ON)
+  if(OPS_BUILD_UNITTESTS AND GTEST_FOUND AND CMAKE_BUILD_TYPE MATCHES "Debug")
+    add_subdirectory(UnitTests)
   endif()
 
   ################################################################################
   # Build Examples
   # We need the opsc compiler from the Bootstrap phase to generate code for the examples
-    option(OPS_BUILD_EXAMPLES "Enable to build the example applications" ON)
-    if(OPS_BUILD_EXAMPLES AND CMAKE_BUILD_TYPE MATCHES "Debug")
-      add_subdirectory(Examples)
+  option(OPS_BUILD_EXAMPLES "Enable to build the example applications" ON)
+  if(OPS_BUILD_EXAMPLES AND CMAKE_BUILD_TYPE MATCHES "Debug")
+    add_subdirectory(Examples)
   endif()
 endif()
 

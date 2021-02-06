@@ -34,70 +34,70 @@ set(LIB_BOTTOM_LAYER_SRC
 # ide grouping, doesn't matter for makefile projects
 source_group("Header Files" FILES ${LIB_PUBLIC_HEADERS})
 
-if(NOT CMAKE_BUILD_TYPE MATCHES "Bootstrap")
+if(NOT OPS_BOOTSTRAP_BUILD)
 
-# generate the library target
-add_library(${LIB_NAME} SHARED
+  # generate the library target
+  add_library(${LIB_NAME} SHARED
     ${LIB_OPS_CORE_SRCS}
     ${LIB_BOTTOM_LAYER_SRC}
     ${LIB_OPS_PUBLIC_HEADERS}
-)
-
-## add_dependencies(${LIB_NAME} opsidls)
-
-target_include_directories(${LIB_NAME} PUBLIC ../include)
-
-set_target_properties(${LIB_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
-# adds -DOPS_LIBRARY to commandline. Can't use add_definitions here
-set_target_properties(${LIB_NAME} PROPERTIES COMPILE_DEFINITIONS OPS_LIBRARY)
-set_target_properties(${LIB_NAME} PROPERTIES DEBUG_POSTFIX "-dbg")
-set_target_properties(${LIB_NAME} PROPERTIES RELEASE_POSTFIX "-opt")
-
-target_link_libraries(${LIB_NAME} ${Boost_LIBRARIES})
-
-if(MINGW)
-  target_link_libraries(${LIB_NAME} ws2_32 mswsock)
-endif()
-
-# build it again but statically this time
-set(LIB_STATIC ${LIB_NAME}-static)
-# generate the library target
-add_library(${LIB_STATIC} STATIC
-    ${LIB_OPS_CORE_SRCS}
-    ${LIB_BOTTOM_LAYER_SRC}
-    ${LIB_OPS_PUBLIC_HEADERS}
-)
-
-## add_dependencies(${LIB_STATIC} opsidls)
-
-set_target_properties(${LIB_STATIC} PROPERTIES VERSION ${PROJECT_VERSION})
-set_target_properties(${LIB_STATIC} PROPERTIES COMPILE_DEFINITIONS OPS_LIBRARY_STATIC)
-set_target_properties(${LIB_STATIC} PROPERTIES DEBUG_POSTFIX "-dbg")
-set_target_properties(${LIB_STATIC} PROPERTIES RELEASE_POSTFIX "-opt")
-
-target_link_libraries(${LIB_STATIC} ${Boost_LIBRARIES})
-
-  # library installation
-set(INSTALL_BINDIR bin)
-if(WIN32 AND NOT CYGWIN)
-  set(INSTALL_LIBDIR bin)
-  set(INSTALL_ARCHIVEDIR lib)
-else()
-  set(INSTALL_LIBDIR lib${LIB_POSTFIX})
-  set(INSTALL_ARCHIVEDIR lib${LIB_POSTFIX})
-endif()
-
-install(TARGETS ${LIB_NAME} ${LIB_STATIC}
-  RUNTIME DESTINATION ${INSTALL_BINDIR}
-  LIBRARY DESTINATION ${INSTALL_LIBDIR}
-  ARCHIVE DESTINATION ${INSTALL_ARCHIVEDIR}
   )
 
-else()
+  ## add_dependencies(${LIB_NAME} opsidls)
+
+  target_include_directories(${LIB_NAME} PUBLIC ../include)
+
+  set_target_properties(${LIB_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
+  # adds -DOPS_LIBRARY to commandline. Can't use add_definitions here
+  set_target_properties(${LIB_NAME} PROPERTIES COMPILE_DEFINITIONS OPS_LIBRARY)
+  set_target_properties(${LIB_NAME} PROPERTIES DEBUG_POSTFIX "-dbg")
+  set_target_properties(${LIB_NAME} PROPERTIES RELEASE_POSTFIX "-opt")
+
+  target_link_libraries(${LIB_NAME} ${Boost_LIBRARIES})
+
+  if(MINGW)
+    target_link_libraries(${LIB_NAME} ws2_32 mswsock)
+  endif()
+
+  # build it again but statically this time
+  set(LIB_STATIC ${LIB_NAME}-static)
+  # generate the library target
+  add_library(${LIB_STATIC} STATIC
+    ${LIB_OPS_CORE_SRCS}
+    ${LIB_BOTTOM_LAYER_SRC}
+    ${LIB_OPS_PUBLIC_HEADERS}
+  )
+
+  ## add_dependencies(${LIB_STATIC} opsidls)
+
+  set_target_properties(${LIB_STATIC} PROPERTIES VERSION ${PROJECT_VERSION})
+  set_target_properties(${LIB_STATIC} PROPERTIES COMPILE_DEFINITIONS OPS_LIBRARY_STATIC)
+  set_target_properties(${LIB_STATIC} PROPERTIES DEBUG_POSTFIX "-dbg")
+  set_target_properties(${LIB_STATIC} PROPERTIES RELEASE_POSTFIX "-opt")
+
+  target_link_libraries(${LIB_STATIC} ${Boost_LIBRARIES})
+
+  # library installation
+  set(INSTALL_BINDIR bin)
+  if(WIN32 AND NOT CYGWIN)
+    set(INSTALL_LIBDIR bin)
+    set(INSTALL_ARCHIVEDIR lib)
+  else()
+    set(INSTALL_LIBDIR lib${LIB_POSTFIX})
+    set(INSTALL_ARCHIVEDIR lib${LIB_POSTFIX})
+  endif()
+
+  install(TARGETS ${LIB_NAME} ${LIB_STATIC}
+    RUNTIME DESTINATION ${INSTALL_BINDIR}
+    LIBRARY DESTINATION ${INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${INSTALL_ARCHIVEDIR}
+  )
+endif()
+
+if((OPS_BOOTSTRAP_BUILD) OR (DEFINED OPS_NO_SEPARATE_BOOTSTRAP))
   # install headers separately to keep the include file hierarchy
   # Only done in Bootstrap phase
   set(INSTALL_INCDIR include)
   install(DIRECTORY ${OPS_HEADER_PATH}/ DESTINATION ${INSTALL_INCDIR}/${LIB_NAME})
   install(DIRECTORY ${PROJECT_SOURCE_DIR}/Common/idl/Generated/Cpp/ DESTINATION ${INSTALL_INCDIR}/${LIB_NAME})
-
 endif()

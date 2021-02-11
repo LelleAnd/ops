@@ -2,7 +2,7 @@ unit uOps.Transport.McUdpSendDataHandler;
 
 (**
 *
-* Copyright (C) 2016-2019 Lennart Andersson.
+* Copyright (C) 2016-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -107,6 +107,7 @@ begin
 
   FSender := TSenderFactory.CreateUDPSender(localInterface, ttl, OutSocketBufferSize);
   FSender.ErrorService := Reporter;
+  FSender.setConnectStatusListener(onConnectStatusChanged);
 end;
 
 destructor TMcUdpSendDataHandler.Destroy;

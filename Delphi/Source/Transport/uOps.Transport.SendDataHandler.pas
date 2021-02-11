@@ -2,7 +2,7 @@ unit uOps.Transport.SendDataHandler;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -24,6 +24,7 @@ interface
 
 uses Contnrs,
      System.SyncObjs,
+     uNotifier,
      uOps.Types,
      uOps.Topic,
      uOps.Transport.Sender;
@@ -33,13 +34,20 @@ type
   private
     FUsers : TObjectList;
 
+    FCsNotifier : TNotifierValue<TConnectStatus>;
+
   protected
     FSender : TSender;
     FMutex : TMutex;
 
+    procedure onConnectStatusChanged(Sender : TObject; arg : TConnectStatus);
+
   public
     constructor Create;
     destructor Destroy; override;
+
+		procedure addListener(Proc : TOnNotifyEvent<TConnectStatus>);
+		procedure removeListener(Proc : TOnNotifyEvent<TConnectStatus>);
 
 		function sendData(buf : PByte; bufSize : Integer; topic : TTopic) : Boolean; virtual; abstract;
 
@@ -55,14 +63,31 @@ constructor TSendDataHandler.Create;
 begin
   inherited Create;
   FUsers := TObjectList.Create(False);    // We don't own objects in list
+  FCsNotifier := TNotifierValue<TConnectStatus>.Create(Self, True);
   FMutex := TMutex.Create;
 end;
 
 destructor TSendDataHandler.Destroy;
 begin
   FreeAndNil(FMutex);
+  FreeAndNil(FCsNotifier);
   FreeAndNil(FUsers);
   inherited;
+end;
+
+procedure TSendDataHandler.addListener(Proc : TOnNotifyEvent<TConnectStatus>);
+begin
+  FCsNotifier.addListener(Proc);
+end;
+
+procedure TSendDataHandler.removeListener(Proc : TOnNotifyEvent<TConnectStatus>);
+begin
+  FCsNotifier.removeListener(Proc);
+end;
+
+procedure TSendDataHandler.onConnectStatusChanged(Sender : TObject; arg : TConnectStatus);
+begin
+  FCsNotifier.doNotify(arg);
 end;
 
 procedure TSendDataHandler.addUser(client : TObject);

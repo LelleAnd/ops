@@ -2,7 +2,7 @@ unit uSockets;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -67,6 +67,7 @@ type
     // ------------------------------------------------------
     // Utility functions
     function GetLocalAddress(var LocalIP : AnsiString; var LocalPort : Integer) : Boolean;
+    function GetPeerAddress(var PeerIP : AnsiString; var PeerPort : Integer) : Boolean;
 
     function MakeSockAddr(IPAddress : AnsiString; Port : Integer): TSockAddr;
 
@@ -369,6 +370,24 @@ begin
   Result := ntohs(addr.sin_port);
 end;
 
+function TBaseIpSocket.GetPeerAddress(var PeerIP : AnsiString; var PeerPort : Integer) : Boolean;
+var
+  len : Integer;
+  addr : TSockAddr;
+begin
+  FLastError := 0;
+  len := SizeOf(addr);
+
+  if getpeername(Handle, addr,len) = SOCKET_ERROR then begin
+    FLastError := WSAGetLastError;
+  end;
+
+  PeerIP := GetIpAddress(addr);
+  PeerPort := GetPort(addr);
+
+  Result := FLastError = 0;
+end;
+
 function TBaseIpSocket.GetLocalAddress(var LocalIP : AnsiString; var LocalPort : Integer) : Boolean;
 var
   len : Integer;
@@ -385,7 +404,7 @@ begin
   LocalIP := GetIpAddress(addr);
   LocalPort := GetPort(addr);
 
-  Result := FlastError = 0;
+  Result := FLastError = 0;
 end;
 
 function TBaseIpSocket.MakeSockAddr(IPAddress : AnsiString; Port : Integer) : TSockAddr;

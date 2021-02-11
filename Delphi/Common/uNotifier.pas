@@ -2,7 +2,7 @@ unit uNotifier;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -61,12 +61,15 @@ type
     function SameMethod(AMethod1, AMethod2: TOnNotifyEvent<T>): Boolean;
     function GetNumListeners : Integer;
 
+    // Only to be used by TNotifier<> classes
+		procedure internalNotify(arg : T);
+
   public
     constructor Create(Owner : TObject);
     destructor Destroy; override;
 
     // Called by subclasses that wishes to notify its listeners.
-		procedure doNotify(arg : T);
+		procedure doNotify(arg : T); virtual;
 
     // Register a Listener via Interface
     procedure addListener(listener : IListener<T>); overload;
@@ -81,6 +84,27 @@ type
     procedure removeListener(proc : TOnNotifyEvent<T>); overload;
 
     property numListeners : Integer read GetNumListeners;
+  end;
+
+  // A Notifier that is restricted to value types so that we safely can store
+  // the latest notified value to be used for late arrivals.
+  TNotifierValue<T: record> = class(TNotifier<T>)
+  private
+    // Late arrivals handling
+    FLateArrivals : Boolean;
+    FValue : T;
+    FValueValid : Boolean;
+  public
+    constructor Create(Owner : TObject; LateArrivals : Boolean = False);
+
+    // Called by subclasses that wishes to notify its listeners.
+		procedure doNotify(arg : T); override;
+
+    // Register a Listener via Interface
+    procedure addListener(listener : IListener<T>); overload;
+
+    // Register a Listener via callback event
+    procedure addListener(proc : TOnNotifyEvent<T>); overload;
   end;
 
 implementation
@@ -175,17 +199,71 @@ begin
   end;
 end;
 
-procedure TNotifier<T>.doNotify(arg : T);
+procedure TNotifier<T>.internalNotify(arg : T);
 var
   i : Integer;
 begin
+  for i := 0 to FListerners.Count - 1 do begin
+    IListener<T>(FListerners.Items[i]).onNotify(FOwner, arg);
+  end;
+  for i := 0 to Length(FEvents) - 1 do begin
+    FEvents[i](FOwner, arg);
+  end;
+end;
+
+procedure TNotifier<T>.doNotify(arg : T);
+begin
   FMutex.Acquire;
   try
-    for i := 0 to FListerners.Count - 1 do begin
-      IListener<T>(FListerners.Items[i]).onNotify(FOwner, arg);
+    internalNotify(arg);
+  finally
+    FMutex.Release;
+  end;
+end;
+
+constructor TNotifierValue<T>.Create(Owner : TObject; LateArrivals : Boolean = False);
+begin
+  inherited Create(Owner);
+  FLateArrivals := LateArrivals;
+  FValueValid := False;
+end;
+
+procedure TNotifierValue<T>.doNotify(arg : T);
+begin
+  FMutex.Acquire;
+  try
+    FValue := arg;
+    FValueValid := True;
+    internalNotify(arg);
+  finally
+    FMutex.Release;
+  end;
+end;
+
+procedure TNotifierValue<T>.addListener(Listener: IListener<T>);
+begin
+  FMutex.Acquire;
+  try
+    FListerners.Add(Listener);
+    if FLateArrivals and FValueValid then begin
+      Listener.onNotify(FOwner, FValue);
     end;
-    for i := 0 to Length(FEvents) - 1 do begin
-      FEvents[i](FOwner, arg);
+  finally
+    FMutex.Release;
+  end;
+end;
+
+procedure TNotifierValue<T>.addListener(Proc: TOnNotifyEvent<T>);
+var
+  Len : Integer;
+begin
+  FMutex.Acquire;
+  try
+    Len := Length(FEvents);
+    SetLength(FEvents, Len + 1);
+    FEvents[Len] := Proc;
+    if FLateArrivals and FValueValid then begin
+      Proc(FOwner, FValue);
     end;
   finally
     FMutex.Release;

@@ -2,7 +2,7 @@ unit uOps.Subscriber;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -51,6 +51,7 @@ type
 
     // Used for notifications to users of the subscriber
     FDataNotifier : TNotifier<TOPSMessage>;
+    FCsNotifier : TNotifierValue<TConnectStatus>;
 
     // Used for notifications to users of the subscriber
     FDeadlineNotifier : TDeadlineTimer;
@@ -97,6 +98,7 @@ type
 
     // Message listener callback
     procedure onNewMessage(Sender : TObject; arg : TOPSMessage);
+    procedure onConnectStatusChanged(Sender : TObject; arg : TConnectStatus);
 
   public
     constructor Create(t : TTopic);
@@ -111,6 +113,10 @@ type
     // Add notifications (callbacks) when data arrives
     // NOTE: 'Proc' will be called in the context of an arbitrary thread
     procedure AddDataListener(Proc : TOnNotifyEvent<TOPSMessage>);
+
+    // Add notifications (callbacks) when connected status changes
+    // NOTE: 'Proc' will be called in the context of an arbitrary thread
+    procedure AddConnectStatusListener(Proc : TOnNotifyEvent<TConnectStatus>);
 
     // Add notifications (callbacks) when a deadline is missed
     // NOTE: 'Proc' will be called in the context of an arbitrary thread
@@ -186,6 +192,7 @@ begin
   inherited Create;
   FTopic := t;
   FDataNotifier := TNotifier<TOPSMessage>.Create(Self);
+  FCsNotifier := TNotifierValue<TConnectStatus>.Create(Self, True);
   FDeadlineNotifier := TDeadlineTimer.Create(Self);
   FFilterQoSPolicies := TObjectList<TFilterQoSPolicy>.Create;
   FFilterQoSPolicyMutex := TMutex.Create;
@@ -217,6 +224,7 @@ begin
   FreeAndNil(FFilterQoSPolicyMutex);
   FreeAndNil(FFilterQoSPolicies);
   FreeAndNil(FDeadlineNotifier);
+  FreeAndNil(FCsNotifier);
   FreeAndNil(FDataNotifier);
   inherited;
 end;
@@ -228,6 +236,7 @@ begin
 	if FStarted then Exit;
 
   FReceiveDataHandler := FParticipant.GetReceiveDataHandler(FTopic);
+  FReceiveDataHandler.addListener(onConnectStatusChanged);
   FReceiveDataHandler.addListener(onNewMessage);
 
   if FDeadlineTimeout > 0 then FDeadlineNotifier.Start(FDeadlineTimeout);
@@ -242,6 +251,7 @@ begin
 
   FReceiveDataHandler.aquireMessageLock;
   FReceiveDataHandler.removeListener(onNewMessage);
+  FReceiveDataHandler.removeListener(onConnectStatusChanged);
   FReceiveDataHandler.releaseMessageLock;
   FReceiveDataHandler := nil;
   FParticipant.ReleaseReceiveDataHandler(FTopic);
@@ -339,6 +349,18 @@ end;
 function TSubscriber.getHistory : TArray<TOpsMessage>;
 begin
   Result := FMessageBuffer.ToArray;
+end;
+
+// ---------------------------------------------------------------------------
+
+procedure TSubscriber.AddConnectStatusListener(Proc : TOnNotifyEvent<TConnectStatus>);
+begin
+  FCsNotifier.addListener(Proc);
+end;
+
+procedure TSubscriber.onConnectStatusChanged(Sender : TObject; arg : TConnectStatus);
+begin
+  FCsNotifier.doNotify(arg);
 end;
 
 // ---------------------------------------------------------------------------

@@ -2,7 +2,7 @@ unit uOps.Transport.TCPServer;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -24,6 +24,7 @@ interface
 
 uses System.Generics.Collections,
      uRunner,
+     uOps.Types,
      uOps.Error,
      uOps.Transport.Sender,
      uSockets;
@@ -111,6 +112,9 @@ begin
 end;
 
 procedure TTCPServerSender.Close();
+var
+  i : Integer;
+  ConnectStatus : TConnectStatus;
 begin
   // Tell thread to terminate
   FTerminated := True;
@@ -120,6 +124,14 @@ begin
 
   // If thread exist, wait for thread to terminate and then delete the object
   FreeAndNil(FRunner);
+
+  for i := FConnectedSockets.Count - 1 downto 0 do begin
+    ConnectStatus.Address := string(FConnectedSockets[i].RemoteHost);
+    ConnectStatus.Port := FConnectedSockets[i].RemotePort;
+    ConnectStatus.TotalNo := 0;
+    ConnectStatus.Connected := False;
+    notifyConnectStatus(ConnectStatus);
+  end;
 
   // Free all connected sockets, which implicitly will close all connections
   FConnectedSockets.Clear;
@@ -141,6 +153,7 @@ var
   i : Integer;
   sizeInfo : array[0..100] of AnsiChar;
   errorFlag : Boolean;
+  ConnectStatus : TConnectStatus;
 begin
   Result := True;
 
@@ -171,6 +184,13 @@ begin
     if ErrorFlag then begin
       FLastErrorCode := FConnectedSockets[i].LastError;
       Report('sendTo', 'Error sending');
+
+      ConnectStatus.Address := string(FConnectedSockets[i].RemoteHost);
+      ConnectStatus.Port := FConnectedSockets[i].RemotePort;
+      ConnectStatus.TotalNo := FConnectedSockets.Count-1;
+      ConnectStatus.Connected := (ConnectStatus.TotalNo > 0);
+      notifyConnectStatus(ConnectStatus);
+
       FConnectedSockets.Delete(i);
     end;
   end;
@@ -179,6 +199,7 @@ end;
 procedure TTCPServerSender.Run;
 var
   tcpClient : TTcpClientSocket;
+  ConnectStatus : TConnectStatus;
 begin
   tcpClient := nil;
 
@@ -220,6 +241,13 @@ begin
 
         // and put it in list and then wait for another connection
         FConnectedSockets.Add(tcpClient);
+
+        ConnectStatus.Address := string(tcpClient.RemoteHost);
+        ConnectStatus.Port := tcpClient.RemotePort;
+        ConnectStatus.Connected := True;
+        ConnectStatus.TotalNo := FConnectedSockets.Count;
+        notifyConnectStatus(ConnectStatus);
+
         tcpClient := nil;   // Clear ref since list now owns object
       end;
     except

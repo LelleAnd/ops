@@ -170,6 +170,8 @@ type
     procedure OndeadlineMissed(Sender : TObject; int : Integer);
     procedure Log(mess : string);
 
+    procedure onConnectStatusChanged(Sender : TObject; arg : TConnectStatus);
+
   public
   	Data : DataType;
 
@@ -257,6 +259,7 @@ begin
       // Create a publisher on that topic
       FPub := TPublisher.Create(topic);
       FPub.Name := 'Delphi Test (' + AnsiString(IntToStr(GetCurrentProcessId)) + ')';
+      FPub.AddConnectStatusListener(onConnectStatusChanged);
     except
       Log('Requested topic "' + topicName + '" does not exist!!');
     end;
@@ -327,6 +330,7 @@ begin
 //      FSub.SetHistoryMaxSize(10);            //TEST
       FSub.AddDataListener(OnOpsMessage);
       FSub.AddDeadlineListener(OnDeadlineMissed);
+      FSub.AddConnectStatusListener(onConnectStatusChanged);
       FSub.Start;
     except
       Log('Requested topic "' + topicName + '" does not exist!!');
@@ -403,6 +407,25 @@ end;
 procedure THelper<DataType, DataTypePublisher, DataTypeSubscriber>.OndeadlineMissed(Sender : TObject; int : Integer);
 begin
   Log('Deadline Missed for topic ' + string(FSub.Topic.Name));
+end;
+
+procedure THelper<DataType, DataTypePublisher, DataTypeSubscriber>.onConnectStatusChanged(Sender : TObject; arg : TConnectStatus);
+var
+  Str : string;
+begin
+  if Sender = FPub then begin
+    Str := '[Publisher, ' + FPub.Topic.Name + ']';
+  end else if Sender = FSub then begin
+    Str := '[Subscriber, ' + FSub.Topic.Name + ']';
+  end else begin
+    Str := '[Unknown]';
+  end;
+  if arg.Connected then begin
+    Str := Str + ' Connected'
+  end else begin
+    Str := Str + ' NOT Connected'
+  end;
+  Log('onConnectStatusChanged: ' + Str + ': ' + arg.Address + '::' + IntToStr(arg.Port) + ', Num = ' + IntToStr(arg.TotalNo));
 end;
 
 procedure THelper<DataType, DataTypePublisher, DataTypeSubscriber>.ClearStorage;

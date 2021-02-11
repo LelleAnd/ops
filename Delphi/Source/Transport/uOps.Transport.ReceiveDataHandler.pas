@@ -2,7 +2,7 @@ unit uOps.Transport.ReceiveDataHandler;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -45,6 +45,7 @@ type
 
     // Used for notifications to users of the ReceiveDataHandler
     FDataNotifier : TNotifier<TOPSMessage>;
+    FCsNotifier : TNotifierValue<TConnectStatus>;
 
     // The receiver used for this ReceiveHandler.
     FReceiver : TReceiver;
@@ -75,6 +76,7 @@ type
     FFirstReceived : Boolean;
 
     function GetNumListeners : Integer;
+    procedure onConnectStatusChanged(Sender : TObject; arg : TConnectStatus);
 
   public
     constructor Create(top : TTopic;
@@ -88,8 +90,11 @@ type
 
     procedure Stop;
 
-		procedure addListener(Proc : TOnNotifyEvent<TOPSMessage>);
-		procedure removeListener(Proc : TOnNotifyEvent<TOPSMessage>);
+		procedure addListener(Proc : TOnNotifyEvent<TOPSMessage>); overload;
+		procedure removeListener(Proc : TOnNotifyEvent<TOPSMessage>); overload;
+
+		procedure addListener(Proc : TOnNotifyEvent<TConnectStatus>); overload;
+		procedure removeListener(Proc : TOnNotifyEvent<TConnectStatus>); overload;
 
     function getReceiver : TReceiver;
 
@@ -119,6 +124,7 @@ begin
   FErrorService := Reporter;
   FDataNotifier := TNotifier<TOPSMessage>.Create(Self);
   FMessageLock := TMutex.Create;
+  FCsNotifier := TNotifierValue<TConnectStatus>.Create(Self, True);
 
   FMemMap := TMemoryMap.Create(top.SampleMaxSize div PACKET_MAX_SIZE + 1, PACKET_MAX_SIZE);
   FBuffer := TByteBuffer.Create(FMemMap);
@@ -135,6 +141,7 @@ begin
     raise ECommException.Create('Could not create receiver');
   end;
   FReceiver.addListener(onNewEvent);
+  FReceiver.setConnectStatusListener(onConnectStatusChanged);
 end;
 
 destructor TReceiveDataHandler.Destroy;
@@ -146,6 +153,7 @@ begin
   FreeAndNil(FArchiver);
   FreeAndNil(FBuffer);
   FreeAndNil(FMemMap);
+  FreeAndNil(FCsNotifier);
   FreeAndNil(FMessageLock);
   FreeAndNil(FDataNotifier);
   inherited;
@@ -198,6 +206,21 @@ end;
 function TReceiveDataHandler.getReceiver : TReceiver;
 begin
   Result := FReceiver;
+end;
+
+procedure TReceiveDataHandler.addListener(Proc : TOnNotifyEvent<TConnectStatus>);
+begin
+  FCsNotifier.addListener(Proc);
+end;
+
+procedure TReceiveDataHandler.removeListener(Proc : TOnNotifyEvent<TConnectStatus>);
+begin
+  FCsNotifier.removeListener(Proc);
+end;
+
+procedure TReceiveDataHandler.onConnectStatusChanged(Sender : TObject; arg : TConnectStatus);
+begin
+  FCsNotifier.doNotify(arg);
 end;
 
 // Called whenever the receiver has new data.

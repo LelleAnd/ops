@@ -2,7 +2,7 @@ unit uOps.Types;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -37,6 +37,14 @@ type
   TDynByteArray = array of Byte;
   TDynBooleanArray = array of Boolean;
   TDynAnsiStringArray = array of AnsiString;
+
+  // Used for reporting Connect Status (only for TCP transports for now)
+  TConnectStatus = record
+    Address : String;
+    Port : Integer;
+    Connected : Boolean;
+    TotalNo : Integer;
+  end;
 
 var
   Logger : TLogger;

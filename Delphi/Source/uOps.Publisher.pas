@@ -2,7 +2,7 @@ unit uOps.Publisher;
 
 (**
 *
-* Copyright (C) 2016-2019 Lennart Andersson.
+* Copyright (C) 2016-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -22,7 +22,8 @@ unit uOps.Publisher;
 
 interface
 
-uses uOps.Types,
+uses uNotifier,
+     uOps.Types,
      uOps.Topic,
      uOps.ByteBuffer,
      uOps.MemoryMap,
@@ -48,10 +49,18 @@ type
 
     // The SendDataHandler used by the Publisher (NOTE: we don't own the object)
     FSendDataHandler : TSendDataHandler;
+    FCsNotifier : TNotifierValue<TConnectStatus>;
+    FStarted : Boolean;
+
+    procedure onConnectStatusChanged(Sender : TObject; arg : TConnectStatus);
 
   public
     constructor Create(t : TTopic);
     destructor Destroy; override;
+
+    // Add notifications (callbacks) when connected status changes
+    // NOTE: 'Proc' will be called in the context of an arbitrary thread
+    procedure AddConnectStatusListener(Proc : TOnNotifyEvent<TConnectStatus>);
 
     procedure Start; override;
     procedure Stop; override;
@@ -76,6 +85,7 @@ begin
   FMemMap := TMemoryMap.Create(UInt32(t.SampleMaxSize div PACKET_MAX_SIZE) + 1, PACKET_MAX_SIZE);
   FBuf := TByteBuffer.Create(FMemMap);
   FArchive := TOPSArchiverOut.Create(FBuf, FTopic.OptNonVirt);
+  FCsNotifier := TNotifierValue<TConnectStatus>.Create(Self, True);
 
   FSendSleepTime := 1;
   FSleepEverySendPacket := 100000;
@@ -83,6 +93,7 @@ begin
 
   FParticipant := TParticipant.getInstance(topic.DomainID, topic.ParticipantID);
   FSendDataHandler := FParticipant.getSendDataHandler(FTopic);
+  FStarted := False;
 
   FMessage := TOPSMessage.Create;
   FMessage.PublisherName := FName;
@@ -99,6 +110,7 @@ begin
   FParticipant.releaseSendDataHandler(FTopic);
 
   FreeAndNil(FMessage);
+  FreeAndNil(FCsNotifier);
   FreeAndNil(FArchive);
   FreeAndNil(FBuf);
   FreeAndNil(FMemMap);
@@ -107,12 +119,30 @@ end;
 
 procedure TPublisher.Start;
 begin
-  FSendDataHandler.addUser(Self);
+  if not FStarted then begin
+    FSendDataHandler.addListener(onConnectStatusChanged);
+    FSendDataHandler.addUser(Self);
+    FStarted := True;
+  end;
 end;
 
 procedure TPublisher.Stop;
 begin
-  FSendDataHandler.removeUser(Self);
+  if FStarted then begin
+    FSendDataHandler.removeUser(Self);
+    FSendDataHandler.removeListener(onConnectStatusChanged);
+    FStarted := False;
+  end;
+end;
+
+procedure TPublisher.AddConnectStatusListener(Proc : TOnNotifyEvent<TConnectStatus>);
+begin
+  FCsNotifier.addListener(Proc);
+end;
+
+procedure TPublisher.onConnectStatusChanged(Sender : TObject; arg : TConnectStatus);
+begin
+  FCsNotifier.doNotify(arg);
 end;
 
 procedure TPublisher.WriteOPSObject(obj : TOPSObject);

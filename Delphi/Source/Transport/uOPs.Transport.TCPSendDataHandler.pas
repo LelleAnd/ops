@@ -2,7 +2,7 @@ unit uOps.Transport.TCPSendDataHandler;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -48,6 +48,7 @@ begin
   inherited Create;
   FSender := TSenderFactory.createTCPServer(string(topic.DomainAddress), topic.Port, topic.OutSocketBufferSize);
   FSender.ErrorService := Reporter;
+  FSender.setConnectStatusListener(onConnectStatusChanged);
 end;
 
 destructor TTCPSendDataHandler.Destroy;

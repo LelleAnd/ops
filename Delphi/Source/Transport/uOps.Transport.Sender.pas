@@ -2,7 +2,7 @@ unit uOps.Transport.Sender;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -22,7 +22,9 @@ unit uOps.Transport.Sender;
 
 interface
 
-uses uOps.Error;
+uses uNotifier,
+     uOps.Types,
+     uOps.Error;
 
 type
   // Interface used to send data
@@ -34,7 +36,15 @@ type
     // Result from WSAGetLastError() on error
     FLastErrorCode : Integer;
 
+    FCsClient : TOnNotifyEvent<TConnectStatus>;
+
+    procedure notifyConnectStatus(arg : TConnectStatus);
+
   public
+    constructor Create;
+
+    procedure setConnectStatusListener(Listener : TOnNotifyEvent<TConnectStatus>);
+
     function sendTo(buf : PByte; size : Integer; ip : string; port : Integer) : Boolean; virtual; abstract;
     function getPort() : Integer; virtual; abstract;
     function getAddress() : string; virtual; abstract;
@@ -59,6 +69,24 @@ implementation
 
 uses uOps.Transport.UDPSender,
      uOps.Transport.TCPServer;
+
+constructor TSender.Create;
+begin
+  inherited Create;
+  fCsClient := nil;
+end;
+
+procedure TSender.setConnectStatusListener(Listener : TOnNotifyEvent<TConnectStatus>);
+begin
+  FCsClient := Listener;
+end;
+
+procedure TSender.notifyConnectStatus(arg : TConnectStatus);
+begin
+  if Assigned(FCsClient) then begin
+    FCsClient(Self, arg);
+  end;
+end;
 
 class function TSenderFactory.createMCSender(localInterface : string; ttl : Integer; outSocketBufferSize : Int64) : TSender;
 begin

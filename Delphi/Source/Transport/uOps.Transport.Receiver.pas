@@ -2,7 +2,7 @@ unit uOps.Transport.Receiver;
 
 (**
 *
-* Copyright (C) 2016-2017 Lennart Andersson.
+* Copyright (C) 2016-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -23,6 +23,7 @@ unit uOps.Transport.Receiver;
 interface
 
 uses uNotifier,
+     uOps.Types,
      uOps.Error,
      uOps.Topic,
      uOps.Domain;
@@ -47,12 +48,18 @@ type
     // Used for notifications to users of the Receiver
     FDataNotifier : TNotifier<TBytesSizePair>;
 
+    FCsClient : TOnNotifyEvent<TConnectStatus>;
+
+    procedure notifyConnectStatus(arg : TConnectStatus);
+
 	public
     constructor Create;
     destructor Destroy; override;
 
 		procedure addListener(Proc : TOnNotifyEvent<TBytesSizePair>);
 		procedure removeListener(Proc : TOnNotifyEvent<TBytesSizePair>);
+
+    procedure setConnectStatusListener(Listener : TOnNotifyEvent<TConnectStatus>);
 
     // Start():
     // Starts the receiver, and reads bytes into given buffer.
@@ -108,12 +115,26 @@ constructor TReceiver.Create;
 begin
   inherited;
   FDataNotifier := TNotifier<TBytesSizePair>.Create(Self);
+  FCsClient := nil;
 end;
 
 destructor TReceiver.Destroy;
 begin
   FreeAndNil(FDataNotifier);
   inherited;
+end;
+
+procedure TReceiver.setConnectStatusListener(Listener : TOnNotifyEvent<TConnectStatus>);
+begin
+  FCsClient := Listener;
+end;
+
+procedure TReceiver.notifyConnectStatus(arg : TConnectStatus);
+begin
+  if Assigned(FCsClient) then begin
+    //TOnNotifyEvent<T> = procedure(Sender : TObject; arg : T) of object;
+    FCsClient(Self, arg);
+  end;
 end;
 
 procedure TReceiver.addListener(Proc : TOnNotifyEvent<TBytesSizePair>);

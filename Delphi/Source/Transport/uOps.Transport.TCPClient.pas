@@ -2,7 +2,7 @@ unit uOps.Transport.TCPClient;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -43,6 +43,7 @@ type
     FInSocketBufferSize : Int64;
 
     FTcpClient : TTcpClientSocket;
+    FConnectStatus : TConnectStatus;
 
     // Current read buffer from user
     FBuffer : PByte;
@@ -254,6 +255,12 @@ begin
       // Disable Nagle algorithm
       FTcpClient.SetTcpNoDelay(True);
 
+      FConnectStatus.Address := FIpAddress;
+      FConnectStatus.Port := FPort;
+      FConnectStatus.Connected := True;
+      FConnectStatus.TotalNo := 1;
+      notifyConnectStatus(FConnectStatus);
+
 //      notifyNewEvent(BytesSizePair(NULL, -5)); //Connection was down but has been reastablished.
 
       BufferIdx := 0;
@@ -304,6 +311,9 @@ begin
         DisconnectAndClose;
       end;
     end;
+    FConnectStatus.Connected := False;
+    FConnectStatus.TotalNo := 0;
+    notifyConnectStatus(FConnectStatus);
   end;
 end;
 

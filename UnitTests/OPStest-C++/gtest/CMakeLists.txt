@@ -53,7 +53,6 @@ set(APP3_SRCS
 # We need also the internal OPS C++ headers from:
 include_directories(
   ${PROJECT_SOURCE_DIR}/Cpp/source
-  ${PROJECT_SOURCE_DIR}/Common/idl/Generated/Cpp
 )
 
 add_executable(${APP_NAME} ${APP_SRCS})
@@ -73,6 +72,7 @@ elseif(MINGW)
   target_link_libraries(${APP2_NAME} ws2_32 mswsock)
   target_link_libraries(${APP3_NAME} ws2_32 mswsock)
 else()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
   target_link_libraries(${APP_NAME} pthread rt)
   target_link_libraries(${APP2_NAME} pthread rt)
   target_link_libraries(${APP3_NAME} pthread rt)

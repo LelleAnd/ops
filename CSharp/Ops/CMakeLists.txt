@@ -1,7 +1,9 @@
 
 set(OPS_LIB_NAME ops-csharp)
 
-set(OPSIDLS_GEN_PATH ${PROJECT_SOURCE_DIR}/Common/idl/Generated/CSharp/opsidls)
+get_target_property(OPSIDLS_GENERATED_PATH opsidls GENERATED_PATH)
+
+set(OPSIDLS_GEN_PATH ${OPSIDLS_GENERATED_PATH}/CSharp/opsidls)
 set(OPSIDLS_SOURCE
   ${OPSIDLS_GEN_PATH}/DebugRequestResponseData.cs
   ${OPSIDLS_GEN_PATH}/OPSConstants.cs
@@ -103,9 +105,7 @@ if(WIN32)
     # Define the DLL target, including all relevant project files.
     add_library(${OPS_LIB_NAME} SHARED ${OPS_CS_SOURCE})
 
-    if(DEFINED OPS_NO_SEPARATE_BOOTSTRAP)
-      add_dependencies(${OPS_LIB_NAME} opsidls)
-    endif()
+    add_dependencies(${OPS_LIB_NAME} opsidls)
 
     # Set the .NET Framework version for the target.
     set_property(TARGET ${OPS_LIB_NAME} PROPERTY VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.6.1")

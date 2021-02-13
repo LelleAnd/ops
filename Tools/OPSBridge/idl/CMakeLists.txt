@@ -13,9 +13,10 @@ set(WANTED_OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/Generated/Cpp/opsbridge/OpsBridgeC
 
 add_custom_command(OUTPUT ${WANTED_OUTPUT}
   COMMAND ${OPSC_COMPILER} -g ALL -B ALL -o ${CMAKE_CURRENT_SOURCE_DIR}/Generated -p opsbridge ${IDL_SRCS}
-  DEPENDS ${IDL_SRCS}
+  DEPENDS ${IDL_SRCS} opsc
   COMMENT "Generating source files from IDL's in ${CMAKE_CURRENT_SOURCE_DIR}"
   VERBATIM
   )
 
 add_custom_target(${BUILD_NAME} DEPENDS ${WANTED_OUTPUT})
+add_dependencies(${BUILD_NAME} opsc)

@@ -15,9 +15,8 @@ set(JAR_OUTPUT ${PROJECT_BINARY_DIR}/bin/PizzaProject.jar)
 
 add_custom_command(OUTPUT ${JAR_OUTPUT}
   COMMAND ${OPSC_COMPILER} -P ${CMAKE_CURRENT_SOURCE_DIR} -g ALL -gpr ../../../../../Ada/
-  #COMMAND ${Java_JAVA_EXECUTABLE} -jar ${CMAKE_BINARY_DIR}/bin/opsc-${OPS_VERSION}.jar -P ${CMAKE_CURRENT_SOURCE_DIR}
   COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/Generated/Java/PizzaProject.jar ${JAR_OUTPUT}
-  DEPENDS ${PIZZA_SRCS} ${OPSC_TARGET}
+  DEPENDS ${PIZZA_SRCS} opsc
   COMMENT "Generating ${JAR_OUTPUT} from ${CMAKE_CURRENT_SOURCE_DIR}"
   VERBATIM
   )

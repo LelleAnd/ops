@@ -1,8 +1,4 @@
 
-if(DEFINED OPS_NO_SEPARATE_BOOTSTRAP)
-  set(OPSC_TARGET opsc)
-endif()
-
 # this one generates all example IDLs
 add_subdirectory(ChatExample)
 add_subdirectory(HelloRequestReply)

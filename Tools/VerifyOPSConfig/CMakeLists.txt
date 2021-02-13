@@ -1,9 +1,4 @@
 
-# We are going to need the OPS headers
-include_directories(
-  ${PROJECT_SOURCE_DIR}/Cpp/include
-)
-
 # We are going to need the boost headers
 include_directories(${Boost_INCLUDE_DIRS})
 
@@ -22,4 +17,3 @@ endif()
 
 # add the source
 add_subdirectory(Source)
-

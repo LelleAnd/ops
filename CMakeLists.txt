@@ -211,6 +211,7 @@ if((OPS_BOOTSTRAP_BUILD) OR (DEFINED OPS_NO_SEPARATE_BOOTSTRAP))
   set(CONFIGURATIONLIB_JAR ${OPSJAR_PATH}/ConfigurationLib-${PROJECT_VERSION}.jar)
 
 else()
+  add_custom_target(opsc ALL COMMENT "Built during Bootstrap phase")
   # Use opsc script from Bootstrap phase, will be used in all subdirs under this one
   if(WIN32)
     find_file(OPSC_COMPILER NAMES opsc.bat PATHS ${CMAKE_INSTALL_PREFIX}/lib/ops NO_DEFAULT_PATH)
@@ -231,12 +232,11 @@ message(">>>> CONFIGURATIONLIB_JAR= " ${CONFIGURATIONLIB_JAR})
 ################################################################################
 # Build the source
 
+# Generate the source from the common idls into the source tree
+add_subdirectory(Common)
+
 # common parts
 if((OPS_BOOTSTRAP_BUILD) OR (DEFINED OPS_NO_SEPARATE_BOOTSTRAP))
-  # We only generate the source from the idls during the Bootstrap phase
-  # since it generates code into the source tree
-  add_subdirectory(Common)
-
   # recurse into java source
   # We only build Java during the Bootstrap phase, since it is needed during
   # bootstrap and there isn't any difference between debug and opt builds

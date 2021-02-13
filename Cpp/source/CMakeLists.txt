@@ -34,6 +34,9 @@ set(LIB_BOTTOM_LAYER_SRC
 # ide grouping, doesn't matter for makefile projects
 source_group("Header Files" FILES ${LIB_PUBLIC_HEADERS})
 
+# Get path to the generated common OPS idls
+get_target_property(OPSIDLS_GENERATED_PATH opsidls GENERATED_PATH)
+
 if(NOT OPS_BOOTSTRAP_BUILD)
 
   # generate the library target
@@ -43,9 +46,10 @@ if(NOT OPS_BOOTSTRAP_BUILD)
     ${LIB_OPS_PUBLIC_HEADERS}
   )
 
-  ## add_dependencies(${LIB_NAME} opsidls)
+  add_dependencies(${LIB_NAME} opsidls)
 
   target_include_directories(${LIB_NAME} PUBLIC ../include)
+  target_include_directories(${LIB_NAME} PUBLIC ${OPSIDLS_GENERATED_PATH}/Cpp)
 
   set_target_properties(${LIB_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
   # adds -DOPS_LIBRARY to commandline. Can't use add_definitions here
@@ -68,7 +72,10 @@ if(NOT OPS_BOOTSTRAP_BUILD)
     ${LIB_OPS_PUBLIC_HEADERS}
   )
 
-  ## add_dependencies(${LIB_STATIC} opsidls)
+  add_dependencies(${LIB_STATIC} opsidls)
+
+  target_include_directories(${LIB_STATIC} PUBLIC ../include)
+  target_include_directories(${LIB_STATIC} PUBLIC ${OPSIDLS_GENERATED_PATH}/Cpp)
 
   set_target_properties(${LIB_STATIC} PROPERTIES VERSION ${PROJECT_VERSION})
   set_target_properties(${LIB_STATIC} PROPERTIES COMPILE_DEFINITIONS OPS_LIBRARY_STATIC)
@@ -99,5 +106,5 @@ if((OPS_BOOTSTRAP_BUILD) OR (DEFINED OPS_NO_SEPARATE_BOOTSTRAP))
   # Only done in Bootstrap phase
   set(INSTALL_INCDIR include)
   install(DIRECTORY ${OPS_HEADER_PATH}/ DESTINATION ${INSTALL_INCDIR}/${LIB_NAME})
-  install(DIRECTORY ${PROJECT_SOURCE_DIR}/Common/idl/Generated/Cpp/ DESTINATION ${INSTALL_INCDIR}/${LIB_NAME})
+  install(DIRECTORY ${OPSIDLS_GENERATED_PATH}/Cpp/ DESTINATION ${INSTALL_INCDIR}/${LIB_NAME})
 endif()

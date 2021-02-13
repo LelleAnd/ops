@@ -1,10 +1,4 @@
 
-# We are going to need the OPS headers
-include_directories(
-  ${PROJECT_SOURCE_DIR}/Cpp/include
-  ${PROJECT_SOURCE_DIR}/Common/idl/Generated/Cpp
-)
-
 # We are going to need the boost headers
 include_directories(${Boost_INCLUDE_DIRS})
 

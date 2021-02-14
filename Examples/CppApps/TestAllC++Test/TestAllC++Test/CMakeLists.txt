@@ -9,7 +9,8 @@ set(COMMON_SRC
   ../../ConfigFileHelper.h
 )
 
-include_directories(${OPSIDL_SOURCE_DIR}/TestAll/Generated/Cpp)
+get_target_property(TESTALL_GENERATED_PATH TestAll GENERATED_PATH)
+include_directories(${TESTALL_GENERATED_PATH}/Cpp)
 
 add_executable(${APP1_NAME} TestAll_Publish/TestAll_Publish.cpp ${COMMON_SRC})
 add_executable(${APP2_NAME} TestAll_Subscribe/TestAll_Subscribe.cpp ${COMMON_SRC})

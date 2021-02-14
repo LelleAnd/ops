@@ -7,7 +7,8 @@ set(COMMON_SRC
   ../ConfigFileHelper.h
 )
 
-include_directories(${OPSIDL_SOURCE_DIR}/HelloRequestReply/Generated/Cpp)
+get_target_property(HELLO_GENERATED_PATH HelloRequestReply GENERATED_PATH)
+include_directories(${HELLO_GENERATED_PATH}/Cpp)
 
 #
 add_executable(${PUB_NAME} RequestHelloTopic_pub.cpp ${COMMON_SRC})

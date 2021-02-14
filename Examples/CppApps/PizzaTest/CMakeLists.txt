@@ -1,7 +1,8 @@
 
 set(APP_NAME PizzaTestCpp)
 
-include_directories(${OPSIDL_SOURCE_DIR}/PizzaProject/Generated/Cpp)
+get_target_property(PIZZAPROJECT_GENERATED_PATH PizzaProject GENERATED_PATH)
+include_directories(${PIZZAPROJECT_GENERATED_PATH}/Cpp)
 
 set(APP_SRCS
   PizzaTest.cpp
@@ -18,8 +19,6 @@ add_executable(${APP_NAME} ${APP_SRCS})
 add_dependencies(${APP_NAME} PizzaProject)
 
 set_target_properties(${APP_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
-#set_target_properties(${LIB_NAME} PROPERTIES DEBUG_POSTFIX "-dbg")
-#set_target_properties(${LIB_NAME} PROPERTIES RELEASE_POSTFIX "-opt")
 
 target_link_libraries(${APP_NAME} ${Boost_LIBRARIES} ops-static)
 

@@ -1,7 +1,8 @@
 
 set(APP_NAME Example1Cpp)
 
-include_directories(${OPSIDL_SOURCE_DIR}/TestAll/Generated/Cpp)
+get_target_property(TESTALL_GENERATED_PATH TestAll GENERATED_PATH)
+include_directories(${TESTALL_GENERATED_PATH}/Cpp)
 
 set(APP_SRCS
   Example1.cpp

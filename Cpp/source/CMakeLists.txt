@@ -37,8 +37,17 @@ source_group("Header Files" FILES ${LIB_PUBLIC_HEADERS})
 # Get path to the generated common OPS idls
 get_target_property(OPSIDLS_GENERATED_PATH opsidls GENERATED_PATH)
 
-if(NOT OPS_BOOTSTRAP_BUILD)
+if((OPS_BOOTSTRAP_BUILD) OR (DEFINED OPS_NO_SEPARATE_BOOTSTRAP))
+  # install headers separately to keep the include file hierarchy
+  # Only done in Bootstrap phase
+  set(HEADER_INSTALL_DIR include/${LIB_NAME})
+  install(DIRECTORY ${OPS_HEADER_PATH}/ DESTINATION ${HEADER_INSTALL_DIR})
+  install(DIRECTORY ${OPSIDLS_GENERATED_PATH}/Cpp/ DESTINATION ${HEADER_INSTALL_DIR})
+else()
+  set(HEADER_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/include/${LIB_NAME})
+endif()
 
+if(NOT OPS_BOOTSTRAP_BUILD)
   # generate the library target
   add_library(${LIB_NAME} SHARED
     ${LIB_OPS_CORE_SRCS}
@@ -48,8 +57,12 @@ if(NOT OPS_BOOTSTRAP_BUILD)
 
   add_dependencies(${LIB_NAME} opsidls)
 
-  target_include_directories(${LIB_NAME} PUBLIC ../include)
-  target_include_directories(${LIB_NAME} PUBLIC ${OPSIDLS_GENERATED_PATH}/Cpp)
+  if (DEFINED OPS_NO_SEPARATE_BOOTSTRAP)
+    target_include_directories(${LIB_NAME} PUBLIC ${OPS4_CPP_ROOT}/include)
+    target_include_directories(${LIB_NAME} PUBLIC ${OPSIDLS_GENERATED_PATH}/Cpp)
+  else()
+    target_include_directories(${LIB_NAME} PUBLIC ${HEADER_INSTALL_DIR})
+  endif()
 
   set_target_properties(${LIB_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
   # adds -DOPS_LIBRARY to commandline. Can't use add_definitions here
@@ -74,8 +87,12 @@ if(NOT OPS_BOOTSTRAP_BUILD)
 
   add_dependencies(${LIB_STATIC} opsidls)
 
-  target_include_directories(${LIB_STATIC} PUBLIC ../include)
-  target_include_directories(${LIB_STATIC} PUBLIC ${OPSIDLS_GENERATED_PATH}/Cpp)
+  if (DEFINED OPS_NO_SEPARATE_BOOTSTRAP)
+    target_include_directories(${LIB_STATIC} PUBLIC ${OPS4_CPP_ROOT}/include)
+    target_include_directories(${LIB_STATIC} PUBLIC ${OPSIDLS_GENERATED_PATH}/Cpp)
+  else()
+    target_include_directories(${LIB_STATIC} PUBLIC ${HEADER_INSTALL_DIR})
+  endif()
 
   set_target_properties(${LIB_STATIC} PROPERTIES VERSION ${PROJECT_VERSION})
   set_target_properties(${LIB_STATIC} PROPERTIES COMPILE_DEFINITIONS OPS_LIBRARY_STATIC)
@@ -95,16 +112,9 @@ if(NOT OPS_BOOTSTRAP_BUILD)
   endif()
 
   install(TARGETS ${LIB_NAME} ${LIB_STATIC}
+    EXPORT ops-targets
     RUNTIME DESTINATION ${INSTALL_BINDIR}
     LIBRARY DESTINATION ${INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${INSTALL_ARCHIVEDIR}
   )
-endif()
-
-if((OPS_BOOTSTRAP_BUILD) OR (DEFINED OPS_NO_SEPARATE_BOOTSTRAP))
-  # install headers separately to keep the include file hierarchy
-  # Only done in Bootstrap phase
-  set(INSTALL_INCDIR include)
-  install(DIRECTORY ${OPS_HEADER_PATH}/ DESTINATION ${INSTALL_INCDIR}/${LIB_NAME})
-  install(DIRECTORY ${OPSIDLS_GENERATED_PATH}/Cpp/ DESTINATION ${INSTALL_INCDIR}/${LIB_NAME})
 endif()

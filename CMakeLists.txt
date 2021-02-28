@@ -1,5 +1,6 @@
 
-cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
+# We need install_jar_exports() which came in 3.7
+cmake_minimum_required(VERSION 3.7.0 FATAL_ERROR)
 
 # The main project name
 project(OPS VERSION 4.2.0)
@@ -326,3 +327,31 @@ if(CMAKE_CPACK_COMMAND)
         include(CPack)
     endif()
 endif()
+
+################################################################################
+# Create cmake-files for use from other projects
+
+if((OPS_BOOTSTRAP_BUILD) OR (DEFINED OPS_NO_SEPARATE_BOOTSTRAP))
+  install_jar_exports(
+    TARGETS OPSCompilerLib OPSJLib IDLParser ConfigurationLib IDLTemplates opsc
+    FILE jar-targets.cmake
+    DESTINATION cmake/internal)
+endif()
+if(NOT OPS_BOOTSTRAP_BUILD)
+  install(EXPORT ops-targets DESTINATION cmake/internal)
+endif()
+
+include(CMakePackageConfigHelpers)
+configure_package_config_file(OpsConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/OpsConfig.cmake
+  INSTALL_DESTINATION ${CMAKE_INSTALL_PREFIX}/cmake
+  PATH_VARS OPSC_COMPILER
+)
+write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/OpsConfigVersion.cmake
+  VERSION ${PROJECT_VERSION}
+  COMPATIBILITY SameMajorVersion
+)
+install(FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/OpsConfig.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/OpsConfigVersion.cmake
+  DESTINATION cmake
+)

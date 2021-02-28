@@ -1,0 +1,11 @@
+set(OPS_VERSION @PROJECT_VERSION@)
+
+@PACKAGE_INIT@
+
+set_and_check(OPSC_COMPILER "@PACKAGE_OPSC_COMPILER@")
+
+check_required_components(Ops)
+
+get_filename_component(_MYDIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+include(${_MYDIR}/internal/ops-targets.cmake)
+include(${_MYDIR}/internal/jar-targets.cmake)

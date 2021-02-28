@@ -18,8 +18,8 @@ add_dependencies(HelloReplierJavaImpl HelloRequestReply)
 
 install(FILES
   ${PROJECT_BINARY_DIR}/bin/HelloReplierJavaImpl-${PROJECT_VERSION}.jar
-  ${OPSJAR_PATH}/OPSJLib-${PROJECT_VERSION}.jar
-  ${OPSJAR_PATH}/ConfigurationLib-${PROJECT_VERSION}.jar
+  ${OPSJLIB_JAR}
+  ${CONFIGURATIONLIB_JAR}
   ${PROJECT_BINARY_DIR}/bin/HelloRequestReply.jar
   DESTINATION examples/requesthello
 )

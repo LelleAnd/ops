@@ -18,8 +18,8 @@ add_dependencies(PizzaTestImpl PizzaProject)
 
 install(FILES
   ${PROJECT_BINARY_DIR}/bin/PizzaTestImpl-${PROJECT_VERSION}.jar
-  ${OPSJAR_PATH}/OPSJLib-${PROJECT_VERSION}.jar
-  ${OPSJAR_PATH}/ConfigurationLib-${PROJECT_VERSION}.jar
+  ${OPSJLIB_JAR}
+  ${CONFIGURATIONLIB_JAR}
   ${PROJECT_BINARY_DIR}/bin/PizzaProject.jar
   DESTINATION examples/pizzatest
 )

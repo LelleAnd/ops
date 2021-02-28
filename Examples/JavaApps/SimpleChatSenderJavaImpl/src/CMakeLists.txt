@@ -18,8 +18,8 @@ add_dependencies(ChatSenderJavaImpl ChatExample)
 
 install(FILES
   ${PROJECT_BINARY_DIR}/bin/ChatSenderJavaImpl-${PROJECT_VERSION}.jar
-  ${OPSJAR_PATH}/OPSJLib-${PROJECT_VERSION}.jar
-  ${OPSJAR_PATH}/ConfigurationLib-${PROJECT_VERSION}.jar
+  ${OPSJLIB_JAR}
+  ${CONFIGURATIONLIB_JAR}
   ${PROJECT_BINARY_DIR}/bin/ChatExample.jar
   DESTINATION examples/chatexample
 )

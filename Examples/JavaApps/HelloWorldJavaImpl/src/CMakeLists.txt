@@ -31,8 +31,8 @@ add_dependencies(MainSubscribe HelloWorld)
 install(FILES
   ${PROJECT_BINARY_DIR}/bin/MainPublish-${PROJECT_VERSION}.jar
   ${PROJECT_BINARY_DIR}/bin/MainSubscribe-${PROJECT_VERSION}.jar
-  ${OPSJAR_PATH}/OPSJLib-${PROJECT_VERSION}.jar
-  ${OPSJAR_PATH}/ConfigurationLib-${PROJECT_VERSION}.jar
+  ${OPSJLIB_JAR}
+  ${CONFIGURATIONLIB_JAR}
   ${PROJECT_BINARY_DIR}/bin/HelloWorld.jar
   DESTINATION examples/helloworld
 )

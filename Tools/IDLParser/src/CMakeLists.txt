@@ -1,5 +1,7 @@
 
-set(IDLPARSER_SRC
+set(LIB_NAME IDLParser)
+
+set(LIB_SRC
   parsing/FileParser.java
   parsing/IDLFileParser.java
   parsing/ParseException.java
@@ -17,20 +19,16 @@ set(IDLPARSER_SRC
   parsing/javaccparser/TokenMgrError.java
 )
 
-add_jar(IDLParser ${IDLPARSER_SRC}
+add_jar(${LIB_NAME} ${LIB_SRC}
   INCLUDE_JARS OPSCompilerLib OPSJLib
-  VERSION ${OPS_VERSION}
+  VERSION ${JAR_APPEND_VERSION}
   OUTPUT_DIR ${PROJECT_BINARY_DIR}/bin
 )
 
-# in cmake-3.1 (at least) the install_jar is broken for Windows
-if(UNIX)
-  install_jar(IDLParser ${OPS_JAR_REL_INSTALL_PATH})
-else()
-  # install manually
-  set(JAR_OUTPUT ${PROJECT_BINARY_DIR}/bin/IDLParser-${OPS_VERSION}.jar)
-  install(FILES ${JAR_OUTPUT} DESTINATION ${OPS_JAR_REL_INSTALL_PATH})
-  install(FILES ${JAR_OUTPUT} DESTINATION ${OPS_JAR_REL_INSTALL_PATH} RENAME IDLParser.jar)
+install_jar(${LIB_NAME} ${OPS_JAR_REL_INSTALL_PATH})
+if(WIN32)
+  # Due to broken install_jar() on windows, install jar with version manually
+  install(FILES ${PROJECT_BINARY_DIR}/bin/${LIB_NAME}.jar DESTINATION ${OPS_JAR_REL_INSTALL_PATH} RENAME ${LIB_NAME}-${OPS_VERSION}.jar)
 endif()
 
 if(BUILD_DOCUMENTATION)

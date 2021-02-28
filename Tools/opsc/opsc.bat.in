@@ -9,9 +9,9 @@
 
 @rem make it possible to use the script from the source tree, when compiler
 @rem built with the windows bat-files that places jars in source tree
-@IF NOT EXIST %SCRIPT_PATH%opsc-${OPS_VERSION}.jar set SCRIPT_PATH=%SCRIPT_PATH%dist\
+@IF NOT EXIST %SCRIPT_PATH%opsc${JAR_APPEND_VER}.jar set SCRIPT_PATH=%SCRIPT_PATH%dist\
 
 @PATH="${JAVA_HOME}";%PATH%
 
 @java -version
-@java -jar %SCRIPT_PATH%opsc-${OPS_VERSION}.jar %*
+@java -jar %SCRIPT_PATH%opsc${JAR_APPEND_VER}.jar %*

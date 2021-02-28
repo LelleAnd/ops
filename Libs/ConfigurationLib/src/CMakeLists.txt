@@ -1,5 +1,7 @@
 
-set(CONFIGLIB_SRC
+set(LIB_NAME ConfigurationLib)
+
+set(LIB_SRC
   configlib/AddElementCallback.java
   configlib/ArchiverIn.java
   configlib/ArchiverInOut.java
@@ -24,21 +26,16 @@ set(CONFIGLIB_SRC
   configlib/exception/FormatException.java
 )
 
-add_jar(ConfigurationLib ${CONFIGLIB_SRC}
-  VERSION ${OPS_VERSION}
+add_jar(${LIB_NAME} ${LIB_SRC}
+  VERSION ${JAR_APPEND_VERSION}
   OUTPUT_DIR ${PROJECT_BINARY_DIR}/bin
 )
 
-# in cmake-3.1 (at least) the install_jar is broken for Windows
-if(UNIX)
-  install_jar(ConfigurationLib ${OPS_JAR_REL_INSTALL_PATH})
-else()
-  # install manually
-  set(JAR_OUTPUT ${PROJECT_BINARY_DIR}/bin/ConfigurationLib-${OPS_VERSION}.jar)
-  install(FILES ${JAR_OUTPUT} DESTINATION ${OPS_JAR_REL_INSTALL_PATH})
-  install(FILES ${JAR_OUTPUT} DESTINATION ${OPS_JAR_REL_INSTALL_PATH} RENAME ConfigurationLib.jar)
+install_jar(${LIB_NAME} ${OPS_JAR_REL_INSTALL_PATH})
+if(WIN32)
+  # Due to broken install_jar() on windows, install jar with version manually
+  install(FILES ${PROJECT_BINARY_DIR}/bin/${LIB_NAME}.jar DESTINATION ${OPS_JAR_REL_INSTALL_PATH} RENAME ${LIB_NAME}-${OPS_VERSION}.jar)
 endif()
-
 
 if(BUILD_DOCUMENTATION)
   create_javadoc(configlib

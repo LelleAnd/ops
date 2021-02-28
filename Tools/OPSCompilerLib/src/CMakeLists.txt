@@ -1,5 +1,7 @@
 
-set(OPSCOMPILERLIB_SRC
+set(LIB_NAME OPSCompilerLib)
+
+set(LIB_SRC
   parsing/AbstractTemplateBasedIDLCompiler.java
   parsing/IDLClass.java
   parsing/IDLCompiler.java
@@ -10,23 +12,19 @@ set(OPSCOMPILERLIB_SRC
   gui/IDLCompilerSettingsPlugin.java
 )
 
-add_jar(OPSCompilerLib ${OPSCOMPILERLIB_SRC}
-  VERSION ${OPS_VERSION}
+add_jar(${LIB_NAME} ${LIB_SRC}
+  VERSION ${JAR_APPEND_VERSION}
   OUTPUT_DIR ${PROJECT_BINARY_DIR}/bin
 )
 
-# in cmake-3.1 (at least) the install_jar is broken for Windows
-if(UNIX)
-  install_jar(OPSCompilerLib ${OPS_JAR_REL_INSTALL_PATH})
-else()
-  # install manually
-  set(JAR_OUTPUT ${PROJECT_BINARY_DIR}/bin/OPSCompilerLib-${OPS_VERSION}.jar)
-  install(FILES ${JAR_OUTPUT} DESTINATION ${OPS_JAR_REL_INSTALL_PATH})
-  install(FILES ${JAR_OUTPUT} DESTINATION ${OPS_JAR_REL_INSTALL_PATH} RENAME OPSCompilerLib.jar)
+install_jar(${LIB_NAME} ${OPS_JAR_REL_INSTALL_PATH})
+if(WIN32)
+  # Due to broken install_jar() on windows, install jar with version manually
+  install(FILES ${PROJECT_BINARY_DIR}/bin/${LIB_NAME}.jar DESTINATION ${OPS_JAR_REL_INSTALL_PATH} RENAME ${LIB_NAME}-${OPS_VERSION}.jar)
 endif()
 
 if(BUILD_DOCUMENTATION)
-  create_javadoc(OPSCompilerLib
+  create_javadoc(${LIB_NAME}
     PACKAGES gui parsing
     SOURCEPATH "${CMAKE_CURRENT_SOURCE_DIR}"
     CLASSPATH ${CMAKE_JAVA_INCLUDE_PATH}

@@ -1,1 +1,1 @@
-Class-Path: OPSCompilerLib-${OPS_VERSION}.jar IDLParser-${OPS_VERSION}.jar ConfigurationLib-${OPS_VERSION}.jar OPSJLib-${OPS_VERSION}.jar IDLTemplates-${OPS_VERSION}.jar
+Class-Path: OPSCompilerLib${JAR_APPEND_VER}.jar IDLParser${JAR_APPEND_VER}.jar ConfigurationLib${JAR_APPEND_VER}.jar OPSJLib${JAR_APPEND_VER}.jar IDLTemplates${JAR_APPEND_VER}.jar

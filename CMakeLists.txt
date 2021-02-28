@@ -88,6 +88,16 @@ else()
   message(WARNING "Could not find a Java compiler")
 endif()
 
+# On Windows the install_jar() is broken if a VERSION is given in add_jar()
+# (at least upto CMake 3.18) so we conditionally set the version on install_jar()
+if(WIN32)
+  set(JAR_APPEND_VERSION "")
+  set(JAR_APPEND_VER "")
+else()
+  set(JAR_APPEND_VERSION ${PROJECT_VERSION})
+  set(JAR_APPEND_VER "-${PROJECT_VERSION}")
+endif()
+
 ## ----------------------------------------------------------------------------
 message(STATUS "BOOST_HOME: " $ENV{BOOST_HOME})
 message(STATUS "BOOST_ARCH: " ${BOOST_ARCH})
@@ -207,8 +217,8 @@ if((OPS_BOOTSTRAP_BUILD) OR (DEFINED OPS_NO_SEPARATE_BOOTSTRAP))
 
   set(OPSJAR_PATH ${PROJECT_BINARY_DIR}/bin)
 
-  set(OPSJLIB_JAR ${OPSJAR_PATH}/OPSJLib-${PROJECT_VERSION}.jar)
-  set(CONFIGURATIONLIB_JAR ${OPSJAR_PATH}/ConfigurationLib-${PROJECT_VERSION}.jar)
+  set(OPSJLIB_JAR ${OPSJAR_PATH}/OPSJLib${JAR_APPEND_VER}.jar)
+  set(CONFIGURATIONLIB_JAR ${OPSJAR_PATH}/ConfigurationLib${JAR_APPEND_VER}.jar)
 
 else()
   add_custom_target(opsc ALL COMMENT "Built during Bootstrap phase")

@@ -1,5 +1,7 @@
 
-set(OPSC_SRC
+set(LIB_NAME opsc)
+
+set(LIB_SRC
   # opsc
   opsc/OpsCompiler.java
   opsc/Compiler.java
@@ -22,27 +24,23 @@ set(OPSC_SRC
 # generate a MANIFEST file
 configure_file(MANIFEST.MF.in MANIFEST.MF)
 
-add_jar(opsc ${OPSC_SRC}
+add_jar(${LIB_NAME} ${LIB_SRC}
   INCLUDE_JARS OPSCompilerLib OPSJLib IDLParser ConfigurationLib IDLTemplates
   ENTRY_POINT opsc/OpsCompiler
   MANIFEST ${CMAKE_CURRENT_BINARY_DIR}/MANIFEST.MF
-  VERSION ${PROJECT_VERSION}
+  VERSION ${JAR_APPEND_VERSION}
   OUTPUT_DIR ${PROJECT_BINARY_DIR}/bin
 )
 
-# in cmake-3.1 (at least) the install_jar is broken for Windows
-if(UNIX)
-  install_jar(opsc ${OPS_JAR_REL_INSTALL_PATH})
-else()
-  # install manually
-  set(JAR_OUTPUT ${PROJECT_BINARY_DIR}/bin/opsc-${OPS_VERSION}.jar)
-  install(FILES ${JAR_OUTPUT} DESTINATION ${OPS_JAR_REL_INSTALL_PATH})
-  install(FILES ${JAR_OUTPUT} DESTINATION ${OPS_JAR_REL_INSTALL_PATH} RENAME opsc.jar)
+install_jar(${LIB_NAME} ${OPS_JAR_REL_INSTALL_PATH})
+if(WIN32)
+  # Due to broken install_jar() on windows, install jar with version manually
+  install(FILES ${PROJECT_BINARY_DIR}/bin/${LIB_NAME}.jar DESTINATION ${OPS_JAR_REL_INSTALL_PATH} RENAME ${LIB_NAME}-${OPS_VERSION}.jar)
 endif()
 
 if(BUILD_DOCUMENTATION)
-  create_javadoc(opsc
-    PACKAGES opsc
+  create_javadoc(${LIB_NAME}
+    PACKAGES ${LIB_NAME}
     SOURCEPATH "${CMAKE_CURRENT_SOURCE_DIR}"
     CLASSPATH ${CMAKE_JAVA_INCLUDE_PATH}
     WINDOWTITLE "ops idl compiler documentation"

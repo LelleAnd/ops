@@ -1,1 +1,1 @@
-Class-Path: ConfigurationLib-${OPS_VERSION}.jar OPSJLib-${OPS_VERSION}.jar PizzaProject.jar
+Class-Path: ConfigurationLib${JAR_APPEND_VER}.jar OPSJLib${JAR_APPEND_VER}.jar PizzaProject.jar

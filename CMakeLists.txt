@@ -218,9 +218,6 @@ if((OPS_BOOTSTRAP_BUILD) OR (DEFINED OPS_NO_SEPARATE_BOOTSTRAP))
 
   set(OPSJAR_PATH ${PROJECT_BINARY_DIR}/bin)
 
-  set(OPSJLIB_JAR ${OPSJAR_PATH}/OPSJLib${JAR_APPEND_VER}.jar)
-  set(CONFIGURATIONLIB_JAR ${OPSJAR_PATH}/ConfigurationLib${JAR_APPEND_VER}.jar)
-
 else()
   add_custom_target(opsc ALL COMMENT "Built during Bootstrap phase")
   # Use opsc script from Bootstrap phase, will be used in all subdirs under this one
@@ -233,9 +230,10 @@ else()
   # Find Java libraries built during the Bootstrap phase
   set(OPSJAR_PATH ${CMAKE_INSTALL_PREFIX}/${OPS_JAR_REL_INSTALL_PATH})
 
-  find_jar(OPSJLIB_JAR OPSJLib PATHS ${OPSJAR_PATH})
-  find_jar(CONFIGURATIONLIB_JAR ConfigurationLib PATHS ${OPSJAR_PATH})
 endif()
+set(OPSJLIB_JAR ${OPSJAR_PATH}/OPSJLib${JAR_APPEND_VER}.jar)
+set(CONFIGURATIONLIB_JAR ${OPSJAR_PATH}/ConfigurationLib${JAR_APPEND_VER}.jar)
+
 message(">>>> OPSC_COMPILER= " ${OPSC_COMPILER})
 message(">>>> OPSJLIB_JAR= " ${OPSJLIB_JAR})
 message(">>>> CONFIGURATIONLIB_JAR= " ${CONFIGURATIONLIB_JAR})

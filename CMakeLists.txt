@@ -334,11 +334,15 @@ endif()
 if((OPS_BOOTSTRAP_BUILD) OR (DEFINED OPS_NO_SEPARATE_BOOTSTRAP))
   install_jar_exports(
     TARGETS OPSCompilerLib OPSJLib IDLParser ConfigurationLib IDLTemplates opsc
+    NAMESPACE ${PROJECT_NAME}::
     FILE jar-targets.cmake
     DESTINATION cmake/internal)
 endif()
 if(NOT OPS_BOOTSTRAP_BUILD)
-  install(EXPORT ops-targets DESTINATION cmake/internal)
+  install(EXPORT ops-targets
+    NAMESPACE ${PROJECT_NAME}::
+    DESTINATION cmake/internal
+  )
 endif()
 
 include(CMakePackageConfigHelpers)

@@ -91,9 +91,9 @@ namespace ops
         receiveDataHandler->releaseMessageLock();
     }
 
-    /// =======================================================================================
+    // =======================================================================================
     
-    // Helper class that handles sending of ACK's if that is enabled in the Topic
+    /// Helper class to the Subscriber for handling of sending ACK's if that is enabled in the Topic
     struct Subscriber::ACKFilter : public FilterQoSPolicy
     {
         explicit ACKFilter(const Topic& ackTopic)

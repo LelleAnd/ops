@@ -35,6 +35,7 @@ namespace ops
 {
 	class Participant;
 
+	///A listener for Participant meta-data
 	class OPS_EXPORT ParticipantInfoDataListener : public DataListener
 	{
 	public:

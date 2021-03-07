@@ -35,7 +35,7 @@ all: debug opt
 	$(MAKE) install
 
 .PHONY : clean
-clean: clean_debug clean_opt clean_deploy clean_bootstrap clean_tools
+clean: clean_debug clean_opt clean_deploy clean_bootstrap clean_tools clean_doxy
 
 .PHONY : clean_bootstrap
 clean_bootstrap:
@@ -63,6 +63,11 @@ clean_deploy:
 clean_tools:
 	@echo "Cleaning tools"
 	rm -rf Tools/OPSBridge/idl/Generated
+
+.PHONY : clean_doxy
+clean_doxy:
+	@echo "Cleaning doxy"
+	rm -rf doxy
 
 # rebuild_cache is used so we can change the configurable sizes and get them
 # generated without cleaning all
@@ -133,6 +138,10 @@ $(INSTALL_PREFIX)/lib/README :
 	echo "gcc version: $(CCV)" > $@
 	echo "g++ version: $(CXXV)" >> $@
 
+.PHONY : doxy
+doxy : ops.doxy
+	doxygen ops.doxy
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -143,6 +152,7 @@ help:
 	@echo "... unittest-c++"
 	@echo "... unittest-python"
 	@echo "... install"
+	@echo "... doxy"
 	@echo "... clean (cleans all)"
 	@echo "... clean_bootstrap"
 	@echo "... clean_debug"

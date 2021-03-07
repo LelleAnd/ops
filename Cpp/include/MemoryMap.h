@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2020 Lennart Andersson.
+* Copyright (C) 2019-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -50,6 +50,7 @@ struct MemoryMapAllocator {
 	virtual ~MemoryMapAllocator() = default;
 };
 
+///A memory buffer that together with the ByteBuffer class is used for [de]serializing OPS messages
 class OPS_EXPORT MemoryMap
 {
 public:

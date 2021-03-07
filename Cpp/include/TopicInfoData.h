@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2020 Lennart Andersson.
+* Copyright (C) 2019-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -26,11 +26,12 @@
 
 namespace ops
 {
-    /// NOTE. Must be kept in sync with other OPS language implementations
+	///Defines part of the meta-data that can be sent between Participants
 	class TopicInfoData : public OPSObject
 	{
 	public:
-        char TopicInfoData_version = TopicInfoData_idlVersion;
+		// NOTE. Must be kept in sync with other OPS language implementations
+		char TopicInfoData_version = TopicInfoData_idlVersion;
 
         static const char TopicInfoData_idlVersion = 0;
 

@@ -4,7 +4,7 @@
 
 namespace ops
 {
-	///Basic implementaion of an error for OPS.
+	///Basic implementation of a warning for OPS.
 	class BasicWarning : public Error
 	{
 	public:

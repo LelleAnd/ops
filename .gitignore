@@ -210,4 +210,4 @@ $RECYCLE.BIN/
 /build*/
 /deploy*/
 .vs/
-
+/doxy/

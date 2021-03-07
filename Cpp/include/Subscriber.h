@@ -45,7 +45,7 @@
 
 namespace ops
 {
-    // Abstract base class for Subscribers
+    /// Abstract base class for Subscribers
     // Need to implement:
     //  *  Callback for received messages
     //     // Note that the receiveDataHandler messageLock is held while executing this method
@@ -67,24 +67,25 @@ namespace ops
         SubscriberBase(Topic t);
         virtual ~SubscriberBase();
 
-        ///Starts communication.
+        ///Starts subscription (starts listening to data)
         void start();
 
-        ///Stops communication, unsubscribe this subscriber to data.
+        ///Stops subscription (stops listening to data)
         void stop();
 
         ///Returns a copy of this subscribers Topic.
         Topic getTopic() const;                                                      // (CB)
 
-        ///Acquires/Releases the MessageLock.
-        ///You should preferably use the MessageLock() class when using the lock.
-        ///NOTE: The MessageLock is held by the subscriber while in the "New Message" callback.
+        ///Acquires the MessageLock
+        // You should preferably use the MessageLock() class when using the lock.
+        // NOTE: The MessageLock is held by the subscriber while in the "New Message" callback.
         bool aquireMessageLock();
+        ///Releases the MessageLock
         void releaseMessageLock();
 
         ///Returns the number of reserved messages in the underlying ReceiveDataHandler
-        ///This value is the total nr for this topic on this participant not only
-        ///for this subscriber.
+        // This value is the total nr for this topic on this participant not only
+        // for this subscriber.
         int numReservedMessages() const                                              // (CB)
         {
             return receiveDataHandler->numReservedMessages();
@@ -114,8 +115,9 @@ namespace ops
         bool started{ false };
     };
 
-    /// =======================================================================================
+    // =======================================================================================
 
+    ///Base class for subscribing to Topics
     class OPS_EXPORT Subscriber : public SubscriberBase
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 		, DebugNotifyInterface
@@ -257,7 +259,7 @@ namespace ops
 #endif
 	};
 
-	// RAII helper for aquire/release of the MessageLock
+	///RAII helper for aquire/release of the MessageLock
 	class MessageLock
 	{
 		SubscriberBase& _sub;

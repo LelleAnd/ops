@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2020 Lennart Andersson.
+* Copyright (C) 2019-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -32,10 +32,10 @@
 
 namespace ops
 { 
-    ///This is a utility class used to read and write the OPS IDL types to and
-    ///from a byte buffer. Usage is simple, create an instance with either an empty
-    ///prealocated buffer(for writing) or a buffer containing the data (reading).
-    ///Use the public methods to read and write to/from the buffer.
+    ///Utility class used to read and write the OPS IDL types to/from a MemoryMap
+    // Usage is simple, create an instance with either an empty preallocated
+    // MemoryMap (for writing) or a MemoryMap containing the data (reading).
+    // Use the public methods to read and write to/from the buffer.
 	class OPS_EXPORT ByteBuffer
 	{
     private:

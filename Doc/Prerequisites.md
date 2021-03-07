@@ -34,9 +34,9 @@ OPS has been used with Boost versions 1.38, 1.48, 1.53, 1.55, 1.60, 1.64, 1.66, 
 Versions older than 1.60 hasn't been used/tested for quite a while. It is recommended to use a more modern version.
 
 ## CMake ##
-Version 3.1.0 or later is required to build OPS with CMake. Make sure the cmake command is in your path. CMake can be downloaded at https://cmake.org/.
+Version 3.7.0 or later is required to build OPS with CMake. Make sure the cmake command is in your path. CMake can be downloaded at https://cmake.org/.
 
-OPS has been used with CMake version 3.5.0 and later. To use CMake to build C# libraries and examples, you need CMake later than version 3.8.0.
+OPS has been used with CMake version 3.7.0 and later. To use CMake to build C# libraries and examples, you need CMake later than version 3.8.0.
 
 ## Visual Studio (Windows) ##
 OPS for C++ requires a C++11 compiler and has therefore only support for VS2015, VS2017 and VS2019. Support for earlier VS versions has been dropped.

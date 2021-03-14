@@ -48,6 +48,10 @@ OPS for C++ requires a C++11 compiler and has therefore only support for gcc 4.8
 
 OPS has been used with 5.3.0, 5.4.0, 6.2.1, 6.4.1, 7.3.1, 9.2.0 and 9.3.0.
 
+## .NET ##
+To use C# on Linux, install .NET 5 or later as decribed on
+https://docs.microsoft.com/en-us/dotnet/core/install/.
+
 ## Google Test (required for unit tests) ##
 Google Test can be downloaded at https://github.com/google/googletest.
 
@@ -70,7 +74,9 @@ OPS has been used with GNAT GPS 2016, GNAT Community 2020 and GNAT Pro 17.1.
 Please note that *GNAT Community 2019 (20190517)* isn't supported. The compiler crashes with a GNAT BUG DETECTED. This has not been investigated further.
 
 ## gcovr ##
-If command found, called to generate coverage during C++ unittests.
+The tool can be downloaded at https://gcovr.com/en/stable/.
+If command found, called to generate coverage during C++ unittests (on Linux).
 
 ## cppcheck ##
-TBD
+The tool can be downloaded at https://github.com/danmar/cppcheck.
+If command found, called to perform some static analysis on the C++ code during C++ unittests (on Linux).

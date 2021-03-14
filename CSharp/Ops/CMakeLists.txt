@@ -203,7 +203,8 @@ else()
 
   # removed System.Net.dll for Microsoft.Net v2.0.xyz
   add_custom_command(OUTPUT ${OPS_TARGET}
-	COMMAND ${CSCOMPILER} -langversion:7.3 -reference:System.dll,System.Drawing.dll,System.Windows.Forms.dll,System.Web.dll,System.Web.Services.dll -target:library -out:${OPS_TARGET} ${OPS_CS_SOURCE}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/bin
+    COMMAND ${CSCOMPILER} -langversion:7.3 -reference:System.dll,System.Drawing.dll,System.Windows.Forms.dll,System.Web.dll,System.Web.Services.dll -target:library -out:${OPS_TARGET} ${OPS_CS_SOURCE}
     DEPENDS ${OPS_CS_SOURCE}
     COMMENT "Building C# sources using ${CSCOMPILER}"
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -211,5 +212,5 @@ else()
   )
   add_custom_target(${OPS_LIB_NAME} ALL DEPENDS ${OPS_TARGET})
 
-  install(FILES ${OPS_TARGET} DESTINATION lib/mono)
+  install(FILES ${OPS_TARGET} DESTINATION bin)
 endif()

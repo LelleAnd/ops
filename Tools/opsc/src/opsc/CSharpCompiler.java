@@ -602,18 +602,10 @@ public class CSharpCompiler extends opsc.Compiler
       // don't want to build bat scripts on linux...
       final boolean isLinux = System.getProperty("os.name").equals("Linux");
 
-      if (isLinux) {
-        System.out.println("Info: Building C# on Linux is not yet supported");
-        return;
-      }
+      String dllDepString = "";
 
       //System.out.println(">>>>: projectDir = " +  projectDir);
       //System.out.println(">>>>: _outputDir = " +  _outputDir);
-
-//        String projDirUp = projectDirectory.substring(0, projectDirectory.lastIndexOf("/Generated"));
-//        String projectName = projectDirectory.substring(projDirUp.lastIndexOf("/")+1, projDirUp.length());
-
-      String dllDepString = "";
 
       if (dllDependencies != null) {
         for (JarDependency dllDep : dllDependencies) {
@@ -631,33 +623,90 @@ public class CSharpCompiler extends opsc.Compiler
         }
       }
 
+//      if (isLinux) {
+//        System.out.println("Info: Building C# on Linux is not yet supported");
+//        return;
+//      }
+
+      String cscName = "csc";
+      String silent = "";
+      if (!isLinux) {
+          cscName = "csc.exe";
+          silent = "@";
+      }
+
       String cscPath = System.getenv("OPS_CSC_PATH");
       if (cscPath == null) {
-        System.out.println("Info: Path to C# compiler \"csc.exe\" can be set using env. symbol OPS_CSC_PATH");
-        cscPath = "csc.exe";
+        System.out.println("Info: Path to C# compiler \"" + cscName + "\" can be set using env. symbol OPS_CSC_PATH");
+        cscPath = cscName;
       } else {
-        cscPath += File.separator + "csc.exe";
+        cscPath += File.separator + cscName;
         System.out.println("Info: C# compiler \"" + cscPath + "\" used (from env. symbol OPS_CSC_PATH)");
       }
 
       String execString = "\"" + cscPath + "\" /target:library " +
                 "/out:\"" + _outputDir + File.separator + _projectName + ".dll\" " +
                 dllDepString + " /recurse:\"" + _outputDir + File.separator + "*.cs\"";
-      String  batFileText = "";
-      batFileText += "@pushd %~dp0" + endl();   // cd to bat-file directory
-      batFileText += "@echo Compiling C#..."  + endl();
-      batFileText += execString + endl();
-      batFileText += "@popd" + endl();
-      batFileText += "@echo Compiling C# done."  + endl();
 
-      String script = _outputDir + File.separator + "cs_build_script.bat";
-      createAndWriteFile(script, batFileText);
+      // -----------------------------------------
+      // Create batch / bash file for compiling of the generated C# files
+      String  batFileText = "";
+      if (isLinux) {
+          batFileText += "#!/bin/sh" + endl();
+          batFileText += "set -e # exit on err" + endl() + endl();
+
+          batFileText += "# find out where this script is" + endl();
+          batFileText += "SCRIPT_PATH=`readlink -f \"$0\"`; SCRIPT_PATH=`dirname \"$SCRIPT_PATH\"`; SCRIPT_PATH=`eval \"cd \\\"$SCRIPT_PATH\\\" && pwd\"`" + endl();
+          batFileText += "echo \"invoking script at: $SCRIPT_PATH\"" + endl();
+          batFileText += "cd $SCRIPT_PATH" + endl();
+
+      } else {
+          //batFileText += "@echo off" + endl();
+          batFileText += silent + "pushd %~dp0" + endl();   // cd to bat-file directory
+      }
+      batFileText += silent + "echo Compiling C#..."  + endl();
+      batFileText += execString + endl();
+      batFileText += silent + "echo Compiling C# done."  + endl();
+      if (!isLinux) {
+          batFileText += silent + "popd" + endl();
+      }
+
+      String script = "";
+
+      if (isLinux) {
+          script = _outputDir + File.separator + "cs_build_script.sh";
+          if (_verbose > 0) System.out.println("Debug: Path to script: " + script);
+          java.io.File file = new java.io.File(script);
+          java.io.Writer output = new java.io.BufferedWriter(new java.io.FileWriter(file));
+//            java.io.Writer output = new java.io.BufferedWriter(new java.io.FileWriter(script));
+          output.write(batFileText);
+          output.close();
+
+          //file.setReadable(true, false);
+          //file.setWriteable(true, false);
+          file.setExecutable(true, false);
+
+//            Runtime rTime = Runtime.getRuntime();
+//            // make script executable
+//            Process process = rTime.exec("chmod u+x " + script);
+//
+//            process.waitFor();
+      } else {
+          script = _outputDir + File.separator + "cs_build_script.bat";
+          if (_verbose > 0) System.out.println("Debug: Path to script: " + script);
+          createAndWriteFile(script, batFileText);
+      }
 
       // --------------------------------------------------------------------
       // Run the batch / shell script and redirct output to standard out
       try {
+        ProcessBuilder pb;
         System.out.println("Info: running \"" + script + "\"");
-        ProcessBuilder pb = new ProcessBuilder(script, "");
+        if (isLinux) {
+          pb = new ProcessBuilder("sh", script);
+        } else {
+          pb = new ProcessBuilder(script, "");
+        }
         pb.redirectErrorStream(true);
         Process p = pb.start();
         InputStream inp = p.getInputStream();

@@ -3,29 +3,18 @@
     return()
   endif()
 
-  if(CMAKE_CL_64)
-    find_program(CSCOMPILER NAMES csc.exe mcs
-      HINTS
-        ENV PATH
-  #      $ENV{WINDIR}/Microsoft.NET/Framework64/v4.0.30319
-  #      /sw/tools/mono/2.6.1
-      PATH_SUFFIXES bin
-      )
-  else()
-    find_program(CSCOMPILER NAMES csc.exe mcs
-      HINTS
-        ENV PATH
-  #      $ENV{WINDIR}/Microsoft.NET/Framework/v4.0.30319
-  #      /sw/tools/mono/2.6.1
-      PATH_SUFFIXES bin
-      )
-  endif()
+  find_program(CSCOMPILER NAMES csc.exe csc
+    HINTS
+      ENV PATH
+    PATH_SUFFIXES bin
+  )
 
   message(">>>> C# Compiler= " ${CSCOMPILER} )
 
   if (CSCOMPILER)
     # We need C# language version 7.3 or later which for now only is supported by Visual Studio 2017 version 15.7 and later
     # (mono version 6.12.0.90 still has only support for language version upto 7.2)
+    # Installing .NET on Linux gives access to the dotnet tool and a csc compiler supporting at least version 8 of C#
 
     execute_process(COMMAND ${CSCOMPILER} -langversion:? OUTPUT_VARIABLE csc_supported_versions ERROR_VARIABLE csc_errors)
     ## message(">>>>>>>> " ${csc_supported_versions} " <<<<<<<<")

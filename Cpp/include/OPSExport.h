@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2016 Anton Gravestam.
+* Copyright (C) 2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -22,17 +23,28 @@
 #define ops_OPSExport_h
 
 #if defined(_MSC_VER) || defined(__CYGWIN__) || defined(__MINGW32__) || defined( __BCPLUSPLUS__)  || defined( __MWERKS__)
-    #  if defined( OPS_LIBRARY_STATIC )
-    #    define OPS_EXPORT
-    #  elif defined( OPS_LIBRARY )
-///TODO        #    define OPS_EXPORT   __declspec(dllexport)
-	#    define OPS_EXPORT
-    #  else
-///TODO    #    define OPS_EXPORT   __declspec(dllimport)
-	#    define OPS_EXPORT
-    #  endif
+    #define OPS_DLLExport __declspec(dllexport)
+    #define OPS_DLLimport __declspec(dllimport)
+    #if defined( OPS_LIBRARY_STATIC )
+        #define OPS_EXPORT
+        #define OPS_FUNCEXPORT
+    #elif defined( OPS_LIBRARY )
+        //TODO #define OPS_EXPORT   OPS_DLLExport
+	    #define OPS_EXPORT
+        #define OPS_FUNCEXPORT OPS_DLLExport
+    #else
+        #ifdef _DLL
+            ///TODO #define OPS_EXPORT   OPS_DLLimport
+	        #define OPS_EXPORT
+            #define OPS_FUNCEXPORT OPS_DLLimport
+        #else
+            #define OPS_EXPORT
+            #define OPS_FUNCEXPORT
+        #endif
+    #endif
 #else
-    #  define OPS_EXPORT
+    #define OPS_EXPORT
+    #define OPS_FUNCEXPORT
 #endif
 
 #endif

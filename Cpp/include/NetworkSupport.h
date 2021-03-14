@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019 Lennart Andersson.
+* Copyright (C) 2019-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -22,18 +22,19 @@
 #pragma once
 
 #include "OPSTypeDefs.h"
+#include "OPSExport.h"
 #include "IOService.h"
 
 namespace ops
 {
-	extern uint32_t IPString2Addr(const Address_T addr);
-	extern Address_T IPAddr2String(const uint32_t addr);
+	OPS_FUNCEXPORT extern uint32_t IPString2Addr(const Address_T addr);
+	OPS_FUNCEXPORT extern Address_T IPAddr2String(const uint32_t addr);
 
-	extern bool isValidMCAddress(const Address_T addr);
-	extern bool isValidNodeAddress(const Address_T addr);
-	extern bool isMyNodeAddress(const Address_T addr, IOService* ioServ);
+	OPS_FUNCEXPORT extern bool isValidMCAddress(const Address_T addr);
+	OPS_FUNCEXPORT extern bool isValidNodeAddress(const Address_T addr);
+	OPS_FUNCEXPORT extern bool isMyNodeAddress(const Address_T addr, IOService* ioServ);
 
-	extern Address_T doSubnetTranslation(const Address_T addr, IOService* ioServ);
+	OPS_FUNCEXPORT extern Address_T doSubnetTranslation(const Address_T addr, IOService* ioServ);
 
-	extern InternalString_T GetHostName();
+	OPS_FUNCEXPORT extern InternalString_T GetHostName();
 }

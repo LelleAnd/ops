@@ -1,0 +1,34 @@
+name: boost-inv
+
+on:
+  push:
+    branches:
+      - boost-config-test2
+    paths-ignore:
+      - 'Ada/**'
+      - 'CSharp/**'
+      - 'Delphi/**'
+      - 'Doc/**'
+      - 'Python/**'
+      - 'Scripts/**'
+      - 'Syntax*/**'
+
+jobs:
+  build:
+
+    #runs-on: ubuntu-latest
+    #runs-on: ubuntu-20.04 , missing boost?
+    runs-on: ubuntu-18.04
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: list environment
+        run: env
+      - name: cmake version
+        run: cmake --version
+      - name: Set BOOST_HOME
+        run: echo "BOOST_HOME=$BOOST_ROOT_1_72_0" >> $GITHUB_ENV
+      - name: debug
+        run: ls -al $BOOST_HOME
+      - name: debug2
+        run: ls -al $BOOST_HOME/lib

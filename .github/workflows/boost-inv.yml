@@ -26,6 +26,10 @@ jobs:
         run: env
       - name: cmake version
         run: cmake --version
+      - name: boost install
+        run: sudo apt-get install libboost-all-dev
+      - name: list environment2
+        run: env
       - name: Set BOOST_HOME
         run: echo "BOOST_HOME=$BOOST_ROOT_1_72_0" >> $GITHUB_ENV
       - name: debug

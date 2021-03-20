@@ -1,10 +1,9 @@
-name: C/C++ CI
+name: boost-inv
 
 on:
   push:
     branches:
-      - development
-      - master
+      - boost-config-test2
     paths-ignore:
       - 'Ada/**'
       - 'CSharp/**'
@@ -13,14 +12,12 @@ on:
       - 'Python/**'
       - 'Scripts/**'
       - 'Syntax*/**'
-  pull_request:
-    branches: [ development ]
 
 jobs:
   build:
 
     runs-on: ubuntu-latest
-    #runs-on: ubuntu-20.04
+    #runs-on: ubuntu-20.04 , missing boost?
     #runs-on: ubuntu-18.04
 
     steps:
@@ -43,6 +40,10 @@ jobs:
         run: sudo apt-get install libboost-system-dev libboost-thread-dev libboost-regex-dev libboost-filesystem-dev libboost-date-time-dev
       #- name: Set BOOST_HOME
       #  run: echo "BOOST_HOME=$BOOST_ROOT_1_72_0" >> $GITHUB_ENV
+      #- name: debug
+      #  run: ls -al $BOOST_HOME
+      #- name: debug2
+      #  run: ls -al $BOOST_HOME/lib
       - name: Build
         run: make BOOST_ARCH=-x64
         env:

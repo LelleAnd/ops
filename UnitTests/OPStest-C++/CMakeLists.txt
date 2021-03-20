@@ -8,6 +8,10 @@ include_directories(${Boost_INCLUDE_DIRS})
 # The Gtest headers are at:
 include_directories(${GTEST_INCLUDE_DIRS})
 
+if(UNIX)
+  add_definitions("--coverage")
+endif()
+
 # the basic tests
 add_subdirectory(gtest)
 

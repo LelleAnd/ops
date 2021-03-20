@@ -35,7 +35,7 @@ all: debug opt
 	$(MAKE) install
 
 .PHONY : clean
-clean: clean_debug clean_opt clean_deploy clean_bootstrap clean_tools clean_doxy
+clean: clean_debug clean_opt clean_deploy clean_bootstrap clean_tools clean_doxy clean_unittest
 
 .PHONY : clean_bootstrap
 clean_bootstrap:
@@ -63,6 +63,11 @@ clean_deploy:
 clean_tools:
 	@echo "Cleaning tools"
 	rm -rf Tools/OPSBridge/idl/Generated
+
+.PHONY : clean_unittest
+clean_unittest:
+	@echo "Cleaning Unittest"
+	rm -rf UnitTests/OPStest-C++/Unit_test_results
 
 .PHONY : clean_doxy
 clean_doxy:

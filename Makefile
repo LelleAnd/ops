@@ -105,9 +105,9 @@ $(BUILD_DEBUG)/Makefile : %/Makefile : bootstrap
 	cmake -DCMAKE_BUILD_TYPE=Debug $(COMMON_DEFINES_FOR_CMAKE) $(CURDIR)
 
 .PHONY : unittest-c++
-unittest-c++ : debug run-unittest-c++
+unittest-c++ : run-unittest-c++
 
-run-unittest-c++:
+run-unittest-c++: debug
 	@echo "Running C++ unit tests!!!"
 	cd UnitTests/OPStest-C++ && \
 	./pizzatest.sh

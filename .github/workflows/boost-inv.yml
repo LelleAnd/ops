@@ -22,18 +22,33 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: list environment
-        run: env
-      - name: cmake version
-        run: cmake --version
-      - name: boost install
+      #- name: list environment
+      #  run: env
+      #- name: cmake version
+      #  run: cmake --version
+      - name: GTest Get
+        run: git clone https://github.com/google/googletest/ $HOME/gtest
+      - name: GTest Build
+        run: pushd $HOME/gtest && mkdir mybuild && cd mybuild && cmake -DCMAKE_INSTALL_PREFIX=$HOME/gtest/deploy .. && make install && popd
+      - name: GTest Set GOOGLETEST_HOME
+        run: echo "GOOGLETEST_HOME=$HOME/gtest/deploy" >> $GITHUB_ENV
+      #- name: debug
+      #  run: ls -alR $GOOGLETEST_HOME
+      - name: CppCheck Install
+        run: sudo apt-get install cppcheck
+      - name: boost Install
         run: sudo apt-get install libboost-system-dev libboost-thread-dev libboost-regex-dev libboost-filesystem-dev libboost-date-time-dev
-        #run: sudo apt-get install libboost-all-dev
-      - name: boost version
-        run: cat /usr/include/boost/version.hpp
       #- name: Set BOOST_HOME
       #  run: echo "BOOST_HOME=$BOOST_ROOT_1_72_0" >> $GITHUB_ENV
       #- name: debug
       #  run: ls -al $BOOST_HOME
       #- name: debug2
       #  run: ls -al $BOOST_HOME/lib
+      - name: Build
+        run: make BOOST_ARCH=-x64
+        env:
+          MAKEFLAGS: "-j2"
+      - name: Run C++ Tests
+        run: make unittest-c++
+      - name: CppCheck Analysis
+        run: cppcheck --enable=all Cpp/source Cpp/include > /dev/null

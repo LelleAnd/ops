@@ -7,11 +7,15 @@
 @IF NOT DEFINED OPS_BUILD_DBG_DIR set OPS_BUILD_DBG_DIR=%~dp0\build.debug
 @IF NOT DEFINED OPS_BUILD_OPT_DIR set OPS_BUILD_OPT_DIR=%~dp0\build.opt
 @IF NOT DEFINED OPS_INSTALL_PREFIX set OPS_INSTALL_PREFIX=%~dp0\deploy
+@IF NOT DEFINED OPS_BUILD_EXAMPLES set OPS_BUILD_EXAMPLES=ON
+@IF NOT DEFINED OPS_BUILD_UNITTESTS set OPS_BUILD_UNITTESTS=ON
 
 @echo Using OPS_BUILD_BOOTSTRAP_DIR = %OPS_BUILD_BOOTSTRAP_DIR%
 @echo Using OPS_BUILD_DBG_DIR = %OPS_BUILD_DBG_DIR%
 @echo Using OPS_BUILD_OPT_DIR = %OPS_BUILD_OPT_DIR%
 @echo Using OPS_INSTALL_PREFIX = %OPS_INSTALL_PREFIX%
+@echo Using OPS_BUILD_EXAMPLES = %OPS_BUILD_EXAMPLES%
+@echo Using OPS_BUILD_UNITTESTS = %OPS_BUILD_UNITTESTS%
 
 @rem Perform the bootstrap process that generates source files needed by the other targets
 @pushd %~dp0
@@ -19,7 +23,8 @@
 @cd %OPS_BUILD_BOOTSTRAP_DIR%
 cmake -DCMAKE_BUILD_TYPE=Bootstrap -DCMAKE_INSTALL_PREFIX=%OPS_INSTALL_PREFIX% -A Win32 %~dp0
 @IF ERRORLEVEL 1 goto :BUILD_FAILED
-cmake --build . --target ALL_BUILD --config Debug
+@rem cmake --build . --target ALL_BUILD --config Debug
+msbuild -m ALL_BUILD.vcxproj -p:Configuration=Debug
 @IF ERRORLEVEL 1 goto :BUILD_FAILED
 cmake -DBUILD_TYPE=Bootstrap -DCMAKE_INSTALL_PREFIX=%OPS_INSTALL_PREFIX% -P cmake_install.cmake
 @IF ERRORLEVEL 1 goto :BUILD_FAILED
@@ -29,9 +34,10 @@ cmake -DBUILD_TYPE=Bootstrap -DCMAKE_INSTALL_PREFIX=%OPS_INSTALL_PREFIX% -P cmak
 @pushd %~dp0
 @IF NOT EXIST %OPS_BUILD_DBG_DIR% mkdir %OPS_BUILD_DBG_DIR%
 @cd %OPS_BUILD_DBG_DIR%
-cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%OPS_INSTALL_PREFIX% -A Win32 %~dp0
+cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%OPS_INSTALL_PREFIX% -DOPS_BUILD_EXAMPLES=%OPS_BUILD_EXAMPLES% -DOPS_BUILD_UNITTESTS=%OPS_BUILD_UNITTESTS% -A Win32 %~dp0
 @IF ERRORLEVEL 1 goto :BUILD_FAILED
-cmake --build . --target ALL_BUILD --config Debug
+@rem cmake --build . --target ALL_BUILD --config Debug
+msbuild -m ALL_BUILD.vcxproj -p:Configuration=Debug
 @IF ERRORLEVEL 1 goto :BUILD_FAILED
 cmake -DBUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%OPS_INSTALL_PREFIX% -P cmake_install.cmake
 @IF ERRORLEVEL 1 goto :BUILD_FAILED
@@ -43,7 +49,8 @@ cmake -DBUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%OPS_INSTALL_PREFIX% -P cmake_in
 @cd %OPS_BUILD_OPT_DIR%
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=%OPS_INSTALL_PREFIX% -A Win32 %~dp0
 @IF ERRORLEVEL 1 goto :BUILD_FAILED
-cmake --build . --target ALL_BUILD --config Release
+@rem cmake --build . --target ALL_BUILD --config Release
+msbuild -m ALL_BUILD.vcxproj -p:Configuration=Release
 @IF ERRORLEVEL 1 goto :BUILD_FAILED
 cmake -DBUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=%OPS_INSTALL_PREFIX% -P cmake_install.cmake
 @IF ERRORLEVEL 1 goto :BUILD_FAILED

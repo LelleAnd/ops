@@ -39,12 +39,6 @@ namespace ops
 	class OPS_EXPORT ByteBuffer
 	{
     private:
-        ///The Write Policy is default to preserve all written data.
-        ///For Big Endian machines, performance can be gained if data isn't preserved,
-        ///but it means that data in vectors may be garbled after writing.
-        ///For Little Endian machines, the data is always preserved.
-        bool preserveWrittenData;
-
         ///Buffer used to store data to be written or read.
         MemoryMap& memMap;
         ///index pointing out where in the buffer to do the next read or write.
@@ -67,11 +61,8 @@ namespace ops
 
 		void writeNewSegment();
 	private:
-		///Utility method for swaping byte order of basic types (int float etc.)
-        void ByteSwap(unsigned char * b, int n) const noexcept;
-
 		void readNewSegment();
-		void WriteBytes(std::vector<char>& out, const int offset, const int length);
+		void WriteBytes(const std::vector<char>& out, const int offset, const int length);
 		void ReadBytes(std::vector<char>& out, const int offset, const int length);
      
     public:
@@ -85,8 +76,7 @@ namespace ops
 			const char* what() const noexcept override { return "ByteBuffer(): Fixed string to small"; }
 		};
 
-        ///The Write Policy is default to preserve all written data (see description above).
-        ByteBuffer(MemoryMap& mMap, bool _preserveWrittenData = true);
+        ByteBuffer(MemoryMap& mMap, bool deprecated_flag = true);
         
         ///Only valid for a ByteBuffer instance used to write data.
         ///Returns the number of bytes containing valid data in the buffer so far.
@@ -178,15 +168,15 @@ namespace ops
 		void ReadStrings(std::vector<std::string>& out);
 		
 		///Writes std::vector of corresponding type and increments index accordingly
-		void WriteStrings(std::vector<std::string>& out);
-		void WriteBooleans(std::vector<bool>& out);
-		void WriteBytes(std::vector<char>& out);
+		void WriteStrings(const std::vector<std::string>& out);
+		void WriteBooleans(const std::vector<bool>& out);
+		void WriteBytes(const std::vector<char>& out);
 		
-		void WriteDoubles(std::vector<double>& out);
-		void WriteInts(std::vector<int>& out);
-		void WriteShorts(std::vector<int16_t>& out);
-		void WriteFloats(std::vector<float>& out);
-		void WriteLongs(std::vector<int64_t>& out);
+		void WriteDoubles(const std::vector<double>& out);
+		void WriteInts(const std::vector<int>& out);
+		void WriteShorts(const std::vector<int16_t>& out);
+		void WriteFloats(const std::vector<float>& out);
+		void WriteLongs(const std::vector<int64_t>& out);
 
 		void writeProtocol();
 		bool checkProtocol();

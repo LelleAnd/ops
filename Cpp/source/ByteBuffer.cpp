@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2019-2020 Lennart Andersson.
+ * Copyright (C) 2019-2021 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -25,8 +25,8 @@
 namespace ops
 {
 
-    ByteBuffer::ByteBuffer(MemoryMap& mMap, bool const _preserveWrittenData):
-        preserveWrittenData(_preserveWrittenData), memMap(mMap),
+    ByteBuffer::ByteBuffer(MemoryMap& mMap, bool ):
+        memMap(mMap),
         nextSegmentAt(memMap.getSegmentSize())
     {
 		// Check that each segment in map is larger than our needed segment header
@@ -124,7 +124,7 @@ namespace ops
         ReadInt();
     }
 
-    void ByteBuffer::ReadChars(char* chars, const int length)
+    void ByteBuffer::ReadChars(char* const chars, const int length)
     {
         int bytesLeftInSegment = memMap.getSegmentSize() - index;
         if (bytesLeftInSegment >= length)
@@ -144,66 +144,87 @@ namespace ops
         }
     }
 
-    void ByteBuffer::ByteSwap(unsigned char* const b, const int n) const noexcept
+    int ByteBuffer::GetSize() const noexcept
+    {
+        return totalSize;
+    }
+
+    ///Utility method for swaping byte order of basic types (int float etc.)
+    void ByteSwap(unsigned char* const b, const int n)
     {
         int i = 0;
         int j = n - 1;
         while (i < j)
         {
             std::swap(b[i], b[j]);
-			i++; 
-			j--;
+            i++;
+            j--;
         }
     }
 
-    int ByteBuffer::GetSize() const noexcept
+    template<typename T>
+    T ByteSwap(const T in)
     {
-        return totalSize; 
+        T res;
+        for (int i = 0, j = sizeof(in) - 1; i < sizeof(in); ++i, --j) {
+            ((uint8_t*)&res)[j] = ((uint8_t*)&in)[i];
+        }
+        return res;
     }
 
-	// -----------------------------------------------------------------
+    // -----------------------------------------------------------------
 
-    void ByteBuffer::WriteFloat(float f)
+    void ByteBuffer::WriteFloat(const float f)
     {
 #ifdef ON_BIG_ENDIAN_MACHINE
-        ByteSwap((unsigned char*)&f, 4);
+        uint32_t tmp = ByteSwap<uint32_t>(*reinterpret_cast<const uint32_t*>(&f));
+        WriteChars(((const char*)&tmp), sizeof(tmp));
+#else
+        WriteChars((const char*)&f, 4);
 #endif
-        WriteChars(((const char*)&f), 4);
     }
 
-    void ByteBuffer::WriteInt(int i)
+    void ByteBuffer::WriteInt(const int i)
     {
 #ifdef ON_BIG_ENDIAN_MACHINE
-        ByteSwap((unsigned char*)&i, 4);
-#endif
+        uint32_t tmp = ByteSwap<uint32_t>(*reinterpret_cast<const uint32_t*>(&i));
+        WriteChars(((const char*)&tmp), sizeof(tmp));
+#else
         WriteChars((const char*)&i, 4);
+#endif
     }
 
-    void ByteBuffer::WriteShort(int16_t i)
+    void ByteBuffer::WriteShort(const int16_t i)
     {
 #ifdef ON_BIG_ENDIAN_MACHINE
-        ByteSwap((unsigned char*)&i, 2);
-#endif
+        uint16_t tmp = ByteSwap<uint16_t>(*reinterpret_cast<const uint16_t*>(&i));
+        WriteChars(((const char*)&tmp), sizeof(tmp));
+#else
         WriteChars((const char*)&i, 2);
+#endif
     }
 
-    void ByteBuffer::WriteLong(int64_t l)
+    void ByteBuffer::WriteLong(const int64_t l)
     {
 #ifdef ON_BIG_ENDIAN_MACHINE
-        ByteSwap((unsigned char*)&l, 8);
-#endif
+        uint64_t tmp = ByteSwap<uint64_t>(*reinterpret_cast<const uint64_t*>(&l));
+        WriteChars(((const char*)&tmp), sizeof(tmp));
+#else
         WriteChars((const char*)&l, 8);
+#endif
     }
 
-    void ByteBuffer::WriteDouble(double d)
+    void ByteBuffer::WriteDouble(const double d)
     {
 #ifdef ON_BIG_ENDIAN_MACHINE
-        ByteSwap((unsigned char*)&d, 8);
+        uint64_t tmp = ByteSwap<uint64_t>(*reinterpret_cast<const uint64_t*>(&d));
+        WriteChars(((const char*)&tmp), sizeof(tmp));
+#else
+        WriteChars((const char*)&d, 8);
 #endif
-		WriteChars((const char*)&d, 8);
     }
 
-    void ByteBuffer::WriteChar(char c)
+    void ByteBuffer::WriteChar(const char c)
     {
         WriteChars((const char*)&c, 1);
     }
@@ -316,15 +337,17 @@ namespace ops
         }
     }
 
-    void ByteBuffer::WriteBooleans(std::vector<bool>& out)
+    void ByteBuffer::WriteBooleans(const std::vector<bool>& out)
     {
         int const size = (int)out.size();
         WriteInt(size);
         for (int i = 0; i < size; i++)
         {
-            char ch = 0;
-            out[i] ? ch = 1 : ch = 0;
-            WriteChar(ch);
+            if (out[i]) {
+                WriteChar(1);
+            } else {
+                WriteChar(0);
+            }
         }
     }
 
@@ -360,17 +383,17 @@ namespace ops
         }
     }
 
-    void ByteBuffer::WriteBytes(std::vector<char>& out)
+    void ByteBuffer::WriteBytes(const std::vector<char>& out)
     {
         int const size = (int)out.size();
         WriteInt(size);
         WriteBytes(out, 0, size);
     }
 
-    void ByteBuffer::WriteBytes(std::vector<char>& out, const int offset, const int length)
+    void ByteBuffer::WriteBytes(const std::vector<char>& out, const int offset, const int length)
     {
         const int bytesLeftInSegment = memMap.getSegmentSize() - index;
-        std::vector<char>::iterator it = out.begin();
+        auto it = out.begin();
         it += offset;
         if (bytesLeftInSegment >= length)
         {
@@ -409,7 +432,7 @@ namespace ops
         }
     }
 
-    void ByteBuffer::WriteDoubles(std::vector<double>& out)
+    void ByteBuffer::WriteDoubles(const std::vector<double>& out)
     {
         int const size = (int)out.size();
         WriteInt(size);
@@ -418,19 +441,11 @@ namespace ops
 #ifdef ON_BIG_ENDIAN_MACHINE
             for(unsigned int i = 0; i < out.size() ; i++)
             {
-                ByteSwap((unsigned char*) &out[i], 8);
-            }
-#endif
-            WriteChars((const char*) & out[0], size * 8);
-#ifdef ON_BIG_ENDIAN_MACHINE
-            if (preserveWrittenData) {
-                for(unsigned int i = 0; i < out.size() ; i++)
-                {
-                    ByteSwap((unsigned char*) &out[i], 8);
-                }
+                uint64_t tmp = ByteSwap<uint64_t>(*reinterpret_cast<const uint64_t*>(&out[i]));
+                WriteChars(((const char*)&tmp), sizeof(tmp));
             }
 #else
-			UNUSED(preserveWrittenData)
+            WriteChars((const char*)&out[0], size * 8);
 #endif
         }
     }
@@ -452,7 +467,7 @@ namespace ops
         }
     }
 
-    void ByteBuffer::WriteInts(std::vector<int>& out)
+    void ByteBuffer::WriteInts(const std::vector<int>& out)
     {
         int const size = (int)out.size();
         WriteInt(size);
@@ -461,17 +476,11 @@ namespace ops
 #ifdef ON_BIG_ENDIAN_MACHINE
             for(unsigned int i = 0; i < out.size() ; i++)
             {
-                ByteSwap((unsigned char*) &out[i], 4);
+                uint32_t tmp = ByteSwap<uint32_t>(*reinterpret_cast<const uint32_t*>(&out[i]));
+                WriteChars(((const char*)&tmp), sizeof(tmp));
             }
-#endif
-            WriteChars((const char*) & out[0], size * 4);
-#ifdef ON_BIG_ENDIAN_MACHINE
-            if (preserveWrittenData) {
-                for(unsigned int i = 0; i < out.size() ; i++)
-                {
-                    ByteSwap((unsigned char*) &out[i], 4);
-                }
-            }
+#else
+            WriteChars((const char*)&out[0], size * 4);
 #endif
         }
     }
@@ -493,7 +502,7 @@ namespace ops
         }
     }
 
-    void ByteBuffer::WriteShorts(std::vector<int16_t>& out)
+    void ByteBuffer::WriteShorts(const std::vector<int16_t>& out)
     {
         int const size = (int)out.size();
         WriteInt(size);
@@ -502,17 +511,11 @@ namespace ops
 #ifdef ON_BIG_ENDIAN_MACHINE
             for(unsigned int i = 0; i < out.size() ; i++)
             {
-                ByteSwap((unsigned char*) &out[i], 2);
+                uint16_t tmp = ByteSwap<uint16_t>(*reinterpret_cast<const uint16_t*>(&out[i]));
+                WriteChars(((const char*)&tmp), sizeof(tmp));
             }
-#endif
-            WriteChars((const char*) & out[0], size * 2);
-#ifdef ON_BIG_ENDIAN_MACHINE
-            if (preserveWrittenData) {
-                for(unsigned int i = 0; i < out.size() ; i++)
-                {
-                    ByteSwap((unsigned char*) &out[i], 2);
-                }
-            }
+#else
+            WriteChars((const char*)&out[0], size * 2);
 #endif
         }
     }
@@ -534,7 +537,7 @@ namespace ops
         }
     }
 
-    void ByteBuffer::WriteFloats(std::vector<float>& out)
+    void ByteBuffer::WriteFloats(const std::vector<float>& out)
     {
         int const size = (int)out.size();
         WriteInt(size);
@@ -543,17 +546,11 @@ namespace ops
 #ifdef ON_BIG_ENDIAN_MACHINE
             for(unsigned int i = 0; i < out.size() ; i++)
             {
-                ByteSwap((unsigned char*) &out[i], 4);
+                uint32_t tmp = ByteSwap<uint32_t>(*reinterpret_cast<const uint32_t*>(&out[i]));
+                WriteChars(((const char*)&tmp), sizeof(tmp));
             }
-#endif
-            WriteChars((const char*) & out[0], size * 4);
-#ifdef ON_BIG_ENDIAN_MACHINE
-            if (preserveWrittenData) {
-                for(unsigned int i = 0; i < out.size() ; i++)
-                {
-                    ByteSwap((unsigned char*) &out[i], 4);
-                }
-            }
+#else
+            WriteChars((const char*)&out[0], size * 4);
 #endif
         }
     }
@@ -575,7 +572,7 @@ namespace ops
         }
     }
 
-    void ByteBuffer::WriteLongs(std::vector<int64_t>& out)
+    void ByteBuffer::WriteLongs(const std::vector<int64_t>& out)
     {
         int const size = (int)out.size();
         WriteInt(size);
@@ -584,17 +581,11 @@ namespace ops
 #ifdef ON_BIG_ENDIAN_MACHINE
             for(unsigned int i = 0; i < out.size() ; i++)
             {
-                ByteSwap((unsigned char*) &out[i], 8);
+                uint64_t tmp = ByteSwap<uint64_t>(*reinterpret_cast<const uint64_t*>(&out[i]));
+                WriteChars(((const char*)&tmp), sizeof(tmp));
             }
-#endif
-            WriteChars((const char*) & out[0], size * 8);
-#ifdef ON_BIG_ENDIAN_MACHINE
-            if (preserveWrittenData) {
-                for(unsigned int i = 0; i < out.size() ; i++)
-                {
-                    ByteSwap((unsigned char*) &out[i], 8);
-                }
-            }
+#else
+            WriteChars((const char*)&out[0], size * 8);
 #endif
         }
     }
@@ -610,7 +601,7 @@ namespace ops
         }
     }
 
-    void ByteBuffer::WriteStrings(std::vector<std::string>& out)
+    void ByteBuffer::WriteStrings(const std::vector<std::string>& out)
     {
         int const size = (int)out.size();
         WriteInt(size);

@@ -13,6 +13,8 @@
 #include <sstream>
 
 #include <ops.h>
+#include <Trace.h>
+#include <TraceStream.h>
 
 #include "pizza/PizzaData.h"
 #include "pizza/PizzaDataSubscriber.h"
@@ -31,7 +33,7 @@
 #include "PubIdChecker.h"
 #include "PrintArchiverOut.h"
 #include "ChecksumArchiver.h"
-
+#include "NetworkSupport.h"
 
 ///----- Configuration -----
 #define USE_LAMDAS
@@ -567,7 +569,7 @@ public:
 		uint16_t port = 0;
 		sub->getMessage()->getSource(addr, port);
 
-		if (!beQuite) {
+        if (!beQuite && (data != nullptr)) {
             std::cout <<
                 "[Topic: " << sub->getTopic().getName() <<
                 "] (From " << addr << ":" << port <<
@@ -612,7 +614,7 @@ public:
 		uint16_t port = 0;
 		sub->getMessage()->getSource(addr, port);
 
-		if (!beQuite) {
+		if (!beQuite && (data != nullptr)) {
 			std::cout <<
 				"[Topic: " << sub->getTopic().getName() <<
 				"] (From " << addr << ":" << port <<
@@ -750,6 +752,17 @@ void printDomainInfo(const ops::Participant& part)
     std::cout << "Checksum 64-bit xor: " << (uint64_t)chk64.calc.sum << "\n";
 }
 
+
+struct OPS_Trace_Sink : public ops::trace::Sink
+{
+	void Log(const ops::trace::level_t level, const char* grp, const char* msg) noexcept override
+	{
+		std::cout << "[mySink:" << std::setw(5) << std::left << level << "] " << grp << ": " << msg;
+	}
+};
+
+OPS_Trace_Sink mySink;
+
 void menu()
 {
 	std::cout << "" << std::endl;
@@ -792,6 +805,9 @@ int main(const int argc, const char* argv[])
 	ops::ObjectName_T debugKey = "Pizza";
 	ops::execution_policy::Enum policy = ops::execution_policy::threading;
 
+	// Install sink for trace logging from OPS
+	InstallSink(&mySink);
+
 	if (argc > 1) {
 		std::string const arg = argv[1];
 		if (arg == "polling") {
@@ -800,6 +816,8 @@ int main(const int argc, const char* argv[])
 			debugKey = arg;
 		}
 	}
+
+	ops::GetHostName();
 
 #ifdef _WIN32
 	// --------------------------------------------------------------------
@@ -920,7 +938,17 @@ int main(const int argc, const char* argv[])
 
 	bool doPartPolling = false;
 
-	std::cout << std::endl;
+    ops::trace::tracestream<500> mystream;
+
+    mystream << ops::trace::grp("grp_A") << "Test of trace" << std::endl;
+	ops::trace::os_info << "Test of trace\n\n" << std::flush;
+    mystream << "Test of trace" << std::endl;
+    mystream << ops::trace::grp("grp_C") << "Test of trace" << std::endl;
+	ops::trace::os_error << "Test of trace" << std::endl;
+
+    std::cout << "hej" << ops::trace::grp("kalle") << std::endl;
+
+    std::cout << std::endl;
 	if (participant->GetExecutionPolicy() == ops::execution_policy::polling) {
 		std::cout << "'participant' is using 'Polling' policy" << std::endl;
 		doPartPolling = true;
@@ -960,9 +988,9 @@ int main(const int argc, const char* argv[])
 			}
 		}
 
-		typedef enum {NONE, PUB, SUB} TFunction;
+		enum class TFunction {NONE, PUB, SUB};
 
-		TFunction func = NONE;
+		TFunction func = TFunction::NONE;
 
 		char buffer[1024];
 		char* const ptr = fgets(buffer, sizeof(buffer), stdin);
@@ -979,10 +1007,10 @@ int main(const int argc, const char* argv[])
 		char ch = line[0];
 		line.erase(0, 1);
 
-		if ((ch == 'p') || (ch == 'P')) { func = PUB; }
-		if ((ch == 's') || (ch == 'S')) { func = SUB; }
+		if ((ch == 'p') || (ch == 'P')) { func = TFunction::PUB; }
+		if ((ch == 's') || (ch == 'S')) { func = TFunction::SUB; }
 
-		if (func != NONE) {
+		if (func != TFunction::NONE) {
 			if (line.size() == 0) {
 				std::cout << "ERROR: Expected character after '" << ch << "'" << std::endl;
 				continue;
@@ -1039,9 +1067,9 @@ int main(const int argc, const char* argv[])
 				for (unsigned int i = 0; i < ItemInfoList.size(); i++) {
 					ItemInfo* const info = ItemInfoList[i];
 					if (!info->selected) { continue; }
-					if (func == PUB) {
+					if (func == TFunction::PUB) {
 						info->helper->CreatePublisher(info->part, info->TopicName);
-					} else if (func == SUB) {
+					} else if (func == TFunction::SUB) {
 						info->helper->CreateSubscriber(info->part, info->TopicName);
 					}
 				}
@@ -1052,9 +1080,9 @@ int main(const int argc, const char* argv[])
 				for (unsigned int i = 0; i < ItemInfoList.size(); i++) {
 					ItemInfo* const info = ItemInfoList[i];
 					if (!info->selected) { continue; }
-					if (func == PUB) {
+					if (func == TFunction::PUB) {
 						info->helper->DeletePublisher();
-					} else if (func == SUB) {
+					} else if (func == TFunction::SUB) {
 						info->helper->DeleteSubscriber();
 					}
 				}
@@ -1065,9 +1093,9 @@ int main(const int argc, const char* argv[])
 				for (unsigned int i = 0; i < ItemInfoList.size(); i++) {
 					ItemInfo* const info = ItemInfoList[i];
 					if (!info->selected) { continue; }
-					if (func == PUB) {
+					if (func == TFunction::PUB) {
 						info->helper->StartPublisher();
-					} else if (func == SUB) {
+					} else if (func == TFunction::SUB) {
 						info->helper->StartSubscriber();
 					}
 				}
@@ -1078,9 +1106,9 @@ int main(const int argc, const char* argv[])
 				for (unsigned int i = 0; i < ItemInfoList.size(); i++) {
 					ItemInfo* const info = ItemInfoList[i];
 					if (!info->selected) { continue; }
-					if (func == PUB) {
+					if (func == TFunction::PUB) {
 						info->helper->StopPublisher();
-					} else if (func == SUB) {
+					} else if (func == TFunction::SUB) {
 						info->helper->StopSubscriber();
 					} else {
 						const int64_t timeout = atoi(line.c_str());

@@ -1,5 +1,10 @@
 *.ncb
 *.suo
 *.vcproj.*
-Debug
-Release
+Debug/
+Release/
+Debug DLL/
+Release DLL/
+depMDd/
+depMDo/
+DLL MDd/

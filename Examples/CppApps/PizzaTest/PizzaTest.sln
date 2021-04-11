@@ -1,26 +1,71 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27428.2015
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31129.286
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PizzaTest", "PizzaTest.vcxproj", "{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug DLL|Win32 = Debug DLL|Win32
+		Debug DLL|x64 = Debug DLL|x64
+		Debug DLL|x86 = Debug DLL|x86
 		Debug|Win32 = Debug|Win32
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
+		depMD-dbg|Win32 = depMD-dbg|Win32
+		depMD-dbg|x64 = depMD-dbg|x64
+		depMD-dbg|x86 = depMD-dbg|x86
+		depMD-opt|Win32 = depMD-opt|Win32
+		depMD-opt|x64 = depMD-opt|x64
+		depMD-opt|x86 = depMD-opt|x86
+		DLL MDd|Win32 = DLL MDd|Win32
+		DLL MDd|x64 = DLL MDd|x64
+		DLL MDd|x86 = DLL MDd|x86
+		Release DLL|Win32 = Release DLL|Win32
+		Release DLL|x64 = Release DLL|x64
+		Release DLL|x86 = Release DLL|x86
 		Release|Win32 = Release|Win32
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.Debug DLL|Win32.ActiveCfg = Debug DLL|Win32
+		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.Debug DLL|Win32.Build.0 = Debug DLL|Win32
+		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.Debug DLL|x64.ActiveCfg = Debug DLL|x64
+		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.Debug DLL|x64.Build.0 = Debug DLL|x64
+		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.Debug DLL|x86.ActiveCfg = Debug DLL|Win32
+		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.Debug DLL|x86.Build.0 = Debug DLL|Win32
 		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.Debug|Win32.ActiveCfg = Debug|Win32
 		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.Debug|Win32.Build.0 = Debug|Win32
 		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.Debug|x64.ActiveCfg = Debug|x64
 		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.Debug|x64.Build.0 = Debug|x64
 		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.Debug|x86.ActiveCfg = Debug|Win32
 		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.Debug|x86.Build.0 = Debug|Win32
+		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.depMD-dbg|Win32.ActiveCfg = depMDd|Win32
+		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.depMD-dbg|Win32.Build.0 = depMDd|Win32
+		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.depMD-dbg|x64.ActiveCfg = depMDd|x64
+		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.depMD-dbg|x64.Build.0 = depMDd|x64
+		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.depMD-dbg|x86.ActiveCfg = depMDd|Win32
+		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.depMD-dbg|x86.Build.0 = depMDd|Win32
+		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.depMD-opt|Win32.ActiveCfg = depMDo|Win32
+		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.depMD-opt|Win32.Build.0 = depMDo|Win32
+		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.depMD-opt|x64.ActiveCfg = depMDo|x64
+		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.depMD-opt|x64.Build.0 = depMDo|x64
+		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.depMD-opt|x86.ActiveCfg = depMDo|Win32
+		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.depMD-opt|x86.Build.0 = depMDo|Win32
+		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.DLL MDd|Win32.ActiveCfg = DLL MDd|Win32
+		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.DLL MDd|Win32.Build.0 = DLL MDd|Win32
+		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.DLL MDd|x64.ActiveCfg = DLL MDd|x64
+		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.DLL MDd|x64.Build.0 = DLL MDd|x64
+		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.DLL MDd|x86.ActiveCfg = DLL MDd|Win32
+		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.DLL MDd|x86.Build.0 = DLL MDd|Win32
+		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.Release DLL|Win32.ActiveCfg = Release DLL|Win32
+		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.Release DLL|Win32.Build.0 = Release DLL|Win32
+		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.Release DLL|x64.ActiveCfg = Release DLL|x64
+		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.Release DLL|x64.Build.0 = Release DLL|x64
+		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.Release DLL|x86.ActiveCfg = Release DLL|Win32
+		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.Release DLL|x86.Build.0 = Release DLL|Win32
 		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.Release|Win32.ActiveCfg = Release|Win32
 		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.Release|Win32.Build.0 = Release|Win32
 		{004496F8-AB2A-4D84-98E4-4B6EC0AC84CA}.Release|x64.ActiveCfg = Release|x64

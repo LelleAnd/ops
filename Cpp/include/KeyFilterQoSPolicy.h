@@ -32,7 +32,6 @@
 #include <vector>
 
 #include "OPSTypeDefs.h"
-#include "OPSExport.h"
 #include "FilterQoSPolicy.h"
 #include "Lockable.h"
 
@@ -41,7 +40,7 @@ namespace ops
     //Forward declaration
     class OPSObject;
 
-    class OPS_EXPORT KeyFilterQoSPolicy
+    class KeyFilterQoSPolicy
 		: public FilterQoSPolicy, public Lockable
 	{
     public:

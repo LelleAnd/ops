@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2020 Lennart Andersson.
+* Copyright (C) 2018-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -23,12 +23,11 @@
 
 #include <map>
 
-#include "OPSExport.h"
 #include "ReceiveDataHandler.h"
 
 namespace ops
 {
-	class OPS_EXPORT TCPReceiveDataHandler : public ReceiveDataHandler
+	class TCPReceiveDataHandler : public ReceiveDataHandler
 	{
 	public:
 		TCPReceiveDataHandler(Topic top, Participant& part);

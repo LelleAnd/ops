@@ -29,14 +29,13 @@
 #include "SendDataHandler.h"
 #include "ReceiveDataHandler.h"
 #include "Lockable.h"
-#include "OPSExport.h"
 
 namespace ops
 {
 	class Participant;
 
 	///A listener for Participant meta-data
-	class OPS_EXPORT ParticipantInfoDataListener : public DataListener
+	class ParticipantInfoDataListener : public DataListener
 	{
 	public:
 		explicit ParticipantInfoDataListener(Participant& part);

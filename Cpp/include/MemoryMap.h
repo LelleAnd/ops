@@ -25,7 +25,6 @@
 #include <exception>
 
 #include "OPSTypeDefs.h"
-#include "OPSExport.h"
 
 namespace ops
 {
@@ -51,7 +50,7 @@ struct MemoryMapAllocator {
 };
 
 ///A memory buffer that together with the ByteBuffer class is used for [de]serializing OPS messages
-class OPS_EXPORT MemoryMap
+class MemoryMap
 {
 public:
 	MemoryMap()

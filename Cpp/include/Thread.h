@@ -25,12 +25,11 @@
 #include <thread>
 
 #include "OPSTypeDefs.h"
-#include "OPSExport.h"
 
 namespace ops
 {
     ///Abstract Thread class for other classes that wishes to be "Active".
-    class OPS_EXPORT Thread
+    class Thread
     {
     public:
         Thread() noexcept;

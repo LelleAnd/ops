@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -22,12 +23,11 @@
 #define ops_OPSObjectFactoryH
 
 #include "SerializableInheritingTypeFactory.h"
-#include "OPSExport.h"
 
 namespace ops
 {
 
-class OPS_EXPORT OPSObjectFactory : public SerializableInheritingTypeFactory
+class OPSObjectFactory : public SerializableInheritingTypeFactory
 {
 public:
     /**

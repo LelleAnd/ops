@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2020 Lennart Andersson.
+* Copyright (C) 2018-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -25,7 +25,6 @@
 #include <functional>
 
 #include "OPSTypeDefs.h"
-#include "OPSExport.h"
 #include "DataListener.h"
 
 namespace ops
@@ -34,7 +33,7 @@ namespace ops
     ///observer GoF-pattern. Classes extending this class extends an interface to which
     ///DataListeners can register their interest to be notified when new OPSObjects are available.
 	///There is also a possibility to use a callback instead of the DataListener interface.
-    class OPS_EXPORT DataNotifier
+    class DataNotifier
     {
     public:
         typedef void (*CallbackFunc)(DataNotifier* sender, void* userData);

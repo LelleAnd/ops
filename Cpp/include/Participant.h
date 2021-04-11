@@ -40,7 +40,6 @@
 #include "ParticipantInfoData.h"
 #include "ParticipantInfoDataListener.h"
 #include "SendDataHandler.h"
-#include "OPSExport.h"
 #include "DebugHandler.h"
 
 namespace ops
@@ -62,7 +61,7 @@ namespace ops
 		};
 	}
 
-	class OPS_EXPORT Participant : Runnable, Listener<int>
+	class Participant : Runnable, Listener<int>
 	{
 		friend class SubscriberBase;
 		friend class Publisher;

@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2020 Lennart Andersson.
+* Copyright (C) 2020-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -21,13 +21,12 @@
 #ifndef ops_DeadlineTimer_h
 #define ops_DeadlineTimer_h
 
-#include "OPSExport.h"
 #include "Notifier.h"
 #include "IOService.h"
 
 namespace ops
 {
-	class OPS_EXPORT DeadlineTimer : public Notifier<int>
+	class DeadlineTimer : public Notifier<int>
 	{
 	public:
 		virtual void start(int64_t timeoutMs) = 0;

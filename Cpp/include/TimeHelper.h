@@ -24,11 +24,10 @@
 
 #include <chrono>
 #include <string>
-#include "OPSExport.h"
 
 namespace ops
 {
-	class OPS_EXPORT TimeHelper
+	class TimeHelper
 	{
 	public:
 		///Returns the current time as a number of milliseconds since Epoch 1970-01-01.

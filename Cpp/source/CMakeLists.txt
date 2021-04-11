@@ -1,6 +1,7 @@
 
 # the library name
 set(LIB_NAME ops)
+set(LIB_STATIC ${LIB_NAME}-static)
 
 set(OPS4_CPP_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
@@ -48,13 +49,14 @@ else()
 endif()
 
 if(NOT OPS_BOOTSTRAP_BUILD)
+  # ----------------------------------------------------------------------------
   # generate the library target
+  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
   add_library(${LIB_NAME} SHARED
     ${LIB_OPS_CORE_SRCS}
     ${LIB_BOTTOM_LAYER_SRC}
     ${LIB_OPS_PUBLIC_HEADERS}
   )
-
   add_dependencies(${LIB_NAME} opsidls)
 
   if (DEFINED OPS_NO_SEPARATE_BOOTSTRAP)
@@ -64,11 +66,19 @@ if(NOT OPS_BOOTSTRAP_BUILD)
     target_include_directories(${LIB_NAME} PUBLIC ${HEADER_INSTALL_DIR})
   endif()
 
-  set_target_properties(${LIB_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
-  # adds -DOPS_LIBRARY to commandline. Can't use add_definitions here
-  set_target_properties(${LIB_NAME} PROPERTIES COMPILE_DEFINITIONS OPS_LIBRARY)
-  set_target_properties(${LIB_NAME} PROPERTIES DEBUG_POSTFIX "-dbg")
-  set_target_properties(${LIB_NAME} PROPERTIES RELEASE_POSTFIX "-opt")
+  set_target_properties(${LIB_NAME} PROPERTIES
+    VERSION ${PROJECT_VERSION}
+    COMPILE_DEFINITIONS OPS_LIBRARY
+    DEBUG_POSTFIX "-dbg"
+    RELEASE_POSTFIX "-opt"
+  )
+  if(MSVC)
+    # Make it clear which lib-file is for linking with the dll
+    set_target_properties(${LIB_NAME} PROPERTIES ARCHIVE_OUTPUT_NAME "${LIB_NAME}-dll")
+    ##TOOD set_target_properties(${LIB_NAME} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+  endif()
+  # Add compile definition so that users of the library get the correct include definitions
+  target_compile_definitions(${LIB_NAME} PUBLIC OPS_LIBRARY_IMPORT)
 
   target_link_libraries(${LIB_NAME} ${Boost_LIBRARIES})
 
@@ -76,15 +86,14 @@ if(NOT OPS_BOOTSTRAP_BUILD)
     target_link_libraries(${LIB_NAME} ws2_32 mswsock)
   endif()
 
+  # ----------------------------------------------------------------------------
   # build it again but statically this time
-  set(LIB_STATIC ${LIB_NAME}-static)
   # generate the library target
   add_library(${LIB_STATIC} STATIC
     ${LIB_OPS_CORE_SRCS}
     ${LIB_BOTTOM_LAYER_SRC}
     ${LIB_OPS_PUBLIC_HEADERS}
   )
-
   add_dependencies(${LIB_STATIC} opsidls)
 
   if (DEFINED OPS_NO_SEPARATE_BOOTSTRAP)
@@ -94,15 +103,26 @@ if(NOT OPS_BOOTSTRAP_BUILD)
     target_include_directories(${LIB_STATIC} PUBLIC ${HEADER_INSTALL_DIR})
   endif()
 
-  set_target_properties(${LIB_STATIC} PROPERTIES VERSION ${PROJECT_VERSION})
-  set_target_properties(${LIB_STATIC} PROPERTIES COMPILE_DEFINITIONS OPS_LIBRARY_STATIC)
-  set_target_properties(${LIB_STATIC} PROPERTIES DEBUG_POSTFIX "-dbg")
-  set_target_properties(${LIB_STATIC} PROPERTIES RELEASE_POSTFIX "-opt")
+  set(MYLIB_POSTFIX "")
+  if(MSVC)
+    # We build with runtime dll's, which are the default flags for CMake: "/MD.."
+    set(MYLIB_POSTFIX "-MD")
+  endif()
+
+  set_target_properties(${LIB_STATIC} PROPERTIES
+    VERSION ${PROJECT_VERSION}
+    COMPILE_DEFINITIONS OPS_LIBRARY_STATIC
+    DEBUG_POSTFIX "${MYLIB_POSTFIX}-dbg"
+    RELEASE_POSTFIX "${MYLIB_POSTFIX}-opt"
+    MINSIZEREL_POSTFIX "${MYLIB_POSTFIX}-msz-opt"
+    RELWITHDEBINFO_POSTFIX "${MYLIB_POSTFIX}-dbi-opt"
+  )
   # Add compile definition so that users of the static library get the correct include definitions
   target_compile_definitions(${LIB_STATIC} PUBLIC OPS_LIBRARY_STATIC)
 
   target_link_libraries(${LIB_STATIC} ${Boost_LIBRARIES})
 
+  # ----------------------------------------------------------------------------
   # library installation
   set(INSTALL_BINDIR bin)
   if(WIN32 AND NOT CYGWIN)
@@ -119,4 +139,13 @@ if(NOT OPS_BOOTSTRAP_BUILD)
     LIBRARY DESTINATION ${INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${INSTALL_ARCHIVEDIR}
   )
+  if(MSVC)
+    # For backward compatibility, make a copy with the old file name
+    if(CMAKE_BUILD_TYPE MATCHES "Debug")
+      install(FILES $<TARGET_FILE:${LIB_STATIC}> DESTINATION ${INSTALL_ARCHIVEDIR} RENAME ops-static-dbg.lib)
+    endif()
+    if(CMAKE_BUILD_TYPE MATCHES "Release")
+      install(FILES $<TARGET_FILE:${LIB_STATIC}> DESTINATION ${INSTALL_ARCHIVEDIR} RENAME ops-static-opt.lib)
+    endif()
+  endif()
 endif()

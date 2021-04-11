@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016-2020 Lennart Andersson.
+* Copyright (C) 2016-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -24,11 +24,10 @@
 #include "OPSTypeDefs.h"
 #include "Topic.h"
 #include "OPSObject.h"
-#include "OPSExport.h"
 
 namespace ops
 {
-    class OPS_EXPORT Channel : public OPSObject
+    class Channel : public OPSObject
     {
     public:
         char Channel_version = Channel_idlVersion;

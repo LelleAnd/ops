@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2020 Lennart Andersson.
+* Copyright (C) 2019-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -23,22 +23,22 @@
 #define ops_OPSObject_h
 
 #include "OPSTypeDefs.h"
+#include "OPSExport.h"
 #if defined(DEBUG_OPSOBJECT_COUNTER)
 #include <atomic>
 #endif
 
-#include "OPSExport.h"
 #include "Serializable.h"
 #include "ArchiverInOut.h"
 
 namespace ops
 {
     ///Base class for object that can be serialized with OPSArchivers
-    class OPS_EXPORT OPSObject : public Serializable
+    class OPSObject : public Serializable
     {
     private:
 #if defined(DEBUG_OPSOBJECT_COUNTER)
-        static std::atomic<uint32_t> _NumOpsObjects;
+        static OPS_EXPORT std::atomic<uint32_t> _NumOpsObjects;
 #endif
 
         friend class ByteBuffer;
@@ -115,6 +115,7 @@ namespace ops
         OPSObject& operator= (OPSObject&& other) = default;      // Move assignment operator
 
 #if defined(DEBUG_OPSOBJECT_COUNTER)
+        // To access this when OPS is compiled as a DLL, you need to define OPS_LIBRARY_IMPORT
         static uint32_t NumOpsObjects() noexcept { return _NumOpsObjects; }
 #endif
     };

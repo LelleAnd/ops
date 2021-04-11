@@ -1,7 +1,7 @@
 #pragma once
 
 /**
- * Copyright (C) 2020 Lennart Andersson.
+ * Copyright (C) 2020-2021 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -24,6 +24,7 @@
 #include <iomanip>
 
 #include "Trace.h"
+#include "OPSExport.h"
 
 namespace ops {
 
@@ -112,10 +113,11 @@ namespace ops {
 
         // Some standard log streams
         using tracestream_t = tracestream<256>;
-        extern tracestream_t os_trace;
-        extern tracestream_t os_info;
-        extern tracestream_t os_warning;
-        extern tracestream_t os_error;
+        // To access these when OPS is compiled as a DLL, you need to define OPS_LIBRARY_IMPORT
+        extern OPS_EXPORT tracestream_t os_trace;
+        extern OPS_EXPORT tracestream_t os_info;
+        extern OPS_EXPORT tracestream_t os_warning;
+        extern OPS_EXPORT tracestream_t os_error;
 
         // Stream manipulator that is used to set the log group if the stream buffer is our trace buffer
         class grp

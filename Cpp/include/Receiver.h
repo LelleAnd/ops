@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2020 Lennart Andersson.
+* Copyright (C) 2019-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -26,13 +26,12 @@
 #include "Notifier.h"
 #include "IOService.h"
 #include "BytesSizePair.h"
-#include "OPSExport.h"
 
 namespace ops
 {
 	struct TCPClientCallbacks;
 
-	class OPS_EXPORT Receiver : public Notifier<BytesSizePair>
+	class Receiver : public Notifier<BytesSizePair>
 	{
 	public:
 		virtual ~Receiver() = default;

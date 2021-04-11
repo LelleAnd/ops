@@ -22,19 +22,18 @@
 #pragma once
 
 #include "OPSTypeDefs.h"
-#include "OPSExport.h"
 #include "IOService.h"
 
 namespace ops
 {
-	OPS_FUNCEXPORT extern uint32_t IPString2Addr(const Address_T addr);
-	OPS_FUNCEXPORT extern Address_T IPAddr2String(const uint32_t addr);
+	extern uint32_t IPString2Addr(const Address_T addr);
+	extern Address_T IPAddr2String(const uint32_t addr);
 
-	OPS_FUNCEXPORT extern bool isValidMCAddress(const Address_T addr);
-	OPS_FUNCEXPORT extern bool isValidNodeAddress(const Address_T addr);
-	OPS_FUNCEXPORT extern bool isMyNodeAddress(const Address_T addr, IOService* ioServ);
+	extern bool isValidMCAddress(const Address_T addr);
+	extern bool isValidNodeAddress(const Address_T addr);
+	extern bool isMyNodeAddress(const Address_T addr, IOService* ioServ);
 
-	OPS_FUNCEXPORT extern Address_T doSubnetTranslation(const Address_T addr, IOService* ioServ);
+	extern Address_T doSubnetTranslation(const Address_T addr, IOService* ioServ);
 
-	OPS_FUNCEXPORT extern InternalString_T GetHostName();
+	extern InternalString_T GetHostName();
 }

@@ -31,7 +31,6 @@
 #include "Listener.h"
 #include "ReferenceHandler.h"
 #include "ReceiveDataChannel.h"
-#include "OPSExport.h"
 #include "ConnectStatus.h"
 
 namespace ops
@@ -39,7 +38,7 @@ namespace ops
 	//Forward declaration
 	class Participant;
 	
-	class OPS_EXPORT ReceiveDataHandler : 
+	class ReceiveDataHandler : 
 		protected Notifier<OPSMessage*>, 
 		public Notifier<ConnectStatus>, public ReceiveDataChannelCallbacks,
         public std::enable_shared_from_this<ReceiveDataHandler>

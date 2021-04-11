@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2020 Lennart Andersson.
+* Copyright (C) 2018-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -21,12 +21,11 @@
 
 #pragma once
 
-#include "OPSExport.h"
 #include "ReceiveDataHandler.h"
 
 namespace ops
 {
-	class OPS_EXPORT UDPReceiveDataHandler : public ReceiveDataHandler
+	class UDPReceiveDataHandler : public ReceiveDataHandler
 	{
 	public:
 		UDPReceiveDataHandler(Topic top, Participant& part, bool commonReceiver);

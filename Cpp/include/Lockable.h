@@ -24,12 +24,11 @@
 
 #include <memory>
 
-#include "OPSExport.h"
 #include "OPSTypeDefs.h"
 
 namespace ops
 {
-	class OPS_EXPORT Lockable
+	class Lockable
 	{
 	private:
         class InternalLock;

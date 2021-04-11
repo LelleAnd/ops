@@ -31,7 +31,6 @@
 #include "SendDataHandler.h"
 #include "MemoryMap.h"
 #include "Participant.h"
-#include "OPSExport.h"
 #include "DebugHandler.h"
 #include "Listener.h"
 #include "ConnectStatus.h"
@@ -39,7 +38,7 @@
 
 namespace ops
 {
-class OPS_EXPORT Publisher : protected Listener<ConnectStatus>, public Notifier<ConnectStatus>
+class Publisher : protected Listener<ConnectStatus>, public Notifier<ConnectStatus>
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 	, DebugNotifyInterface
 #endif

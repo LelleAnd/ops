@@ -1,5 +1,5 @@
 /**
-* 
+*
 * Copyright (C) 2016 Anton Gravestam.
 * Copyright (C) 2021 Lennart Andersson.
 *
@@ -27,24 +27,17 @@
     #define OPS_DLLimport __declspec(dllimport)
     #if defined( OPS_LIBRARY_STATIC )
         #define OPS_EXPORT
-        #define OPS_FUNCEXPORT
     #elif defined( OPS_LIBRARY )
-        //TODO #define OPS_EXPORT   OPS_DLLExport
-	    #define OPS_EXPORT
-        #define OPS_FUNCEXPORT OPS_DLLExport
+        // Not used for building dynamic library either. We build and export all symbols.
+        #define OPS_EXPORT
+    #elif defined( OPS_LIBRARY_IMPORT )
+        // The import is though needed for a few static data members (if used).
+        #define OPS_EXPORT OPS_DLLimport
     #else
-        #ifdef _DLL
-            ///TODO #define OPS_EXPORT   OPS_DLLimport
-	        #define OPS_EXPORT
-            #define OPS_FUNCEXPORT OPS_DLLimport
-        #else
-            #define OPS_EXPORT
-            #define OPS_FUNCEXPORT
-        #endif
+        #define OPS_EXPORT
     #endif
 #else
     #define OPS_EXPORT
-    #define OPS_FUNCEXPORT
 #endif
 
 #endif

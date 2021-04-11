@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2020 Lennart Andersson.
+* Copyright (C) 2019-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -24,13 +24,12 @@
 
 #include "OPSTypeDefs.h"
 #include "OPSObject.h"
-#include "OPSExport.h"
 
 namespace ops
 {
     class Participant;
 
-	class OPS_EXPORT Topic : public OPSObject
+	class Topic : public OPSObject
     {
 		friend class Channel;
 		friend class Domain;

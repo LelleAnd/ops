@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2020 Lennart Andersson.
+* Copyright (C) 2019-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -31,7 +31,7 @@
 
 namespace ops
 {
-    class OPS_EXPORT OPSConfig : public OPSObject
+    class OPSConfig : public OPSObject
 	{
 	public:
         char OPSConfig_version = OPSConfig_idlVersion;

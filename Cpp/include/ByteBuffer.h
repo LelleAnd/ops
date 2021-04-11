@@ -27,7 +27,6 @@
 #include <exception>
 
 #include "OPSTypeDefs.h"
-#include "OPSExport.h"
 #include "MemoryMap.h"
 
 namespace ops
@@ -36,7 +35,7 @@ namespace ops
     // Usage is simple, create an instance with either an empty preallocated
     // MemoryMap (for writing) or a MemoryMap containing the data (reading).
     // Use the public methods to read and write to/from the buffer.
-	class OPS_EXPORT ByteBuffer
+	class ByteBuffer
 	{
     private:
         ///Buffer used to store data to be written or read.

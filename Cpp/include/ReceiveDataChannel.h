@@ -30,7 +30,6 @@
 #include "OPSMessage.h"
 #include "Listener.h"
 #include "BytesSizePair.h"
-#include "OPSExport.h"
 #include "ConnectStatus.h"
 #include "opsidls/OPSConstants.h"
 
@@ -48,7 +47,7 @@ namespace ops
 		virtual ~ReceiveDataChannelCallbacks() = default;
 	};
 
-	class OPS_EXPORT ReceiveDataChannel : 
+	class ReceiveDataChannel : 
 		protected Listener<BytesSizePair>, 
 		public Listener<ConnectStatus>
 	{

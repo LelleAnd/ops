@@ -38,7 +38,6 @@
 #include "OPSMessage.h"
 #include "ReceiveDataHandler.h"
 #include "DeadlineTimer.h"
-#include "OPSExport.h"
 #include "PubIdChecker.h"
 #include "DebugHandler.h"
 #include "OPSEvent.h"
@@ -118,7 +117,7 @@ namespace ops
     // =======================================================================================
 
     ///Base class for subscribing to Topics
-    class OPS_EXPORT Subscriber : public SubscriberBase
+    class Subscriber : public SubscriberBase
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 		, DebugNotifyInterface
 #endif

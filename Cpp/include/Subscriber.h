@@ -215,7 +215,7 @@ namespace ops
 	protected:
         void checkAndNotifyDeadlineMissed();
 
-        OPSMessage* message{ nullptr };
+        OPSMessage* m_message{ nullptr };
 
         OPSObject* data{ nullptr };
         OPSObject* getData() noexcept;
@@ -224,7 +224,7 @@ namespace ops
 
 	private:
         ///Name of this subscriber
-		ObjectName_T name;
+		ObjectName_T m_name;
 
         ///Receiver side filters that will be applied to data from receiveDataHandler before delivery to application layer.
         std::list<FilterQoSPolicy*> filterQoSPolicies;

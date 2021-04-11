@@ -42,7 +42,7 @@ using namespace ops;
 // ===============================
 // Helper
 
-static void WaitWTimeout(Receiver& rcv, RAII_ioServ& ioServ, int64_t timeoutMs)
+static void WaitWTimeout(Receiver& , RAII_ioServ& ioServ, int64_t timeoutMs)
 {
 	int64_t limit = TimeHelper::currentTimeMillis() + timeoutMs;
 	while (TimeHelper::currentTimeMillis() < limit) {
@@ -101,7 +101,7 @@ public:
 
 	// Called from server when data has been filled into given buffer
 	// A new call to conn->asynchRead(buffer, size) need to be done to continue to read
-	void onEvent(TCPConnection& conn, BytesSizePair arg) override
+	void onEvent(TCPConnection& , BytesSizePair arg) override
 	{
 		bsp = arg;
 	}
@@ -109,7 +109,7 @@ public:
 	// Called from server when a connection has been deleted
 	// NOTE: 'conn' is invalid and is only provided as an ID.
 	// Ev. buffer used in asynchRead() is no longer in use
-	void onDisconnect(TCPConnection& conn, ConnectStatus status) override
+	void onDisconnect(TCPConnection& , ConnectStatus status) override
 	{
 		Log("Server", status);
 		cst = status;
@@ -136,7 +136,7 @@ public:
 
 	// Called from client when a connection is closed
 	// Ev. buffer used in asynchRead() is no longer in use
-	void onDisconnect(TCPConnection& conn, ConnectStatus status) override
+	void onDisconnect(TCPConnection& , ConnectStatus status) override
 	{
 		Log("Client", status);
 		cst = status;

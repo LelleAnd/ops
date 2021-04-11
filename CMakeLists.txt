@@ -1,6 +1,15 @@
 
-# We need install_jar_exports() which came in 3.7
+# We need install_jar_exports() and VERSION_GREATER_EQUAL which came in 3.7.
 cmake_minimum_required(VERSION 3.7.0 FATAL_ERROR)
+
+# Adopt some policies for newer CMake's
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.15.0")
+  ##message(">>>>> CMAKE_VERSION= " ${CMAKE_VERSION})
+  # We don't want the default warning flags for VS builds
+  cmake_policy(SET CMP0092 NEW)
+  # We also want to be able to change the VS runtime
+  cmake_policy(SET CMP0091 NEW)
+endif()
 
 # The main project name
 project(OPS VERSION 4.2.0)
@@ -15,6 +24,10 @@ project(OPS VERSION 4.2.0)
 #       JAVA_HOME                   -
 #       Python_ROOT_DIR             -
 #       BOOST_HOME or BOOST_ROOT    -
+#
+#     C++ compile flags:
+#       CXXFLAGS                    Init value for CMAKE_CXX_FLAGS (C++ compile flags).
+#                                   Used at configure time, then cached.
 #
 #     When C++ has defined USE_FIXED_LENGTH_STRINGS:
 #       OPS_FIXED_OBJECT_NAME_SIZE  default: 50
@@ -34,7 +47,9 @@ project(OPS VERSION 4.2.0)
 #
 ################################################################################
 
-set (CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 message(STATUS ">>> CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE})
 message(STATUS ">>> OPS_BUILD_UNITTESTS: " ${OPS_BUILD_UNITTESTS})
@@ -151,10 +166,32 @@ else()
 endif()
 
 ## ----------------------------------------------------------------------------
-# add compiler flags for C++11 / release / debug
+# Update C++ compiler flags (warnings, exceptions, ...)
+message(STATUS ">>> CMAKE_CXX_FLAGS: " ${CMAKE_CXX_FLAGS})
+message(STATUS ">>> CMAKE_CXX_FLAGS_DEBUG: " ${CMAKE_CXX_FLAGS_DEBUG})
+message(STATUS ">>> CMAKE_CXX_FLAGS_RELEASE: " ${CMAKE_CXX_FLAGS_RELEASE})
+
+set(warnings "")
 if(MSVC)
-#  set(warnings "/W4 /WX /EHsc")
-  set(warnings "/W3 /WX /EHsc")
+  # Use at least warning level W3, User can specify higher level
+  # CMake sets default value after user supplied value so it need to be removed
+  # CMake 3.15 has removed the default values (Policy CMP0092)
+  if(CMAKE_CXX_FLAGS MATCHES "/Wall")
+    string(REGEX REPLACE "/W[0-4]" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+  endif()
+  if(CMAKE_CXX_FLAGS MATCHES "/W4")
+    string(REGEX REPLACE "/W[0-3]" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+  endif()
+  if(NOT CMAKE_CXX_FLAGS MATCHES "/W([3-4]|all)")
+    # Our default, if not specified from user/CMake
+    string(APPEND warnings " /W3 /WX")
+  endif()
+
+  # Check and specify exception handling if not defined by user/CMake
+  if(NOT CMAKE_CXX_FLAGS MATCHES "/EH[ascr]+")
+    string(APPEND warnings " /EHsc")
+  endif()
+
 else()
   if(CMAKE_BUILD_TYPE MATCHES "Release" OR CMAKE_BUILD_TYPE MATCHES "")
   	set(CMAKE_CXX_FLAGS "-O2")
@@ -166,13 +203,12 @@ else()
 #  set(warnings "-Wall -Wextra -Werror")
 #  set(warnings "-Wall -Wunused-parameter -Wsign-compare -Wcast-qual -Wconversion")
   set(warnings "-Wall")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 endif()
-set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} ${warnings}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${warnings}")
 
-message(STATUS "c Flags: " ${CMAKE_C_FLAGS})
-message(STATUS "cxx Flags: " ${CMAKE_CXX_FLAGS})
+message(STATUS "CMAKE_CXX_FLAGS: " ${CMAKE_CXX_FLAGS})
+message(STATUS "CMAKE_CXX_FLAGS_DEBUG: " ${CMAKE_CXX_FLAGS_DEBUG})
+message(STATUS "CMAKE_CXX_FLAGS_RELEASE: " ${CMAKE_CXX_FLAGS_RELEASE})
 
 ## ----------------------------------------------------------------------------
 # If we have java
@@ -329,16 +365,18 @@ endif()
 ################################################################################
 # Create cmake-files for use from other projects
 
+set(OPS_NAMESPACE ${PROJECT_NAME}::)
+
 if((OPS_BOOTSTRAP_BUILD) OR (DEFINED OPS_NO_SEPARATE_BOOTSTRAP))
   install_jar_exports(
     TARGETS OPSCompilerLib OPSJLib IDLParser ConfigurationLib IDLTemplates opsc
-    NAMESPACE ${PROJECT_NAME}::
+    NAMESPACE ${OPS_NAMESPACE}
     FILE jar-targets.cmake
     DESTINATION cmake/internal)
 endif()
 if(NOT OPS_BOOTSTRAP_BUILD)
   install(EXPORT ops-targets
-    NAMESPACE ${PROJECT_NAME}::
+    NAMESPACE ${OPS_NAMESPACE}
     DESTINATION cmake/internal
   )
 endif()

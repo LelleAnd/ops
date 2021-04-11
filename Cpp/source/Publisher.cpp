@@ -147,7 +147,7 @@ namespace ops
         sendDataHandler = participant->getSendDataHandler(topic);
 
 		message.setKey("");
-        message.setPublisherName(name);
+        message.setPublisherName(m_name);
         message.setTopicName(topic.getName());
         message.setDataOwner(false);
 		
@@ -216,23 +216,23 @@ namespace ops
 
     void Publisher::setName(ObjectName_T const name)
     {
-        this->name = name;
+        m_name = name;
 		message.setPublisherName(name);
 	}
 
     void Publisher::setKey(ObjectKey_T const key) noexcept
     {
-        this->key = key;
+        m_key = key;
     }
 
     ObjectKey_T Publisher::getKey() const noexcept
     {
-        return key;
+        return m_key;
     }
 
 	ObjectName_T Publisher::getName() const noexcept
     {
-        return name;
+        return m_name;
     }
 
     bool Publisher::writeOPSObject(OPSObject* const obj)
@@ -262,8 +262,8 @@ namespace ops
 	bool Publisher::internalWrite(OPSObject* const data)
 	{
 #endif
-        if (key != "") {
-            data->setKey(key);
+        if (m_key != "") {
+            data->setKey(m_key);
         }
 
         if (_ackSub != nullptr) {

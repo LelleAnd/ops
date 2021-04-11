@@ -48,7 +48,7 @@ public:
 class MyNotifier : public Notifier<int>
 {
 public:
-	void notify(int const value) { notifyNewEvent(value); }
+	void notify(int const val) { notifyNewEvent(val); }
 
 	MyNotifier() = default;
 	explicit MyNotifier(bool lateArrivals) : Notifier<int>(lateArrivals) {};

@@ -107,8 +107,8 @@ private:
  
     Participant* participant{ nullptr };
 
-	ObjectName_T name;
-    ObjectKey_T key;
+	ObjectName_T m_name;
+    ObjectKey_T m_key;
 
     bool started{ false };
 

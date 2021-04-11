@@ -84,12 +84,12 @@ namespace ops
 		std::shared_ptr<TCPConnection> _connection;
 
 		// Should be called by the derived classes
-		void connected(bool value)
+		void connected(bool val)
 		{
-			const bool doNotify = _cs.connected != value;
-			_cs.connected = value;
-			_cs.totalNo = value ? 1 : 0;
-			if (value) getSource(_cs.addr, _cs.port);
+			const bool doNotify = _cs.connected != val;
+			_cs.connected = val;
+			_cs.totalNo = val ? 1 : 0;
+			if (val) { getSource(_cs.addr, _cs.port); }
 			if (doNotify) {
 				if (_cs.connected) {
 					_client->onConnect(*_connection, _cs);

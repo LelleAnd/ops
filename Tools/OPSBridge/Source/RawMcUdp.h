@@ -81,6 +81,6 @@ namespace opsbridge {
 #if defined(_MSC_VER) && (_MSC_VER == 1900)
 #pragma warning( disable : 4373)
 #endif
-		void onNewEvent(ops::Notifier<ops::BytesSizePair>* const sender, ops::BytesSizePair byteSizePair);
+		void onNewEvent(ops::Notifier<ops::BytesSizePair>* const sender, ops::BytesSizePair byteSizePair) override;
 	};
 }

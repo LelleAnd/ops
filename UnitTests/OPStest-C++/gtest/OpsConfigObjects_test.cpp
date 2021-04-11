@@ -45,7 +45,7 @@ using namespace opsidls;
 
 class TopicTestFixture : public ::testing::Test {
 protected:
-	std::string content{
+	std::string gcontent{
 		" <root>"
 		"	<name>TestTopic</name>"
 		"	<dataType>GTest.TestData</dataType>"
@@ -187,7 +187,7 @@ TEST_F(TopicTestFixture, Test_Clone) {
 
 	Topic obj1;
 
-	getFromString(content, obj1);
+	getFromString(gcontent, obj1);
 	obj1.setTimeToLive(2);
 	obj1.setLocalInterface("192.1.1.1");
 	obj1.setParticipantID("Hi");
@@ -245,7 +245,7 @@ TEST_F(TopicTestFixture, Test_Serialize) {
 
 	Topic obj1;
 	{
-		getFromString(content, obj1);
+		getFromString(gcontent, obj1);
 		EXPECT_STREQ(obj1.getName().c_str(), "TestTopic");
 		EXPECT_EQ(obj1.getPort(), 6689);
 		EXPECT_STREQ(obj1.getTypeID().c_str(), "GTest.TestData");
@@ -322,7 +322,7 @@ TEST_F(TopicTestFixture, Test_Serialize) {
 
 class ChannelTestFixture : public ::testing::Test {
 protected:
-	std::string content{
+	std::string gcontent{
 		" <root>"
 		"	<name>Channel-A</name>"
 		"	<localInterface>127.0.0.1</localInterface>"
@@ -419,7 +419,7 @@ TEST_F(ChannelTestFixture, Test_Clone) {
 
 	Channel obj1;
 
-	getFromString(content, obj1);
+	getFromString(gcontent, obj1);
 	getFromString(content_linkudp, obj1);
 	obj1.spareBytes.push_back('a');
 
@@ -458,7 +458,7 @@ TEST_F(ChannelTestFixture, Test_Serialize) {
 
 	Channel obj1;
 	{
-		getFromString(content, obj1);
+		getFromString(gcontent, obj1);
 		EXPECT_STREQ(obj1.channelID.c_str(), "Channel-A");
 		EXPECT_STREQ(obj1.linktype.c_str(), Channel::LINKTYPE_MC.c_str());
 		EXPECT_STREQ(obj1.localInterface.c_str(), "127.0.0.1");
@@ -513,7 +513,7 @@ TEST_F(ChannelTestFixture, Test_Populate) {
 
 	Channel obj1;
 
-	getFromString(content, obj1);
+	getFromString(gcontent, obj1);
 	getFromString(content_linkudp, obj1);
 
 	EXPECT_STREQ(obj1.channelID.c_str(), "Channel-A");
@@ -549,7 +549,7 @@ TEST_F(ChannelTestFixture, Test_Populate) {
 
 class TransportTestFixture : public ::testing::Test {
 protected:
-	std::string content{
+	std::string gcontent{
 		" <root>"
 		"	<channelID>Channel-A</channelID>"
 		"	<topics>"
@@ -636,7 +636,7 @@ TEST_F(TransportTestFixture, Test_Clone) {
 
 	Transport obj1;
 
-	getFromString(content, obj1);
+	getFromString(gcontent, obj1);
 	obj1.spareBytes.push_back('a');
 
 	EXPECT_STREQ(obj1.channelID.c_str(), "Channel-A");
@@ -664,7 +664,7 @@ TEST_F(TransportTestFixture, Test_Serialize) {
 
 	Transport obj1;
 
-	getFromString(content, obj1);
+	getFromString(gcontent, obj1);
 
 	EXPECT_STREQ(obj1.channelID.c_str(), "Channel-A");
 	ASSERT_EQ(obj1.topics.size(), (size_t)4);
@@ -987,7 +987,7 @@ protected:
 	OPSObjectFactoryImpl fact1;
 	SerializableInheritingTypeFactory factory;
 
-	std::string content{
+	std::string gcontent{
 		" <root>"
 		"   <domains>"
 		"	  <element type = \"Domain\">"
@@ -1062,7 +1062,7 @@ TEST_F(OpsConfigTestFixture, Test) {
 	EXPECT_EQ(obj1.getDomain("Test"), nullptr);
 
 	// Add some data
-	getFromString(content, obj1);
+	getFromString(gcontent, obj1);
 	Domain* dom = obj1.getDomain("TestDomain");
 	ASSERT_NE(dom, nullptr);
 	EXPECT_EQ(dom->getDebugMcPort(), 9999);
@@ -1112,7 +1112,7 @@ TEST_F(OpsConfigTestFixture, Test) {
 TEST_F(OpsConfigTestFixture, Test_Clone) {
 
 	DefaultOPSConfigImpl obj1;
-	getFromString(content, obj1);
+	getFromString(gcontent, obj1);
 	Domain* dom = obj1.getDomain("TestDomain");
 	ASSERT_NE(dom, nullptr);
 	EXPECT_EQ(dom->getDebugMcPort(), 9999);
@@ -1133,7 +1133,7 @@ TEST_F(OpsConfigTestFixture, Test_Serialize) {
 
 	{
 		DefaultOPSConfigImpl obj1;
-		getFromString(content, obj1);
+		getFromString(gcontent, obj1);
 
 		EXPECT_STREQ(obj1.getTypeString().c_str(), "DefaultOPSConfigImpl ");
 		EXPECT_EQ(obj1.getRefToDomains().size(), (size_t)2);

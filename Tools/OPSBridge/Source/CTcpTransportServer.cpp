@@ -78,8 +78,8 @@ void CTcpTransportServer::CloseServer()
 void CTcpTransportServer::Run()
 {
     int				nRet;           
-	sockaddr_in		saServer;
-	sockaddr_in		SockAddr;
+	sockaddr_in		saServer{ 0 };
+	sockaddr_in		SockAddr{ 0 };
 
 	// Create socket
 	m_listenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);

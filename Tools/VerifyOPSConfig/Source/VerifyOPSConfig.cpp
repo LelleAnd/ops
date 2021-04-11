@@ -490,7 +490,7 @@ public:
 				LOG_WARN(">>> Missing <port> for channel '" << channelName << "' in domain '" << domainName << "'" << std::endl);
 			}
 		} else {
-			if (config.parseInt(port, -1) > 65535) {
+			if (config.parseInt(port, 65536u) > 65535u) {
 				LOG_WARN(">>> port > 65535 for channel '" << channelName << "' in domain '" << domainName << "'" << std::endl);
 			}
 		}
@@ -689,7 +689,7 @@ public:
 					LOG_WARN(">>> Missing <port> for topic '" << topicName << "' in domain '" << domainName << "'" << std::endl);
 				}
 			} else {
-				if (config.parseInt(port, -1) > 65535) {
+				if (config.parseInt(port, 65536u) > 65535u) {
 					LOG_WARN(">>> port > 65535 for topic '" << topicName << "' in domain '" << domainName << "'" << std::endl);
 				}
 			}

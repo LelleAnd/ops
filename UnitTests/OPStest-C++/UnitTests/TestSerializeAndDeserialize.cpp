@@ -145,13 +145,13 @@ TEST_F(Test_OPS_Serialization_And_Deserialization, test_ExtraAllt_OPSMessage) {
 	ops::OPSArchiverOut out(buf, false);
 	ops::OPSArchiverIn  in(buf, &fact);
 
-	pizza::special::ExtraAllt extraAllt;
-	init::initExtraAlltNormal(extraAllt);
+	pizza::special::ExtraAllt extraAllt2;
+	init::initExtraAlltNormal(extraAllt2);
 
 
 	ops::OPSMessage mess;
 	mess.setDataOwner(false);
-	mess.setData(&extraAllt);
+	mess.setData(&extraAllt2);
 
 	EXPECT_EQ(buf.GetSize(), 0);
 

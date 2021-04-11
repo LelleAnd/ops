@@ -103,7 +103,7 @@ namespace ops
 			    sock->bind(*localEndpoint);
 
 				//ipaddress = localEndpoint->address().to_string();
-	            port = sock->local_endpoint().port();
+	            m_port = sock->local_endpoint().port();
 			} catch (...) {
 				ops::BasicError err("UDPReceiver", "UDPReceiver", "Failed to setup UDP socket. Check address");
 				Participant::reportStaticError(&err);
@@ -227,7 +227,7 @@ namespace ops
 
         virtual uint16_t getLocalPort() noexcept override
         {
-            return port;
+            return m_port;
         }
 
 		virtual Address_T getLocalAddress() noexcept override
@@ -266,7 +266,7 @@ namespace ops
 		}
 
     private:
-        uint16_t port = 0;
+        uint16_t m_port = 0;
 		Address_T ipaddress;
         std::unique_ptr<socket_t> sock;
         std::unique_ptr<endpoint_t> localEndpoint;

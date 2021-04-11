@@ -215,7 +215,7 @@ int main(const int argc, const char* args[])
 
 		if (_kbhit() != 0) {
 #ifdef _WIN32
-			char const ch = _getch();
+			char const ch = (char const)_getch();
 #else
 			char const ch = (char const)getchar();
 #endif

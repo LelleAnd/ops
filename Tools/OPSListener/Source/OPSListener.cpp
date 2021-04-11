@@ -421,9 +421,9 @@ public:
 	}
 #endif
 
-	bool HandleCommandLine(const int argc, const char* argv[])
-	{
 #ifdef _WIN32
+	bool HandleCommandLine(const int , const char** )
+	{
 		bool returnValue = false;
 		int nArgs;
 		LPWSTR *szArglist = CommandLineToArgvW(GetCommandLineW(), &nArgs);
@@ -437,6 +437,8 @@ public:
 		LocalFree(szArglist);
 		return returnValue;
 #else
+	bool HandleCommandLine(const int argc, const char* argv[])
+	{
 		return HandleArguments(argv, 1, argc);
 #endif
 	}

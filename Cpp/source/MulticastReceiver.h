@@ -88,10 +88,10 @@ namespace ops
 
 			if (_inSocketBufferSizent > 0) {
 				boost::asio::socket_base::receive_buffer_size option(_inSocketBufferSizent);
-				boost::system::error_code ec, ec2;
-				ec = sock->set_option(option, ec);
+				boost::system::error_code ec1, ec2;
+				ec1 = sock->set_option(option, ec1);
 				sock->get_option(option, ec2);
-				if (ec || ec2 || option.value() != _inSocketBufferSizent) {
+				if (ec1 || ec2 || option.value() != _inSocketBufferSizent) {
 					ErrorMessage_T msg("Socket buffer size ");
 					msg += NumberToString(_inSocketBufferSizent);
 					msg += " could not be set. Used value: ";

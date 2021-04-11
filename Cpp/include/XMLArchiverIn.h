@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2020 Lennart Andersson.
+ * Copyright (C) 2020-2021 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -61,13 +61,11 @@ namespace ops
     class XMLArchiverIn : public ArchiverInOut
     {
 	private:
-		std::istream& is;
 		std::string topNode;
 		SerializableInheritingTypeFactory * factory;
         opsXML::XMLNode currentNode;
         std::string xmlString;
         std::string parseString;
-        std::stringstream ss;
 
 		std::stack<opsXML::XMLNode> _stack;
 
@@ -96,10 +94,10 @@ namespace ops
 
     public:
 
-		XMLArchiverIn(std::istream& is_, std::string topNode_, SerializableInheritingTypeFactory* factory_): 
-			is(is_), topNode(topNode_), factory(factory_)
+		XMLArchiverIn(std::istream& is, std::string topNode_, SerializableInheritingTypeFactory* factory_): 
+			topNode(topNode_), factory(factory_)
         {
-            std::string tmp;
+			std::string tmp;
             is >> tmp;
             while (!is.eof())
             {

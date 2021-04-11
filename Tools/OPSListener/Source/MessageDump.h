@@ -496,8 +496,8 @@ namespace message_dump {
                     //std::cout << "  FieldObject, name: '" << fieldname << "', type: '" << elementtype << "'\n";
                     auto search = enums.find(elementtype);
                     if (search != enums.end()) {
-                        DumpEnumShort* dmp = search->second;
-                        val = new DumpVectorEnumShort(dmp);
+                        DumpEnumShort* dmp2 = search->second;
+                        val = new DumpVectorEnumShort(dmp2);
                     } else {
                         val = new DumpFieldObjectVector(isvirt, elementtype, objs);
                     }
@@ -512,8 +512,8 @@ namespace message_dump {
                 //std::cout << "  FieldObject, name: '" << fieldname << "', type: '" << fieldtype << "'\n";
                 auto search = enums.find(fieldtype);
                 if (search != enums.end()) {
-                    DumpEnumShort* dmp = search->second;
-                    val = new DumpEnumShort(*dmp);
+                    DumpEnumShort* dmp2 = search->second;
+                    val = new DumpEnumShort(*dmp2);
                 } else {
                     val = new DumpFieldObject(isvirt, fieldtype, objs);
                 }

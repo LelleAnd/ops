@@ -321,7 +321,7 @@ namespace ops
                 firstDataReceived = true;
                 
                 addToBuffer(message);
-                this->message = message;
+                m_message = message;
                 data = o;
 
                 // Notify all registered listeners
@@ -382,19 +382,19 @@ namespace ops
     OPSMessage* Subscriber::getMessage() noexcept
     {
         hasUnreadData = false;
-        return message;
+        return m_message;
     }
 
     /// ----------------------------------------------------------
 
     ObjectName_T Subscriber::getName() const noexcept
     {
-        return name;
+        return m_name;
     }
 
     void Subscriber::setName(ObjectName_T const name) noexcept
     {
-        this->name = name;
+        m_name = name;
         if (_ackFilter != nullptr) {
             _ackFilter->_pub->setName(name);
         }

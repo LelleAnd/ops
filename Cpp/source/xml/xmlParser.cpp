@@ -1,6 +1,10 @@
 
 //parasoft-begin-suppress ALL "suppress all rules for this XMLPARSER Library"
 
+#if defined(_MSC_VER) && (_MSC_VER >= 1900)
+#pragma warning( disable : 4706)
+#endif
+
 #ifdef __GNUC__
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wcast-qual"

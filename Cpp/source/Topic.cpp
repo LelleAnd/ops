@@ -177,9 +177,9 @@ namespace ops
 	{
 		return port;
 	}
-	void Topic::setPort(int const port) noexcept
+	void Topic::setPort(int const pt) noexcept
 	{
-		this->port = port;
+		this->port = pt;
 	}
 	void Topic::setTimeToLive(int const ttl) noexcept
 	{

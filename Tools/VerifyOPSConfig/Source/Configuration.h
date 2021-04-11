@@ -16,7 +16,6 @@
 		opsXML::XMLResults parseResult;
 		std::string xmlString;
 		std::string parseString;
-		std::stringstream ss;
 	public:
 		Configuration(std::istream& is_, std::string topNode_ = "")
 		{

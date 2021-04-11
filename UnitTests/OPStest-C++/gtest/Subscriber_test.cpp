@@ -55,11 +55,11 @@ struct MySubscriberBase : public ops::SubscriberBase
     MySubscriberBase(ops::Topic top) : ops::SubscriberBase(top) {}
 
     // Callback for received messages
-    void onNewEvent(Notifier<OPSMessage*>*, OPSMessage* const )
+    void onNewEvent(Notifier<OPSMessage*>*, OPSMessage* const ) override
     {
     }
     // Callback for deadline timeouts
-    void onNewEvent(Notifier<int>*, int)
+    void onNewEvent(Notifier<int>*, int) override
     {
     }
 };

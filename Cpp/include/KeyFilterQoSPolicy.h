@@ -1,6 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -70,7 +71,7 @@ namespace ops
         bool applyFilter(const OPSObject* const o) override;
 
     private:
-        std::vector<ObjectKey_T> keyStrings;
+        std::vector<ObjectKey_T> m_keyStrings;
     };
 
 }

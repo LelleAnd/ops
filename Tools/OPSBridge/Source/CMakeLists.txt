@@ -29,6 +29,15 @@ SEHException.cpp
 SEHException.h
 )
 
+if(MSVC)
+  # We need /EHa exception handling
+  string(REGEX REPLACE "/EH[ascr]+" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+  string(APPEND CMAKE_CXX_FLAGS " /EHa")
+  message(STATUS ">>> " ${EXE_NAME} ": CMAKE_CXX_FLAGS: " ${CMAKE_CXX_FLAGS})
+  message(STATUS ">>> " ${EXE_NAME} ": CMAKE_CXX_FLAGS_DEBUG: " ${CMAKE_CXX_FLAGS_DEBUG})
+  message(STATUS ">>> " ${EXE_NAME} ": CMAKE_CXX_FLAGS_RELEASE: " ${CMAKE_CXX_FLAGS_RELEASE})
+endif()
+
 # generate the library target
 add_executable(${EXE_NAME}
     ${EXE_SRCS}

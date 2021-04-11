@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <chrono>
+
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
@@ -55,7 +57,7 @@ namespace ops
 			volatile bool _tryToConnect;
 			std::unique_ptr<boost::asio::ip::tcp::endpoint> _endpoint;
 			int _inBufferSize;
-			boost::asio::deadline_timer _timer;
+			boost::asio::steady_timer _timer;
 
 		public:
 			TCPBoostConnectionWConnect(TCPClient* owner, Address_T serverIP, uint16_t serverPort, IOService* ioServ, int inBufferSize) :
@@ -115,7 +117,7 @@ namespace ops
 							// Delay new connect attempt
 							std::shared_ptr<TCPConnection> self = shared_from_this();
 							_timer.cancel();
-							_timer.expires_from_now(boost::posix_time::milliseconds(100));
+							_timer.expires_from_now(std::chrono::milliseconds(100));
 							_timer.async_wait([self](const boost::system::error_code& e) {
 								OPS_TCP_TRACE("Client: handleConnect(), delay error: " << e << '\n');
 								if (e != boost::asio::error::operation_aborted) {

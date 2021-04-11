@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -20,6 +21,8 @@
 #ifndef ops_BoostDeadlineTimerImpl_h
 #define ops_BoostDeadlineTimerImpl_h
 
+#include "chrono"
+
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
@@ -27,7 +30,6 @@
 
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -70,7 +72,7 @@ namespace ops
 
     class BoostDeadlineTimerImpl::impl : public Notifier<int>, public boost::enable_shared_from_this< BoostDeadlineTimerImpl::impl >
 	{
-		boost::asio::deadline_timer deadlineTimer;
+		boost::asio::steady_timer deadlineTimer;
 	public:
         explicit impl(boost::asio::io_service* boostIOService) : deadlineTimer(*boostIOService)
 		{
@@ -79,7 +81,7 @@ namespace ops
 		virtual void start(int64_t timeoutMs) 
 		{
 			deadlineTimer.cancel();
-			deadlineTimer.expires_from_now(boost::posix_time::milliseconds(timeoutMs));
+			deadlineTimer.expires_from_now(std::chrono::milliseconds(timeoutMs));
             // Here we pass in a shared_ptr to our instance
 			deadlineTimer.async_wait(boost::bind(&impl::asynchHandleDeadlineTimeout, shared_from_this(), boost::asio::placeholders::error));
 		}
@@ -119,9 +121,8 @@ namespace ops
         pimpl_->removeListener(this);
     }
 
-    void BoostDeadlineTimerImpl::onNewEvent(Notifier<int>* sender, int message)
+    void BoostDeadlineTimerImpl::onNewEvent(Notifier<int>* , int message)
     {
-        UNUSED(sender);
         notifyNewEvent(message);    // Just forward the event
     }
 

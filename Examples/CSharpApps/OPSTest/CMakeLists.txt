@@ -14,6 +14,8 @@ set(IDLS_SOURCE
   ${IDLS_GEN_PATH}/sds/MessageHeaderData.cs
 )
 
+set_source_files_properties(${IDLS_SOURCE} PROPERTIES GENERATED TRUE)
+
 set(PROG_CS_SOURCE
   ${IDLS_SOURCE}
   OPSTest/Form1.cs
@@ -30,6 +32,7 @@ if(WIN32)
 
     # Define the DLL target, including all relevant project files.
     add_executable(${PROG_NAME} ${PROG_CS_SOURCE})
+    add_dependencies(${PROG_NAME} PizzaProject)
 
     # Set the .NET Framework version for the target.
     set_property(TARGET ${PROG_NAME} PROPERTY VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.6.1")

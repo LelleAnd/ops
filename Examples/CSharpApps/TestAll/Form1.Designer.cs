@@ -45,11 +45,6 @@
             this.textBox1.Size = new System.Drawing.Size(800, 450);
             this.textBox1.TabIndex = 0;
             // 
-            // timer1
-            // 
-            this.timer1.Interval = 4000;
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
-            // 
             // timerLog
             // 
             this.timerLog.Enabled = true;

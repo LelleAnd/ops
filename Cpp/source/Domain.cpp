@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2020 Lennart Andersson.
+* Copyright (C) 2019-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -49,13 +49,13 @@ Domain& Domain::operator= (const Domain& other)
 // Returns a newely allocated deep copy/clone of this object.
 Domain* Domain::clone()
 {
-	Domain* ret = new Domain;
+	Domain* const ret = new Domain;
 	fillClone(ret);
 	return ret;
 }
 
 // Fills the parameter obj with all values from this object.
-void Domain::fillClone(Domain* obj) const
+void Domain::fillClone(Domain* const obj) const
 {
 	if (this == obj) { return; }
 	ops::OPSObject::fillClone(obj);
@@ -195,14 +195,14 @@ void Domain::checkTransports() const
 	// Loop over all transports and for each topic, see if it needs parameters from the channel
 	for (auto& trans : transports) {
 		// Get channel
-		const Channel* channel = findChannel(trans->channelID);
+		const Channel* const channel = findChannel(trans->channelID);
 		if (channel == nullptr) {
 			ExceptionMessage_T msg("Non existing channelID: '");
 			msg += trans->channelID;
 			msg += "' used in transport specification.";
 			throw ops::ConfigException(msg);
 		} else {
-			for (auto& topname : trans->topics) {
+			for (const auto& topname : trans->topics) {
 				Topic* const top = findTopic(topname);
 				if (top == nullptr) {
 					ExceptionMessage_T msg("Non existing topicID: '");
@@ -262,11 +262,11 @@ int Domain::getHeartbeatTimeout() const noexcept
 
 Domain::~Domain()
 {
-	for (auto& x : topics) { delete x; }
+	for (const auto& x : topics) { delete x; }
 	topics.clear();
-	for (auto& x : channels) { delete x; }
+	for (const auto& x : channels) { delete x; }
 	channels.clear();
-	for (auto& x : transports) { delete x; }
+	for (const auto& x : transports) { delete x; }
 	transports.clear();
 }
 

@@ -96,14 +96,13 @@ namespace ops
     /// Helper class to the Subscriber for handling of sending ACK's if that is enabled in the Topic
     struct Subscriber::ACKFilter : public FilterQoSPolicy
     {
-        explicit ACKFilter(const Topic& ackTopic)
+        explicit ACKFilter(const Topic& ackTopic) :
+            _pub(new Publisher(ackTopic))   // Create Publisher for sending REGISTER, ACK, UNREGISTER
         {
-            // Create Publisher for sending REGISTER, ACK, UNREGISTER
-            _pub = std::unique_ptr<Publisher>(new Publisher(ackTopic));
         }
 
         // Not used, but must be implemeted
-        bool applyFilter(const OPSObject* const) override
+        virtual bool applyFilter(const OPSObject* const) override
         {
             return true;
         }
@@ -112,10 +111,10 @@ namespace ops
         // Applies a filter in the receiving process in Subscribers.
         // Returning false from a filter indicates that this data sample (OPSObject)
         // shall not be propagated to the application layer.
-        bool applyFilter(const OPSMessage* const mess, const OPSObject* const) override
+        virtual bool applyFilter(const OPSMessage* const mess, const OPSObject* const) override
         {
             // Send ACK with Pub ID counter
-            int64_t pubId = mess->getPublicationID();
+            const int64_t pubId = mess->getPublicationID();
             mess->getSource((uint32_t&)_data.sourceIP, (uint16_t&)_data.sourcePort);
             _data.publicationID = pubId;
             _data.messageType = opsidls::SendAckPatternData::MType::ACK;
@@ -125,7 +124,7 @@ namespace ops
 
             const MyKey_t pubKey((uint32_t)_data.sourceIP, (uint16_t)_data.sourcePort);
 
-            auto it = _lastReceivedPubId.find(pubKey);
+            const auto it = _lastReceivedPubId.find(pubKey);
             if (it != _lastReceivedPubId.end()) {
                 // If the same Pub ID counter from Publisher, skip message (we have already seen it, it's a resend)
                 if (it->second == pubId) { return false; }
@@ -141,7 +140,7 @@ namespace ops
         }
 
         // Need to hold Messagelock when called to synchronize with callback/applyFilter above
-        void send(opsidls::SendAckPatternData::MType req)
+        void send(const opsidls::SendAckPatternData::MType req)
         {
             _data.messageType = req;
             _pub->writeOPSObject(&_data);
@@ -203,7 +202,7 @@ namespace ops
     void Subscriber::AddExpectedPublisher(const ObjectName_T& pubname)
     {
         if (_ackFilter == nullptr) { return; }
-        MessageLock lck(*this);
+        const MessageLock lck(*this);
         _ackFilter->_expectedPub[pubname] = false;
     }
 
@@ -211,17 +210,17 @@ namespace ops
     bool Subscriber::CheckPublisher(const ObjectName_T& pubname)
     {
         if (_ackFilter == nullptr) { return true; }
-        MessageLock lck(*this);
+        const MessageLock lck(*this);
         if (pubname == "") {
-            for (auto& x : _ackFilter->_expectedPub) {
-                if (x.second == false) return false;
+            for (const auto& x : _ackFilter->_expectedPub) {
+                if (x.second == false) { return false; }
             }
             return true;
         }
         else {
-            for (auto& x : _ackFilter->_expectedPub) {
+            for (const auto& x : _ackFilter->_expectedPub) {
                 if (x.first == pubname) {
-                    if (x.second == true) return true;
+                    if (x.second == true) { return true; }
                 }
             }
             return false;
@@ -231,7 +230,7 @@ namespace ops
     void Subscriber::RemoveExpectedPublisher(const ObjectName_T& pubname)
     {
         if (_ackFilter == nullptr) { return; }
-        MessageLock lck(*this);
+        const MessageLock lck(*this);
         _ackFilter->_expectedPub.erase(pubname);
     }
 
@@ -247,10 +246,10 @@ namespace ops
 
         bool sendRegister = false;
 
-        MessageLock lck(*this);
+        const MessageLock lck(*this);
 
         // Only until we got a message from all expected publishers
-        for (auto& x : _ackFilter->_expectedPub) {
+        for (const auto& x : _ackFilter->_expectedPub) {
             if (x.second == false) {
                 sendRegister = true;
                 break;
@@ -415,10 +414,10 @@ namespace ops
         filterQoSPolicies.remove(fqos);
     }
 
-    bool Subscriber::applyFilterQoSPolicies(OPSMessage* const message, OPSObject* const obj)
+    bool Subscriber::applyFilterQoSPolicies(const OPSMessage* const message, const OPSObject* const obj)
     {
         const SafeLock lock(filterQoSPolicyMutex);
-        for (auto filter : filterQoSPolicies) {
+        for (const auto filter : filterQoSPolicies) {
             if (filter->applyFilter(message, obj) == false) {
                 return false;
             }

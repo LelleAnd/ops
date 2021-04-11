@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2019-2020 Lennart Andersson.
+ * Copyright (C) 2019-2021 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -49,7 +49,7 @@ namespace ops
 		appendType(TypeId_T("Topic"));
 	}
 
-    Topic::Topic(const ObjectName_T namee, const TypeId_T typeIDd, int sampleMaxSizee, bool useAckk, const Topic& base) :
+    Topic::Topic(const ObjectName_T namee, const TypeId_T typeIDd, const int sampleMaxSizee, const bool useAckk, const Topic& base) :
         name(namee),
         port(base.port),
         timeToLive(base.timeToLive),
@@ -86,13 +86,13 @@ namespace ops
 	// Returns a newely allocated deep copy/clone of this object.
 	Topic* Topic::clone()
 	{
-		Topic* ret = new Topic;
+		Topic* const ret = new Topic;
 		fillClone(ret);
 		return ret;
 	}
 
 	// Fills the parameter obj with all values from this object.
-	void Topic::fillClone(Topic* obj) const
+	void Topic::fillClone(Topic* const obj) const
 	{
 		if (this == obj) { return; }
 		ops::OPSObject::fillClone(obj);
@@ -229,7 +229,7 @@ namespace ops
     {
         return useAck;
     }
-    void Topic::setUseAck(bool value) noexcept
+    void Topic::setUseAck(const bool value) noexcept
     {
         useAck = value;
     }

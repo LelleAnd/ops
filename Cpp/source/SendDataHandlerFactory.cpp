@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2020 Lennart Andersson.
+* Copyright (C) 2020-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -113,7 +113,7 @@ namespace ops
             return sdh;
         }
 
-		int ttl = top.getTimeToLive();
+		const int ttl = top.getTimeToLive();
         std::shared_ptr<SendDataHandler> sdh = nullptr;
 
 		if (top.getTransport() == Topic::TRANSPORT_MC)

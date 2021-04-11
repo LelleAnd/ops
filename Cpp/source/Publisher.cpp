@@ -35,8 +35,8 @@ namespace ops
     // A subscriber for ACK messages
     struct Publisher::AckSubscriber : public ops::SubscriberBase
     {
-        explicit AckSubscriber(const ops::Topic& topic) :
-            SubscriberBase(topic)
+        explicit AckSubscriber(const ops::Topic& top) :
+            SubscriberBase(top)
         {
         }
 
@@ -46,22 +46,22 @@ namespace ops
 #pragma warning( disable : 4373 )
 #endif
         // Note that the receiveDataHandler messageLock is held while executing this method
-        void onNewEvent(ops::Notifier<ops::OPSMessage*>*, ops::OPSMessage* const mess) override
+        virtual void onNewEvent(ops::Notifier<ops::OPSMessage*>*, ops::OPSMessage* const mess) override
         {
             //Check that this message is delivered on the same topic as this Subscriber use
             if (mess->getTopicName() != topic.getName()) {
                 // This is a normal case when several Topics use the same port
                 return;
             }
-            opsidls::SendAckPatternData* ackData = dynamic_cast<opsidls::SendAckPatternData*>(mess->getData());
-            if (ackData == nullptr) return;
+            opsidls::SendAckPatternData* const ackData = dynamic_cast<opsidls::SendAckPatternData*>(mess->getData());
+            if (ackData == nullptr) { return; }
 
             uint32_t IP;
             uint16_t port;
             mess->getSource(IP, port);
-            MyKey_t subKey(IP, port);
+            const MyKey_t subKey(IP, port);
 
-            ObjectName_T subName = mess->getPublisherName();
+            const ObjectName_T subName = mess->getPublisherName();
 
             switch (ackData->messageType)
             {
@@ -73,7 +73,7 @@ namespace ops
                         // If so, mark Subscriber as "acked"
                         _map[subKey].ack();
                         // If it's an expected subscribers, set mark
-                        auto ent = _expectedSub.find(subName);
+                        const auto ent = _expectedSub.find(subName);
                         if (ent != _expectedSub.end()) {
                             _expectedSub[subName].ack();
                         }
@@ -114,7 +114,7 @@ namespace ops
         }
 
         // Callback for deadline timeouts, Needed but not used
-        void onNewEvent(ops::Notifier<int>*, int) override {}
+        virtual void onNewEvent(ops::Notifier<int>*, int) override {}
 
         typedef std::pair<uint32_t, uint16_t> MyKey_t;
         struct entry_t {
@@ -268,7 +268,7 @@ namespace ops
 
         if (_ackSub != nullptr) {
             // Clear ACK flag for each expected ACK sender, but not failed counter
-            ops::MessageLock lck(*_ackSub);
+            const ops::MessageLock lck(*_ackSub);
             for (auto& element : _ackSub->_map) {
                 element.second.acked = false;
             }
@@ -282,7 +282,7 @@ namespace ops
             _sendState = SendState::acked;
         }
 
-        SafeLock lck(_pubLock);
+        const SafeLock lck(_pubLock);
         _resendsLeft = topic.getNumResends();
 
         // Serialize message
@@ -329,7 +329,7 @@ namespace ops
     {
         if (_ackSub == nullptr) { return true; }
         if (_ackSub->_lastSentPubId < 0) { return true; }
-        SafeLock lck(_pubLock);
+        const SafeLock lck(_pubLock);
         return writeSerializedBuffer();
     }
 
@@ -338,7 +338,7 @@ namespace ops
     {
         if (_ackSub == nullptr) { return; }
         // Add Subscriber to expected ACK senders
-        MessageLock lck(*_ackSub);
+        const MessageLock lck(*_ackSub);
         _ackSub->_expectedSub[subname].acked = false;
         _ackSub->_expectedSub[subname].valid = true;
     }
@@ -347,14 +347,14 @@ namespace ops
     bool Publisher::CheckAckSender(const ObjectName_T& subname)
     {
         if (_ackSub == nullptr) { return true; }
-        MessageLock lck(*_ackSub);
+        const MessageLock lck(*_ackSub);
         if (subname == "") {
-            for (auto& x : _ackSub->_expectedSub) {
+            for (const auto& x : _ackSub->_expectedSub) {
                 if (!x.second.acked && x.second.valid) { return false; }
             }
             return true;
         } else {
-            for (auto& x : _ackSub->_expectedSub) {
+            for (const auto& x : _ackSub->_expectedSub) {
                 if ((x.first == subname) && x.second.valid) {
                     if (x.second.acked) { return true; }
                 }
@@ -367,7 +367,7 @@ namespace ops
     {
         if (_ackSub == nullptr) { return; }
         // Remove Subscriber from expected ACK senders
-        MessageLock lck(*_ackSub);
+        const MessageLock lck(*_ackSub);
         _ackSub->_expectedSub.erase(subname);
     }
 
@@ -377,7 +377,7 @@ namespace ops
     }
 
     // Need to be called periodically
-    void Publisher::Activate(ShouldResendFunc_T shouldResend)
+    void Publisher::Activate(ShouldResendFunc_T const shouldResend)
     {
         if (_ackSub == nullptr) { return; }
 
@@ -389,7 +389,7 @@ namespace ops
         // If message isn't ACK'ed from all expected ACK senders, resend message with same Pub Id Counter
         bool resend = false;
         {
-            MessageLock lck(*_ackSub);
+            const MessageLock lck(*_ackSub);
             // Check if any of the expected hasn't responded to us
             for (auto& element : _ackSub->_expectedSub) {
                 AckSubscriber::entry_t& ent = element.second;
@@ -404,6 +404,8 @@ namespace ops
                         break;
                     case ResendAlternative_T::yes:
                         resend = true;
+                        break;
+                    default:
                         break;
                     }
                 }

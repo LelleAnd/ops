@@ -44,7 +44,7 @@
 namespace ops
 {
     using boost::asio::ip::udp;
-	UDPSender::UDPSender(IOService* ioServ, const Address_T localInterface, const int ttl, const int outSocketBufferSize, const bool multicastSocket):
+	UDPSender::UDPSender(IOService* const ioServ, const Address_T localInterface, const int ttl, const int outSocketBufferSize, const bool multicastSocket):
 		ipAddr(boost::asio::ip::address_v4::from_string(localInterface.c_str())),
 		localEndpoint(ipAddr, 0),
 		io_service(BoostIOServiceImpl::get(ioServ)),

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 Lennart Andersson.
+ * Copyright (C) 2020-2021 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -24,7 +24,7 @@ namespace ops {
 
     namespace trace {
 
-        std::ostream& operator<< (std::ostream& os, level_t level)
+        std::ostream& operator<< (std::ostream& os, const level_t level)
         {
             switch (level) {
             case level_t::Error:   os << "Error"; break;
@@ -39,14 +39,14 @@ namespace ops {
         // Used to limit trace in the default Trace Sink, to given level and greater
         static level_t currentLevel = level_t::Trace;
 
-        void SetTraceLevel(level_t level) noexcept
+        void SetTraceLevel(const level_t level) noexcept
         {
             currentLevel = level;
         }
 
         struct DefaultSink : Sink
         {
-            void Log(const level_t level, const char* grp, const char* msg) override
+            virtual void Log(const level_t level, const char* const grp, const char* const msg) override
             {
                 if (level >= currentLevel) {
                     std::cout << "[" << level << "] " << grp << ": " << msg;
@@ -68,7 +68,7 @@ namespace ops {
         tracestream_t os_warning(level_t::Warning);
         tracestream_t os_error(level_t::Error);
 
-        void InstallSink(Sink* s) noexcept
+        void InstallSink(Sink* const s) noexcept
         {
             if (s == nullptr) {
                 currentSink = &AA;

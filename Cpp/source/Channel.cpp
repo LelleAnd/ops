@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016-2020 Lennart Andersson.
+* Copyright (C) 2016-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -33,12 +33,12 @@ namespace ops
     // Returns a deep copy of this object.
     Channel* Channel::clone()
     {
-        Channel* ret = new Channel;
+        Channel* const ret = new Channel;
         fillClone(ret);
         return ret;
     }
 
-    void Channel::fillClone(Channel* obj) const
+    void Channel::fillClone(Channel* const obj) const
     {
         if (this == obj) { return; }
         ops::OPSObject::fillClone(obj);
@@ -57,7 +57,7 @@ namespace ops
         obj->sampleMaxSize = sampleMaxSize;
     }
 
-    void Channel::serialize(ArchiverInOut* archiver)
+    void Channel::serialize(ArchiverInOut* const archiver)
     {
         OPSObject::serialize(archiver);
         if (idlVersionMask != 0) {

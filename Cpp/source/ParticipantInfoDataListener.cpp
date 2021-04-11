@@ -34,7 +34,7 @@ namespace ops
     {
     }
 
-    void ParticipantInfoDataListener::handle(ParticipantInfoData* partInfo)
+    void ParticipantInfoDataListener::handle(ParticipantInfoData* const partInfo)
     {
         const SafeLock lock(mutex);
         if (partInfo->mc_udp_port != 0) {

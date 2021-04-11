@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2020 Lennart Andersson.
+* Copyright (C) 2019-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -85,13 +85,13 @@ namespace ops
 	// Returns a newely allocated deep copy/clone of this object.
 	OPSConfig* OPSConfig::clone()
 	{
-		OPSConfig* ret = new OPSConfig;
+		OPSConfig* const ret = new OPSConfig;
 		fillClone(ret);
 		return ret;
 	}
 
 	// Fills the parameter obj with all values from this object.
-	void OPSConfig::fillClone(OPSConfig* obj) const
+	void OPSConfig::fillClone(OPSConfig* const obj) const
 	{
 		if (this == obj) { return; }
 		ops::OPSObject::fillClone(obj);
@@ -101,7 +101,7 @@ namespace ops
 
 	OPSConfig::~OPSConfig()
 	{
-		for (auto& x : domains) {
+		for (const auto& x : domains) {
 			delete x;
 		}
 		domains.clear();

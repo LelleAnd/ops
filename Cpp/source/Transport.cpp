@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016-2020 Lennart Andersson.
+* Copyright (C) 2016-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -31,13 +31,13 @@ namespace ops
     // Returns a newely allocated deep copy/clone of this object.
     Transport* Transport::clone()
     {
-        Transport* ret = new Transport;
+        Transport* const ret = new Transport;
         fillClone(ret);
         return ret;
     }
 
     // Fills the parameter obj with all values from this object.
-    void Transport::fillClone(Transport* obj) const
+    void Transport::fillClone(Transport* const obj) const
     {
         if (this == obj) { return; }
         ops::OPSObject::fillClone(obj);

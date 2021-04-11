@@ -240,7 +240,7 @@ namespace ops
         int64_t timeLastDataForTimeBase{ 0 };
         int64_t timeBaseMinSeparationTime{ 0 };
 
-        bool applyFilterQoSPolicies(OPSMessage* message, OPSObject* o);
+        bool applyFilterQoSPolicies(const OPSMessage* message, const OPSObject* o);
 
         void cancelDeadlineTimeouts();
 

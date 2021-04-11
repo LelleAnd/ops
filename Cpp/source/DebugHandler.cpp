@@ -55,7 +55,7 @@ namespace ops {
         InternalDebugListener& operator= (InternalDebugListener&& other) = delete;
 
 		// Used by application to set a handler for "Generic Command" (50)
-		void SetAppCallback(DebugNotifyInterface* client)
+		void SetAppCallback(DebugNotifyInterface* const client)
 		{
 			const SafeLock lck(_mapLock);
 			_appCallback = client;

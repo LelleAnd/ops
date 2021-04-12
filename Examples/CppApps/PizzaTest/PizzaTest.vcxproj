@@ -272,7 +272,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\OPSIdls\PizzaProject\Generated\Cpp;..\..\..\Cpp\include;D:\OPS\ops4\Common\idl\Generated\Cpp;C:\proj\SDSTest\OPSData\SDSIDL\Generated\C++;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\OPSIdls\PizzaProject\Generated\Cpp;..\..\..\Cpp\include;..\..\..\Common\idl\Generated\Cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -294,7 +294,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\OPSIdls\PizzaProject\Generated\Cpp;..\..\..\Cpp\include;D:\OPS\ops4\Common\idl\Generated\Cpp;C:\proj\SDSTest\OPSData\SDSIDL\Generated\C++;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\OPSIdls\PizzaProject\Generated\Cpp;..\..\..\Cpp\include;..\..\..\Common\idl\Generated\Cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -316,7 +316,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='depMDd|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\OPSIdls\PizzaProject\Generated\Cpp;..\..\..\Cpp\include;D:\OPS\ops4\Common\idl\Generated\Cpp;C:\proj\SDSTest\OPSData\SDSIDL\Generated\C++;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\OPSIdls\PizzaProject\Generated\Cpp;..\..\..\Cpp\include;..\..\..\Common\idl\Generated\Cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -338,7 +338,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DLL MDd|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\OPSIdls\PizzaProject\Generated\Cpp;..\..\..\Cpp\include;D:\OPS\ops4\Common\idl\Generated\Cpp;C:\proj\SDSTest\OPSData\SDSIDL\Generated\C++;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\OPSIdls\PizzaProject\Generated\Cpp;..\..\..\Cpp\include;..\..\..\Common\idl\Generated\Cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>OPS_LIBRARY_IMPORT;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -469,7 +469,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\..\OPSIdls\PizzaProject\Generated\Cpp;..\..\..\Cpp\include;D:\OPS\ops4\Common\idl\Generated\Cpp;C:\proj\SDSTest\OPSData\SDSIDL\Generated\C++;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\OPSIdls\PizzaProject\Generated\Cpp;..\..\..\Cpp\include;..\..\..\Common\idl\Generated\Cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -493,7 +493,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\..\OPSIdls\PizzaProject\Generated\Cpp;..\..\..\Cpp\include;D:\OPS\ops4\Common\idl\Generated\Cpp;C:\proj\SDSTest\OPSData\SDSIDL\Generated\C++;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\OPSIdls\PizzaProject\Generated\Cpp;..\..\..\Cpp\include;..\..\..\Common\idl\Generated\Cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -518,7 +518,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\..\OPSIdls\PizzaProject\Generated\Cpp;..\..\..\Cpp\include;D:\OPS\ops4\Common\idl\Generated\Cpp;C:\proj\SDSTest\OPSData\SDSIDL\Generated\C++;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\OPSIdls\PizzaProject\Generated\Cpp;..\..\..\Cpp\include;..\..\..\Common\idl\Generated\Cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>

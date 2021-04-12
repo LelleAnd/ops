@@ -89,7 +89,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>D:\OPS\OPS4\Examples\OPSIdls\TestAll\Generated\Cpp;D:\OPS\OPS4\Cpp\include;D:\OPS\ops4\Common\idl\Generated\Cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\Examples\OPSIdls\TestAll\Generated\Cpp;..\..\..\Cpp\include;..\..\..\Common\idl\Generated\Cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -101,7 +101,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>OPSCppLib_vc142_MTd.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>D:\OPS\OPS4\Cpp\lib-vc142-x86;C:\Program Files (x86)\boost\boost_1_71\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\Cpp\lib-vc142-x86;C:\Program Files (x86)\boost\boost_1_71\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
@@ -111,7 +111,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>D:\OPS\OPS4\Examples\OPSIdls\TestAll\Generated\Cpp;D:\OPS\OPS4\Cpp\include;D:\OPS\ops4\Common\idl\Generated\Cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\Examples\OPSIdls\TestAll\Generated\Cpp;..\..\..\Cpp\include;..\..\..\Common\idl\Generated\Cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -122,7 +122,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>OPSCppLib_vc142_MT.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>D:\OPS\OPS4\Cpp\lib-vc142-x86;C:\Program Files (x86)\boost\boost_1_66\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\Cpp\lib-vc142-x86;C:\Program Files (x86)\boost\boost_1_66\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>

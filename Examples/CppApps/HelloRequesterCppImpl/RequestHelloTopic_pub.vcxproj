@@ -72,7 +72,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>OPSCppLib_vc142_MDd.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>D:\OPS\ops4\Cpp\lib-vc142-x86;C:\Program Files %28x86%29\boost\boost_1_71\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\Cpp\lib-vc142-x86;C:\Program Files %28x86%29\boost\boost_1_71\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
@@ -93,7 +93,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>OPSCppLib_vc142_MD.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>D:\OPS\ops4\Cpp\lib-vc142-x86;C:\Program Files %28x86%29\boost\boost_1_71\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\Cpp\lib-vc142-x86;C:\Program Files %28x86%29\boost\boost_1_71\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>

@@ -61,14 +61,14 @@
       <PrecompiledHeader />
       <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>D:\OPS\ops4\Cpp\include;D:\OPS\ops4\Common\idl\Generated\Cpp;D:\OPS\ops4\Examples\OPSIdls\HelloRequestReply\Generated\Cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\Cpp\include;..\..\..\Common\idl\Generated\Cpp;..\..\..\Examples\OPSIdls\HelloRequestReply\Generated\Cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalLibraryDirectories>D:\OPS\OPS4\Cpp\lib-vc142-x86;C:\Program Files (x86)\boost\boost_1_71\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\Cpp\lib-vc142-x86;C:\Program Files (x86)\boost\boost_1_71\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>OPSCppLib_vc142_MTd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -82,7 +82,7 @@
       <PrecompiledHeader />
       <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>D:\OPS\ops4\Cpp\include;D:\OPS\ops4\Common\idl\Generated\Cpp;D:\OPS\ops4\Examples\OPSIdls\HelloRequestReply\Generated\Cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\Cpp\include;..\..\..\Common\idl\Generated\Cpp;..\..\..\Examples\OPSIdls\HelloRequestReply\Generated\Cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
@@ -91,7 +91,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalLibraryDirectories>D:\OPS\OPS4\Cpp\lib-vc142-x86;C:\Program Files (x86)\boost\boost_1_71\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\Cpp\lib-vc142-x86;C:\Program Files (x86)\boost\boost_1_71\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>OPSCppLib_vc142_MD.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

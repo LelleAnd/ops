@@ -30,7 +30,8 @@
 
 #include <ops.h>
 #include <Publisher.h>
-#include "Lockable.h"
+#include <Lockable.h>
+#include <TimeHelper.h>
 
 #include "opsbridge/OpsBridgeStatusData.h"
 
@@ -118,7 +119,7 @@ namespace opsbridge {
 		// ---------------------------------------------------------------
 		std::string m_myName;
 		uint64_t m_maxBufferSize;
-		int64_t m_minPubTime;
+		std::chrono::milliseconds m_minPubTime{ 0 };
 
 		volatile bool m_isPausedChanged;
 		bool m_ResendSend;
@@ -161,14 +162,14 @@ namespace opsbridge {
 
 		// ---------------------------------------------------------------
 		// List with publishers for data 
-		typedef struct {
-			ops::Publisher* pub;
+		struct TPublisherData {
+			ops::Publisher* pub{ nullptr };
 			ops::ObjectName_T topicName;
 			// Last AckNumber we published (init to 0, updated at each publish)
-			uint64_t AckNumber;
+			uint64_t AckNumber{ 0 };
 			// Publish time, used to provide a minimum distance between publishes
-			int64_t pubTime;
-		} TPublisherData;
+			ops::ops_clock::time_point pubTime;
+		};
 
 		std::vector<TPublisherData> m_publishers;
 		// not needed since only transport thread is using 
@@ -211,7 +212,7 @@ namespace opsbridge {
 
 		// ---------------------------------------------------------------
 		/// saved time
-		int64_t m_recvTime;
+		ops::ops_clock::time_point m_recvTime;
 		ops::Lockable m_timeLock;
 
 		void UpdateReceiveTime();

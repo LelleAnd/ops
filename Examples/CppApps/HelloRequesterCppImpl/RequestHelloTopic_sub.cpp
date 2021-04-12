@@ -50,7 +50,7 @@ public:
 		sub.reset(new hello::RequestHelloDataSubscriber(topic));
 
 		//Tell the subscriber that we expect data at least once every 1500 ms
-		sub->setDeadlineQoS(1500);
+		sub->setDeadline(std::chrono::milliseconds(1500));
 
 		//Add this class as a listener for new data events
 		sub->addDataListener(this);

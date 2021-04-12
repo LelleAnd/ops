@@ -44,24 +44,24 @@ using namespace ops;
 
 static void WaitWTimeout(Receiver& , RAII_ioServ& ioServ, int64_t timeoutMs)
 {
-	int64_t limit = TimeHelper::currentTimeMillis() + timeoutMs;
-	while (TimeHelper::currentTimeMillis() < limit) {
+	ops::ops_clock::time_point limit = ops::ops_clock::now() + std::chrono::milliseconds(timeoutMs);
+	while (ops::ops_clock::now() < limit) {
 		ioServ()->poll();
 	}
 }
 
 static void PollWTimeout(RAII_ioServ& ioServ, int64_t timeoutMs)
 {
-	int64_t limit = TimeHelper::currentTimeMillis() + timeoutMs;
-	while (TimeHelper::currentTimeMillis() < limit) {
+	ops::ops_clock::time_point limit = ops::ops_clock::now() + std::chrono::milliseconds(timeoutMs);
+	while (ops::ops_clock::now() < limit) {
 		ioServ()->poll();
 	}
 }
 
 static void WaitConnectedWTimeout(TCPClient& rcv, TCPServer& snd, RAII_ioServ& ioServ, int64_t timeoutMs)
 {
-	int64_t limit = TimeHelper::currentTimeMillis() + timeoutMs;
-	while ( ((!rcv.isConnected()) || (snd.numConnected() == 0)) && (TimeHelper::currentTimeMillis() < limit)) {
+	ops::ops_clock::time_point limit = ops::ops_clock::now() + std::chrono::milliseconds(timeoutMs);
+	while ( ((!rcv.isConnected()) || (snd.numConnected() == 0)) && (ops::ops_clock::now() < limit)) {
 		ioServ()->poll();
 	}
 }
@@ -93,7 +93,7 @@ public:
 		Log("Server", status);
 		cst = status;
 		
-		conn.setProtocol(new ops::TCPOpsProtocol(TimeHelper::currentTimeMillis, 1000, 3000));
+		conn.setProtocol(new ops::TCPOpsProtocol(ops::ops_clock::now, 1000, 3000));
 		
 		// Start a read
 		conn.asynchWait(buffer, 1024);
@@ -128,7 +128,7 @@ public:
 	// Called from client when a connection is made
 	void onConnect(TCPConnection& conn, ConnectStatus status) override
 	{
-		if (!protSet) conn.setProtocol(new ops::TCPOpsProtocol(TimeHelper::currentTimeMillis, 1000, 3000));
+		if (!protSet) conn.setProtocol(new ops::TCPOpsProtocol(ops::ops_clock::now, 1000, 3000));
 		protSet = true;
 		Log("Client", status);
 		cst = status;

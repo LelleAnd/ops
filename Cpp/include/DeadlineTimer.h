@@ -21,6 +21,8 @@
 #ifndef ops_DeadlineTimer_h
 #define ops_DeadlineTimer_h
 
+#include <chrono>
+
 #include "Notifier.h"
 #include "IOService.h"
 
@@ -29,6 +31,10 @@ namespace ops
 	class DeadlineTimer : public Notifier<int>
 	{
 	public:
+		virtual void start(const std::chrono::milliseconds& timeout) = 0;
+#ifdef OPS_C14_DETECTED
+		[[deprecated("Deprecated. Replaced by start() taking chrono duration")]]
+#endif
 		virtual void start(int64_t timeoutMs) = 0;
 		virtual void cancel() = 0;
 		virtual ~DeadlineTimer() = default;

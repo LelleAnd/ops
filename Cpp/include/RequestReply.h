@@ -24,6 +24,7 @@
 
 #include <memory>
 #include <sstream>
+#include <chrono>
 
 #include "OPSTypeDefs.h"
 #include "Topic.h"
@@ -46,7 +47,14 @@ namespace ops
 			sub->addFilterQoSPolicy(&keyFilter);
 			sub->start();
 		}
-	    RepType* request(ReqType* req, int timeout)
+#ifdef OPS_C14_DETECTED
+		[[deprecated("Deprecated. Replaced by request() taking chrono duration")]]
+#endif
+		RepType* request(ReqType* req, int timeout)
+		{
+			return request(req, std::chrono::milliseconds(timeout));
+		}
+	    RepType* request(ReqType* req, const std::chrono::milliseconds& timeout)
 		{
 			reqInt++;
 			req->setKey(key);
@@ -54,11 +62,12 @@ namespace ops
 			ss << key << reqInt;
 			req->requestId = ss.str();
 			
-			int64_t requestLimit = TimeHelper::currentTimeMillis() + (int64_t)timeout;
+			ops_clock::time_point requestLimit = ops_clock::now() + timeout;
 			sub->getDataReference();
 			pub->writeOPSObject(req);
-			while (TimeHelper::currentTimeMillis() < requestLimit) {
-				if (sub->waitForNewData((int)(requestLimit - TimeHelper::currentTimeMillis()))) {
+			while (ops_clock::now() < requestLimit) {
+				std::chrono::milliseconds left = std::chrono::duration_cast<std::chrono::milliseconds>(requestLimit - ops_clock::now());
+				if (sub->waitForNewData(left)) {
 					if (dynamic_cast<RepType*>(sub->getMessage()->getData())->requestId == req->requestId) {
 						return dynamic_cast<RepType*>(sub->getMessage()->getData()->clone());
 					}

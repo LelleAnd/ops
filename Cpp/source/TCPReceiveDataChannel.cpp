@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2020 Lennart Andersson.
+ * Copyright (C) 2018-2021 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -81,7 +81,7 @@ namespace ops
 		OPS_TCP_TRACE("RDC: onConnect()\n");
 		// If first time, set the protocol to use
 		if (conn.getProtocol() == nullptr) {
-			conn.setProtocol(new TCPOpsProtocol(TimeHelper::currentTimeMillis, _heartbeatPeriod, _heartbeatTimeout));
+			conn.setProtocol(new TCPOpsProtocol(ops_clock::now, _heartbeatPeriod, _heartbeatTimeout));
 		}
 		TCPOpsProtocol* const prot = dynamic_cast<TCPOpsProtocol*>(conn.getProtocol());
 		if (prot != nullptr) {

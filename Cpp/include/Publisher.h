@@ -35,6 +35,7 @@
 #include "Listener.h"
 #include "ConnectStatus.h"
 #include "Lockable.h"
+#include "TimeHelper.h"
 
 namespace ops
 {
@@ -123,8 +124,9 @@ private:
     struct AckSubscriber;
     std::unique_ptr<AckSubscriber> _ackSub;
     Lockable _pubLock;
-    std::atomic<int64_t> _ackTimeout{ 0 };
-    const int64_t _ackTimeoutInc;
+    // Since time_point can't be stored in an atomic, we use a duration from the epoch start
+    std::atomic<std::chrono::milliseconds> _ackTimeout;
+    const std::chrono::milliseconds _ackTimeoutInc;
     std::atomic<int> _resendsLeft{ -1 };
     bool resendLatest();
     SendState _sendState{ SendState::init };

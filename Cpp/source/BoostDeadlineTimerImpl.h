@@ -64,7 +64,9 @@ namespace ops
         explicit BoostDeadlineTimerImpl(boost::asio::io_service* boostIOService);
         virtual ~BoostDeadlineTimerImpl();
 
-		void start(int64_t timeoutMs) override;
+        void start(const std::chrono::milliseconds& timeout) override;
+        virtual void start(int64_t timeoutMs) override;
+
 		void cancel() override;
     };
 
@@ -78,13 +80,13 @@ namespace ops
 		{
 		}
 
-		virtual void start(int64_t timeoutMs) 
-		{
-			deadlineTimer.cancel();
-			deadlineTimer.expires_from_now(std::chrono::milliseconds(timeoutMs));
+        virtual void start(const std::chrono::milliseconds& timeout)
+        {
+            deadlineTimer.cancel();
+            deadlineTimer.expires_from_now(timeout);
             // Here we pass in a shared_ptr to our instance
-			deadlineTimer.async_wait(boost::bind(&impl::asynchHandleDeadlineTimeout, shared_from_this(), boost::asio::placeholders::error));
-		}
+            deadlineTimer.async_wait(boost::bind(&impl::asynchHandleDeadlineTimeout, shared_from_this(), boost::asio::placeholders::error));
+        }
 
 		virtual void cancel()
 		{
@@ -126,9 +128,14 @@ namespace ops
         notifyNewEvent(message);    // Just forward the event
     }
 
-    void BoostDeadlineTimerImpl::start(int64_t timeout)
+    void BoostDeadlineTimerImpl::start(const std::chrono::milliseconds& timeout)
     {
         pimpl_->start(timeout);
+    }
+
+    void BoostDeadlineTimerImpl::start(int64_t timeout)
+    {
+        pimpl_->start(std::chrono::milliseconds(timeout));
     }
 
     void BoostDeadlineTimerImpl::cancel()

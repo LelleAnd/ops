@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2019 Lennart Andersson.
+ * Copyright (C) 2019-2021 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -23,7 +23,6 @@
 
 #ifndef REPLACE_TRANSPORT_LAYER
 
-#include <chrono>
 #include <thread>
 #include <ctime>
 
@@ -32,7 +31,7 @@ namespace ops
     ///Returns the current time as a number of milliseconds since Epoch 1970-01-01.
     int64_t TimeHelper::currentTimeMillis() noexcept
     {
-        return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+        return std::chrono::duration_cast<std::chrono::milliseconds>(ops_clock::now().time_since_epoch()).count();
     }
 
     void TimeHelper::sleep(const std::chrono::milliseconds& sleep_duration)
@@ -72,7 +71,7 @@ namespace ops
 	///Returns the current time as a number of milliseconds since Epoch 1970-01-01.
     int64_t TimeHelper::getEpochTime() noexcept
     {
-        return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+        return std::chrono::duration_cast<std::chrono::milliseconds>(ops_clock::now().time_since_epoch()).count();
     }
 
 }

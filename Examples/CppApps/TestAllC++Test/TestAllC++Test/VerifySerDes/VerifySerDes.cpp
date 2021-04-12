@@ -682,7 +682,7 @@ int main(const int argc, const char* args[])
 
 
 			// Check received values against sent values
-			AssertEQ<bool>(sub.waitForNewData(100), true, "No data received");
+			AssertEQ<bool>(sub.waitForNewData(std::chrono::milliseconds(100)), true, "No data received");
 			bool const flag = AssertEQ<bool>(sub.getData(cd3), true, "No received data");
 
 			sub.aquireMessageLock();
@@ -703,10 +703,10 @@ int main(const int argc, const char* args[])
 #endif
 
 			std::cout << "Waiting for more data during 60 seconds... (Press Ctrl-C to terminate)" << std::endl;
-			int64_t PubTime = ops::TimeHelper::currentTimeMillis() + 5000;
-			const int64_t Limit = ops::TimeHelper::currentTimeMillis() + 60000;
-			while ((!gTerminate) && (Limit >= ops::TimeHelper::currentTimeMillis())) {
-				if (sub.waitForNewData(100)) {
+			ops::ops_clock::time_point PubTime = ops::ops_clock::now() + std::chrono::milliseconds(5000);
+			const ops::ops_clock::time_point Limit = ops::ops_clock::now() + std::chrono::milliseconds(60000);
+			while ((!gTerminate) && (Limit >= ops::ops_clock::now())) {
+				if (sub.waitForNewData(std::chrono::milliseconds(100))) {
 					sub.aquireMessageLock();
 					std::cout << "Received new data from " << sub.getMessage()->getPublisherName() << ". Checking..." << std::endl;
 					sub.releaseMessageLock();
@@ -717,8 +717,8 @@ int main(const int argc, const char* args[])
 					checkObjects(cd3, cd1);
 					std::cout << "Data check done" << std::endl;
 				}
-				if (PubTime < ops::TimeHelper::currentTimeMillis()) {
-					PubTime = ops::TimeHelper::currentTimeMillis() + 5000;
+				if (PubTime < ops::ops_clock::now()) {
+					PubTime = ops::ops_clock::now() + std::chrono::milliseconds(5000);
 					pub.write(cd1);
 				}
 			}

@@ -48,7 +48,6 @@ CBridge::CBridge(std::string name, int64_t const maxBufferSize, int64_t const iM
 	m_transport(transport), m_raw(this),
 	m_isConnected(false), m_skipMessages(false), m_isPaused(false), m_isEpPaused(false), 
 	m_AckCounter(0),
-	m_recvTime(0), 
 	m_MaxLimitReached(false)
 {
 	m_savedMess.mess = nullptr;
@@ -82,7 +81,7 @@ void CBridge::setupSubscriber(ops::Topic& recTopic, BridgeConfig::TTopicConfig& 
 
 	// Time based filter
 	if (tc.iMinTime_ms > 0) {
-		sub->setTimeBasedFilterQoS(tc.iMinTime_ms);
+		sub->setTimeBasedFilter(std::chrono::milliseconds(tc.iMinTime_ms));
 	}
 
 	// Key filter
@@ -381,7 +380,7 @@ void CBridge::Continue()
 void CBridge::UpdateReceiveTime()
 {
 	ops::SafeLock const lock(m_timeLock);
-	m_recvTime = ops::TimeHelper::currentTimeMillis();
+	m_recvTime = ops::ops_clock::now();
 }
 
 // NOTE Called from transport thread
@@ -521,9 +520,9 @@ void CBridge::onOpsMessage(CTransport* const sender, ops::OPSObject* const mess,
 			// If we haven't already sent this one
 			if (AckCounter > (*iter).AckNumber) {
 				// Check min time beween samples
-				int64_t const diffTime = ops::TimeHelper::currentTimeMillis() - (*iter).pubTime;
+				std::chrono::milliseconds const diffTime = std::chrono::duration_cast<std::chrono::milliseconds>(ops::ops_clock::now() - (*iter).pubTime);
 				if (diffTime < m_minPubTime) {
-					std::this_thread::sleep_for(std::chrono::milliseconds(m_minPubTime - diffTime));
+					std::this_thread::sleep_for(m_minPubTime - diffTime);
 				}
 
 				// Publish message via OPS
@@ -531,7 +530,7 @@ void CBridge::onOpsMessage(CTransport* const sender, ops::OPSObject* const mess,
 				pub->writeOPSObject(mess);
 
 				// Save time
-				(*iter).pubTime = ops::TimeHelper::currentTimeMillis();
+				(*iter).pubTime = ops::ops_clock::now();
 
 				// Update saved AckNumber for publisher
 				(*iter).AckNumber = AckCounter;
@@ -603,7 +602,6 @@ ops::Publisher* CBridge::setupPublisher(ops::Topic& destTopic)
 	pd.pub = new ops::Publisher(destTopic);
 	pd.pub->setName("Ops_Bridge");
 	pd.AckNumber = 0;
-	pd.pubTime = 0;
 
 	m_publishers.push_back(pd);
 
@@ -808,8 +806,8 @@ void CBridge::SendOPSMessage()
 // 
 void CBridge::Run()
 {
-	int64_t PeriodicalTime = 0;
-	int64_t StatusTime = 0;
+	ops::ops_clock::time_point PeriodicalTime;
+	ops::ops_clock::time_point StatusTime;
 
 	m_transport->Start();
 
@@ -866,15 +864,15 @@ void CBridge::Run()
 		// Periodical things
 
 		// if connected, send heartbeat with status periodically
-		if (m_isConnected && ((ops::TimeHelper::currentTimeMillis() - StatusTime) >= 1000)) {
+		if (m_isConnected && ((ops::ops_clock::now() - StatusTime) >= std::chrono::milliseconds(1000))) {
 			TStatusMessage stat;
 			stat.NumQueuedMessages = m_myQueued;
 			stat.Paused = m_isEpPaused;			// Tell other side what they have ordered
 			m_transport->writeStatus(stat);
-			StatusTime = ops::TimeHelper::currentTimeMillis();
+			StatusTime = ops::ops_clock::now();
 		}
 
-		if ((ops::TimeHelper::currentTimeMillis() - PeriodicalTime) >= 1000) {
+		if ((ops::ops_clock::now() - PeriodicalTime) >= std::chrono::milliseconds(1000)) {
 			// Calculate number of queued messages
 			uint32_t NumQueuedMessages = 0;
 			{
@@ -888,13 +886,13 @@ void CBridge::Run()
 			// if no data from other side (endpoint) in 5000 [ms], force a disconnect
 			if (m_isConnected) {
 				ops::SafeLock const lock(m_timeLock);
-				if ((ops::TimeHelper::currentTimeMillis() - m_recvTime) > 5000) {
+				if ((ops::ops_clock::now() - m_recvTime) > std::chrono::milliseconds(5000)) {
 					BL_TRACE("# [ CBridge (%s) ] NO DATA. Forcing DISCONNECT\n", m_myName.c_str());
 					m_transport->disconnect();
 				}
 			}
 
-			PeriodicalTime = ops::TimeHelper::currentTimeMillis();
+			PeriodicalTime = ops::ops_clock::now();
 		}
 	}
 }

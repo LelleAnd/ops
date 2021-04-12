@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2019 Lennart Andersson.
+ * Copyright (C) 2018-2021 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -21,7 +21,10 @@
 
 #pragma once
 
+#include <chrono>
+
 #include "TCPProtocol.h"
+#include "TimeHelper.h"
 
 namespace ops
 {
@@ -42,7 +45,7 @@ namespace ops
 	//
 
 	// Function that returns current time in ms.
-	typedef int64_t(*timeFunc)();
+	typedef ops_clock::time_point(*timeFunc)();
 
 	class TCPOpsProtocol : public TCPProtocol
 	{
@@ -54,12 +57,12 @@ namespace ops
 		char _sizeInfoBuffer[32];
 		char _probeBuffer[32];
 		bool _readingHeader = true;
-		int64_t _timeRcv = 0;
-		int64_t _timeSnd = 0;
+		ops_clock::time_point _timeRcv;
+		ops_clock::time_point _timeSnd;
 		int _detectedVersion = 1;
 		bool _hbSent = false;
-		int _heartbeatPeriod = 1000;
-		int _heartbeatTimeout = 3000;
+		std::chrono::milliseconds _heartbeatPeriod{ 1000 };
+		std::chrono::milliseconds _heartbeatTimeout{ 3000 };
 
 		// _data[0 .. _accumulatedSize-1] contains data (_accumulatedSize == _expectedSize)
 		// returns false if error
@@ -233,7 +236,7 @@ namespace ops
 		{
 			bool errorDetected = false;
 
-			if ((_detectedVersion > 1) && (_heartbeatPeriod > 0)) {
+			if ((_detectedVersion > 1) && (_heartbeatPeriod > std::chrono::milliseconds(0))) {
 				// Check if we need to send a heartbeat (at least one during a connection)
 				if ((!_hbSent) || ((_timeFuncMs() - _timeSnd) >= _heartbeatPeriod)) {
 					if (sendHeartbeat() < 0) errorDetected = true;

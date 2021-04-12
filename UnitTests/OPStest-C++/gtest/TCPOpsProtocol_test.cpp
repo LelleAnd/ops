@@ -135,9 +135,10 @@ struct MyTime
 {
 	static int64_t _now;
 
-	static int64_t clock()
+	static ops::ops_clock::time_point clock()
 	{
-		return _now;
+		static ops::ops_clock::time_point start = ops::ops_clock::now();
+		return start + std::chrono::milliseconds(_now);
 	}
 
 	MyTime() = default;

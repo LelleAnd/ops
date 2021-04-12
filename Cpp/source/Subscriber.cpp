@@ -160,7 +160,7 @@ namespace ops
     Subscriber::Subscriber(Topic const t) :
         SubscriberBase(t)
 	{
-        timeLastData = TimeHelper::currentTimeMillis();
+        timeLastData = ops_clock::now();
 
         if (topic.getUseAck()) {
             // Enable ACK's
@@ -241,7 +241,7 @@ namespace ops
         if (_ackFilter == nullptr) { return; }
 
         // Send REGISTER (~1Hz)
-        const int64_t now = ops::TimeHelper::currentTimeMillis();
+        const ops_clock::time_point now = ops_clock::now();
         if (_nextRegisterTime > now) { return; }
 
         bool sendRegister = false;
@@ -261,7 +261,7 @@ namespace ops
         }
         if (sendRegister) {
             _ackFilter->send(opsidls::SendAckPatternData::MType::REGISTER);
-            _nextRegisterTime = now + topic.getRegisterTimeMs();
+            _nextRegisterTime = now + std::chrono::milliseconds(topic.getRegisterTimeMs());
         }
     }
 
@@ -316,7 +316,7 @@ namespace ops
         OPSObject* const o = message->getData();
         if (applyFilterQoSPolicies(message, o))
         {
-            if (timeBaseMinSeparationTime == 0 || TimeHelper::currentTimeMillis() - timeLastDataForTimeBase > timeBaseMinSeparationTime)
+            if (timeBaseMinSeparationTime == std::chrono::milliseconds(0) || ops_clock::now() - timeLastDataForTimeBase > timeBaseMinSeparationTime)
             {
                 firstDataReceived = true;
                 
@@ -332,7 +332,7 @@ namespace ops
                 newDataEvent.signal();
 
 				// Update deadline variables
-                timeLastData = timeLastDataForTimeBase = TimeHelper::currentTimeMillis();
+                timeLastData = timeLastDataForTimeBase = ops_clock::now();
                 deadlineMissed = false;
 
                 deadlineTimer->start(deadlineTimeout);
@@ -364,6 +364,14 @@ namespace ops
     }
 
     /// ----------------------------------------------------------
+
+    bool Subscriber::waitForNewData(const std::chrono::milliseconds& timeout)
+    {
+        if (hasUnreadData) {
+            return true;
+        }
+        return newDataEvent.waitFor(timeout);
+    }
 
     bool Subscriber::waitForNewData(int const timeoutMs)
     {
@@ -427,27 +435,52 @@ namespace ops
 
     void Subscriber::setDeadlineQoS(int64_t const millis)
     {
-		if (millis == 0) {
-		    deadlineTimeout = TimeHelper::infinite;
+		if ((millis == 0) || (millis > TimeHelper::infinite)) {
+		    deadlineTimeout = std::chrono::milliseconds(TimeHelper::infinite);
 		} else {
-	        deadlineTimeout = millis;
+	        deadlineTimeout = std::chrono::milliseconds(millis);
 		}
 		cancelDeadlineTimeouts();	// Restart with new timeout
     }
 
+    void Subscriber::setDeadline(const std::chrono::milliseconds& millis)
+    {
+        if ((millis == std::chrono::milliseconds(0)) || (millis > std::chrono::milliseconds(TimeHelper::infinite))) {
+            deadlineTimeout = std::chrono::milliseconds(TimeHelper::infinite);
+        } else {
+            deadlineTimeout = millis;
+        }
+        cancelDeadlineTimeouts();	// Restart with new timeout
+    }
+
     int64_t Subscriber::getDeadlineQoS() const noexcept
+    {
+        return deadlineTimeout.count();
+    }
+
+    std::chrono::milliseconds Subscriber::getDeadline() const noexcept
     {
         return deadlineTimeout;
     }
 
     int64_t Subscriber::getTimeBasedFilterQoS() const noexcept
     {
-        return timeBaseMinSeparationTime;
+        return timeBaseMinSeparationTime.count();
     }
 
     void Subscriber::setTimeBasedFilterQoS(int64_t const timeBaseMinSeparationMillis) noexcept
     {
-        timeBaseMinSeparationTime = timeBaseMinSeparationMillis;
+        timeBaseMinSeparationTime = std::chrono::milliseconds(timeBaseMinSeparationMillis);
+    }
+
+    void Subscriber::setTimeBasedFilter(const std::chrono::milliseconds& minSeparation) noexcept
+    {
+        timeBaseMinSeparationTime = minSeparation;
+    }
+
+    std::chrono::milliseconds Subscriber::getTimeBasedFilter() const noexcept
+    {
+        return timeBaseMinSeparationTime;
     }
 
     /// ----------------------------------------------------------
@@ -458,13 +491,13 @@ namespace ops
         {
             //printf("DeadlineMissed timeLastData = %d, currTime = %d, deadlineTimeout = %d\n", timeLastData, currTime, deadlineTimeout)
             deadlineMissedEvent.notifyDeadlineMissed();
-            timeLastData = TimeHelper::currentTimeMillis();
+            timeLastData = ops_clock::now();
         }
     }
 
-    bool Subscriber::isDeadlineMissed()
+    bool Subscriber::isDeadlineMissed() noexcept
     {
-        const int64_t currTime = TimeHelper::currentTimeMillis();
+        const ops_clock::time_point currTime = ops_clock::now();
         if (currTime - timeLastData > deadlineTimeout)
         {
             deadlineMissed = true;

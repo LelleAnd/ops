@@ -31,6 +31,7 @@
 #include <vector>
 #include <memory>
 #include <atomic>
+#include <chrono>
 
 #include "OPSTypeDefs.h"
 
@@ -199,7 +200,7 @@ namespace ops
 		std::vector<ConnectStatus> _connectedStatus;
 		Lockable _mtx;
         std::unique_ptr<DeadlineTimer> _timer;
-		const int64_t period = 1000;
+		const std::chrono::milliseconds period{ 1000 };
 
 	private:
 		TCPServerCallbacks* _client;

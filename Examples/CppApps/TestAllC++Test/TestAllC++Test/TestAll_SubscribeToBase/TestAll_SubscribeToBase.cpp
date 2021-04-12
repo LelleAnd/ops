@@ -60,7 +60,7 @@ public:
 
 		//Create a BaseSubscriber on that topic.
 		baseSub.reset(new Subscriber(topic));
-		baseSub->setDeadlineQoS(10000);		
+		baseSub->setDeadline(std::chrono::milliseconds(10000));		
 		baseSub->addDataListener(this);
 		baseSub->deadlineMissedEvent.addDeadlineMissedListener(this);
 		baseSub->start();

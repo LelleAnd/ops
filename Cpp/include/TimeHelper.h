@@ -25,12 +25,19 @@
 #include <chrono>
 #include <string>
 
+#include "OPSTypeDefs.h"
+
 namespace ops
 {
+	using ops_clock = std::chrono::system_clock;
+
 	class TimeHelper
 	{
 	public:
 		///Returns the current time as a number of milliseconds since Epoch 1970-01-01.
+#ifdef OPS_C14_DETECTED
+		[[deprecated("Deprecated. Replaced by ops::ops_clock::now() returning a time_point")]]
+#endif
 		static int64_t currentTimeMillis() noexcept;
 
 		///Sleeps the given duration

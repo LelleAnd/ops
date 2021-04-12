@@ -125,7 +125,7 @@ namespace ops
 			Connection_t* ct = new Connection_t();
 			ct->sentAtConnect = false;
 
-			TCPOpsProtocol* prot = new TCPOpsProtocol(TimeHelper::currentTimeMillis, _heartbeatPeriod, _heartbeatTimeout);
+			TCPOpsProtocol* prot = new TCPOpsProtocol(ops_clock::now, _heartbeatPeriod, _heartbeatTimeout);
 			prot->userData = ct;
 			InternalString_T dbgId(status.addr);
 			dbgId += "::";

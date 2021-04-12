@@ -423,7 +423,7 @@ public:
 	{
         if (sub != nullptr) {
             std::cout << "Setting deadlineQos to " << timeoutMs << " [ms] for topic " << sub->getTopic().getName() << std::endl;
-			sub->setDeadlineQoS(timeoutMs);
+			sub->setDeadline(std::chrono::milliseconds(timeoutMs));
 		} else {
 			std::cout << "Subscriber must be created first!!" << std::endl;
 		}

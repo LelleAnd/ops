@@ -321,7 +321,8 @@ namespace ops
                 TimeHelper::sleep(sendSleepTime);
             }
         }
-        _ackTimeout = TimeHelper::currentTimeMillis() + _ackTimeoutInc;
+        // Since time_point can't be stored in an atomic, we use a duration from the epoch start
+        _ackTimeout = std::chrono::duration_cast<std::chrono::milliseconds>(ops_clock::now().time_since_epoch()) + _ackTimeoutInc;
         return sendOK;
     }
 
@@ -384,7 +385,7 @@ namespace ops
         //If we haven't sent anything yet or all is ACKED/no more resends, return
         if (_resendsLeft < 0) { return; }
 
-        if (_ackTimeout > TimeHelper::currentTimeMillis()) { return; }
+        if (_ackTimeout.load() > std::chrono::duration_cast<std::chrono::milliseconds>(ops_clock::now().time_since_epoch())) { return; }
 
         // If message isn't ACK'ed from all expected ACK senders, resend message with same Pub Id Counter
         bool resend = false;

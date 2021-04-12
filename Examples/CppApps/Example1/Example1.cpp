@@ -1,6 +1,7 @@
 // Example1.cpp : Defines the entry point for the console application.
 //
 
+#include <chrono>
 #include <ops.h>
 
 // The following include files are created by the OPS IDL Builder
@@ -77,7 +78,7 @@ void PollingSubscriberExample(const ops::Topic& topic)
 
 	while (true) {
 #ifndef zzz
-        if (sub.waitForNewData(100)) {
+        if (sub.waitForNewData(std::chrono::milliseconds(100))) {
 			// Need to lock message while using it's data via the reference
             const ops::MessageLock lck(sub);
 			ChildData* const data = sub.getTypedDataReference();
@@ -180,7 +181,7 @@ public:
 		// If you want, set a deadline with maximum allowed distance between two messages,
 		// the method onDeadlineMissed() will be called if time exceeds maximum
 		sub.deadlineMissedEvent.addDeadlineMissedListener(this);
-		sub.setDeadlineQoS(5000);
+		sub.setDeadline(std::chrono::milliseconds(5000));
 
 		// If you want, add a keyfilter to just be notified with data objects with the specified key
 		sub.addFilterQoSPolicy(new ops::KeyFilterQoSPolicy("InstanceOne"));

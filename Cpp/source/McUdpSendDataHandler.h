@@ -25,6 +25,7 @@
 #include <iostream>
 #include <sstream>
 #include <stack>
+#include <chrono>
 
 #include "SendDataHandler.h"
 #include "Sender.h"
@@ -125,7 +126,7 @@ namespace ops
             IpPortPair(Address_T ip, int port, bool alwaysAlive):
 				_ip(ip), _port(port), _alwaysAlive(alwaysAlive)
             {
-                _lastTimeAlive = TimeHelper::currentTimeMillis();
+                _lastTimeAlive = ops_clock::now();
                 _key = _ip.c_str();
                 _key += ':';
                 _key += NumberToString(_port);
@@ -135,20 +136,20 @@ namespace ops
 
             bool isAlive() const
             {
-                return _alwaysAlive || ((TimeHelper::currentTimeMillis() - _lastTimeAlive) < ALIVE_TIMEOUT);
+                return _alwaysAlive || ((ops_clock::now() - _lastTimeAlive) < std::chrono::milliseconds(ALIVE_TIMEOUT));
             }
 
             void feedWatchdog(bool alwaysAlive)
             {
                 _alwaysAlive |= alwaysAlive;	// once set to true, always true
-                _lastTimeAlive = TimeHelper::currentTimeMillis();
+                _lastTimeAlive = ops_clock::now();
             }
 
 			Address_T _ip;
             int _port{ 0 };
             InternalKey_T _key;
             bool _alwaysAlive{ false };
-            int64_t _lastTimeAlive{ 0 };
+            ops_clock::time_point _lastTimeAlive;
             const static int ALIVE_TIMEOUT = 3000;
         };
 

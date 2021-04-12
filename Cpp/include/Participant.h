@@ -22,6 +22,7 @@
 #ifndef ops_ParticipantH
 #define	ops_ParticipantH
 
+#include <chrono>
 #include <map>
 #include <exception>
 #include <memory>
@@ -261,7 +262,7 @@ namespace ops
         volatile bool keepRunning{ true };
 
 		///The interval with which this Participant publishes ParticipantInfoData
-        int64_t aliveTimeout{ 1000 };
+        std::chrono::milliseconds aliveTimeout{ 1000 };
 
 		///The data type factory used in this Participant. 
         std::unique_ptr<OPSObjectFactory> objectFactory;

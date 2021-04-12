@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <chrono>
+
 #include "Receiver.h"
 #include "BytesSizePair.h"
 #include "DeadlineTimer.h"
@@ -156,6 +158,6 @@ namespace ops
 		ConnectStatus _cs;
 		volatile bool _started;
 		std::unique_ptr<DeadlineTimer> _timer;
-		const int64_t period = 1000;
+		const std::chrono::milliseconds period{ 1000 };
 	};
 }

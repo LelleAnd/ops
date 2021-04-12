@@ -50,7 +50,7 @@ int main(const int argc, const char* args[])
 	hello::RequestHelloData request;
 	request.requestersName = "C++ Requester";
 
-	reply = requestReplyHelper.request(&request, 1000);
+	reply = requestReplyHelper.request(&request, std::chrono::milliseconds(1000));
 
 	if(reply != nullptr)
 	{

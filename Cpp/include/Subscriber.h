@@ -24,6 +24,7 @@
 #include <list>
 #include <deque>
 #include <climits>
+#include <chrono>
 
 #include "OPSTypeDefs.h"
 #include "Topic.h"
@@ -41,6 +42,7 @@
 #include "PubIdChecker.h"
 #include "DebugHandler.h"
 #include "OPSEvent.h"
+#include "TimeHelper.h"
 
 namespace ops
 {
@@ -101,7 +103,7 @@ namespace ops
         std::shared_ptr<ReceiveDataHandler> receiveDataHandler{ nullptr };
 
         std::unique_ptr<DeadlineTimer> deadlineTimer;
-        int64_t deadlineTimeout{ 0 };
+        std::chrono::milliseconds deadlineTimeout{ 0 };
 
         // Called from ReceiveDataHandler (TCPClient)
         virtual void onNewEvent(Notifier<ConnectStatus>*, ConnectStatus arg) override
@@ -136,14 +138,23 @@ namespace ops
 
         DeadlineMissedEvent deadlineMissedEvent;
 
-        ///Sets the deadline timeout for this subscriber.
+        ///Sets the deadline timeout for this subscriber (== 0 --> no deadline timeout (default)).
         ///If no message is received within deadline,
         ///listeners to deadlineMissedEvent will be notified
-        const static int64_t MAX_DEADLINE_TIMEOUT = LLONG_MAX;
+        const static int64_t MAX_DEADLINE_TIMEOUT = TimeHelper::infinite;
+#ifdef OPS_C14_DETECTED
+        [[deprecated("Deprecated. Replaced by setDeadline() taking chrono duration")]]
+#endif
         void setDeadlineQoS(int64_t deadlineT);
+#ifdef OPS_C14_DETECTED
+        [[deprecated("Deprecated. Replaced by getDeadline() returning chrono duration")]]
+#endif
         int64_t getDeadlineQoS() const noexcept;
 
-        bool isDeadlineMissed();
+        void setDeadline(const std::chrono::milliseconds& deadlineT);
+        std::chrono::milliseconds getDeadline() const noexcept;
+
+        bool isDeadlineMissed() noexcept;
 
         // Note that the subscriber just borrows the reference. The caller still owns it and 
         // need to keep it around at least as long as the subscriber use it.
@@ -152,12 +163,24 @@ namespace ops
 
         ///Sets the minimum time separation between to consecutive messages.
         ///Received messages in between will be ignored by this Subscriber
-        void setTimeBasedFilterQoS(int64_t timeBaseMinSeparationMillis) noexcept;    // (CB)
-        int64_t getTimeBasedFilterQoS() const noexcept;                              // (CB)
+#ifdef OPS_C14_DETECTED
+        [[deprecated("Deprecated. Replaced by setTimeBasedFilter() taking chrono duration")]]
+#endif
+        void setTimeBasedFilterQoS(int64_t timeBaseMinSeparationMillis) noexcept;   // (CB)
+#ifdef OPS_C14_DETECTED
+        [[deprecated("Deprecated. Replaced by getTimeBasedFilter() returning chrono duration")]]
+#endif
+        int64_t getTimeBasedFilterQoS() const noexcept;                             // (CB)
+        void setTimeBasedFilter(const std::chrono::milliseconds& minSeparation) noexcept;  // (CB)
+        std::chrono::milliseconds getTimeBasedFilter() const noexcept;              // (CB)                // (CB)
 
         ///Waits for new data to arrive or timeout.
         ///Returns: true if new data (i.e. unread data) exist.
+#ifdef OPS_C14_DETECTED
+        [[deprecated("Deprecated. Replaced by waitForNewData() taking chrono duration")]]
+#endif
         bool waitForNewData(int timeoutMs);
+        bool waitForNewData(const std::chrono::milliseconds& timeout);
 
         ///Checks if new data exist (same as 'waitForNewData(0)' but faster) 
         ///Returns: true if new data (i.e. unread data) exist.
@@ -235,9 +258,9 @@ namespace ops
         Lockable filterQoSPolicyMutex;
         Event newDataEvent;
 
-        int64_t timeLastData{ 0 };
-        int64_t timeLastDataForTimeBase{ 0 };
-        int64_t timeBaseMinSeparationTime{ 0 };
+        ops_clock::time_point timeLastData;
+        ops_clock::time_point timeLastDataForTimeBase;
+        std::chrono::milliseconds timeBaseMinSeparationTime{ 0 };
 
         bool applyFilterQoSPolicies(const OPSMessage* message, const OPSObject* o);
 
@@ -248,7 +271,7 @@ namespace ops
         // ACK handling
         struct ACKFilter;
         std::unique_ptr<ACKFilter> _ackFilter;
-        int64_t _nextRegisterTime{ 0 };
+        ops_clock::time_point _nextRegisterTime;
 
 #ifdef OPS_ENABLE_DEBUG_HANDLER
         volatile int64_t _dbgSkip{ 0 };

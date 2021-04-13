@@ -32,6 +32,7 @@
 
 @rem call :build path project_file
 :build
+@if not exist %~1\%~2 goto :eof
 @echo Building %~1 ...
 @pushd %~1
 msbuild %~2 -t:Rebuild

@@ -35,11 +35,9 @@ namespace ops
 {
 
     SubscriberBase::SubscriberBase(Topic const t) :
-        topic(t),
-        deadlineTimeout(TimeHelper::infinite)
+        topic(t)
     {
         participant = Participant::getInstance(topic.getDomainID(), topic.getParticipantID());
-        deadlineTimer = std::unique_ptr<DeadlineTimer>(DeadlineTimer::create(participant->getIOService()));
     }
 
     SubscriberBase::~SubscriberBase()
@@ -48,21 +46,30 @@ namespace ops
         stop();
     }
 
+    void SubscriberBase::setupDeadlineTimer()
+    {
+        if (deadlineTimer == nullptr) {
+            deadlineTimer = std::unique_ptr<DeadlineTimer>(DeadlineTimer::create(participant->getIOService()));
+            deadlineTimer->addListener(this);
+        }
+    }
+
     void SubscriberBase::start()
     {
-        if (started) { return; }
+        if (m_started) { return; }
 
         receiveDataHandler = participant->getReceiveDataHandler(topic);
         receiveDataHandler->addListener(this, topic);
         receiveDataHandler->Notifier<ConnectStatus>::addListener(this);
-        deadlineTimer->addListener(this);
-        deadlineTimer->start(deadlineTimeout);
-        started = true;
+        if ((deadlineTimer != nullptr) && deadlineUsed) {
+            deadlineTimer->start(deadlineTimeout);
+        }
+        m_started = true;
     }
 
     void SubscriberBase::stop()
     {
-        if (!started) { return; }
+        if (!m_started) { return; }
 
         // Note that the receiveDataHandler messageLock is held while we are removed from its list.
         // This ensures that the receive thread can't be in our onNewEvent() or be calling us anymore
@@ -71,9 +78,10 @@ namespace ops
         receiveDataHandler->removeListener(this, topic);
         receiveDataHandler.reset();
         participant->releaseReceiveDataHandler(topic);
-        deadlineTimer->removeListener(this);
-        deadlineTimer->cancel();
-        started = false;
+        if (deadlineTimer != nullptr) {
+            deadlineTimer->cancel();
+        }
+        m_started = false;
     }
 
     Topic SubscriberBase::getTopic() const
@@ -238,7 +246,7 @@ namespace ops
     ///TBD controllable if called by user or timer???
     void Subscriber::Activate()
     {
-        if (_ackFilter == nullptr) { return; }
+        if ((_ackFilter == nullptr) || (!isStarted())) { return; }
 
         // Send REGISTER (~1Hz)
         const ops_clock::time_point now = ops_clock::now();
@@ -316,8 +324,7 @@ namespace ops
         OPSObject* const o = message->getData();
         if (applyFilterQoSPolicies(message, o))
         {
-            if (timeBaseMinSeparationTime == std::chrono::milliseconds(0) || ops_clock::now() - timeLastDataForTimeBase > timeBaseMinSeparationTime)
-            {
+            if ((!minSeparationUsed) || ((ops_clock::now() - timeLastDataForTimeBase) > timeBaseMinSeparationTime)) {
                 firstDataReceived = true;
                 
                 addToBuffer(message);
@@ -333,9 +340,10 @@ namespace ops
 
 				// Update deadline variables
                 timeLastData = timeLastDataForTimeBase = ops_clock::now();
-                deadlineMissed = false;
 
-                deadlineTimer->start(deadlineTimeout);
+                if (deadlineUsed) {
+                    deadlineTimer->start(deadlineTimeout);
+                }
             }
         }
     }
@@ -435,22 +443,29 @@ namespace ops
 
     void Subscriber::setDeadlineQoS(int64_t const millis)
     {
-		if ((millis == 0) || (millis > TimeHelper::infinite)) {
-		    deadlineTimeout = std::chrono::milliseconds(TimeHelper::infinite);
-		} else {
-	        deadlineTimeout = std::chrono::milliseconds(millis);
-		}
-		cancelDeadlineTimeouts();	// Restart with new timeout
+        setDeadline(std::chrono::milliseconds(millis));
     }
 
     void Subscriber::setDeadline(const std::chrono::milliseconds& millis)
     {
-        if ((millis == std::chrono::milliseconds(0)) || (millis > std::chrono::milliseconds(TimeHelper::infinite))) {
-            deadlineTimeout = std::chrono::milliseconds(TimeHelper::infinite);
+        if (millis <= std::chrono::milliseconds(0)) {
+            deadlineTimeout = std::chrono::milliseconds(0);
+            deadlineUsed = false;
+            if (deadlineTimer != nullptr) {
+                deadlineTimer->cancel();
+            }
         } else {
-            deadlineTimeout = millis;
+            if (millis > std::chrono::milliseconds(TimeHelper::infinite)) {
+                deadlineTimeout = std::chrono::milliseconds(TimeHelper::infinite);
+            } else {
+                deadlineTimeout = millis;
+            }
+            deadlineUsed = true;
+            setupDeadlineTimer();
+            if (deadlineTimer != nullptr) {
+                deadlineTimer->start(deadlineTimeout);	// Restart with new timeout
+            }
         }
-        cancelDeadlineTimeouts();	// Restart with new timeout
     }
 
     int64_t Subscriber::getDeadlineQoS() const noexcept
@@ -471,11 +486,13 @@ namespace ops
     void Subscriber::setTimeBasedFilterQoS(int64_t const timeBaseMinSeparationMillis) noexcept
     {
         timeBaseMinSeparationTime = std::chrono::milliseconds(timeBaseMinSeparationMillis);
+        minSeparationUsed = timeBaseMinSeparationTime != std::chrono::milliseconds(0);
     }
 
     void Subscriber::setTimeBasedFilter(const std::chrono::milliseconds& minSeparation) noexcept
     {
         timeBaseMinSeparationTime = minSeparation;
+        minSeparationUsed = timeBaseMinSeparationTime != std::chrono::milliseconds(0);
     }
 
     std::chrono::milliseconds Subscriber::getTimeBasedFilter() const noexcept
@@ -487,9 +504,7 @@ namespace ops
 
     void Subscriber::checkAndNotifyDeadlineMissed()
     {
-        if (isDeadlineMissed())
-        {
-            //printf("DeadlineMissed timeLastData = %d, currTime = %d, deadlineTimeout = %d\n", timeLastData, currTime, deadlineTimeout)
+        if (isDeadlineMissed()) {
             deadlineMissedEvent.notifyDeadlineMissed();
             timeLastData = ops_clock::now();
         }
@@ -498,17 +513,10 @@ namespace ops
     bool Subscriber::isDeadlineMissed() noexcept
     {
         const ops_clock::time_point currTime = ops_clock::now();
-        if (currTime - timeLastData > deadlineTimeout)
-        {
-            deadlineMissed = true;
-            return deadlineMissed;
+        if (currTime - timeLastData > deadlineTimeout) {
+            return true;
         }
         return false;
-    }
-
-    void Subscriber::cancelDeadlineTimeouts()
-    {
-        deadlineTimer->start(deadlineTimeout);
     }
 
     void Subscriber::onNewEvent(Notifier<int>* , int )

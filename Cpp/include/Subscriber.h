@@ -74,6 +74,8 @@ namespace ops
         ///Stops subscription (stops listening to data)
         void stop();
 
+        bool isStarted() const noexcept { return m_started; }
+
         ///Returns a copy of this subscribers Topic.
         Topic getTopic() const;                                                      // (CB)
 
@@ -104,6 +106,9 @@ namespace ops
 
         std::unique_ptr<DeadlineTimer> deadlineTimer;
         std::chrono::milliseconds deadlineTimeout{ 0 };
+        bool deadlineUsed{ false };
+
+        void setupDeadlineTimer();
 
         // Called from ReceiveDataHandler (TCPClient)
         virtual void onNewEvent(Notifier<ConnectStatus>*, ConnectStatus arg) override
@@ -113,7 +118,7 @@ namespace ops
         }
 
     private:
-        bool started{ false };
+        bool m_started{ false };
     };
 
     // =======================================================================================
@@ -261,12 +266,9 @@ namespace ops
         ops_clock::time_point timeLastData;
         ops_clock::time_point timeLastDataForTimeBase;
         std::chrono::milliseconds timeBaseMinSeparationTime{ 0 };
+        bool minSeparationUsed{ false };
 
         bool applyFilterQoSPolicies(const OPSMessage* message, const OPSObject* o);
-
-        void cancelDeadlineTimeouts();
-
-        bool deadlineMissed{ false };
 
         // ACK handling
         struct ACKFilter;

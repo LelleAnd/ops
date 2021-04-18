@@ -1,4 +1,10 @@
+@SETLOCAL
 @pushd %~dp0\..
+
+@set target=
+@if %1.==. goto :noarg
+@set target=-t:Rebuild
+:noarg
 
 @call :build Examples\CppApps\Example1 Example1.vcxproj
 @if errorlevel 1 goto :error
@@ -35,6 +41,6 @@
 @if not exist %~1\%~2 goto :eof
 @echo Building %~1 ...
 @pushd %~1
-msbuild %~2 -t:Rebuild
+msbuild %~2 %target%
 @popd
 @goto :eof

@@ -2,6 +2,7 @@
 
 #include <time.h>
 #include <stdio.h>
+#include <limits>
 
 #ifdef _WIN32
 #include <direct.h>
@@ -40,7 +41,7 @@
 
 #endif
 
-const char c_program_version[] = "OPSListener Version 2020-11-28";
+const char c_program_version[] = "OPSListener Version 2021-04-24";
 
 void showDescription()
 {
@@ -55,7 +56,7 @@ void ShowUsage()
 {
     std::cout << std::endl << "Usage:" << std::endl;
     std::cout << "  OPSListener [-v] [-?] [-c ops_cfg_file [-c ops_cfg_file [...]]]" << std::endl;
-    std::cout << "              [-j json_file [-j json_file [...]]]" << std::endl;
+    std::cout << "              [-j json_file [-j json_file [...]]] [-jr rowlimit]" << std::endl;
     std::cout << "              [-t] [-pA | -p<option_chars>] [-d [num]]" << std::endl;
     std::cout << "              [-a arg_file [-a arg_file [...]]]" << std::endl;
     std::cout << "              [-GA | -G domain [-G domain [...]]]" << std::endl;
@@ -78,7 +79,8 @@ void ShowUsage()
     std::cout << "    -I domain          Subscribe to Participant Info Data from given domain" << std::endl;
     std::cout << "    -IA                Subscribe to Participant Info Data from all domains in given configuration files" << std::endl;
     std::cout << "    -j json_file       Specifies a JSON-file with OPS Message descriptions (generated from opsc)" << std::endl;
-    std::cout << "    -n                 Don't subscribe to topics following" << std::endl;
+	std::cout << "    -jr rowlimit       Specifies the row limit for presented vectors in the Message descriptions" << std::endl;
+	std::cout << "    -n                 Don't subscribe to topics following" << std::endl;
     std::cout << "    -O                 if -I or -IA given, only show arriving and timed out participants" << std::endl;
     std::cout << "    -p<option_chars>   Defines for received messages, which fields to print and in which order" << std::endl;
     std::cout << "                 n       Publisher Name" << std::endl;
@@ -126,6 +128,7 @@ public:
 	bool skipTopics = false;
 	bool dontSkipUdpStaticRoute = false;
     int maxDumpBytes = 0;
+	int rowlimit = INT_MAX;
 
 	CArguments() : defaultDomain(getDefaultDomain())
 	{
@@ -266,7 +269,24 @@ public:
                 continue;
             }
 
-            if (argument == "-O") {
+			if (argument == "-jr") {
+				if (argIdx >= nArgs) {
+					std::cout << "Argument '-jr' is missing value" << std::endl;
+					return false;
+				}
+				std::string val = toAnsi(szArglist[argIdx++]);
+				if (val.size() > 0) {
+					if (isdigit(val[0]) != 0) {
+						int tmp = atoi(val.c_str());
+						if (tmp > 0) {
+							rowlimit = tmp;
+						}
+					}
+				}
+				continue;
+			}
+
+			if (argument == "-O") {
 				onlyArrivingLeaving = true;
 				continue;
 			}
@@ -712,6 +732,7 @@ public:
 
 		ErrorWriter* const errorWriter = new ErrorWriter(std::cout);
 
+		MsgDump.SetRowLimit(args.rowlimit);
         for (unsigned int i = 0; i < args.jsonFiles.size(); i++) { MsgDump.AddDefinitions(args.jsonFiles[i]); }
 
 		// First, Add all domains in given configuration files to the helper

@@ -26,6 +26,8 @@ namespace message_dump {
 
     class MessageDump
     {
+        int rowlimit = INT_MAX;
+
         struct CheckVersion
         {
             struct Range
@@ -47,6 +49,7 @@ namespace message_dump {
 
         struct DumpValue
         {
+            int rowlimit = INT_MAX;
             DumpObject* parent = nullptr;
             CheckVersion* chkVer = nullptr;
 
@@ -86,49 +89,37 @@ namespace message_dump {
             virtual ~DumpValue() {}
         };
 
-        struct DumpBoolean : DumpValue
-        {
-            void operator()(char*& ptr, int level) override
-            {
-                if (skipField()) return;
-                std::cout << indent(level) << name << " <boolean>: " << (*ptr ? "true" : "false") << "\n";
-                ptr += 1;
-            }
-        };
-        struct DumpVectorBoolean : DumpValue
-        {
-            void operator()(char*& ptr, int level) override
-            {
-                if (skipField()) return;
-                int len = GetInt(ptr);
-                if (len == 0) {
-                    std::cout << indent(level) << name << "[ size == 0 ]\n";
-                }
-                for (int i = 0; i < len; ++i) {
-                    std::cout << indent(level) << name << "[" << i << "] <boolean>: " << (*ptr ? "true" : "false") << "\n";
-                    ptr += 1;
-                }
-            }
-        };
-
         template <typename T, typename P = T>
         struct DumpV : DumpValue
         {
             void operator()(char*& ptr, int level) override
             {
                 if (skipField()) return;
-                std::cout << indent(level) << name << " <" << sizeof(T) << ">: " << (P)*(T*)ptr << "\n";
+                std::cout << indent(level) << name << " <" << sizeof(T) << ">: "; 
+                if (std::is_same<T, bool>::value) {
+                    std::cout << (*ptr ? "true" : "false") << "\n";
+                } else {
+                    std::cout << (P) * (T*)ptr << "\n";
+                }
                 ptr += sizeof(T);
             }
         };
-        using DumpByte   = DumpV<int8_t, int>;
-        using DumpShort  = DumpV<int16_t>;
-        using DumpInt    = DumpV<int32_t>;
-        using DumpLong   = DumpV<int64_t>;
-        using DumpFloat  = DumpV<float>;
-        using DumpDouble = DumpV<double>;
+        using DumpBoolean = DumpV<bool>;
+        using DumpByte    = DumpV<int8_t, int>;
+        using DumpShort   = DumpV<int16_t>;
+        using DumpInt     = DumpV<int32_t>;
+        using DumpLong    = DumpV<int64_t>;
+        using DumpFloat   = DumpV<float>;
+        using DumpDouble  = DumpV<double>;
 
-        template <typename T, typename P = T>
+        static int width(int value)
+        {
+            int num = 1;
+            while (value > 9) { ++num; value /= 10; }
+            return num;
+        }
+
+        template <typename T, int numw = 8, typename P = T>
         struct DumpVector : DumpValue
         {
             void operator()(char*& ptr, int level) override
@@ -138,14 +129,37 @@ namespace message_dump {
                 if (len == 0) {
                     std::cout << indent(level) << name << "[ size == 0 ]\n";
                 }
-                for (int i = 0; i < len; ++i) {
-                    std::cout << indent(level) << name << "[" << i << "] <" << sizeof(T) << ">: " << (P)*(T*)ptr << "\n";
-                    ptr += sizeof(T);
+                int w = width(len);
+                int row = 0;
+                for (int i = 0; i < len; ) {
+                    int num = len - i;
+                    ++row;
+                    if ((row < (rowlimit-1)) || (num <= numw)) {
+                        if (num > numw) { 
+                            num = numw; 
+                        } else {
+                            if (row >= rowlimit) { std::cout << indent(level) << name << "[" << std::setw(w) << " " << " ... " << std::setw(w) << " " << "]\n"; }
+                        }
+                        std::cout << indent(level) << name << "[" << std::setw(w) << i << " ... " << std::setw(w) << (i + num - 1) << "] <" << sizeof(T) << ">: ";
+                        for (int j = 0; (i < len) && (j < numw); ++i, ++j) {
+                            if (std::is_same<T, bool>::value) {
+                                std::cout << (*ptr ? "true" : "false") << "  ";
+                            } else {
+                                std::cout << (P) * (T*)ptr << "  ";
+                            }
+                            ptr += sizeof(T);
+                        }
+                        std::cout << "\n";
+                    } else {
+                        ptr += numw * sizeof(T);
+                        i += numw;
+                    }
                 }
             }
         };
-        using DumpVectorByte = DumpVector<int8_t, int>;
-        using DumpVectorShort = DumpVector<int16_t>;
+        using DumpVectorBoolean = DumpVector<bool, 8>;
+        using DumpVectorByte = DumpVector<int8_t, 16, int>;
+        using DumpVectorShort = DumpVector<int16_t, 16>;
         using DumpVectorInt = DumpVector<int32_t>;
         using DumpVectorLong = DumpVector<int64_t>;
         using DumpVectorFloat = DumpVector<float>;
@@ -169,9 +183,19 @@ namespace message_dump {
                 if (len1 == 0) {
                     std::cout << indent(level) << name << "[ size == 0 ]\n";
                 }
+                int w = width(len1);
                 for (int i = 0; i < len1; ++i) {
                     int len = GetInt(ptr);
-                    std::cout << indent(level) << name << "[" << i << "] <string[" << len << "]>: " << GetString(ptr, len) << "\n";
+                    if (i < (rowlimit-2)) {
+                        std::cout << indent(level) << name << "[" << std::setw(w) << i << "] <string[" << len << "]>: " << GetString(ptr, len) << "\n";
+                    } else {
+                        if (i == (len1 - 1)) {
+                            std::cout << indent(level) << name << "[ ... ]\n";
+                            std::cout << indent(level) << name << "[" << std::setw(w) << i << "] <string[" << len << "]>: " << GetString(ptr, len) << "\n";
+                        } else {
+                            GetString(ptr, len);
+                        }
+                    }
                 }
             }
         };
@@ -521,6 +545,7 @@ namespace message_dump {
 
             if (val) {
                 val->SetName(fieldname);
+                val->rowlimit = rowlimit;
                 val->optionalOnTagVersion = optionalOnTagVersion;
                 val->chkVer = chkVer;
                 val->parent = dmp;
@@ -596,6 +621,11 @@ namespace message_dump {
         }
 
         bool Any() { return objs.size() > 0; }
+
+        void SetRowLimit(int limit)
+        {
+            rowlimit = limit;
+        }
 
         void Dump(std::string tname, uint32_t verMask, char* ptr)
         {

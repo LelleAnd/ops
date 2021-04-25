@@ -70,7 +70,9 @@ uses
   uOps.NetworkSupport in '..\..\..\Delphi\Source\uOps.NetworkSupport.pas',
   pizza.special.Parmesan in '..\..\OPSIdls\PizzaProject\Generated\Delphi\pizza\special\pizza.special.Parmesan.pas',
   opsidls.OPSConstants in '..\..\..\Common\idl\Generated\Delphi\opsidls\opsidls.OPSConstants.pas',
-  opsidls.SendAckPatternData in '..\..\..\Common\idl\Generated\Delphi\opsidls\opsidls.SendAckPatternData.pas';
+  opsidls.SendAckPatternData in '..\..\..\Common\idl\Generated\Delphi\opsidls\opsidls.SendAckPatternData.pas',
+  opsidls.DebugRequestResponseData in '..\..\..\Common\idl\Generated\Delphi\opsidls\opsidls.DebugRequestResponseData.pas',
+  opsidls.opsidlsTypeFactory in '..\..\..\Common\idl\Generated\Delphi\opsidls\opsidls.opsidlsTypeFactory.pas';
 
 {$R *.res}
 

@@ -414,9 +414,9 @@ var
   Str : string;
 begin
   if Sender = FPub then begin
-    Str := '[Publisher, ' + FPub.Topic.Name + ']';
+    Str := '[Publisher, ' + string(FPub.Topic.Name) + ']';
   end else if Sender = FSub then begin
-    Str := '[Subscriber, ' + FSub.Topic.Name + ']';
+    Str := '[Subscriber, ' + string(FSub.Topic.Name) + ']';
   end else begin
     Str := '[Unknown]';
   end;

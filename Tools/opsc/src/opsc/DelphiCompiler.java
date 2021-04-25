@@ -105,18 +105,24 @@ public class DelphiCompiler extends opsc.Compiler
         createdFiles += "\"" + getOutputFileName() + "\"\n";
     }
 
+    private String convertComment(int tnum, String comment)
+    {
+      String ret = "";
+      int idx;
+      while ((idx = comment.indexOf('\n')) >= 0) {
+          ret += tab(tnum) + "///" + comment.substring(0,idx).replace("/*", "").replace("*/", "").replace("\r", "") + endl();
+          comment = comment.substring(idx+1);
+      }
+      ret += tab(tnum) + "///" + comment.replace("/*", "").replace("*/", "") + endl();
+      return ret;
+    }
+
     private String getClassComment(IDLClass idlClass)
     {
         String ret = "";
         if (idlClass.getComment() != null) {
             if (!idlClass.getComment().equals("")) {
-                String comment = idlClass.getComment();
-                int idx;
-                while ((idx = comment.indexOf('\n')) >= 0) {
-                    ret += tab(1) + "///" + comment.substring(0,idx).replace("/*", "").replace("*/", "").replace("\r", "") + endl();
-                    comment = comment.substring(idx+1);
-                }
-                ret += tab(1) + "///" + comment.replace("/*", "").replace("*/", "") + endl();
+                ret = convertComment(1, idlClass.getComment());
             }
         }
         return ret;
@@ -245,6 +251,13 @@ public class DelphiCompiler extends opsc.Compiler
         return languageType(type.replace("[]", ""));
     }
 
+    protected String convOpsName(String type)
+    {
+        if (type.equals("OPSObject")) return "TOPSObject";
+        if (type.equals("OPSObject[]")) return "TOPSObject[]";
+        return type;
+    }
+
     protected String getLastPart(String name)
     {
       int idx;
@@ -263,6 +276,7 @@ public class DelphiCompiler extends opsc.Compiler
           return cl.getPackageName() + "." + getClassName(cl);
         }
       }
+      if (className.equals("OPSObject")) { return "uOps.OPSObject"; }
       // Didn't find class in list so it is from another "project"
       // Assume then that the 'className' contains <packagename>.<class>
       // and that the unit is <packagename>.<class>, i.e. the same
@@ -271,8 +285,9 @@ public class DelphiCompiler extends opsc.Compiler
 
     protected String getFullyQualifiedClassName(String className)
     {
+      String s = elementType(className);
       // We return the unitname.classname
-      return getUnitName(className) + "." + checkReservedName(getLastPart(className));
+      return getUnitName(s) + "." + convOpsName(checkReservedName(getLastPart(s)));
     }
 
     protected String getConstructorHead(IDLClass idlClass)
@@ -305,7 +320,7 @@ public class DelphiCompiler extends opsc.Compiler
               if (field.isArray()) {
                   if (field.getArraySize() > 0) {
                       ret += tab(1) + "for i := 0 to High(" + fieldName + ") do begin" + endl();
-                      ret += tab(2) +   fieldName + "[i] := " + getFullyQualifiedClassName(elementType(field.getType())) + ".Create;" + endl();
+                      ret += tab(2) +   fieldName + "[i] := " + getFullyQualifiedClassName(field.getType()) + ".Create;" + endl();
                       ret += tab(1) + "end;" + endl();
                   }
               } else {
@@ -417,6 +432,7 @@ public class DelphiCompiler extends opsc.Compiler
                 if (field.isArray()) {
                     type = type.substring(0, type.length() - 2);
                 }
+                if (type.equals("OPSObject")) continue;
                 String unit = getUnitName(type);
                 typesToInclude.put(unit, unit);
             }
@@ -451,14 +467,14 @@ public class DelphiCompiler extends opsc.Compiler
         if (field.getArraySize() == 0) {
             // idl = type[] name;
             if (field.isIdlType()) {
-                ret += languageType(getFullyQualifiedClassName(fieldType)) + ";" + endl();
+                ret += languageType(getFullyQualifiedClassName(fieldType) + "[]") + ";" + endl();
             } else {
                 ret += languageType(fieldType) + ";" + endl();
             }
         } else {
             // idl = type[size] name;
             if (field.isIdlType()) {
-                ret += "array [0.." + (field.getArraySize() - 1) + "] of " + languageType(getFullyQualifiedClassName(elementType(field.getType()))) + ";" + endl();
+                ret += "array [0.." + (field.getArraySize() - 1) + "] of " + languageType(getFullyQualifiedClassName(field.getType())) + ";" + endl();
             } else {
                 ret += "array [0.." + (field.getArraySize() - 1) + "] of " + languageType(elementType(field.getType())) + ";" + endl();
             }
@@ -481,13 +497,7 @@ public class DelphiCompiler extends opsc.Compiler
             if (field.isStatic()) continue;
             String fieldName = getFieldName(field);
             if(!field.getComment().equals("")) {
-                String comment = field.getComment();
-                int idx;
-                while ((idx = comment.indexOf('\n')) >= 0) {
-                  ret += tab(2) + "///" + comment.substring(0,idx).replace("/*", "").replace("*/", "") + endl();
-                  comment = comment.substring(idx+1);
-                }
-                ret += tab(2) + "///" + comment.replace("/*", "").replace("*/", "") + endl();
+                ret += convertComment(2, field.getComment());
             }
             String vers = getVersionDescription(field.getDirective());
             if (vers.length() > 0) {
@@ -520,13 +530,7 @@ public class DelphiCompiler extends opsc.Compiler
             if (!field.isStatic()) continue;
             String fieldName = getFieldName(field);
             if (!field.getComment().equals("")) {
-                String comment = field.getComment();
-                int idx;
-                while ((idx = comment.indexOf('\n')) >= 0) {
-                    ret += tab(3) + "///" + comment.substring(0,idx).replace("/*", "").replace("*/", "") + endl();
-                    comment = comment.substring(idx+1);
-                }
-                ret += tab(3) + "///" + comment.replace("/*", "").replace("*/", "") + endl();
+                ret += convertComment(3, field.getComment());
             }
             String fieldType = getLastPart(field.getType());
             if (field.getType().equals("string")) {
@@ -546,13 +550,7 @@ public class DelphiCompiler extends opsc.Compiler
         String ret = "";
         for (IDLEnumType et : idlClass.getEnumTypes()) {
             if (!et.getComment().equals("")) {
-                String comment = et.getComment();
-                int idx;
-                while ((idx = comment.indexOf('\n')) >= 0) {
-                    ret += tab(3) + "///" + comment.substring(0,idx).replace("/*", "").replace("*/", "").replace("\r", "") + endl();
-                    comment = comment.substring(idx+1);
-                }
-                ret += tab(3) + "///" + comment.replace("/*", "").replace("*/", "") + endl();
+                ret += convertComment(3, et.getComment());
             }
             ret += tab(3) + et.getName() + " = (" + endl();
             String values = "";
@@ -601,7 +599,7 @@ public class DelphiCompiler extends opsc.Compiler
               // is of the correct type
               if (field.isArray()) {
                 String s = field.getType();
-                s = getLastPart(s.substring(0, s.indexOf('[')));
+                s = convOpsName(getLastPart(s.substring(0, s.indexOf('['))));
                 ret += tab(1) + "for __i__ := 0 to High(" + fieldName + ") do begin" + endl();
                 ret += tab(2) + "if not " + fieldName + "[__i__].ClassNameIs('" + s + "') then Result := False;" + endl();
                 ret += tab(1) + "end;" + endl();
@@ -716,11 +714,11 @@ public class DelphiCompiler extends opsc.Compiler
                     if (field.getArraySize() > 0) {
                         // idl = type[size] name;
                         // TestDataArchiveHelper.inoutfixarr(archiver, 'ftest2s', ftest2s, 5);
-                        ret += getFullyQualifiedClassName(elementType(field.getType())) +
+                        ret += getFullyQualifiedClassName(field.getType()) +
                               "ArchiveHelper.Inoutfixarr(archiver, '" + fieldName + "', " + fieldName + ", " +
                               field.getArraySize() + ", " + isAbsType + ");" + endl();
                     } else {
-                        ret += getFullyQualifiedClassName(elementType(field.getType())) +
+                        ret += getFullyQualifiedClassName(field.getType()) +
                               "ArchiveHelper.Inoutdynarr(archiver, '" + fieldName + "', TDynSerializableArray(" + fieldName +
                               "), " + isAbsType + ");" + endl();
 ///                        ret += "archiver.Inout('" + field.getName() + "', TDynSerializableArray(" + fieldName + "));" + endl();

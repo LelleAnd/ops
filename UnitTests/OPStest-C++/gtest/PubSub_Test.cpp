@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2020 Lennart Andersson.
+* Copyright (C) 2020-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -184,6 +184,7 @@ TEST_F(Test_PubSub, TestNormal) {
     EXPECT_EQ(pub->getSendState(), ops::Publisher::SendState::acked);
 
     // Check data incl. PubId
+    ASSERT_NE(sub->getMessage(), nullptr);
     EXPECT_EQ(sub->getMessage()->getPublicationID(), 0);
     EXPECT_STREQ(sub->getDataReference()->getKey().c_str(), "test0");
     EXPECT_EQ(dataNotifications, 1);
@@ -246,6 +247,7 @@ TEST_F(Test_PubSub, TestLostData) {
     EXPECT_EQ(pub->getSendState(), ops::Publisher::SendState::acked);
 
     // Check data incl. PubId
+    ASSERT_NE(sub->getMessage(), nullptr);
     EXPECT_EQ(sub->getMessage()->getPublicationID(), 0);
     EXPECT_STREQ(sub->getDataReference()->getKey().c_str(), "test1");
     EXPECT_EQ(dataNotifications, 1);
@@ -308,6 +310,7 @@ TEST_F(Test_PubSub, TestLostAck) {
     EXPECT_EQ(pub->getSendState(), ops::Publisher::SendState::acked);
 
     // Check data incl. PubId
+    ASSERT_NE(sub->getMessage(), nullptr);
     EXPECT_EQ(sub->getMessage()->getPublicationID(), 0);
     EXPECT_STREQ(sub->getDataReference()->getKey().c_str(), "test2");
     EXPECT_EQ(dataNotifications, 1);

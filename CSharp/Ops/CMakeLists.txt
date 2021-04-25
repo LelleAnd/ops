@@ -130,7 +130,7 @@ if(WIN32)
     set_target_properties(${OPS_LIB_NAME} PROPERTIES RELEASE_POSTFIX "-opt")
 
     install(TARGETS ${OPS_LIB_NAME}
-      EXPORT ops-targets
+      EXPORT csharp-targets
       DESTINATION bin
     )
 
@@ -187,7 +187,7 @@ if(WIN32)
     add_custom_target(${OPS_LIB_NAME} ALL DEPENDS ${OPS_TARGET})
 
     install(FILES ${OPS_TARGET}
-      EXPORT ops-targets
+      EXPORT csharp-targets
       DESTINATION lib/mono
     )
 

@@ -75,7 +75,7 @@ if(NOT OPS_BOOTSTRAP_BUILD)
   if(MSVC)
     # Make it clear which lib-file is for linking with the dll
     set_target_properties(${LIB_NAME} PROPERTIES ARCHIVE_OUTPUT_NAME "${LIB_NAME}-dll")
-    ##TOOD set_target_properties(${LIB_NAME} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    ##TODO set_target_properties(${LIB_NAME} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
   endif()
   # Add compile definition so that users of the library get the correct include definitions
   target_compile_definitions(${LIB_NAME} PUBLIC OPS_LIBRARY_IMPORT)
@@ -134,7 +134,7 @@ if(NOT OPS_BOOTSTRAP_BUILD)
   endif()
 
   install(TARGETS ${LIB_NAME} ${LIB_STATIC}
-    EXPORT ops-targets
+    EXPORT cpp-targets
     RUNTIME DESTINATION ${INSTALL_BINDIR}
     LIBRARY DESTINATION ${INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${INSTALL_ARCHIVEDIR}

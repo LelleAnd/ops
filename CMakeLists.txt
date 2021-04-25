@@ -39,6 +39,9 @@ project(OPS VERSION 4.2.0)
 #   CMAKE:
 #     CMAKE_BUILD_TYPE              Bootstrap / Debug / Opt
 #     BOOST_ARCH                    -
+#     OPS_BUILD_CPP                 default: ON
+#     OPS_BUILD_CSHARP              default: ON
+#     OPS_BUILD_PYTHON              default: ON
 #     OPS_BUILD_UNITTESTS           default: ON
 #     OPS_BUILD_EXAMPLES            default: ON
 #
@@ -51,9 +54,18 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-message(STATUS ">>> CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE})
+option(OPS_BUILD_CPP "Enable to build C++ Core, apps and tools" ON)
+option(OPS_BUILD_CSHARP "Enable to build C# Core and apps" ON)
+option(OPS_BUILD_PYTHON "Enable to build Python package" ON)
+option(OPS_BUILD_UNITTESTS "Enable to build the UnitTest app(s)" ON)
+option(OPS_BUILD_EXAMPLES "Enable to build the example applications" ON)
+
+message(STATUS ">>> CMAKE_BUILD_TYPE:    " ${CMAKE_BUILD_TYPE})
+message(STATUS ">>> OPS_BUILD_CPP:       " ${OPS_BUILD_CPP})
+message(STATUS ">>> OPS_BUILD_CSHARP:    " ${OPS_BUILD_CSHARP})
+message(STATUS ">>> OPS_BUILD_PYTHON:    " ${OPS_BUILD_PYTHON})
 message(STATUS ">>> OPS_BUILD_UNITTESTS: " ${OPS_BUILD_UNITTESTS})
-message(STATUS ">>> OPS_BUILD_EXAMPLES: " ${OPS_BUILD_EXAMPLES})
+message(STATUS ">>> OPS_BUILD_EXAMPLES:  " ${OPS_BUILD_EXAMPLES})
 
 if(CMAKE_BUILD_TYPE MATCHES "Bootstrap")
   set(OPS_BOOTSTRAP_BUILD TRUE)
@@ -75,16 +87,18 @@ endif()
 # Find external dependencies
 
 ## ----------------------------------------------------------------------------
-message(STATUS "GOOGLETEST_HOME: " $ENV{GOOGLETEST_HOME})
+if (OPS_BUILD_UNITTESTS)
+  message(STATUS "GOOGLETEST_HOME: " $ENV{GOOGLETEST_HOME})
 
-# help the FindGtest script locate gtest
-if(DEFINED ENV{GOOGLETEST_HOME})
-  set(GTEST_ROOT $ENV{GOOGLETEST_HOME})
-  list(APPEND CMAKE_PREFIX_PATH $ENV{GOOGLETEST_LIB})
+  # help the FindGtest script locate gtest
+  if(DEFINED ENV{GOOGLETEST_HOME})
+    set(GTEST_ROOT $ENV{GOOGLETEST_HOME})
+    list(APPEND CMAKE_PREFIX_PATH $ENV{GOOGLETEST_LIB})
+  endif()
+  find_package(GTest)
+
+  message(STATUS "GTEST_INCLUDE_DIRS: " ${GTEST_INCLUDE_DIRS})
 endif()
-find_package(GTest)
-
-message(STATUS "GTEST_INCLUDE_DIRS: " ${GTEST_INCLUDE_DIRS})
 
 ## ----------------------------------------------------------------------------
 # We need Java 1.8 (JDK 8) or later since Java code uses lambda expressions
@@ -115,100 +129,106 @@ else()
 endif()
 
 ## ----------------------------------------------------------------------------
-message(STATUS "BOOST_HOME: " $ENV{BOOST_HOME})
-message(STATUS "BOOST_ARCH: " ${BOOST_ARCH})
+if (OPS_BUILD_CPP)
+  message(STATUS "BOOST_HOME: " $ENV{BOOST_HOME})
+  message(STATUS "BOOST_ARCH: " ${BOOST_ARCH})
 
-# find Boost. If not found we can't build c++ libs
-option(Boost_DEBUG "Set to ON to debug Boost paths" OFF)
+  # find Boost. If not found we can't build c++ libs
+  option(Boost_DEBUG "Set to ON to debug Boost paths" OFF)
 
-# this prevents the FindBoost.cmake to search for cmake-built Boost
-set(Boost_NO_BOOST_CMAKE ON)
+  # this prevents the FindBoost.cmake to search for cmake-built Boost
+  set(Boost_NO_BOOST_CMAKE ON)
 
-# if the Boost home environment var is set, use it to hint the FindBoost.cmake about Boost location
-if(DEFINED ENV{BOOST_HOME})
-  set(BOOST_ROOT $ENV{BOOST_HOME})
-endif()
-message(STATUS "BOOST_ROOT: " ${BOOST_ROOT})
+  # if the Boost home environment var is set, use it to hint the FindBoost.cmake about Boost location
+  if(DEFINED ENV{BOOST_HOME})
+    set(BOOST_ROOT $ENV{BOOST_HOME})
+  endif()
+  message(STATUS "BOOST_ROOT: " ${BOOST_ROOT})
 
-if(BOOST_ARCH)
-  ###  set(Boost_ARCHITECTURE "-x64")    ## Needed to work on GitHub CI test
-  set(Boost_ARCHITECTURE ${BOOST_ARCH})
-endif()
+  if(BOOST_ARCH)
+    ###  set(Boost_ARCHITECTURE "-x64")    ## Needed to work on GitHub CI test
+    set(Boost_ARCHITECTURE ${BOOST_ARCH})
+  endif()
 
-if(MSVC)
-  set(Boost_USE_STATIC_LIBS ON)
-  find_package(Boost MODULE COMPONENTS system thread date_time regex chrono)
-else()
-  find_package(Boost MODULE COMPONENTS system thread)
-endif()
+  if(MSVC)
+    set(Boost_USE_STATIC_LIBS ON)
+    find_package(Boost MODULE COMPONENTS system thread regex)
+  else()
+    find_package(Boost MODULE COMPONENTS system thread)
+  endif()
 
-message(STATUS "Boost_INCLUDE_DIRS: " ${Boost_INCLUDE_DIRS})
-message(STATUS "Boost_LIBRARY_DIRS: " ${Boost_LIBRARY_DIRS})
-message(STATUS "Boost_LIBRARIES: " ${Boost_LIBRARIES})
+  message(STATUS "Boost_INCLUDE_DIRS: " ${Boost_INCLUDE_DIRS})
+  message(STATUS "Boost_LIBRARY_DIRS: " ${Boost_LIBRARY_DIRS})
+  message(STATUS "Boost_LIBRARIES: " ${Boost_LIBRARIES})
+endif ()
 
 ## ----------------------------------------------------------------------------
 # Python, v2.7 or 3.x
-if (${CMAKE_VERSION} VERSION_LESS "3.12")
-  find_package(PythonInterp)
-  if(PYTHONINTERP_FOUND)
-    message(STATUS "Found Python interpreter version " ${PYTHON_VERSION_STRING})
-    set(Python_EXECUTABLE ${PYTHON_EXECUTABLE})
+if(OPS_BUILD_PYTHON)
+  if (${CMAKE_VERSION} VERSION_LESS "3.12")
+    find_package(PythonInterp)
+    if(PYTHONINTERP_FOUND)
+      message(STATUS "Found Python interpreter version " ${PYTHON_VERSION_STRING})
+      set(Python_EXECUTABLE ${PYTHON_EXECUTABLE})
+    else()
+      message(STATUS "No Python interpreter found. Python package will not be built.")
+    endif()
   else()
-    message(STATUS "No Python interpreter found. Python package will not be built.")
-  endif()
-else()
-  find_package(Python COMPONENTS Interpreter Development)
-  if(Python_FOUND)
-    message(STATUS "Found Python interpreter version " ${Python_VERSION} " ID: " ${Python_INTERPRETER_ID})
-  else()
-    message(STATUS "No Python interpreter found. Python package will not be built.")
+    find_package(Python COMPONENTS Interpreter Development)
+    if(Python_FOUND)
+      message(STATUS "Found Python interpreter version " ${Python_VERSION} " ID: " ${Python_INTERPRETER_ID})
+    else()
+      message(STATUS "No Python interpreter found. Python package will not be built.")
+    endif()
   endif()
 endif()
 
 ## ----------------------------------------------------------------------------
 # Update C++ compiler flags (warnings, exceptions, ...)
-message(STATUS ">>> CMAKE_CXX_FLAGS: " ${CMAKE_CXX_FLAGS})
-message(STATUS ">>> CMAKE_CXX_FLAGS_DEBUG: " ${CMAKE_CXX_FLAGS_DEBUG})
-message(STATUS ">>> CMAKE_CXX_FLAGS_RELEASE: " ${CMAKE_CXX_FLAGS_RELEASE})
+if (OPS_BUILD_CPP)
+  message(STATUS ">>> CMAKE_CXX_FLAGS: " ${CMAKE_CXX_FLAGS})
+  message(STATUS ">>> CMAKE_CXX_FLAGS_DEBUG: " ${CMAKE_CXX_FLAGS_DEBUG})
+  message(STATUS ">>> CMAKE_CXX_FLAGS_RELEASE: " ${CMAKE_CXX_FLAGS_RELEASE})
 
-set(warnings "")
-if(MSVC)
-  # Use at least warning level W3, User can specify higher level
-  # CMake sets default value after user supplied value so it need to be removed
-  # CMake 3.15 has removed the default values (Policy CMP0092)
-  if(CMAKE_CXX_FLAGS MATCHES "/Wall")
-    string(REGEX REPLACE "/W[0-4]" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
-  endif()
-  if(CMAKE_CXX_FLAGS MATCHES "/W4")
-    string(REGEX REPLACE "/W[0-3]" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
-  endif()
-  if(NOT CMAKE_CXX_FLAGS MATCHES "/W([3-4]|all)")
-    # Our default, if not specified from user/CMake
-    string(APPEND warnings " /W3 /WX")
-  endif()
+  set(warnings "")
+  if(MSVC)
+    # Use at least warning level W3, User can specify higher level
+    # CMake sets default value after user supplied value so it need to be removed
+    # CMake 3.15 has removed the default values (Policy CMP0092)
+    if(CMAKE_CXX_FLAGS MATCHES "/Wall")
+      string(REGEX REPLACE "/W[0-4]" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+    endif()
+    if(CMAKE_CXX_FLAGS MATCHES "/W4")
+      string(REGEX REPLACE "/W[0-3]" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+    endif()
+    if(NOT CMAKE_CXX_FLAGS MATCHES "/W([3-4]|all)")
+      # Our default, if not specified from user/CMake
+      string(APPEND warnings " /W3 /WX")
+    endif()
 
-  # Check and specify exception handling if not defined by user/CMake
-  if(NOT CMAKE_CXX_FLAGS MATCHES "/EH[ascr]+")
-    string(APPEND warnings " /EHsc")
-  endif()
+    # Check and specify exception handling if not defined by user/CMake
+    if(NOT CMAKE_CXX_FLAGS MATCHES "/EH[ascr]+")
+      string(APPEND warnings " /EHsc")
+    endif()
 
-else()
-  if(CMAKE_BUILD_TYPE MATCHES "Release" OR CMAKE_BUILD_TYPE MATCHES "")
-  	set(CMAKE_CXX_FLAGS "-O2")
-  	string(REPLACE "-O3 -DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE} )
-  elseif(CMAKE_BUILD_TYPE MATCHES "Debug")
-  	set(CMAKE_CXX_FLAGS "-g -fprofile-arcs -ftest-coverage -O0") #fPIC is set
-  	string(REPLACE "-g" "" CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG} )
+  else()
+    if(CMAKE_BUILD_TYPE MATCHES "Release" OR CMAKE_BUILD_TYPE MATCHES "")
+  	  set(CMAKE_CXX_FLAGS "-O2")
+  	  string(REPLACE "-O3 -DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE} )
+    elseif(CMAKE_BUILD_TYPE MATCHES "Debug")
+  	  set(CMAKE_CXX_FLAGS "-g -fprofile-arcs -ftest-coverage -O0") #fPIC is set
+  	  string(REPLACE "-g" "" CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG} )
+    endif()
+  #  set(warnings "-Wall -Wextra -Werror")
+  #  set(warnings "-Wall -Wunused-parameter -Wsign-compare -Wcast-qual -Wconversion")
+    set(warnings "-Wall")
   endif()
-#  set(warnings "-Wall -Wextra -Werror")
-#  set(warnings "-Wall -Wunused-parameter -Wsign-compare -Wcast-qual -Wconversion")
-  set(warnings "-Wall")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${warnings}")
+
+  message(STATUS "CMAKE_CXX_FLAGS: " ${CMAKE_CXX_FLAGS})
+  message(STATUS "CMAKE_CXX_FLAGS_DEBUG: " ${CMAKE_CXX_FLAGS_DEBUG})
+  message(STATUS "CMAKE_CXX_FLAGS_RELEASE: " ${CMAKE_CXX_FLAGS_RELEASE})
 endif()
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${warnings}")
-
-message(STATUS "CMAKE_CXX_FLAGS: " ${CMAKE_CXX_FLAGS})
-message(STATUS "CMAKE_CXX_FLAGS_DEBUG: " ${CMAKE_CXX_FLAGS_DEBUG})
-message(STATUS "CMAKE_CXX_FLAGS_RELEASE: " ${CMAKE_CXX_FLAGS_RELEASE})
 
 ## ----------------------------------------------------------------------------
 # If we have java
@@ -292,30 +312,35 @@ if((OPS_BOOTSTRAP_BUILD) OR (DEFINED OPS_NO_SEPARATE_BOOTSTRAP))
     add_subdirectory(Java)
   endif()
 
-  # We only handle Python during the Bootstrap phase, since there isn't any
-  # difference between debug and opt builds
-  if(PYTHONINTERP_FOUND OR Python_FOUND)
-    # Build python source distribution of ops
-    add_subdirectory(Python)
+  if(OPS_BUILD_PYTHON)
+    # We only handle Python during the Bootstrap phase, since there isn't any
+    # difference between debug and opt builds
+    if(PYTHONINTERP_FOUND OR Python_FOUND)
+      # Build python source distribution of ops
+      add_subdirectory(Python)
+    endif()
   endif()
 endif()
 
 # add the C++ source, only if Boost is loaded
-if(Boost_FOUND)
-  add_subdirectory(Cpp)
-else()
-  message(WARNING "install Boost to build OPS for C++")
+if (OPS_BUILD_CPP)
+  if(Boost_FOUND)
+    add_subdirectory(Cpp)
+  else()
+    message(WARNING "install Boost to build OPS for C++")
+  endif()
 endif()
 
 # Tools
 add_subdirectory(Tools)
 
 if(NOT OPS_BOOTSTRAP_BUILD)
-  add_subdirectory(CSharp)
+  if(OPS_BUILD_CSHARP)
+    add_subdirectory(CSharp)
+  endif()
 
   ################################################################################
   # Build Unittests
-  option(OPS_BUILD_UNITTESTS "Enable to build the UnitTest app(s)" ON)
   if(OPS_BUILD_UNITTESTS AND GTEST_FOUND AND CMAKE_BUILD_TYPE MATCHES "Debug")
     add_subdirectory(UnitTests)
   endif()
@@ -323,7 +348,6 @@ if(NOT OPS_BOOTSTRAP_BUILD)
   ################################################################################
   # Build Examples
   # We need the opsc compiler from the Bootstrap phase to generate code for the examples
-  option(OPS_BUILD_EXAMPLES "Enable to build the example applications" ON)
   if(OPS_BUILD_EXAMPLES AND CMAKE_BUILD_TYPE MATCHES "Debug")
     add_subdirectory(Examples)
   endif()
@@ -375,10 +399,18 @@ if((OPS_BOOTSTRAP_BUILD) OR (DEFINED OPS_NO_SEPARATE_BOOTSTRAP))
     DESTINATION cmake/internal)
 endif()
 if(NOT OPS_BOOTSTRAP_BUILD)
-  install(EXPORT ops-targets
-    NAMESPACE ${OPS_NAMESPACE}
-    DESTINATION cmake/internal
-  )
+  if(OPS_BUILD_CPP)
+    install(EXPORT cpp-targets
+      NAMESPACE ${OPS_NAMESPACE}
+      DESTINATION cmake/internal
+    )
+  endif()
+  if(OPS_BUILD_CSHARP AND WIN32)
+    install(EXPORT csharp-targets
+      NAMESPACE ${OPS_NAMESPACE}
+      DESTINATION cmake/internal
+    )
+  endif()
 endif()
 
 include(CMakePackageConfigHelpers)

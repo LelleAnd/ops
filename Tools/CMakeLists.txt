@@ -12,11 +12,13 @@ if((OPS_BOOTSTRAP_BUILD) OR (DEFINED OPS_NO_SEPARATE_BOOTSTRAP))
 endif()
 
 if(NOT OPS_BOOTSTRAP_BUILD)
-  # Tools written in C++ is compiled for both debug and opt builds
-  add_subdirectory(OPSListener)
-  add_subdirectory(VerifyOPSConfig)
-  add_subdirectory(DebugConsole)
-  add_subdirectory(OPSBridge)
+  if (OPS_BUILD_CPP)
+    # Tools written in C++ is compiled for both debug and opt builds
+    add_subdirectory(OPSListener)
+    add_subdirectory(VerifyOPSConfig)
+    add_subdirectory(DebugConsole)
+    add_subdirectory(OPSBridge)
+  endif()
 endif()
 
 # Install the latest template files

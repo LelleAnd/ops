@@ -5,8 +5,12 @@ add_subdirectory(OPSIdls)
 # Java example applications
 add_subdirectory(JavaApps)
 
-# CSharp examples
-add_subdirectory(CSharpApps)
+if(OPS_BUILD_CSHARP)
+  # CSharp examples
+  add_subdirectory(CSharpApps)
+endif()
 
-# C++ example applications
-add_subdirectory(CppApps)
+if (OPS_BUILD_CPP)
+  # C++ example applications
+  add_subdirectory(CppApps)
+endif()

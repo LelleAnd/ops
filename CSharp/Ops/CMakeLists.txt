@@ -98,8 +98,8 @@ set(OPS_CS_SOURCE
 )
 
 if(WIN32)
-  if(${CMAKE_VERSION} VERSION_GREATER "3.8.0")
-    ## message(">>>>> CMAKE_VERSION= " ${CMAKE_VERSION})
+  if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.8.0")
+    ##message(">>>>> CMAKE_VERSION= " ${CMAKE_VERSION})
     enable_language(CSharp)
 
     # Define the DLL target, including all relevant project files.

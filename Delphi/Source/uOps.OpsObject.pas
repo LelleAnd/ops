@@ -2,7 +2,7 @@ unit uOps.OpsObject;
 
 (**
 *
-* Copyright (C) 2016-2020 Lennart Andersson.
+* Copyright (C) 2016-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -69,9 +69,13 @@ type
       property OPSObject_version : Byte read FOPSObject_version write FOPSObject_version;
   end;
 
+var
+  TOPSObjectArchiveHelper : TArchiverInOut.TSerializableHelper<TOPSObject>;
+
 implementation
 
-uses uOps.Exceptions;
+uses SysUtils,
+     uOps.Exceptions;
 
 { TOPSObject }
 
@@ -131,5 +135,12 @@ begin
   archiver.inout('key', FKey);
 end;
 
+initialization
+  TOPSObjectArchiveHelper := TArchiverInOut.TSerializableHelper<TOPSObject>.Create;
+
+finalization
+  FreeAndNil(TOPSObjectArchiveHelper);
+
 end.
+
 

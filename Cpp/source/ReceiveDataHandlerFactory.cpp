@@ -58,6 +58,11 @@ namespace ops
 			}
 		} 
 		key += "::";
+        if ((top.getTransport() == Topic::TRANSPORT_TCP) && (top.getPort() == 0)) {
+            // We add the channel name so different channels get different TCP RDH's
+            key += top.getChannelId();
+            key += "::";
+        }
 		key += top.getDomainAddress();
 		key += "::";
 		key += NumberToString(top.getPort());

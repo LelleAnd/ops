@@ -104,6 +104,8 @@ namespace ops
         Address_T localIf = doSubnetTranslation(top.getLocalInterface(), participant.getIOService());
         const InternalKey_T key = getKey(top, localIf);
 
+        OPS_CH_TRACE("getSendDataHandler() topic: " << top.getName() << ", key: " << key << "\n");
+
 		const SafeLock lock(mutex);
 
         // Check if a suitable SendDataHandler already exist

@@ -53,6 +53,7 @@
 #define OPS_NOTRACE(msg) 
 
 #define OPS_ACK_TRACE(msg)  { OPS_TRACE(ops::trace::grp("ACK") << msg); }
+#define OPS_CH_TRACE(msg)   { OPS_NOTRACE(ops::trace::grp("CH") << msg); }
 #define OPS_DES_TRACE(msg)  { OPS_NOTRACE(ops::trace::grp("DES") << msg); }
 #define OPS_OBJ_TRACE(msg)  { OPS_NOTRACE(ops::trace::grp("OBJ") << msg); }
 #define OPS_PIFO_TRACE(msg) { OPS_NOTRACE(ops::trace::grp("PIFO") << msg); }

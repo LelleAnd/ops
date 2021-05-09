@@ -471,9 +471,10 @@ package body PizzaTest_Pa is
        Part : Participant_Class_At := null;
      end record;
 
-  type ItemInfoList_T is array(Integer range 0..17) of ItemInfo_T;
+  type ItemInfoList_T is array(Integer range <>) of ItemInfo_T;
+  type ItemInfoList_At is access all ItemInfoList_T;
 
-  ItemInfoList : ItemInfoList_T;
+  ItemInfoList : ItemInfoList_At := null;
   ItemInfoNum : Integer := 0;
 
   procedure SetUp(dom, Topic, Typ : String) is
@@ -777,6 +778,7 @@ package body PizzaTest_Pa is
   procedure PizzaTest is
     participant : Participant_Class_At := null;
     otherParticipant : Participant_Class_At := null;
+    NumTopics : Integer := 0;
     dummy : Boolean;
   begin
     -- Enable TCP Client trace
@@ -791,23 +793,66 @@ package body PizzaTest_Pa is
     -- Add all Domain's from given file(s)
     setup_alt_config("Examples/OPSIdls/PizzaProject/ops_config.xml");
 
+    -- Count topics
+    declare
+      cfg  : OPSConfig_Class_At := RepositoryInstance.getConfig;
+      doms : Domain_Class_At_Arr_At := null;
+      tops : Topic_Class_At_Arr_At := null;
+    begin
+      if cfg /= null then
+        doms := cfg.getDomains;
+        if doms /= null then
+          for i in doms.all'Range loop
+            if doms(i) /= null then
+              tops := doms(i).getTopics;
+              if tops /= null then
+                for j in tops.all'Range loop
+                  if tops(j) /= null then
+                    NumTopics := NumTopics + 1;
+                  end if;
+                end loop;
+              end if;
+            end if;
+          end loop;
+        end if;
+      end if;
+    end;
+
+    NumTopics := NumTopics + 3;
+    ItemInfoList := new ItemInfoList_T(0..NumTopics-1);
+
     -- Setup Topic list
-    -- Setup the InfoItem list (TODO take from ops_config.xml)
-    Setup("PizzaDomain", "PizzaTopic", "pizza.PizzaData");
-    Setup("PizzaDomain", "VessuvioTopic", "pizza.VessuvioData");
-    Setup("PizzaDomain", "PizzaTopic2", "pizza.PizzaData");
-    Setup("PizzaDomain", "VessuvioTopic2", "pizza.VessuvioData");
-    Setup("PizzaDomain", "TcpPizzaTopic", "pizza.PizzaData");
-    Setup("PizzaDomain", "TcpVessuvioTopic", "pizza.VessuvioData");
-    Setup("PizzaDomain", "TcpPizzaTopic2", "pizza.PizzaData");
-    Setup("PizzaDomain", "TcpVessuvioTopic2", "pizza.VessuvioData");
-    Setup("PizzaDomain", "UdpPizzaTopic", "pizza.PizzaData");
-    Setup("PizzaDomain", "UdpVessuvioTopic", "pizza.VessuvioData");
-    Setup("PizzaDomain", "UdpPizzaTopic2", "pizza.PizzaData");
-    Setup("PizzaDomain", "UdpVessuvioTopic2", "pizza.VessuvioData");
-    Setup("OtherPizzaDomain", "OtherPizzaTopic", "pizza.PizzaData");
-    Setup("OtherPizzaDomain", "OtherVessuvioTopic", "pizza.VessuvioData");
-    Setup("PizzaDomain", "ExtraAlltTopic", "pizza.special.ExtraAllt");
+    declare
+      cfg  : OPSConfig_Class_At := RepositoryInstance.getConfig;
+      doms : Domain_Class_At_Arr_At := null;
+      tops : Topic_Class_At_Arr_At := null;
+    begin
+      if cfg /= null then
+        doms := cfg.getDomains;
+        if doms /= null then
+          for i in doms.all'Range loop
+            if doms(i) /= null then
+              tops := doms(i).getTopics;
+              if tops /= null then
+                for j in tops.all'Range loop
+                  if tops(j) /= null then
+                    declare
+                      domid : String := doms(i).DomainID;
+                      name  : String := tops(j).Name;
+                      tid   : String := tops(j).TypeID;
+                    begin
+                      Setup(domid, name, tid);
+                    end;
+                  end if;
+                end loop;
+              end if;
+            end if;
+          end loop;
+        end if;
+      end if;
+    end;
+
+    -- Add some extra duplicates (note that size above need to include these)
     Setup("PizzaDomain", "PizzaTopic", "pizza.PizzaData");
     Setup("PizzaDomain", "TcpPizzaTopic", "pizza.PizzaData");
     Setup("PizzaDomain", "TcpPizzaTopic", "pizza.PizzaData");

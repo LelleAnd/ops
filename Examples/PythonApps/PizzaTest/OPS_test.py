@@ -251,32 +251,6 @@ def menu():
 	print("\t X     Exit program")
 
 
-
-ItemInfoList.append(ItemInfo("PizzaDomain", "PizzaTopic", "pizza.PizzaData"))
-ItemInfoList.append(ItemInfo("PizzaDomain", "VessuvioTopic", "pizza.VessuvioData"))
-
-ItemInfoList.append(ItemInfo("PizzaDomain", "PizzaTopic2", "pizza.PizzaData"))
-ItemInfoList.append(ItemInfo("PizzaDomain", "VessuvioTopic2", "pizza.VessuvioData"))
-
-ItemInfoList.append(ItemInfo("PizzaDomain", "TcpPizzaTopic", "pizza.PizzaData"))
-ItemInfoList.append(ItemInfo("PizzaDomain", "TcpVessuvioTopic", "pizza.VessuvioData"))
-
-ItemInfoList.append(ItemInfo("PizzaDomain", "TcpPizzaTopic2", "pizza.PizzaData"))
-ItemInfoList.append(ItemInfo("PizzaDomain", "TcpVessuvioTopic2", "pizza.VessuvioData"))
-
-ItemInfoList.append(ItemInfo("PizzaDomain", "UdpPizzaTopic", "pizza.PizzaData"))
-ItemInfoList.append(ItemInfo("PizzaDomain", "UdpVessuvioTopic", "pizza.VessuvioData"))
-
-ItemInfoList.append(ItemInfo("PizzaDomain", "UdpPizzaTopic2", "pizza.PizzaData"))
-ItemInfoList.append(ItemInfo("PizzaDomain", "UdpVessuvioTopic2", "pizza.VessuvioData"))
-
-ItemInfoList.append(ItemInfo("OtherPizzaDomain", "OtherPizzaTopic", "pizza.PizzaData"))
-ItemInfoList.append(ItemInfo("OtherPizzaDomain", "OtherVessuvioTopic", "pizza.VessuvioData"))
-
-ItemInfoList.append(ItemInfo("PizzaDomain", "ExtraAlltTopic", "pizza.special.ExtraAllt"))
-
-ItemInfoList[0].selected = True
-
 cfg_file = None
 import os.path
 from os import path
@@ -291,6 +265,7 @@ if cfg_file == None:
 else:
 	print("Using config file: " + cfg_file)
 
+
 participant = Participant.Participant.getInstance("PizzaDomain", "PizzaDomain", cfg_file)
 if participant == None:
 	print("Failed to create Participant. Missing ops_config.xml ??")
@@ -302,6 +277,16 @@ if otherParticipant == None:
 	print("Failed to create Participant. Missing ops_config.xml ??")
 	sys.exit(-1)
 otherParticipant.addTypeSupport(PizzaProjectTypeFactory.PizzaProjectTypeFactory())
+
+
+for top in participant.domain.topics:
+	ItemInfoList.append(ItemInfo(participant.domain.domainID, top.name, top.typeID))
+
+for top in otherParticipant.domain.topics:
+	ItemInfoList.append(ItemInfo(otherParticipant.domain.domainID, top.name, top.typeID))
+
+ItemInfoList[0].selected = True
+
 
 for info in ItemInfoList:
 	if info.TypeName == pizza.PizzaData.TypeName:

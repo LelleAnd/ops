@@ -90,22 +90,36 @@ namespace OPSTest
             // Set up a text file logger for errors reported from OPS.
             ///Logger.ExceptionLogger.AddLogger(new TextFileLogger(Path.GetDirectoryName(Application.ExecutablePath) + "\\Log.txt"));
 
-            ///TODO to be filled from existing items in config file??
-            MyTopicInfoList.Add(new MyTopicInfo("PizzaDomain",      "PizzaTopic",         "pizza.PizzaData"));
-            MyTopicInfoList.Add(new MyTopicInfo("PizzaDomain",      "VessuvioTopic",      "pizza.VessuvioData"));
-            MyTopicInfoList.Add(new MyTopicInfo("PizzaDomain",      "PizzaTopic2",        "pizza.PizzaData"));
-            MyTopicInfoList.Add(new MyTopicInfo("PizzaDomain",      "VessuvioTopic2",     "pizza.VessuvioData"));
-            MyTopicInfoList.Add(new MyTopicInfo("PizzaDomain",      "TcpPizzaTopic",      "pizza.PizzaData"));
-            MyTopicInfoList.Add(new MyTopicInfo("PizzaDomain",      "TcpVessuvioTopic",   "pizza.VessuvioData"));
-            MyTopicInfoList.Add(new MyTopicInfo("PizzaDomain",      "TcpPizzaTopic2",     "pizza.PizzaData"));
-            MyTopicInfoList.Add(new MyTopicInfo("PizzaDomain",      "TcpVessuvioTopic2",  "pizza.VessuvioData"));
-            MyTopicInfoList.Add(new MyTopicInfo("PizzaDomain",      "UdpPizzaTopic",      "pizza.PizzaData"));
-            MyTopicInfoList.Add(new MyTopicInfo("PizzaDomain",      "UdpVessuvioTopic",   "pizza.VessuvioData"));
-            MyTopicInfoList.Add(new MyTopicInfo("PizzaDomain",      "UdpPizzaTopic2",     "pizza.PizzaData"));
-            MyTopicInfoList.Add(new MyTopicInfo("PizzaDomain",      "UdpVessuvioTopic2",  "pizza.VessuvioData"));
-            MyTopicInfoList.Add(new MyTopicInfo("OtherPizzaDomain", "OtherPizzaTopic",    "pizza.PizzaData"));
-            MyTopicInfoList.Add(new MyTopicInfo("OtherPizzaDomain", "OtherVessuvioTopic", "pizza.VessuvioData"));
-            MyTopicInfoList.Add(new MyTopicInfo("PizzaDomain",      "ExtraAlltTopic",     "pizza.special.ExtraAllt"));
+            if (File.Exists("ops_config.xml"))
+            {
+                //Log("Using config file in CWD");
+            }
+            else
+            {
+                string cwd = Environment.CurrentDirectory;
+                int pos = cwd.IndexOf("Example");
+                if (pos > 0)
+                {
+                    cwd = cwd.Substring(0, pos) + "Examples/OPSIdls/PizzaProject/ops_config.xml";
+                    //Log("Using config file: " + cwd);
+                    OPSConfigRepository.Add(cwd);
+                }
+            }
+
+            // Get all topics
+            OPSConfig cfg = OPSConfigRepository.GetConfig();
+            if (cfg != null)
+            {
+                List<Domain> doms = cfg.getDomains();
+                foreach (Domain dom in doms)
+                {
+                    List<Topic> tops = dom.GetTopics();
+                    foreach (Topic top in tops)
+                    {
+                        MyTopicInfoList.Add(new MyTopicInfo(dom.GetDomainID(), top.GetName(), top.GetTypeID()));
+                    }
+                }
+            }
 
             // Fill in the listbox and create the needed helper objects
             foreach (MyTopicInfo info in MyTopicInfoList)
@@ -164,22 +178,6 @@ namespace OPSTest
             {
                 try
                 {
-                    if (File.Exists("ops_config.xml"))
-                    {
-                        Log("Using config file in CWD");
-                    }
-                    else
-                    {
-                        string cwd = Environment.CurrentDirectory;
-                        int pos = cwd.IndexOf("Example");
-                        if (pos > 0)
-                        {
-                            cwd = cwd.Substring(0, pos) + "Examples/OPSIdls/PizzaProject/ops_config.xml";
-                            Log("Using config file: " + cwd);
-                            OPSConfigRepository.Add(cwd);
-                        }
-                    }
-
                     myParticipant = Participant.GetInstance("PizzaDomain", "partId");
                     OtherParticipant = Participant.GetInstance("OtherPizzaDomain", "partId");
                     if (myParticipant == null)

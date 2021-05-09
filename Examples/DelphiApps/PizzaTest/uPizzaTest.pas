@@ -136,6 +136,7 @@ uses
   uOps.OPSMessage,
   uOps.Publisher,
   uOps.XMLArchiverOut,
+  uOps.OPSConfig,
   uOps.OPSConfigRepository,
   PizzaProject.PizzaProjectTypeFactory;
 
@@ -795,6 +796,10 @@ var
   info : TItemInfo;
   cwd : string;
   idx : Integer;
+  cfg : uOps.OPSConfig.TOPSConfig;
+  doms : uOps.OPSConfig.TOPSConfig.TDynDomainArray;
+  tops : uOps.Domain.TDomain.TDynTopicArray;
+  i, j : Integer;
 begin
   FMsgLog := TStringList.Create;
 
@@ -803,30 +808,6 @@ begin
 
   FMutex := TMutex.Create;
   FItemInfoList := TList<TItemInfo>.Create;
-
-  // Setup the InfoItem list (TODO take from ops_config.xml)
-  FItemInfoList.Add(TItemInfo.Create('PizzaDomain', 'PizzaTopic', 'pizza.PizzaData'));
-  FItemInfoList.Add(TItemInfo.Create('PizzaDomain', 'VessuvioTopic', 'pizza.VessuvioData'));
-
-  FItemInfoList.Add(TItemInfo.Create('PizzaDomain', 'PizzaTopic2', 'pizza.PizzaData'));
-  FItemInfoList.Add(TItemInfo.Create('PizzaDomain', 'VessuvioTopic2', 'pizza.VessuvioData'));
-
-  FItemInfoList.Add(TItemInfo.Create('PizzaDomain', 'TcpPizzaTopic', 'pizza.PizzaData'));
-  FItemInfoList.Add(TItemInfo.Create('PizzaDomain', 'TcpVessuvioTopic', 'pizza.VessuvioData'));
-
-  FItemInfoList.Add(TItemInfo.Create('PizzaDomain', 'TcpPizzaTopic2', 'pizza.PizzaData'));
-  FItemInfoList.Add(TItemInfo.Create('PizzaDomain', 'TcpVessuvioTopic2', 'pizza.VessuvioData'));
-
-  FItemInfoList.Add(TItemInfo.Create('PizzaDomain', 'UdpPizzaTopic', 'pizza.PizzaData'));
-  FItemInfoList.Add(TItemInfo.Create('PizzaDomain', 'UdpVessuvioTopic', 'pizza.VessuvioData'));
-
-  FItemInfoList.Add(TItemInfo.Create('PizzaDomain', 'UdpPizzaTopic2', 'pizza.PizzaData'));
-  FItemInfoList.Add(TItemInfo.Create('PizzaDomain', 'UdpVessuvioTopic2', 'pizza.VessuvioData'));
-
-  FItemInfoList.Add(TItemInfo.Create('OtherPizzaDomain', 'OtherPizzaTopic', 'pizza.PizzaData'));
-  FItemInfoList.Add(TItemInfo.Create('OtherPizzaDomain', 'OtherVessuvioTopic', 'pizza.VessuvioData'));
-
-  FItemInfoList.Add(TItemInfo.Create('PizzaDomain', 'ExtraAlltTopic', 'pizza.special.ExtraAllt'));
 
   // Add all Domain's from file(s)
   if FileExists('ops_config.xml') then begin
@@ -838,6 +819,18 @@ begin
       cwd := Copy(cwd, 0, idx-1) + 'Examples/OPSIdls/PizzaProject/ops_config.xml';
       uOps.OPSConfigRepository.TOPSConfigRepository.Instance.Add(cwd);
       LogProc('Using config file: ' + cwd);
+    end;
+  end;
+
+  // Setup the InfoItem list
+  cfg := uOps.OPSConfigRepository.TOPSConfigRepository.Instance.getConfig;
+  if Assigned(cfg) then begin
+    doms := cfg.getDomains;
+    for i := 0 to Length(doms) - 1 do begin
+      tops := doms[i].getTopics;
+      for j := 0 to Length(tops) - 1 do begin
+        FItemInfoList.Add(TItemInfo.Create(string(doms[i].DomainID), string(tops[j].Name), string(tops[j].TypeID)));
+      end;
     end;
   end;
 

@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sstream>
+#include <iomanip>
 
 #include <ops.h>
 #include <Trace.h>
@@ -424,6 +425,7 @@ public:
         if (sub != nullptr) {
             std::cout << "Setting deadlineQos to " << timeoutMs << " [ms] for topic " << sub->getTopic().getName() << std::endl;
 			sub->setDeadline(std::chrono::milliseconds(timeoutMs));
+			std::cout << "Actual deadlineQos: " << sub->getDeadline().count() << std::endl;
 		} else {
 			std::cout << "Subscriber must be created first!!" << std::endl;
 		}
@@ -768,7 +770,7 @@ void menu()
 	std::cout << "" << std::endl;
 	for (unsigned int i = 0; i < ItemInfoList.size(); i++) {
 		ItemInfo* const ii = ItemInfoList[i];
-		std::cout << "\t " << i <<
+		std::cout << "\t " << std::setw(2) << i <<
 			" " <<
 		(ii->helper->HasPublisher() ? "P" : " ") <<
 		(ii->helper->HasSubscriber() ? "S" : " ") <<
@@ -805,9 +807,6 @@ int main(const int argc, const char* argv[])
 	ops::ObjectName_T debugKey = "Pizza";
 	ops::execution_policy::Enum policy = ops::execution_policy::threading;
 
-	// Install sink for trace logging from OPS
-	InstallSink(&mySink);
-
 	if (argc > 1) {
 		std::string const arg = argv[1];
 		if (arg == "polling") {
@@ -817,7 +816,20 @@ int main(const int argc, const char* argv[])
 		}
 	}
 
-	ops::GetHostName();
+	// Install sink for trace logging from OPS
+	InstallSink(&mySink);
+
+	// --------------------------------------------------------------------
+	// Test ops trace streams
+	ops::trace::tracestream<500> mystream;
+
+	mystream << ops::trace::grp("grp_A") << "Test of trace" << std::endl;
+	ops::trace::os_info << "Test of trace\n\n" << std::flush;
+	mystream << "Test of trace" << std::endl;
+	mystream << ops::trace::grp("grp_C") << "Test of trace" << std::endl;
+	ops::trace::os_error << "Test of trace" << std::endl << std::endl;
+
+	std::cout << ops::trace::grp("kalle") << "Hostname: " << ops::GetHostName() << std::endl << std::endl;
 
 #ifdef _WIN32
 	// --------------------------------------------------------------------
@@ -845,36 +857,26 @@ int main(const int argc, const char* argv[])
     setup_alt_config("Examples/OPSIdls/PizzaProject/ops_config.xml");
 
 	// --------------------------------------------------------------------
+	// Setup the InfoItem list
+	std::shared_ptr<ops::OPSConfig> cfg = ops::OPSConfigRepository::Instance()->getConfig();
+	if (cfg != nullptr) {
+		const std::vector<ops::Domain*> doms = cfg->getDomains();
+		for (const auto& dom : doms) {
+			const ops::ObjectName_T domID = dom->getDomainID();
+			const std::vector<ops::Topic*> tops = dom->getTopics();
+			for (const auto& top : tops) {
+				ItemInfoList.push_back(new ItemInfo(domID, top->getName(), top->getTypeID()));
+			}
+		}
+	}
+
+	// Add an extra entry with a duplicate topic
+	ItemInfoList.push_back(new ItemInfo("PizzaDomain", "PizzaTopic", "pizza.PizzaData"));
+
+	// --------------------------------------------------------------------
 	MyListener myListener;
 
-	// Setup the InfoItem list (TODO take from ops_config.xml)
-	ItemInfoList.push_back(new ItemInfo("PizzaDomain", "PizzaTopic", "pizza.PizzaData"));
-	ItemInfoList.push_back(new ItemInfo("PizzaDomain", "VessuvioTopic", "pizza.VessuvioData"));
-
-	ItemInfoList.push_back(new ItemInfo("PizzaDomain", "PizzaTopic2", "pizza.PizzaData"));
-	ItemInfoList.push_back(new ItemInfo("PizzaDomain", "VessuvioTopic2", "pizza.VessuvioData"));
-
-	ItemInfoList.push_back(new ItemInfo("PizzaDomain", "TcpPizzaTopic", "pizza.PizzaData"));
-	ItemInfoList.push_back(new ItemInfo("PizzaDomain", "TcpVessuvioTopic", "pizza.VessuvioData"));
-
-	ItemInfoList.push_back(new ItemInfo("PizzaDomain", "TcpPizzaTopic2", "pizza.PizzaData"));
-	ItemInfoList.push_back(new ItemInfo("PizzaDomain", "TcpVessuvioTopic2", "pizza.VessuvioData"));
-
-	ItemInfoList.push_back(new ItemInfo("PizzaDomain", "UdpPizzaTopic", "pizza.PizzaData"));
-	ItemInfoList.push_back(new ItemInfo("PizzaDomain", "UdpVessuvioTopic", "pizza.VessuvioData"));
-
-    ItemInfoList.push_back(new ItemInfo("PizzaDomain", "UdpPizzaTopic2", "pizza.PizzaData"));
-    ItemInfoList.push_back(new ItemInfo("PizzaDomain", "UdpVessuvioTopic2", "pizza.VessuvioData"));
-
-    ItemInfoList.push_back(new ItemInfo("OtherPizzaDomain", "OtherPizzaTopic", "pizza.PizzaData"));
-	ItemInfoList.push_back(new ItemInfo("OtherPizzaDomain", "OtherVessuvioTopic", "pizza.VessuvioData"));
-
-	ItemInfoList.push_back(new ItemInfo("PizzaDomain", "ExtraAlltTopic", "pizza.special.ExtraAllt"));
-
-	ItemInfoList.push_back(new ItemInfo("PizzaDomain", "PizzaTopic", "pizza.PizzaData"));
-
 	// Create participants
-	// NOTE that the second parameter (participantID) must be different for the two participant instances
 	ops::Participant* const participant = ops::Participant::getInstance("PizzaDomain", "PizzaDomain", policy);
     if (participant == nullptr) {
 	    std::cout << "Failed to create Participant. Missing ops_config.xml ??" << std::endl;
@@ -928,6 +930,7 @@ int main(const int argc, const char* argv[])
 		}
 	}
 
+	// --------------------------------------------------------------------
 	ItemInfo* ii = ItemInfoList[0];
 	ii->selected = true;
 
@@ -937,16 +940,6 @@ int main(const int argc, const char* argv[])
 	menu();
 
 	bool doPartPolling = false;
-
-    ops::trace::tracestream<500> mystream;
-
-    mystream << ops::trace::grp("grp_A") << "Test of trace" << std::endl;
-	ops::trace::os_info << "Test of trace\n\n" << std::flush;
-    mystream << "Test of trace" << std::endl;
-    mystream << ops::trace::grp("grp_C") << "Test of trace" << std::endl;
-	ops::trace::os_error << "Test of trace" << std::endl;
-
-    std::cout << "hej" << ops::trace::grp("kalle") << std::endl;
 
     std::cout << std::endl;
 	if (participant->GetExecutionPolicy() == ops::execution_policy::polling) {
@@ -1111,7 +1104,7 @@ int main(const int argc, const char* argv[])
 					} else if (func == TFunction::SUB) {
 						info->helper->StopSubscriber();
 					} else {
-						const int64_t timeout = atoi(line.c_str());
+						const int64_t timeout = atoll(line.c_str());
 						info->helper->SetDeadlineQos(timeout);
 					}
 				}

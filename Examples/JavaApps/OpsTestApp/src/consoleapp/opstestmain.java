@@ -73,27 +73,6 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
 
   public opstestmain() {
 
-    MyTopicInfoList.add(new MyTopicInfo("PizzaDomain",      "PizzaTopic",         "pizza.PizzaData"));
-    MyTopicInfoList.add(new MyTopicInfo("PizzaDomain",      "VessuvioTopic",      "pizza.VessuvioData"));
-    MyTopicInfoList.add(new MyTopicInfo("PizzaDomain",      "PizzaTopic2",        "pizza.PizzaData"));
-    MyTopicInfoList.add(new MyTopicInfo("PizzaDomain",      "VessuvioTopic2",     "pizza.VessuvioData"));
-    MyTopicInfoList.add(new MyTopicInfo("PizzaDomain",      "TcpPizzaTopic",      "pizza.PizzaData"));
-    MyTopicInfoList.add(new MyTopicInfo("PizzaDomain",      "TcpVessuvioTopic",   "pizza.VessuvioData"));
-    MyTopicInfoList.add(new MyTopicInfo("PizzaDomain",      "TcpPizzaTopic2",     "pizza.PizzaData"));
-    MyTopicInfoList.add(new MyTopicInfo("PizzaDomain",      "TcpVessuvioTopic2",  "pizza.VessuvioData"));
-    MyTopicInfoList.add(new MyTopicInfo("PizzaDomain",      "UdpPizzaTopic",      "pizza.PizzaData"));
-    MyTopicInfoList.add(new MyTopicInfo("PizzaDomain",      "UdpVessuvioTopic",   "pizza.VessuvioData"));
-    MyTopicInfoList.add(new MyTopicInfo("PizzaDomain",      "UdpPizzaTopic2",     "pizza.PizzaData"));
-    MyTopicInfoList.add(new MyTopicInfo("PizzaDomain",      "UdpVessuvioTopic2",  "pizza.VessuvioData"));
-    MyTopicInfoList.add(new MyTopicInfo("OtherPizzaDomain", "OtherPizzaTopic",    "pizza.PizzaData"));
-    MyTopicInfoList.add(new MyTopicInfo("OtherPizzaDomain", "OtherVessuvioTopic", "pizza.VessuvioData"));
-    MyTopicInfoList.add(new MyTopicInfo("PizzaDomain",      "ExtraAlltTopic",     "pizza.special.ExtraAllt"));
-
-    for(int i = 0; i < MyTopicInfoList.size(); i++) {
-        MyTopicInfo info = MyTopicInfoList.elementAt(i);
-        info.helper = new COpsHelper(this);
-    }
-
     File tmp = new File("ops_config.xml");
     if (tmp.exists()) {
       OnLog("Using config file in CWD\n");
@@ -105,6 +84,25 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
         OPSConfigRepository.add(cfg);
         OnLog("Using config file in: " + cfg);
       }
+    }
+
+    // Get topics from config file
+    OPSConfig cfg = OPSConfigRepository.getConfig();
+    if (cfg != null) {
+      Vector<Domain> doms = cfg.getDomains();
+      for (Domain dom : doms) {
+        String domID = dom.getDomainID();
+        Vector<Topic> tops = dom.getTopics();
+        for (Topic top : tops) {
+          //OnLog(domID + ", " + top.getName() + ", " + top.getTypeID());
+          MyTopicInfoList.add(new MyTopicInfo(domID, top.getName(), top.getTypeID()));
+        }
+      }
+    }
+
+    for(int i = 0; i < MyTopicInfoList.size(); i++) {
+        MyTopicInfo info = MyTopicInfoList.elementAt(i);
+        info.helper = new COpsHelper(this);
     }
 
     try
@@ -321,7 +319,7 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
 	{
 		for (int i = 0; i < MyTopicInfoList.size(); i++) {
       MyTopicInfo info = MyTopicInfoList.elementAt(i);
-			System.out.print("\t " + i);
+			System.out.format("\t %2d", i);
       if (info.helper.HasPublisher()) {
         System.out.print(" P");
       } else {

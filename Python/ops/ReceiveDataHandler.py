@@ -241,7 +241,10 @@ class McReceiveDataHandler(AbstractReceiveDataHandler):
 		self.channels.add(McReceiveDataChannel(topic,localInterface,self))
 
 def __makeKey(topic):
-	return topic.transport + "::" + topic.domainAddress + "::" + str(topic.port)
+	if topic.transport == TRANSPORT_TCP and topic.port == 0:
+		return topic.channelID + "::" + topic.transport + "::" + topic.domainAddress + "::" + str(topic.port)
+	else:
+		return topic.transport + "::" + topic.domainAddress + "::" + str(topic.port)
 
 __ReceiveDataHandlerList = {}
 

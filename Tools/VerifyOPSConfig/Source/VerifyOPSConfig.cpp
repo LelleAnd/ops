@@ -12,7 +12,7 @@
 
 #include "Configuration.h"
 
-const std::string sVersion = "Version 2020-07-14";
+const std::string sVersion = "Version 2021-05-10";
 
 
 bool gErrorGiven = false;
@@ -136,9 +136,14 @@ public:
 			std::shared_ptr<ops::OPSConfig> const cfg = ops::OPSConfig::getConfig(filename.c_str());
 			if (cfg != nullptr) {
 				// Trick to get all topics fully initialized
-				std::vector<ops::Domain*> domains = cfg->getRefToDomains();
-				for (unsigned int i = 0; i < domains.size(); i++) {
-					domains[i]->getTopics();
+				const std::vector<ops::Domain*> domains = cfg->getRefToDomains();
+				for (const auto dom : domains) {
+					const std::vector<ops::Topic* > tops = dom->getTopics();
+					if (bDebug) {
+						for (const auto x : tops) {
+							PrintTopic(*x);
+						}
+					}
 				}
 
 				// 
@@ -155,6 +160,31 @@ public:
 		catch (std::exception& e) {
 			LOG_WARN(">>> Exception: " << e.what() << std::endl);
 		}
+	}
+
+	void PrintTopic(const ops::Topic& top)
+	{
+		std::cout << "Topic name:            " << top.getName() << "\n";
+		std::cout << "  typeID:              " << top.getTypeID() << "\n";
+		std::cout << "  transport:           " << top.getTransport() << "\n";
+		std::cout << "  domainAddress:       " << top.getDomainAddress() << "\n";
+		std::cout << "  port:                " << top.getPort() << "\n";
+		std::cout << "  localInterface:      " << top.getLocalInterface() << "\n";
+		std::cout << "  timeToLive:          " << top.getTimeToLive() << "\n";
+		std::cout << "  participantID:       " << top.getParticipantID() << "\n";
+		std::cout << "  domainID:            " << top.getDomainID() << "\n";
+		std::cout << "  channelID:           " << top.getChannelId() << "\n";
+		std::cout << "  sampelMaxSize:       " << top.getSampleMaxSize() << "\n";
+		std::cout << "  outSocketBufferSize: " << top.getOutSocketBufferSize() << "\n";
+		std::cout << "  inSocketBufferSize:  " << top.getInSocketBufferSize() << "\n";
+		std::cout << "  optNonVirt:          " << top.getOptNonVirt() << "\n";
+		std::cout << "  heartbeatPeriod:     " << top.getHeartbeatPeriod() << "\n";
+		std::cout << "  heartbeatTimeout:    " << top.getHeartbeatTimeout() << "\n";
+		std::cout << "  useAck:              " << top.getUseAck() << "\n";
+		std::cout << "  resendNum:           " << top.getNumResends() << "\n";
+		std::cout << "  resendTimeMs:        " << top.getResendTimeMs() << "\n";
+		std::cout << "  registerTimeMs:      " << top.getRegisterTimeMs() << "\n";
+		std::cout << "\n";
 	}
 
 	void verifyOnlyOneEntry(Configuration& config, std::string const name, std::string const parent) const 
@@ -313,7 +343,8 @@ public:
 				"localInterface", "timeToLive",
 				"channels", "transports",
 				"outSocketBufferSize", "inSocketBufferSize",
-				"topics", "optNonVirt", "heartbeatPeriod", "heartbeatTimeout"
+				"topics", "optNonVirt", "heartbeatPeriod", "heartbeatTimeout",
+				"resendNum", "resendTimeMs", "registerTimeMs"
 			};
 			CheckForUnknown(config, known, " in <domains> for domainID '" + domainName + "'");
 		}
@@ -634,7 +665,8 @@ public:
 				"name", "dataType",
 				"sampleMaxSize",
 				"address", "transport", "port",
-				"outSocketBufferSize", "inSocketBufferSize"
+				"outSocketBufferSize", "inSocketBufferSize",
+				"useAck"
 			};
 			CheckForUnknown(config, known, "in <topics> for domain: " + domainName + " topic: " + topicName);
 		}

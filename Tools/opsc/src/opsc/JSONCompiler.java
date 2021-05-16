@@ -157,6 +157,15 @@ public class JSONCompiler extends CompilerSupport
       }
     }
 
+    protected String validateComment(String comment)
+    {
+        return comment.replace("/*", "").replace("*/", "").
+                replace("\\", "\\\\").
+                replace("\b", "\\b").replace("\f", "\\f").
+                replace("\n", "\\n").replace("\r", "\\r").
+                replace("\t", "\\t").replace("\"", "'").trim();
+    }
+
     protected String generateEnumTypeDeclarations(int t, IDLClass idlClass)
     {
       String ret = "";
@@ -166,8 +175,7 @@ public class JSONCompiler extends CompilerSupport
           ret += tab(t+1) + "\"type\": \"" + thisClassName + "." + et.getName() + "\"," + endl();
           ret += tab(t+1) + "\"basetype\": \"short\"," + endl();
 
-          String comment = et.getComment();
-          comment = comment.replace("/*", "").replace("*/", "").replace("\n", " ").replace("\"", "'").trim();
+          String comment = validateComment(et.getComment());
           if (comment.length() > 0) {
             ret += tab(t+1) + "\"desc\": \"" + comment + "\"," + endl();
           }
@@ -244,8 +252,7 @@ public class JSONCompiler extends CompilerSupport
             consts += ", \"type\": \"" + makeType(field) + "\"";
             consts += ", \"value\": \"" + field.getValue().replace("\"", "'") + "\"";
 
-            String comment = field.getComment();
-            comment = comment.replace("/*", "").replace("*/", "").replace("\n", " ").replace("\"", "'").trim();
+            String comment = validateComment(field.getComment());
             if (comment.length() > 0) {
               consts += ", \"desc\": \"" + comment + "\"";
             }
@@ -287,8 +294,7 @@ public class JSONCompiler extends CompilerSupport
                 res += ", \"version\": [" + fieldGuard + "]";
             }
 
-            String comment = field.getComment();
-            comment = comment.replace("/*", "").replace("*/", "").replace("\n", " ").replace("\"", "'").trim();
+            String comment = validateComment(field.getComment());
             if (comment.length() > 0) {
               res += ", \"desc\": \"" + comment + "\"";
             }

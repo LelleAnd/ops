@@ -44,6 +44,8 @@ public class JSONCompiler extends CompilerSupport
         res += generate_coretypes_JSON(1);
         res += tab(1) + "," + endl();
         res += generate_OPSObject_JSON(1);
+        res += tab(1) + "," + endl();
+        res += generate_OPSMessage_JSON(1);
         for (IDLClass iDLClass : idlClasses)
         {
             res += tab(1) + "," + endl();
@@ -140,6 +142,30 @@ public class JSONCompiler extends CompilerSupport
         res += " }" + endl();
         res += tab(t+1) + "]" + endl();
 
+        res += tab(t) + "}" + endl();
+        return res;
+    }
+
+    protected String generate_OPSMessage_JSON(int t)
+    {
+        String res = "";
+        res += tab(t) + "{" + endl();
+        res += tab(t+1) + "\"type\": \"ops.protocol.OPSMessage\"," + endl();
+        res += tab(t+1) + "\"extends\": \"ops.OPSObject\"," + endl();
+
+        res += tab(t+1) + "\"fields\": [" + endl();
+        if (includeVersion) {
+            res += tab(t+2) + getVersionField() + "," + endl();
+        }
+        res += tab(t+2) + "{ \"name\": \"messageType\",       \"type\": \"byte\" }," + endl();
+        res += tab(t+2) + "{ \"name\": \"publisherPriority\", \"type\": \"byte\" }," + endl();
+        res += tab(t+2) + "{ \"name\": \"publicationID\",     \"type\": \"long\" }," + endl();
+        res += tab(t+2) + "{ \"name\": \"publisherName\",     \"type\": \"string\" }," + endl();
+        res += tab(t+2) + "{ \"name\": \"topicName\",         \"type\": \"string\" }," + endl();
+        res += tab(t+2) + "{ \"name\": \"topLevelKey\",       \"type\": \"string\" }," + endl();
+        res += tab(t+2) + "{ \"name\": \"address\",           \"type\": \"string\" }," + endl();
+        res += tab(t+2) + "{ \"name\": \"data\",              \"type\": \"virtual ops.OPSObject\" }" + endl();
+        res += tab(t+1) + "]" + endl();
         res += tab(t) + "}" + endl();
         return res;
     }

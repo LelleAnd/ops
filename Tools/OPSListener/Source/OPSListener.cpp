@@ -41,7 +41,7 @@
 
 #endif
 
-const char c_program_version[] = "OPSListener Version 2021-04-24";
+const char c_program_version[] = "OPSListener Version 2021-05-22";
 
 void showDescription()
 {
@@ -673,10 +673,13 @@ private:
 	// local storage of current worked on entry time
 	int64_t _messageTime = 0;
 
-    message_dump::MessageDump MsgDump;
+	// Since our factory creates OPSObjects, the spareBytes starts after the OPSObject fields, 
+	// so we need to skip the OPSObject fields on top level.
+	message_dump::SkipFunc_T skipFunc = [=](const std::string& name) -> bool { return name == "ops.OPSObject"; };
+	message_dump::MessageDump MsgDump;
 
 public:
-	int messDataCounter;
+	int messDataCounter = 0;
 
 	int numQueued() const {return (int)List.size();}
 
@@ -715,7 +718,7 @@ public:
 		doPubIdCheck(args.doPubIdCheck),
 		doMinimizeOutput(args.doMinimizeOutput),
         maxDumpBytes(args.maxDumpBytes),
-		messDataCounter(0)
+		MsgDump(skipFunc)
 	{
 		using namespace ops;
 
@@ -1370,25 +1373,26 @@ public:
 				if ((str != "") && (!doMinimizeOutput)) {
 					std::cout << str << std::endl;
 				}
-                // Dump OPSData->spareBytes content in hex
-                if (opsData->spareBytes.size() > 0) {
-                    dumpHex(&opsData->spareBytes[0], opsData->spareBytes.size());
-                }
-                // Dump OPSData->spareBytes content in clear text
-                if (MsgDump.Any() && (opsData->spareBytes.size() > 0)) {
-                    std::string tname = opsData->getTypeString().c_str();
-                    // Skip ev leading spaces
-                    std::string::size_type const idx = tname.find_first_not_of(' ');
-                    if (idx != std::string::npos) {
-                        if (idx > 0) { tname.erase(0, idx); }
-                        const auto pos = tname.find(' ');
-                        if (pos != tname.npos) {
-                            tname = tname.substr(0, pos);
-                        }
-                        MsgDump.Dump(tname, opsData->getVersionMask(), &opsData->spareBytes[0]);
-                    }
-                }
-                
+				if (opsData != nullptr) {
+					// Dump OPSData->spareBytes content in hex
+					if (opsData->spareBytes.size() > 0) {
+						dumpHex(&opsData->spareBytes[0], opsData->spareBytes.size());
+					}
+					// Dump OPSData->spareBytes content in clear text
+					if (MsgDump.Any() && (opsData->spareBytes.size() > 0)) {
+						std::string tname = opsData->getTypeString().c_str();
+						// Skip ev leading spaces
+						std::string::size_type const idx = tname.find_first_not_of(' ');
+						if (idx != std::string::npos) {
+							if (idx > 0) { tname.erase(0, idx); }
+							const auto pos = tname.find(' ');
+							if (pos != tname.npos) {
+								tname = tname.substr(0, pos);
+							}
+							MsgDump.Dump(tname, opsData->getVersionMask(), &opsData->spareBytes[0]);
+						}
+					}
+				}
                 if (doPubIdCheck) {
 					// This may call our "onNewEvent(ops::Notifier<ops::PublicationIdNotification_T>* ...") method
 					// We may need the time in that method so save it in a member variable

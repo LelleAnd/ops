@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <vector>
 #include <map>
+#include <functional>
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -24,8 +25,71 @@ namespace message_dump {
 
     std::ostream& operator<<(std::ostream& os, const indent& ind);
 
+    typedef std::function<bool(const std::string& name)> SkipFunc_T;
+
     class MessageDump
     {
+    public:
+        // The passed lamda, if any, tells which object(s) that should be skipped on top-level,
+        // since the fields for these object(s) already are taken care of before calling Dump()
+        // (i.e. the buffer in the Dump()-call starts @ the field after the skipped object(s)).
+        // As default nothing is skipped.
+        MessageDump(SkipFunc_T func = nullptr) : skipFunc(func)
+        {
+            if (skipFunc == nullptr) {
+                skipFunc = [=](const std::string&) -> bool { return false; };
+            }
+        }
+
+        void AddDefinitions(std::string filename)
+        {
+            // Create empty property tree object
+            pt::ptree tree;
+            pt::read_json(filename, tree);
+            //printTree(tree, 1);
+
+            // Find all enums first
+            for (pt::ptree::iterator pos = tree.begin(); pos != tree.end(); ++pos) {
+                CreateEnums(pos->second);
+            }
+            for (pt::ptree::iterator pos = tree.begin(); pos != tree.end(); ++pos) {
+                CreateDumper(pos->second);
+            }
+
+            ResolveExtends();
+
+            std::cout << "\n\n";
+        }
+
+        bool Any() { return objs.size() > 0; }
+
+        void SetRowLimit(int limit)
+        {
+            rowlimit = limit;
+        }
+
+        // Dump given object type, 'ptr' should point to field in object to start from (inherited
+        // objects can be skipped, see skipFunc).
+        void Dump(std::string tname, uint32_t verMask, char* ptr)
+        {
+            auto search = objs.find(tname);
+            if (search != objs.end()) {
+                DumpObject* dmp = search->second;
+                dmp->tagVersion = (verMask != 0);
+                dmp->operator()(ptr, 0);
+            }
+        }
+
+        // Dump object, 'ptr' should point to string with object type followed by object data
+        void DumpFromType(char* ptr)
+        {
+            DumpFieldObject dmp(*this, false, "", objs);
+            dmp.operator()(ptr, 0);
+        }
+
+    private:
+        SkipFunc_T skipFunc = nullptr;
+
         int rowlimit = INT_MAX;
 
         struct CheckVersion
@@ -49,7 +113,7 @@ namespace message_dump {
 
         struct DumpValue
         {
-            int rowlimit = INT_MAX;
+            MessageDump& msgDump;
             DumpObject* parent = nullptr;
             CheckVersion* chkVer = nullptr;
 
@@ -86,12 +150,16 @@ namespace message_dump {
 
             virtual void operator()(char*& ptr, int level) = 0;
 
-            virtual ~DumpValue() {}
+            explicit DumpValue(MessageDump& mdump) : msgDump(mdump) {}
+            DumpValue() = delete;
+            virtual ~DumpValue() = default;
         };
 
         template <typename T, typename P = T>
         struct DumpV : DumpValue
         {
+            DumpV() = delete;
+            explicit DumpV(MessageDump& mdump) : DumpValue(mdump) {}
             void operator()(char*& ptr, int level) override
             {
                 if (skipField()) return;
@@ -122,6 +190,8 @@ namespace message_dump {
         template <typename T, int numw = 8, typename P = T>
         struct DumpVector : DumpValue
         {
+            DumpVector() = delete;
+            explicit DumpVector(MessageDump& mdump) : DumpValue(mdump) {}
             void operator()(char*& ptr, int level) override
             {
                 if (skipField()) return;
@@ -134,11 +204,11 @@ namespace message_dump {
                 for (int i = 0; i < len; ) {
                     int num = len - i;
                     ++row;
-                    if ((row < (rowlimit-1)) || (num <= numw)) {
+                    if ((row < (msgDump.rowlimit-1)) || (num <= numw)) {
                         if (num > numw) { 
                             num = numw; 
                         } else {
-                            if (row >= rowlimit) { std::cout << indent(level) << name << "[" << std::setw(w) << " " << " ... " << std::setw(w) << " " << "]\n"; }
+                            if (row >= msgDump.rowlimit) { std::cout << indent(level) << name << "[" << std::setw(w) << " " << " ... " << std::setw(w) << " " << "]\n"; }
                         }
                         std::cout << indent(level) << name << "[" << std::setw(w) << i << " ... " << std::setw(w) << (i + num - 1) << "] <" << sizeof(T) << ">: ";
                         for (int j = 0; (i < len) && (j < numw); ++i, ++j) {
@@ -167,6 +237,8 @@ namespace message_dump {
 
         struct DumpString : DumpValue
         {
+            DumpString() = delete;
+            explicit DumpString(MessageDump& mdump) : DumpValue(mdump) {}
             void operator()(char*& ptr, int level) override
             {
                 if (skipField()) return;
@@ -176,6 +248,8 @@ namespace message_dump {
         };
         struct DumpVectorString : DumpValue
         {
+            DumpVectorString() = delete;
+            explicit DumpVectorString(MessageDump& mdump) : DumpValue(mdump) {}
             void operator()(char*& ptr, int level) override
             {
                 if (skipField()) return;
@@ -186,7 +260,7 @@ namespace message_dump {
                 int w = width(len1);
                 for (int i = 0; i < len1; ++i) {
                     int len = GetInt(ptr);
-                    if (i < (rowlimit-2)) {
+                    if (i < (msgDump.rowlimit-2)) {
                         std::cout << indent(level) << name << "[" << std::setw(w) << i << "] <string[" << len << "]>: " << GetString(ptr, len) << "\n";
                     } else {
                         if (i == (len1 - 1)) {
@@ -217,7 +291,7 @@ namespace message_dump {
                     base->operator()(ptr, level);
                 }
                 // Skip ops.OPSOBject if on top level, since it is already handled when calling Dump()
-                if ((level > 0) || (name != "ops.OPSObject")) {
+                if ((level > 0) || (!msgDump.skipFunc(name))) {
                     std::cout << indent(level + 1) << "<<<" << name << ">>>\n";
                     if (tagVersion) {
                         // Version is always placed first if it exist
@@ -230,14 +304,20 @@ namespace message_dump {
                     }
                 }
             }
+            DumpObject() = delete;
+            explicit DumpObject(MessageDump& mdump) : DumpValue(mdump) {}
         };
         struct DumpEnum : DumpValue
         {
             std::vector<std::string> enumvalues;
             void AddEnum(std::string value) { enumvalues.push_back(value); }
+            DumpEnum() = delete;
+            explicit DumpEnum(MessageDump& mdump) : DumpValue(mdump) {}
         };
         struct DumpEnumShort : DumpEnum
         {
+            DumpEnumShort() = delete;
+            explicit DumpEnumShort(MessageDump& mdump) : DumpEnum(mdump) {}
             void operator()(char*& ptr, int level) override
             {
                 if (skipField()) return;
@@ -252,7 +332,8 @@ namespace message_dump {
         struct DumpVectorEnumShort : DumpValue
         {
             DumpEnumShort* dmp;
-            DumpVectorEnumShort(DumpEnumShort* d) : dmp(d) {}
+            DumpVectorEnumShort() = delete;
+            DumpVectorEnumShort(MessageDump& mdump, DumpEnumShort* d) : DumpValue(mdump), dmp(d) {}
             void operator()(char*& ptr, int level) override
             {
                 if (skipField()) return;
@@ -277,7 +358,9 @@ namespace message_dump {
             std::map<std::string, DumpObject*>& objs;
             const bool isvirtual;
             const std::string fieldtype;
-            DumpFieldObject(bool isvirt, std::string fname, std::map<std::string, DumpObject*>& o) : 
+            DumpFieldObject() = delete;
+            DumpFieldObject(MessageDump& mdump, bool isvirt, std::string fname, std::map<std::string, DumpObject*>& o) :
+                DumpValue(mdump),
                 objs(o), isvirtual(isvirt), fieldtype(fname) {}
             void operator()(char*& ptr, int level) override
             {
@@ -317,8 +400,9 @@ namespace message_dump {
         struct DumpFieldObjectVector : DumpValue
         {
             DumpFieldObject obj;
-            DumpFieldObjectVector(bool isvirt, std::string fname, std::map<std::string, DumpObject*>& o) :
-                obj(isvirt, fname, o) {}
+            DumpFieldObjectVector() = delete;
+            DumpFieldObjectVector(MessageDump& mdump, bool isvirt, std::string fname, std::map<std::string, DumpObject*>& o) :
+                DumpValue(mdump), obj(mdump, isvirt, fname, o) {}
             void operator()(char*& ptr, int level) override
             {
                 if (skipField()) return;
@@ -350,7 +434,7 @@ namespace message_dump {
                     if (basetype != "short") {
                         std::cout << "  UNKNOWN enum of size \"" << basetype << "\"\n";
                     }
-                    DumpEnumShort* dmp = new DumpEnumShort();
+                    DumpEnumShort* dmp = new DumpEnumShort(*this);
                     enums[objtype] = dmp;
                     dmp->SetName(objtype);
                     AddEnums(pos->second, dmp);
@@ -379,7 +463,7 @@ namespace message_dump {
                 } else if (pos->first == "fields") {
                     //std::cout << objtype << "\n";
                     //std::cout << "  extends: " << basetype << "\n";
-                    DumpObject* dmp = new DumpObject();
+                    DumpObject* dmp = new DumpObject(*this);
                     objs[objtype] = dmp;
                     dmp->SetName(objtype);
                     dmp->SetExtends(basetype);
@@ -387,11 +471,11 @@ namespace message_dump {
                 } else if (pos->first == "enum") {
                     //std::cout << objtype << "\n";
                     //std::cout << "  extends: " << basetype << "\n";
-                    DumpObject* dmp = new DumpObject();
+                    DumpObject* dmp = new DumpObject(*this);
                     objs[objtype] = dmp;
                     dmp->SetName(objtype);
                     dmp->SetExtends(basetype);
-                    DumpValue* val = new DumpInt();
+                    DumpValue* val = new DumpInt(*this);
                     val->SetName("enum");
                     dmp->Add(val);
                 } else if (pos->first == "enum_definition") {
@@ -492,23 +576,23 @@ namespace message_dump {
             }
             
             DumpValue* val = nullptr;
-            if      (fieldtype == "boolean")   { val = new DumpBoolean(); }
-            else if (fieldtype == "byte")      { val = new DumpByte(); }
-            else if (fieldtype == "short")     { val = new DumpShort(); }
-            else if (fieldtype == "int"   )    { val = new DumpInt(); }
-            else if (fieldtype == "long"  )    { val = new DumpLong(); }
-            else if (fieldtype == "float")     { val = new DumpFloat(); }
-            else if (fieldtype == "double")    { val = new DumpDouble(); }
-            else if (fieldtype == "string")    { val = new DumpString(); }
+            if      (fieldtype == "boolean")   { val = new DumpBoolean(*this); }
+            else if (fieldtype == "byte")      { val = new DumpByte(*this); }
+            else if (fieldtype == "short")     { val = new DumpShort(*this); }
+            else if (fieldtype == "int"   )    { val = new DumpInt(*this); }
+            else if (fieldtype == "long"  )    { val = new DumpLong(*this); }
+            else if (fieldtype == "float")     { val = new DumpFloat(*this); }
+            else if (fieldtype == "double")    { val = new DumpDouble(*this); }
+            else if (fieldtype == "string")    { val = new DumpString(*this); }
             else if (fieldtype == "vector<T>") { 
-                if      (elementtype == "boolean") { val = new DumpVectorBoolean(); }
-                else if (elementtype == "byte")    { val = new DumpVectorByte(); }
-                else if (elementtype == "short")   { val = new DumpVectorShort(); }
-                else if (elementtype == "int")     { val = new DumpVectorInt(); }
-                else if (elementtype == "long")    { val = new DumpVectorLong(); }
-                else if (elementtype == "float")   { val = new DumpVectorFloat(); }
-                else if (elementtype == "double")  { val = new DumpVectorDouble(); }
-                else if (elementtype == "string")  { val = new DumpVectorString(); }
+                if      (elementtype == "boolean") { val = new DumpVectorBoolean(*this); }
+                else if (elementtype == "byte")    { val = new DumpVectorByte(*this); }
+                else if (elementtype == "short")   { val = new DumpVectorShort(*this); }
+                else if (elementtype == "int")     { val = new DumpVectorInt(*this); }
+                else if (elementtype == "long")    { val = new DumpVectorLong(*this); }
+                else if (elementtype == "float")   { val = new DumpVectorFloat(*this); }
+                else if (elementtype == "double")  { val = new DumpVectorDouble(*this); }
+                else if (elementtype == "string")  { val = new DumpVectorString(*this); }
                 else {
                     bool isvirt = false;
                     auto pos = elementtype.find("virtual");
@@ -521,9 +605,9 @@ namespace message_dump {
                     auto search = enums.find(elementtype);
                     if (search != enums.end()) {
                         DumpEnumShort* dmp2 = search->second;
-                        val = new DumpVectorEnumShort(dmp2);
+                        val = new DumpVectorEnumShort(*this, dmp2);
                     } else {
-                        val = new DumpFieldObjectVector(isvirt, elementtype, objs);
+                        val = new DumpFieldObjectVector(*this, isvirt, elementtype, objs);
                     }
                 }
             } else { 
@@ -539,13 +623,12 @@ namespace message_dump {
                     DumpEnumShort* dmp2 = search->second;
                     val = new DumpEnumShort(*dmp2);
                 } else {
-                    val = new DumpFieldObject(isvirt, fieldtype, objs);
+                    val = new DumpFieldObject(*this, isvirt, fieldtype, objs);
                 }
             }
 
             if (val) {
                 val->SetName(fieldname);
-                val->rowlimit = rowlimit;
                 val->optionalOnTagVersion = optionalOnTagVersion;
                 val->chkVer = chkVer;
                 val->parent = dmp;
@@ -594,46 +677,6 @@ namespace message_dump {
                 }
 
                 std::cerr << indent(level) << "}";
-            }
-        }
-
-    public:
-        MessageDump() = default;
-
-        void AddDefinitions(std::string filename)
-        {
-            // Create empty property tree object
-            pt::ptree tree;
-            pt::read_json(filename, tree);
-            //printTree(tree, 1);
-
-            // Find all enums first
-            for (pt::ptree::iterator pos = tree.begin(); pos != tree.end(); ++pos) {
-                CreateEnums(pos->second);
-            }
-            for (pt::ptree::iterator pos = tree.begin(); pos != tree.end(); ++pos) {
-                CreateDumper(pos->second);
-            }
-
-            ResolveExtends();
-
-            std::cout << "\n\n";
-        }
-
-        bool Any() { return objs.size() > 0; }
-
-        void SetRowLimit(int limit)
-        {
-            rowlimit = limit;
-        }
-
-        void Dump(std::string tname, uint32_t verMask, char* ptr)
-        {
-            auto search = objs.find(tname);
-            if (search != objs.end()) {
-                DumpObject* dmp = search->second;
-                dmp->tagVersion = (verMask != 0);
-                dmp->operator()(ptr, 0);
             }
         }
 

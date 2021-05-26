@@ -41,7 +41,7 @@
 
 #endif
 
-const char c_program_version[] = "OPSListener Version 2021-05-22";
+const char c_program_version[] = "OPSListener Version 2021-05-26";
 
 void showDescription()
 {
@@ -58,10 +58,12 @@ void ShowUsage()
     std::cout << "  OPSListener [-v] [-?] [-c ops_cfg_file [-c ops_cfg_file [...]]]" << std::endl;
     std::cout << "              [-j json_file [-j json_file [...]]] [-jr rowlimit]" << std::endl;
     std::cout << "              [-t] [-pA | -p<option_chars>] [-d [num]]" << std::endl;
+	std::cout << "              [-s] " << std::endl;
     std::cout << "              [-a arg_file [-a arg_file [...]]]" << std::endl;
     std::cout << "              [-GA | -G domain [-G domain [...]]]" << std::endl;
     std::cout << "              [-IA | -I domain [-I domain [...]] [-O]]" << std::endl;
     std::cout << "              [-SA | -S domain [-S domain [...]]]" << std::endl;
+	std::cout << "              [-CH channel [-CH channel [...]]]" << std::endl;
     std::cout << "              [-D default_domain] [-C [-E]] [-u] [-n] Topic [Topic ...]" << std::endl;
     std::cout << std::endl;
     std::cout << "    -?                 Shows a short description" << std::endl;
@@ -69,11 +71,12 @@ void ShowUsage()
     std::cout << "    -c ops_config_file Specifies an OPS configuration file to use" << std::endl;
     std::cout << "                       If none given, the default 'ops_config.xml' is used" << std::endl;
     std::cout << "    -C                 Do a publication ID check" << std::endl;
+	std::cout << "    -CH channel        Limit to topics on given channel(s)" << std::endl;
     std::cout << "    -d [num]           Dump message content in hex (the part derived from OPSObject)" << std::endl;
     std::cout << "    -D default_domain  Default domain name to use for topics given without domain name" << std::endl;
     std::cout << "                       If none given, the default 'SDSDomain' is used" << std::endl;
     std::cout << "                       A new default can be given between topics" << std::endl;
-    std::cout << "    -E                 If -C given, minimize normal output" << std::endl;
+    std::cout << "    -E                 If -C or -s given, minimize normal output" << std::endl;
     std::cout << "    -G domain          Subscribe to Debug Request/Response from given domain" << std::endl;
     std::cout << "    -GA                Subscribe to Debug Request/Response from all domains in given configuration files" << std::endl;
     std::cout << "    -I domain          Subscribe to Participant Info Data from given domain" << std::endl;
@@ -93,6 +96,7 @@ void ShowUsage()
     std::cout << "                 v       Version mask OPSMessage" << std::endl;
     std::cout << "                 V       Version mask contained OPSObject" << std::endl;
     std::cout << "    -pA                Short for all option chars in the program default order" << std::endl;
+	std::cout << "    -s                 Calculate and show statistics" << std::endl;
     std::cout << "    -S domain          Subscribe to all topics in given domain" << std::endl;
     std::cout << "    -SA                Subscribe to all topics in all domains in given configuration files" << std::endl;
     std::cout << "    -t                 Print receive time for each message" << std::endl;
@@ -115,6 +119,7 @@ public:
 	std::vector<ops::ObjectName_T> infoDomains;
 	std::vector<ops::ObjectName_T> debugDomains;
 	std::vector<ops::ObjectName_T> skipTopicNames;
+	std::vector<ops::ChannelId_T> channels;
 	std::string printFormat = "";
 	ops::ObjectName_T defaultDomain;
 	bool verboseOutput = false;
@@ -127,7 +132,8 @@ public:
 	bool doMinimizeOutput = false;
 	bool skipTopics = false;
 	bool dontSkipUdpStaticRoute = false;
-    int maxDumpBytes = 0;
+	bool statistics = false;
+    size_t maxDumpBytes = 0;
 	int rowlimit = INT_MAX;
 
 	CArguments() : defaultDomain(getDefaultDomain())
@@ -195,7 +201,17 @@ public:
 				continue;
 			}
 
-            // DumpMessage
+			// Limit to channels
+			if (argument == "-CH") {
+				if (argIdx >= nArgs) {
+					std::cout << "Argument '-CH' is missing value" << std::endl;
+					return false;
+				}
+				channels.push_back(toAnsi(szArglist[argIdx++]).c_str());
+				continue;
+			}
+
+			// DumpMessage
             if (argument == "-d") {
                 maxDumpBytes = 0x7FFFFFFF;
                 if (argIdx >= nArgs) {
@@ -288,6 +304,11 @@ public:
 
 			if (argument == "-O") {
 				onlyArrivingLeaving = true;
+				continue;
+			}
+
+			if (argument == "-s") {
+				statistics = true;
 				continue;
 			}
 
@@ -481,7 +502,7 @@ public:
 			}
 		}
 
-		if (!doPubIdCheck) { doMinimizeOutput = false; }
+		if (!doPubIdCheck && !statistics) { doMinimizeOutput = false; }
 
 		if (verboseOutput) {
 			//std::vector<std::string> cfgFiles;
@@ -644,14 +665,9 @@ std::string objectVersion(const ops::OPSMessage* const mess, const ops::OPSObjec
 class Main : ops::DataListener, ops::Listener<ops::PublicationIdNotification_T>, ops::Listener<ops::ConnectStatus>
 {
 private:
-	bool logTime;
+	CArguments& args;
 	MyLogger logger;
 	COpsConfigHelper opsHelper;
-	std::string printFormat;
-	bool onlyArrivingLeaving;
-	bool doPubIdCheck;
-	bool doMinimizeOutput;
-    size_t maxDumpBytes;
 
 	std::vector<ops::Subscriber*> vSubs;
 	std::map<ops::Subscriber*, ops::PublicationIdChecker*> pubIdMap;
@@ -710,14 +726,9 @@ public:
 	}
 
 	//
-	Main(CArguments& args) :
-		logTime(args.logTime),
+	Main(CArguments& args_) :
+		args(args_),
 		opsHelper(&logger, &logger, args.defaultDomain),
-		printFormat(args.printFormat),
-		onlyArrivingLeaving(args.onlyArrivingLeaving),
-		doPubIdCheck(args.doPubIdCheck),
-		doMinimizeOutput(args.doMinimizeOutput),
-        maxDumpBytes(args.maxDumpBytes),
 		MsgDump(skipFunc)
 	{
 		using namespace ops;
@@ -889,6 +900,17 @@ public:
 
 			Topic topic = part->createTopic(ops::utilities::topicName(topName));
 
+			if (args.channels.size() > 0) {
+				ops::ChannelId_T chan = topic.getChannelId();
+				for (const auto& x : args.channels) {
+					if (chan == x) {
+						found = true;
+						break;
+					}
+				}
+				if (!found) { continue; }
+			}
+
 			// Need to skip Topics using UDP with static route, to not interfere with the real subscriber
 			if (topic.getTransport() == ops::Topic::TRANSPORT_UDP) {
 				if (isMyNodeAddress(topic.getDomainAddress(), part->getIOService())) {
@@ -913,7 +935,7 @@ public:
 			sub->start();
 
 			vSubs.push_back(sub);
-			if (doPubIdCheck) {
+			if (args.doPubIdCheck) {
 				// We don't use the subscriber to do the checking due to performance, instead we do it "off-line"
 				pubIdMap[sub] = new ops::PublicationIdChecker();
 				pubIdMap[sub]->addListener(this);
@@ -950,7 +972,7 @@ public:
 				sub->start();
 
 				vSubs.push_back(sub);
-				if (doPubIdCheck) {
+				if (args.doPubIdCheck) {
 					// We don't use the subscriber to do the checking due to performance, instead we do it "off-line"
 					pubIdMap[sub] = new ops::PublicationIdChecker();
 					pubIdMap[sub]->addListener(this);
@@ -980,7 +1002,7 @@ public:
 				sub->start();
 
 				vSubs.push_back(sub);
-				if (doPubIdCheck) {
+				if (args.doPubIdCheck) {
 					// We don't use the subscriber to do the checking due to performance, instead we do it "off-line"
 					pubIdMap[sub] = new ops::PublicationIdChecker();
 					pubIdMap[sub]->addListener(this);
@@ -1056,7 +1078,7 @@ public:
 		std::string const newPub = (arg.newPublisher) ? "NEW Publisher" : "SEQ ERROR";
 
 		std::string str = "";
-		if (logTime) {
+		if (args.logTime) {
 			str += "[" + sds::sdsSystemTimeToLocalTime(_messageTime) + "] ";
 		}
 		std::cout << str <<
@@ -1182,7 +1204,7 @@ public:
 	}
     void ShowAckMessage(const TEntry& ent, const ops::OPSMessage* const mess, const opsidls::SendAckPatternData* const data) const
     {
-        if (logTime) {
+        if (args.logTime) {
             std::cout << "[" << sds::sdsSystemTimeToLocalTime(ent.time) << "] ";
         }
         ops::Address_T addr;
@@ -1212,7 +1234,7 @@ public:
 	{
 		// Show Debug Request/Response data
 		std::string str = "";
-		if (logTime) {
+		if (args.logTime) {
 			str += "[" + sds::sdsSystemTimeToLocalTime(ent.time) + "] ";
 		}
 		std::cout << str <<
@@ -1256,7 +1278,7 @@ public:
 			}
 			partMap[piData->name] = sds::sdsSystemTime();
 		}
-		if (!fromMe && !onlyArrivingLeaving) {
+		if (!fromMe && !args.onlyArrivingLeaving) {
 			std::cout <<
 				"[" << partMap.size() << "] " <<
 				"name: " << piData->name <<
@@ -1305,7 +1327,7 @@ public:
     void dumpHex(const char* const ptr, size_t numbytes) const
     {
         int offset = 0;
-        if (numbytes > maxDumpBytes) { numbytes = maxDumpBytes; }
+        if (numbytes > args.maxDumpBytes) { numbytes = args.maxDumpBytes; }
         while (numbytes > 0) {
             const uint8_t* Ptr__ = (const uint8_t*)&ptr[offset];
             int len = (int)numbytes;
@@ -1345,6 +1367,33 @@ public:
 
 			if (mess == nullptr) { return; }
 
+			// Calculate statistics
+			if (args.statistics) {
+				static uint32_t countPerSlot[100]{ 0 };
+				int64_t timeMs = sds::sdsSystemTimeUnitsToMs(ent.time);
+				int ms = timeMs % 1000;
+				static int64_t prevTimestamp = -1;
+				int64_t timestamp = timeMs - ms;		// Whole seconds
+				ms = ms / 10;							// 10ms slots
+				if (prevTimestamp != timestamp) {
+					if (prevTimestamp >= 0) {
+						int64_t time = sds::msToSdsSystemTimeUnits(prevTimestamp);
+						if (args.logTime) {
+							std::cout << "[" + sds::sdsSystemTimeToLocalTime(time) + "] ";
+						}
+						std::cout << "{stat} ";
+						for (int slot = 0; slot < 100; ++slot) {
+							std::cout << std::setw(2) << countPerSlot[slot] << " ";
+						}
+						std::cout << "\n";
+						memset(&countPerSlot[0], 0, sizeof(countPerSlot));
+					}
+					prevTimestamp = timestamp;
+				}
+				countPerSlot[ms]++;
+			}
+
+			// Show messages
 			opsData = mess->getData();
 
 			piData = dynamic_cast<ops::ParticipantInfoData*>(opsData);
@@ -1364,13 +1413,13 @@ public:
             } else {
 				// Ordinary Topic
 				std::string str = "";
-				if (logTime) {
+				if (args.logTime) {
 					str += "[" + sds::sdsSystemTimeToLocalTime(ent.time) + "] ";
 				}
-				for (unsigned int i = 0; i < printFormat.size(); i++) {
-					str += formatMap[printFormat[i]](mess, opsData) + ", ";
+				for (unsigned int i = 0; i < args.printFormat.size(); i++) {
+					str += formatMap[args.printFormat[i]](mess, opsData) + ", ";
 				}
-				if ((str != "") && (!doMinimizeOutput)) {
+				if ((str != "") && (!args.doMinimizeOutput)) {
 					std::cout << str << std::endl;
 				}
 				if (opsData != nullptr) {
@@ -1393,7 +1442,7 @@ public:
 						}
 					}
 				}
-                if (doPubIdCheck) {
+                if (args.doPubIdCheck) {
 					// This may call our "onNewEvent(ops::Notifier<ops::PublicationIdNotification_T>* ...") method
 					// We may need the time in that method so save it in a member variable
 					_messageTime = ent.time;

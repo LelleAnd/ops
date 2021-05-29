@@ -41,7 +41,7 @@
 
 #endif
 
-const char c_program_version[] = "OPSListener Version 2021-05-26";
+const char c_program_version[] = "OPSListener Version 2021-05-29";
 
 void showDescription()
 {
@@ -900,6 +900,7 @@ public:
 
 			Topic topic = part->createTopic(ops::utilities::topicName(topName));
 
+			// If channels are specified, ensure that topic belongs to a specified channel
 			if (args.channels.size() > 0) {
 				ops::ChannelId_T chan = topic.getChannelId();
 				for (const auto& x : args.channels) {
@@ -1382,10 +1383,13 @@ public:
 							std::cout << "[" + sds::sdsSystemTimeToLocalTime(time) + "] ";
 						}
 						std::cout << "{stat} ";
+						uint32_t sum = 0;
 						for (int slot = 0; slot < 100; ++slot) {
+							if ((slot % 20) == 0) { std::cout << " "; }
+							sum += countPerSlot[slot];
 							std::cout << std::setw(2) << countPerSlot[slot] << " ";
 						}
-						std::cout << "\n";
+						std::cout << " sum= " << sum << "\n";
 						memset(&countPerSlot[0], 0, sizeof(countPerSlot));
 					}
 					prevTimestamp = timestamp;

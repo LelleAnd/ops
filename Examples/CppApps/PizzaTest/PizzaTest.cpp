@@ -148,6 +148,7 @@ static int NumVessuvioBytes = 0;
 static std::string FillerStr("");
 int64_t sendPeriod = 1000;
 int PD_version = (int)pizza::PizzaData::PizzaData_idlVersion;
+unsigned int numBurst = 1;
 
 void WriteUpdate(pizza::PizzaData& data, const std::string& message)
 {
@@ -690,18 +691,22 @@ void ActivateAll()
     }
 }
 
-void WriteToAllSelected(ops::OPSObject* const other = nullptr)
+void WriteToAllSelected(unsigned int nBurst, ops::OPSObject* const other = nullptr)
 {
 	static int64_t Counter = 0;
+
+	if (nBurst < 1) { nBurst = 1; }
 
 	for (unsigned int i = 0; i < ItemInfoList.size(); i++) {
 		ItemInfo* const info = ItemInfoList[i];
 		if (!info->selected) { continue; }
-		std::stringstream str;
-		str << Counter;
-        const std::string CounterStr(str.str());
-		Counter++;
-		info->helper->Write(CounterStr, other);
+		for (unsigned int b = 0; b < nBurst; b++) {
+			std::stringstream str;
+			str << Counter;
+			const std::string CounterStr(str.str());
+			Counter++;
+			info->helper->Write(CounterStr, other);
+		}
 	}
 }
 
@@ -788,6 +793,7 @@ void menu()
 	std::cout << "\t SD    Delete Subscriber" << std::endl;
 	std::cout << "\t SS    Start Subscriber" << std::endl;
 	std::cout << "\t ST    Stop Subscriber" << std::endl;
+	std::cout << "\t B num Set number of messages to burst [" << numBurst << "]" << std::endl;
 	std::cout << "\t L num Set num Vessuvio Bytes [" << NumVessuvioBytes << "]" << std::endl;
 	std::cout << "\t T ms  Set deadline timeout [ms]" << std::endl;
 	std::cout << "\t V ms  Set send period [ms] [" << sendPeriod << "]" << std::endl;
@@ -968,13 +974,13 @@ int main(const int argc, const char* argv[])
 				int64_t const now = (int64_t)getNow();
 				if (doPeriodicSend && (now >= nextSendTime)) {
 					// write
-					WriteToAllSelected();
+					WriteToAllSelected(numBurst);
 					// Calc next time to send
 					nextSendTime = now + sendPeriod;
 				}
 				if (participant->GetExecutionPolicy() == ops::execution_policy::polling) { participant->Poll(); }
 				if (otherParticipant->GetExecutionPolicy() == ops::execution_policy::polling) { otherParticipant->Poll(); }
-                if (participant->dataAvailable()) {
+                if ((!beQuite) && participant->dataAvailable()) {
                     std::cout << "##### data is available\n";
                 }
                 ops::TimeHelper::sleep(std::chrono::milliseconds(1));
@@ -1051,9 +1057,14 @@ int main(const int argc, const char* argv[])
 				doPeriodicSend = !doPeriodicSend;
 				break;
 
-            case 'b':
-                gDoRcvDelay = true;
-                break;
+			case 'b':
+			case 'B':
+			{
+				num = atoi(line.c_str());
+				if (num >= 1) { numBurst = (unsigned int)num; }
+				std::cout << "Num burst: " << numBurst << std::endl;
+			}
+			break;
 
 			case 'c':
 			case 'C':
@@ -1080,6 +1091,30 @@ int main(const int argc, const char* argv[])
 					}
 				}
 				break;
+
+			case 'e':
+				gDoRcvDelay = true;
+				break;
+
+			case 'l':
+			case 'L':
+			{
+				num = atoi(line.c_str());
+				if (num >= 0) { NumVessuvioBytes = num; }
+				if (FillerStr.size() > (unsigned int)num) { FillerStr.erase(num); }
+				while (FillerStr.size() < (unsigned int)num) { FillerStr += " "; }
+				std::cout << "Length: " << FillerStr.size() << std::endl;
+			}
+			break;
+
+			case 'm':
+			case 'M':
+			{
+				num = atoi(line.c_str());
+				if (num >= -1) { PD_version = num; }
+				std::cout << "PB_version: " << PD_version << std::endl;
+			}
+			break;
 
 			case 's':
 			case 'S':
@@ -1110,17 +1145,6 @@ int main(const int argc, const char* argv[])
 				}
 				break;
 
-			case 'l':
-			case 'L':
-				{
-					num = atoi(line.c_str());
-                    if (num >= 0) { NumVessuvioBytes = num; }
-					if (FillerStr.size() > (unsigned int)num) { FillerStr.erase(num); }
-					while (FillerStr.size() < (unsigned int)num) { FillerStr += " "; }
-					std::cout << "Length: " << FillerStr.size() << std::endl;
-				}
-				break;
-
 			case 'v':
 			case 'V':
 				{
@@ -1137,23 +1161,14 @@ int main(const int argc, const char* argv[])
 
 			case 'w':
 			case 'W':
-				WriteToAllSelected();
+				WriteToAllSelected(numBurst);
 				break;
 
             case 'z':
             case 'Z':
                 {
                 pizza::special::ExtraAllt ext;
-                WriteToAllSelected(&ext);
-                }
-                break;
-
-            case 'm':
-            case 'M':
-                {
-                    num = atoi(line.c_str());
-                    if (num >= -1) { PD_version = num; }
-                    std::cout << "PB_version: " << PD_version << std::endl;
+                WriteToAllSelected(numBurst, &ext);
                 }
                 break;
 

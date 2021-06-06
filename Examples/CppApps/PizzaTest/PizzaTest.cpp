@@ -149,6 +149,7 @@ static std::string FillerStr("");
 int64_t sendPeriod = 1000;
 int PD_version = (int)pizza::PizzaData::PizzaData_idlVersion;
 unsigned int numBurst = 1;
+ops::ObjectKey_T gKey;
 
 void WriteUpdate(pizza::PizzaData& data, const std::string& message)
 {
@@ -300,6 +301,7 @@ public:
         if (pub != nullptr) {
             try {
                 if (other == nullptr) {
+					data.setKey(gKey);
                     WriteUpdate(data, message);
 #ifdef TRUE
                     res = pub->writeOPSObject(&data);     // Write using pointer
@@ -798,7 +800,8 @@ void menu()
 	std::cout << "\t T ms  Set deadline timeout [ms]" << std::endl;
 	std::cout << "\t V ms  Set send period [ms] [" << sendPeriod << "]" << std::endl;
 	std::cout << "\t A     Start/Stop periodical Write with set period" << std::endl;
-    std::cout << "\t M ver Set Pizzadata version [" << PD_version << "]" << std::endl;
+	std::cout << "\t K     Set key [" << gKey << "]" << std::endl;
+	std::cout << "\t M ver Set Pizzadata version [" << PD_version << "]" << std::endl;
 	std::cout << "\t W     Write data" << std::endl;
 	std::cout << "\t Q     Quite (minimize program output)" << std::endl;
 	std::cout << "\t X     Exit program" << std::endl;
@@ -1040,6 +1043,10 @@ int main(const int argc, const char* argv[])
 		if (idx != std::string::npos) {
             if (idx > 0) { line.erase(0, idx); }
 		}
+		idx = line.find_first_of("\r\n");
+		if (idx != std::string::npos) {
+			if (idx > 0) { line.erase(idx); }
+		}
 
         ii = ItemInfoList[num];
 
@@ -1106,6 +1113,11 @@ int main(const int argc, const char* argv[])
 				std::cout << "Length: " << FillerStr.size() << std::endl;
 			}
 			break;
+
+			case 'k':
+			case 'K':
+				gKey = line;
+				break;
 
 			case 'm':
 			case 'M':

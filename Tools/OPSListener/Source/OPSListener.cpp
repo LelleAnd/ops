@@ -34,6 +34,7 @@
 #include "COpsConfigHelper.h"
 #include "SdsSystemTime.h"
 #include "MessageDump.h"
+#include "FilterMessage.h"
 
 #ifndef _WIN32
 
@@ -41,14 +42,13 @@
 
 #endif
 
-const char c_program_version[] = "OPSListener Version 2021-05-29";
+const char c_program_version[] = "OPSListener Version 2021-05-31";
 
 void showDescription()
 {
-	std::cout << "  This program can subscribe to any OPS topic and it is possible to choose what ";
-	std::cout << "information to present and in which order." << std::endl;
+	std::cout << "  This program can subscribe to any OPS topic and it is possible to choose what information to present and in which order." << std::endl;
 	std::cout << "  This can be used to test if / verify that topics are published." << std::endl;
-	std::cout << "  Topic names can use wildcards (eg. \".*zz.*\" means any topic with 'zz' any where in the name)." << std::endl;
+	std::cout << "  Topic names can use regex (eg. \".*zz.*\" means any topic with 'zz' any where in the name)." << std::endl;
 	std::cout << std::endl;
 }
 
@@ -56,14 +56,15 @@ void ShowUsage()
 {
     std::cout << std::endl << "Usage:" << std::endl;
     std::cout << "  OPSListener [-v] [-?] [-c ops_cfg_file [-c ops_cfg_file [...]]]" << std::endl;
-    std::cout << "              [-j json_file [-j json_file [...]]] [-jr rowlimit]" << std::endl;
+	std::cout << "              [-a arg_file [-a arg_file [...]]]" << std::endl;
+	std::cout << "              [-j json_file [-j json_file [...]]] [-jr rowlimit]" << std::endl;
     std::cout << "              [-t] [-pA | -p<option_chars>] [-d [num]]" << std::endl;
 	std::cout << "              [-s] " << std::endl;
-    std::cout << "              [-a arg_file [-a arg_file [...]]]" << std::endl;
     std::cout << "              [-GA | -G domain [-G domain [...]]]" << std::endl;
     std::cout << "              [-IA | -I domain [-I domain [...]] [-O]]" << std::endl;
     std::cout << "              [-SA | -S domain [-S domain [...]]]" << std::endl;
 	std::cout << "              [-CH channel [-CH channel [...]]]" << std::endl;
+	std::cout << "              [-f<knSy> param [-f<knSy> param [...]]]" << std::endl;
     std::cout << "              [-D default_domain] [-C [-E]] [-u] [-n] Topic [Topic ...]" << std::endl;
     std::cout << std::endl;
     std::cout << "    -?                 Shows a short description" << std::endl;
@@ -77,7 +78,12 @@ void ShowUsage()
     std::cout << "                       If none given, the default 'SDSDomain' is used" << std::endl;
     std::cout << "                       A new default can be given between topics" << std::endl;
     std::cout << "    -E                 If -C or -s given, minimize normal output" << std::endl;
-    std::cout << "    -G domain          Subscribe to Debug Request/Response from given domain" << std::endl;
+	std::cout << "    -f<knSy> param     Filter messages shown on given value (regex)" << std::endl;
+	std::cout << "                 k       param = Key" << std::endl;
+	std::cout << "                 n       param = Publisher Name" << std::endl;
+	std::cout << "                 S       param = Source IP::Port" << std::endl;
+	std::cout << "                 y       param = Type" << std::endl;
+	std::cout << "    -G domain          Subscribe to Debug Request/Response from given domain" << std::endl;
     std::cout << "    -GA                Subscribe to Debug Request/Response from all domains in given configuration files" << std::endl;
     std::cout << "    -I domain          Subscribe to Participant Info Data from given domain" << std::endl;
     std::cout << "    -IA                Subscribe to Participant Info Data from all domains in given configuration files" << std::endl;
@@ -103,7 +109,6 @@ void ShowUsage()
     std::cout << "    -u                 Force subscription to UDP static route topics (may interfere with real subscriber)" << std::endl;
     std::cout << "    -v                 Verbose output during parsing of command line arguments" << std::endl;
     std::cout << std::endl;
-    std::cout << std::endl;
 }
 
 class CArguments
@@ -112,6 +117,7 @@ public:
 	static std::string getValidFormatChars() { return "TknisySvV"; }
 	static ops::ObjectName_T getDefaultDomain() { return "SDSDomain"; }
 
+	filter::FilterAny* filter{ nullptr };
 	std::vector<ops::FileName_T> cfgFiles;
     std::vector<std::string> jsonFiles;
     std::vector<ops::ObjectName_T> topicNames;
@@ -242,6 +248,37 @@ public:
 			// minimize output
 			if (argument == "-E") {
 				doMinimizeOutput = true;
+				continue;
+			}
+
+			// Filters
+			if (argument.find("-f") == 0) {
+				try {
+					if (argIdx >= nArgs) {
+						std::cout << "Argument '-f[knSy]' is missing value" << std::endl;
+						return false;
+					}
+					std::string param(toAnsi(szArglist[argIdx++]).c_str());
+					if (filter == nullptr) {
+						filter = new filter::FilterAny();
+					}
+					if (argument == "-fk") {
+						filter->Add(new filter::FilterKey(param));
+					}
+					if (argument == "-fn") {
+						filter->Add(new filter::FilterPubName(param));
+					}
+					if (argument == "-fS") {
+						filter->Add(new filter::FilterSource(param));
+					}
+					if (argument == "-fy") {
+						filter->Add(new filter::FilterType(param));
+					}
+				}
+				catch (std::exception& e) {
+					std::cout << "Argument '-f[knSy]' exception: " << e.what() << std::endl;
+					return false;
+				}
 				continue;
 			}
 
@@ -1368,6 +1405,15 @@ public:
 
 			if (mess == nullptr) { return; }
 
+			opsData = mess->getData();
+			piData = dynamic_cast<ops::ParticipantInfoData*>(opsData);
+			debugData = dynamic_cast<opsidls::DebugRequestResponseData*>(opsData);
+			ackData = dynamic_cast<opsidls::SendAckPatternData*>(opsData);
+
+			if (args.filter != nullptr) {
+				if (!args.filter->accept(mess, opsData)) { continue; }
+			}
+
 			// Calculate statistics
 			if (args.statistics) {
 				static uint32_t countPerSlot[100]{ 0 };
@@ -1398,12 +1444,6 @@ public:
 			}
 
 			// Show messages
-			opsData = mess->getData();
-
-			piData = dynamic_cast<ops::ParticipantInfoData*>(opsData);
-			debugData = dynamic_cast<opsidls::DebugRequestResponseData*>(opsData);
-            ackData = dynamic_cast<opsidls::SendAckPatternData*>(opsData);
-
 			if (piData != nullptr) {
 				// Show Participant Info
 				ShowParticipantInfo(mess, piData);

@@ -4,6 +4,7 @@ set(EXE_NAME OPSListener)
 
 set(EXE_SRCS
 COpsConfigHelper.h
+FilterMessage.h
 MessageDump.cpp
 MessageDump.h
 OPSListener.cpp

@@ -169,6 +169,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\COpsConfigHelper.h" />
+    <ClInclude Include="..\..\Source\FilterMessage.h" />
     <ClInclude Include="..\..\Source\MessageDump.h" />
     <ClInclude Include="..\..\Source\SdsSystemTime.h" />
   </ItemGroup>

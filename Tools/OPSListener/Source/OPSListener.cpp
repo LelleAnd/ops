@@ -42,7 +42,7 @@
 
 #endif
 
-const char c_program_version[] = "OPSListener Version 2021-05-31";
+const char c_program_version[] = "OPSListener Version 2021-06-12";
 
 void showDescription()
 {
@@ -179,15 +179,11 @@ public:
 
 			// Command line argument file
 			if (argument == "-a") {
-#ifdef _WIN32
 				if (argIdx >= nArgs) {
 					std::cout << "Argument '-a' is missing value" << std::endl;
 					return false;
 				}
-				if (!ParseFile(toAnsi(szArglist[argIdx++]))) return false;
-#else
-				std::cout << "Argument '-a' currently NOT supported on non-WIN32" << std::endl;
-#endif
+				if (!ParseFile(toAnsi(szArglist[argIdx++]))) { return false; }
 				continue;
 			}
 
@@ -402,7 +398,9 @@ public:
 			// Verbose output or not
 			if (argument == "-v") {
 				verboseOutput = true;
-				continue;
+				// Call recursive to handle rest of arguments with verboseOutput
+				HandleArguments(szArglist, argIdx, nArgs);
+				break;
 			}
 
 			// The rest is topic names
@@ -436,12 +434,12 @@ public:
 		return true;
 	}
 
-	///TODO for Linux
-#ifdef _WIN32
 	bool ParseFile(std::string fileName)
 	{
 		char buffer[16384];
+#ifdef _WIN32
 		wchar_t wbuffer[32768];
+#endif
 		std::string oldIndent = indent;
 
 		FILE* stream = nullptr;
@@ -459,18 +457,25 @@ public:
 		}
 
 		indent += "  ";
-		if (verboseOutput) std::cout << indent << "Parsing argument file: " << fileName << std::endl;
+		if (verboseOutput) { std::cout << indent << "Parsing argument file: " << fileName << std::endl; }
 
 		bool returnValue = true;
 		while (!feof(stream) && returnValue) {
-			if (fgets(buffer, sizeof(buffer), stream) == nullptr) break;
+			if (fgets(buffer, sizeof(buffer), stream) == nullptr) { break; }
 
 			int len = (int)strlen(buffer);
-			if (len == 0) continue;
-			if (buffer[0] == '#') continue;
+			if (len == 0) { continue; }
+			if (buffer[0] == '#') { continue; }
 
-			if (buffer[len - 1] == '\n') buffer[len - 1] = ' ';
+			for (int i = 0; i < len; ++i) {
+				if ((buffer[i] == '\n') || (buffer[i] == '\r')) {
+					buffer[i] = ' ';
+				}
+			}
 
+#ifdef _WIN32
+			LPWSTR* szArglist = nullptr;
+			int nArgs = 0;
 			size_t numConverted = 0;
 			if (mbstowcs_s(&numConverted, wbuffer, 32768, buffer, _TRUNCATE) != 0) {
 				std::cout << "mbstowcs_s() failed" << std::endl;
@@ -478,26 +483,68 @@ public:
 				break;
 			}
 
-			LPWSTR *szArglist;
-			int nArgs;
-
 			szArglist = CommandLineToArgvW(wbuffer, &nArgs);
 			if (nullptr == szArglist) {
 				std::cout << "CommandLineToArgvW() failed" << std::endl;
 				returnValue = false;
-			} else {
+			}
+			else {
 				returnValue = HandleArguments(szArglist, 0, nArgs);
 			}
 
 			// Free memory allocated for CommandLineToArgvW arguments.
-			if (szArglist) LocalFree(szArglist);
+			if (szArglist) { LocalFree(szArglist); }
+#else
+			// Create argv[] and argc in-place in buffer
+			// \x escapes	--> x
+			// "x" string	--> x
+			std::vector<char*> args;
+			bool escaped = false;
+			bool inString = false;
+			bool pushArg = true;
+			for (int i = 0, j = 0; i < len; ++i, ++j) {
+				if (pushArg) {
+					args.push_back(&buffer[i]);
+					pushArg = false;
+				}
+				if (j < i) {
+					// compact
+					buffer[j] = buffer[i];
+				}
+				switch (buffer[i]) {
+				case '\\':
+					escaped = !escaped;
+					--j;
+					break;
+				case '"':
+					if (!escaped) {
+						inString = !inString;
+						--j;
+					}
+					escaped = false;
+					break;
+				case ' ':
+					if (!inString && !escaped) {
+						buffer[j] = '\0';
+						pushArg = true;
+						j = i;
+					}
+					escaped = false;
+					break;
+				default:;
+					escaped = false;
+					break;
+				}
+			}
+			returnValue = HandleArguments((const char**)&args[0], 0, args.size());
+#endif
 		}
 		fclose(stream);
-		if (verboseOutput) std::cout << indent << "Finished parsing argument file: " << fileName << std::endl;
+
+		if (verboseOutput) { std::cout << indent << "Finished parsing argument file: " << fileName << std::endl; }
 		indent = oldIndent;
 		return returnValue;
 	}
-#endif
 
 #ifdef _WIN32
 	bool HandleCommandLine(const int , const char** )

@@ -1,0 +1,14 @@
+# File: argfile-linux.txt
+# Comment for ....
+
+# Configuration file(s)
+-c /home/lelle/ops4-local/Examples/OPSIdls/PizzaProject/ops_config.xml
+
+# Print format
+-pA
+
+# Topics to subscribe for in the default domain
+PizzaTopic1 PizzaTopic2
+
+# More arguments in another file
+-a /home/lelle/ops4-local/Tools/OPSListener/argfile-linked-linux.txt

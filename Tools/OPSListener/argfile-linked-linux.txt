@@ -1,8 +1,8 @@
-# File: argfile-linked.txt
+# File: argfile-linked-linux.txt
 # Comment for ...
 
 # Configuration file
--c "D:\OPS\OPS4\Examples\OPSIdls\Space Test\ops_config.xml"
+-c "/home/lelle/ops4-local/Examples/OPSIdls/Space Test/ops_config.xml"
 
 # Print format
 -pA

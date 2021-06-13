@@ -231,6 +231,20 @@ if (OPS_BUILD_CPP)
 endif()
 
 ## ----------------------------------------------------------------------------
+# Special for GCC on RasberryPI requiring extra link library
+if (OPS_BUILD_CPP)
+  message(STATUS ">>> CMAKE_COMPILER_IS_GNUCXX=    " ${CMAKE_COMPILER_IS_GNUCXX})
+  message(STATUS ">>> CMAKE_HOST_SYSTEM_PROCESSOR= " ${CMAKE_HOST_SYSTEM_PROCESSOR})
+
+  if(CMAKE_COMPILER_IS_GNUCXX)
+    if(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "arm")
+      message(STATUS ">>> Adding -latomic to executable linking")
+      set(CMAKE_EXE_LINKER_FLAGS "-latomic")
+    endif()
+  endif()
+endif()
+
+## ----------------------------------------------------------------------------
 # If we have java
 # we need ANother Tool for Language Recognition
 find_jar(ANTLR_JAR antlr

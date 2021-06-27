@@ -19,11 +19,11 @@ class OPS_Object(object):
 	"""docstring for OPS_Object"""
 	OPSOBJECT_IDLVERSION = 0
 
-	def __init__(self):
+	def __init__(self,key=""):
 		super(OPS_Object, self).__init__()
 		self.idlVersionMask = 0
 		self.OPSObject_version = OPS_Object.OPSOBJECT_IDLVERSION
-		self.key = ""
+		self.key = key
 		self.typesString = ""
 		self.spareBytes = None
 

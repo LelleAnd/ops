@@ -54,7 +54,7 @@ class Archiver_In(object):
 	def OpsVector(self,name,value):
 		raise NotImplementedError
 	def Spare(self):
- 		raise NotImplementedError
+		raise NotImplementedError
 
 
 class Archiver_Out(object):

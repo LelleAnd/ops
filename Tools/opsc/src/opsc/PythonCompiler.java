@@ -40,6 +40,8 @@ public class PythonCompiler extends opsc.CompilerSupport
 {
 //class template
     private final static String BASE_CLASS_NAME_REGEX = "__baseClassName";
+    private final static String BASE_INITPARAMETERS_REGEX = "__baseinitparameters";
+    private final static String INITPARAMETERS_REGEX = "__initparameters";
     private final static String DECLARATIONS_REGEX = "__declarations";
     private final static String CONSTANTS_REGEX = "__constDeclarations";
     private final static String SERIALIZE_REGEX = "__serialize";
@@ -49,6 +51,13 @@ public class PythonCompiler extends opsc.CompilerSupport
 //module template
     private final static String IMPORTS_REGEX = "__imports";
     private final static String CLASSES_REGEX = "__classes";
+
+    private boolean genPythonInit = false;
+
+    void setGenPythonInit(boolean value)
+    {
+      genPythonInit = value;
+    }
 
 /*
 
@@ -425,6 +434,13 @@ public class PythonCompiler extends opsc.CompilerSupport
         templateText = templateText.replace(BASE_CLASS_NAME_REGEX, baseClassName);
         templateText = templateText.replace(CONSTANTS_REGEX, getConstantDeclarations(idlClass) + getEnumClassDeclarations(idlClass));
         templateText = templateText.replace(DECLARATIONS_REGEX, getDeclarations(idlClass));
+        if (genPythonInit) {
+            templateText = templateText.replace(INITPARAMETERS_REGEX, getInitParams(idlClass, false));
+            templateText = templateText.replace(BASE_INITPARAMETERS_REGEX, getBaseInitParams(idlClass));
+        } else {
+            templateText = templateText.replace(INITPARAMETERS_REGEX, "");
+            templateText = templateText.replace(BASE_INITPARAMETERS_REGEX, "");
+        }
         templateText = templateText.replace(SERIALIZE_REGEX, getSerialize(idlClass));
         templateText = templateText.replace(VALIDATION_REGEX, getValidation(idlClass));
 
@@ -452,6 +468,7 @@ public class PythonCompiler extends opsc.CompilerSupport
         templateText = templateText.replace(BASE_CLASS_NAME_REGEX, baseClassName);
         templateText = templateText.replace(DECLARATIONS_REGEX, getEnumDeclarations(idlClass));
         templateText = templateText.replace(VALIDATION_REGEX, "" + idlClass.getEnumNames().size());
+        templateText = templateText + endl();
 
         helper.setClassDeclaration(templateText);
         checkForImports(helper,idlClass);
@@ -669,20 +686,78 @@ public class PythonCompiler extends opsc.CompilerSupport
         return ret;
     }
 
+    protected String getBaseInitParams(IDLClass idlClass)
+    {
+        // Get init params for base class
+        String ret = getInitParams(idlClass.getBaseClassRef(), true);
+        if (ret != "") {
+            // Remove leading ','
+            ret = ret.substring(1);
+        }
+        return ret;
+    }
+
+    protected String getInitParams(IDLClass idlClass, boolean onlyName)
+    {
+        if (idlClass == null) {
+            // For the implicit base class OPS_Object
+            if (onlyName) {
+              return ",key";
+            } else {
+              return ",key=\"\"";
+            }
+        }
+
+        String packageName = idlClass.getPackageName() + ".";
+        String className = idlClass.getClassName() + ".";
+
+        // Get baseclass parameters and put them first
+        String ret = getInitParams(idlClass.getBaseClassRef(), onlyName);
+
+        for (IDLField field : idlClass.getFields()) {
+            if (field.isStatic()) continue;
+            String fieldName = getFieldName(field);
+            ret += "," + fieldName;
+            if (!onlyName) {
+                if (field.isArray() || field.isIdlType()) {
+                    ret += "=None";
+                } else if (field.isEnumType()) {
+                    //Set first enum value as init value
+                    if (field.getValue().length() > 0) {
+                        String typeName = field.getFullyQualifiedType().replace("[]", "");
+                        if (typeName.startsWith(packageName)) {
+                            typeName = typeName.substring(packageName.length());
+                        }
+                        if (typeName.startsWith(className)) {
+                            typeName = typeName.substring(className.length());
+                        }
+                        ret += "=" + typeName + "." + field.getValue();
+                    } else {
+                        ret += "=0";
+                    }
+                } else {
+                    ret += "=" + getTypeInitialization(field.getType());
+                }
+            }
+        }
+        return ret;
+    }
+
     protected String getDeclarations(IDLClass idlClass)
     {
         String packageName = idlClass.getPackageName() + ".";
         String ret = "";
+        int t = 2;
 
         if (!isOnlyDefinition(idlClass)) {
             int version = idlClass.getVersion();
             if (version < 0) { version = 0; }
             // Need an implicit version field that should be [de]serialized
-            ret += tab(2) + "self." + idlClass.getClassName() + "_version = " +
+            ret += tab(t) + "self." + idlClass.getClassName() + "_version = " +
                 idlClass.getClassName() + "." + idlClass.getClassName().toUpperCase() + "_IDLVERSION" + endl();
         }
         if (idlClass.getVersion() > 0) {
-            ret += tab(2) + "self.idlVersionMask |= 1" + endl();
+            ret += tab(t) + "self.idlVersionMask |= 1" + endl();
         }
 
         for (IDLField field : idlClass.getFields()) {
@@ -692,14 +767,14 @@ public class PythonCompiler extends opsc.CompilerSupport
                 String comment = field.getComment();
                 int idx;
                 while ((idx = comment.indexOf('\n')) >= 0) {
-                    ret += tab(2) + "#" + comment.substring(0,idx).replace("/*", "").replace("*/", "") + endl();
+                    ret += tab(t) + "#" + comment.substring(0,idx).replace("/*", "").replace("*/", "") + endl();
                     comment = comment.substring(idx+1);
                 }
-                ret += tab(2) + "#" + comment.replace("/*", "").replace("*/", "") + endl();
+                ret += tab(t) + "#" + comment.replace("/*", "").replace("*/", "") + endl();
             }
             String vers = getVersionDescription(field.getDirective());
             if (vers.length() > 0) {
-                ret += tab(2) + "# " + vers + endl();
+                ret += tab(t) + "# " + vers + endl();
             }
             // Get type initialization value
             String typeInit = "";
@@ -717,28 +792,36 @@ public class PythonCompiler extends opsc.CompilerSupport
                         typeName = typeName.substring(packageName.length());
                     }
                     typeInit = typeName + "." + field.getValue();
+                } else {
+                    typeInit = "0";
                 }
             } else {
                 typeInit = getTypeInitialization(field.getType().replace("[]", ""));
             }
+            // Generate initialization statement
+            ret += tab(t) + "self." + fieldName + " = ";
+            String conditional = "";
+            if (genPythonInit) {
+                conditional = fieldName + " or ";
+            }
             if (field.isArray()) {
-                ret += tab(2) + "self." + fieldName + " = [";
+                ret += conditional + "[";
                 if (field.getArraySize() > 0) {
                     ret += typeInit + " for x in range(" + field.getArraySize() + ")";
                 }
-                ret +=  "]" + endl();
+                ret +=  "]";
             } else {
                 if (field.isIdlType()) {
-                    ret += tab(2) + "self." + fieldName + " = " + typeInit + endl();
-                } else if (field.isEnumType()) {
-                    //Set first enum value as init value
-                    if (field.getValue().length() > 0) {
-                        ret += tab(2) + "self." + fieldName + " = " + typeInit + endl();
-                    }
+                    ret += conditional + typeInit;
                 } else {
-                    ret += tab(2) + "self." + fieldName + " = " + typeInit + endl();
+                    if (genPythonInit) {
+                      ret += fieldName;
+                    } else {
+                      ret += typeInit;
+                    }
                 }
             }
+            ret += endl();
         }
         return ret;
     }

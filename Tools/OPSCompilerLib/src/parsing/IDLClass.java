@@ -20,6 +20,7 @@ public class IDLClass
     private static final int CLASS_TYPE = 0;
     public static final int ENUM_TYPE = 1;
 
+    private IDLClass baseClassRef = null;
 
     private int type = CLASS_TYPE;
     private String packageName;
@@ -63,6 +64,16 @@ public class IDLClass
     public void addImport(String s)
     {
         imports.add(s);
+    }
+
+    // ------------------------
+    public IDLClass getBaseClassRef()
+    {
+        return baseClassRef;
+    }
+    public void setBaseClassRef(IDLClass value)
+    {
+        baseClassRef = value;
     }
 
     // ------------------------

@@ -39,12 +39,14 @@ import opsc.CompilerSupport;
 public class OpsCompiler
 {
     List<String> _listInputFiles = new ArrayList<String>();
+    List<String> _listRefFiles = new ArrayList<String>();
     String _strProjectName = "";
     String _strProjectDir = "";
     boolean _bOnlyParse = false;
     boolean _bOnlyGenFactories = false;
     boolean _bGenMemoryPool = false;
     boolean _bJsonVersion = true;
+    boolean _bPythonInit = false;
     String _strOps4GprPath = "";
 
     /** An instance of ProjectProperties is used to hold defaults
@@ -73,15 +75,15 @@ public class OpsCompiler
 
     public static void usage() {
         System.out.println("");
-        System.out.println("opsc -P <IDL_proj_dir> [options]");
+        System.out.println("opsc -P <IDL_proj_dir> [options] [-ref idlfiles...]");
         System.out.println("  or");
-        System.out.println("opsc [options] idlfiles...");
+        System.out.println("opsc [options] idlfiles... [-ref idlfiles...]");
         System.out.println("");
         System.out.println("OPTIONS");
         System.out.println("  -? | -h | --help  show this help");
         System.out.println("  -b <feature>      build given feature");
         System.out.println("  -B <feature>      don't build given feature");
-        System.out.println("  -d                verbose output");
+        System.out.println("  -d[d]             verbose output");
         System.out.println("  -dump             print all parsed objects");
         System.out.println("  -fac              only generate factories for given features");
         System.out.println("  -g <feature>      generate given feature");
@@ -94,6 +96,7 @@ public class OpsCompiler
         System.out.println("  -parse            only parse, don't generate");
         System.out.println("  -pp <file>        name an ops IDL project.properties file");
         System.out.println("  -printProps       print system props");
+        System.out.println("  -ref              remaining idlfiles specified are only used as reference (no code gen)");
         System.out.println("  -s <feature>      special, generate with given feature");
         System.out.println("  -S <feature>      special, don't generate with given feature");
         System.out.println("  -t <dir>          set template directory (overrides built-in templates)");
@@ -106,7 +109,7 @@ public class OpsCompiler
         System.out.println("FEATURE");
         System.out.println("  for generate: ALL, ada, cpp(*), csharp(*), delphi, java(*), json, python(*), debug");
         System.out.println("  for build:    ALL, csharp, java");
-        System.out.println("  for special:  mempool, jsonver(*)");
+        System.out.println("  for special:  mempool, jsonver(*), pyinit");
         System.out.println("                (*) == Default enabled");
         System.out.println("");
     }
@@ -296,6 +299,8 @@ public class OpsCompiler
           }
         }
 
+        boolean refIdl = false;
+
         // finally parse remaining arguments
         for(int i = 0 ; i < extraArgs.size() ; i++) {
             String arg = extraArgs.elementAt(i);
@@ -361,6 +366,9 @@ public class OpsCompiler
                 String special = extraArgs.elementAt(i);
                 if(special.equals("mempool")) _bGenMemoryPool = arg.equals("-s");
                 if(special.equals("jsonver")) _bJsonVersion = arg.equals("-s");
+                if(special.equals("pyinit")) _bPythonInit = arg.equals("-s");
+            } else if(arg.equals("-ref")) {
+                refIdl = true;
             } else {
                 // not a known option - regard as input file
                 // Add file if not already in list
@@ -368,7 +376,14 @@ public class OpsCompiler
                 for(String input : _listInputFiles) {
                   if(input.equals(arg)) found = true;
                 }
-                if(!found) _listInputFiles.add(arg);
+                for(String input : _listRefFiles) {
+                  if(input.equals(arg)) found = true;
+                }
+                if (refIdl) {
+                  if(!found) _listRefFiles.add(arg);
+                } else {
+                  if(!found) _listInputFiles.add(arg);
+                }
             }
         }
         return true;
@@ -378,7 +393,7 @@ public class OpsCompiler
      *  through the IDLParser. The _parser will hold all
      *  loaded classes. Nothing is stored here.
      *  @return true on success */
-    protected boolean parseFile(java.io.File inputfile) {
+    protected boolean parseFile(java.io.File inputfile, boolean refClass) {
         String fileString;
 
         try {
@@ -397,30 +412,16 @@ public class OpsCompiler
 
         // parse the file
         String filename_wo_ext = inputfile.getName().substring(0, inputfile.getName().lastIndexOf("."));
-        parsing.IDLClass idlclass = _parser.parse(filename_wo_ext, fileString);
+        parsing.IDLClass idlclass = _parser.parse(filename_wo_ext, fileString, refClass);
 
-        // Check that onlydefinition classes don't have fields
-        if (idlclass != null) {
-          String s = idlclass.getDirective();
-          if (s != null) {
-              int idx = s.indexOf("onlydefinition");
-              if (idx != -1) {
-                  for (IDLField field : idlclass.getFields()) {
-                      if (field.isStatic()) continue;
-                      System.out.println("Error: " + inputfile.getName() + " set as 'onlydefinition' and contains fields");
-                      return false;
-                  }
-              }
-          }
-        }
-
-        return true;
+        return idlclass != null;
     }
 
     protected boolean compilePython() {
         // create the compiler and set parameters
         opsc.PythonCompiler compiler = new opsc.PythonCompiler(_strProjectName);
         compiler.setVerbose(_verbose);
+        compiler.setGenPythonInit(_bPythonInit);
         Property propTemplatePath = _props.getProperty("templatePath");
         if(propTemplatePath != null)
             compiler.setTemplateDir(propTemplatePath.value);
@@ -631,7 +632,11 @@ public class OpsCompiler
 
     protected void secondStage()
     {
+      // Connect class to base class
+      _parser.connectClasses();
+
       for (IDLClass idlClass : _parser._idlClasses) {
+        // Fix some things that the parser couldn't
         int version = -1;
         for (IDLField field : idlClass.getFields()) {
           // Parser only set enumType for our locally defined enums
@@ -672,6 +677,11 @@ public class OpsCompiler
         System.out.println("idlClass.getVersion()       : " + Integer.toString(idlClass.getVersion()));
         System.out.println("idlClass.getComment()       : " + idlClass.getComment());
 
+        IDLClass bc = idlClass.getBaseClassRef();
+        if (bc != null) {
+          System.out.println("idlClass.getBaseClassRef()  : " + bc.getClassName());
+        }
+
         if (idlClass.getType() == IDLClass.ENUM_TYPE) {
           for (String str : idlClass.getEnumNames()) {
             System.out.println("  enum : " + str);
@@ -707,6 +717,31 @@ public class OpsCompiler
       }
     }
 
+    protected void parseFileList(List<String> inputFiles, boolean refClass)
+    {
+        for(String input : inputFiles) {
+            // Debug output
+            if(_verbose > 0) {
+                System.out.println("Debug: input: " + input);
+            }
+
+            if(input.endsWith(".idl")) {
+                java.io.File inputfile = new java.io.File(input);
+                if (!parseFile(inputfile, refClass)) {
+                    System.exit(4);
+                }
+
+            } else if(input.endsWith(".prj")) {
+                System.out.println("Error: We dont support prj files");
+                System.exit(5);
+
+            } else {
+                System.out.println("Error: " + input + " unknown input type");
+                System.exit(6);
+            }
+        }
+    }
+
     public static void main(String args[]) {
 
         // instantiate this class
@@ -731,26 +766,9 @@ public class OpsCompiler
             System.exit( 2 );
         }
 
-        // iterate over all idl files on the cmd line
-        for(String input : opsc._listInputFiles) {
-            // Debug output
-            if(opsc._verbose > 0) {
-                System.out.println("Debug: input: " + input);
-            }
-
-            if(input.endsWith(".idl")) {
-                java.io.File inputfile = new java.io.File(input);
-                if (!opsc.parseFile(inputfile)) {
-                    System.exit(4);
-                }
-
-            } else if(input.endsWith(".prj")) {
-                System.out.println("Error: We dont support prj files");
-            } else {
-                System.out.println("Error: " + input + " unknown input type");
-            }
-        }
-
+        // iterate over all input files (idls) on the cmd line
+        opsc.parseFileList(opsc._listRefFiles, true);
+        opsc.parseFileList(opsc._listInputFiles, false);
         opsc.secondStage();
 
         if (opsc._dumpFlag) opsc.dump();

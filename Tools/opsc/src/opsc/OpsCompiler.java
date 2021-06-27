@@ -79,6 +79,10 @@ public class OpsCompiler
         System.out.println("  or");
         System.out.println("opsc [options] idlfiles... [-ref idlfiles...]");
         System.out.println("");
+        System.out.println("  idlfiles...       one or more names; name can be a file with extension '.idl' or");
+        System.out.println("                    a directory (ended with a path separator) to be recursively searched");
+        System.out.println("                    for idlfiles");
+        System.out.println("");
         System.out.println("OPTIONS");
         System.out.println("  -? | -h | --help  show this help");
         System.out.println("  -b <feature>      build given feature");
@@ -185,6 +189,7 @@ public class OpsCompiler
         //System.out.println("Info: Parse arguments...");
 
         Vector<String> extraArgs = new Vector<String>();
+        Vector<String> tmpFiles = new Vector<String>();
         boolean projDirGiven = false;
 
         // first step in handling arguments. Some of these will expand the command line.
@@ -300,6 +305,7 @@ public class OpsCompiler
         }
 
         boolean refIdl = false;
+        String pathSep = File.separator;
 
         // finally parse remaining arguments
         for(int i = 0 ; i < extraArgs.size() ; i++) {
@@ -371,18 +377,37 @@ public class OpsCompiler
                 refIdl = true;
             } else {
                 // not a known option - regard as input file
-                // Add file if not already in list
-                boolean found = false;
-                for(String input : _listInputFiles) {
-                  if(input.equals(arg)) found = true;
-                }
-                for(String input : _listRefFiles) {
-                  if(input.equals(arg)) found = true;
-                }
-                if (refIdl) {
-                  if(!found) _listRefFiles.add(arg);
+                tmpFiles.clear();
+                if(arg.endsWith(pathSep)) {
+                    // directory, add all files recursively
+                    File dir = new File(arg);
+                    if (!dir.isDirectory()) {
+                        System.out.println("Error: argument is not a directory: " + arg);
+                        return false;
+                    }
+                    try {
+                        arg = dir.getCanonicalPath();
+                        System.out.println("Info: recursively using idl's in directory: " + arg);
+                        addFilesFromDirectory(dir, tmpFiles);
+                    } catch (java.io.IOException ioe) {
+                    }
                 } else {
-                  if(!found) _listInputFiles.add(arg);
+                    tmpFiles.add(arg);
+                }
+                // Add file(s) if not already in list
+                for (String name : tmpFiles) {
+                    boolean found = false;
+                    for(String input : _listInputFiles) {
+                        if(input.equals(name)) found = true;
+                    }
+                    for(String input : _listRefFiles) {
+                        if(input.equals(name)) found = true;
+                    }
+                    if (refIdl) {
+                        if(!found) _listRefFiles.add(name);
+                    } else {
+                        if(!found) _listInputFiles.add(name);
+                    }
                 }
             }
         }

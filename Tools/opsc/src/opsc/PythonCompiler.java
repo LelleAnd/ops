@@ -355,7 +355,7 @@ public class PythonCompiler extends opsc.CompilerSupport
                 compileIDLClass(iDLClass);
             }
             connectHelpers();
-            saveAll();
+            saveAll(_projectName);
 
             compileTypeSupport(_idlClasses, _projectName);
 
@@ -485,7 +485,7 @@ public class PythonCompiler extends opsc.CompilerSupport
         }
     }
 
-    public void saveAll() throws IOException
+    public void saveAll(String projectName) throws IOException
     {
         HashMap<String,ClassesAndImports> packages = new HashMap<String,ClassesAndImports>();
 
@@ -532,7 +532,11 @@ public class PythonCompiler extends opsc.CompilerSupport
 
         for(String key: packages.keySet())
         {
-            setOutputFileName(_outputDir + File.separator + key.replace(".","_") + ".py");
+            if (genPythonInit) {
+                setOutputFileName(_outputDir + File.separator + projectName + File.separator + key.replace(".","_") + ".py");
+            } else {
+                setOutputFileName(_outputDir + File.separator + key.replace(".","_") + ".py");
+            }
             String templateText = getTemplateText();
 
             templateText = templateText.replace(CLASSES_REGEX, packages.get(key).classes);
@@ -618,9 +622,12 @@ public class PythonCompiler extends opsc.CompilerSupport
         templateText = templateText.replace(CLASS_NAME_REGEX, className);
         templateText = templateText.replace(CREATE_BODY_REGEX, StringJoin("", createBodyText));
 
-
-
         saveOutputText(templateText);
+
+        if (genPythonInit) {
+            setOutputFileName(_outputDir + File.separator + projectName + File.separator + "__init__.py");
+            saveOutputText("");
+        }
     }
 
 //    public void compileTopicConfig(Vector<TopicInfo> topics, String name, String packageString, String projectDirectory)

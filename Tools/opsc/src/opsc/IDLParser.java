@@ -108,9 +108,12 @@ public class IDLParser
     // Connect classes to base class
     public void connectClasses()
     {
-      // Ref classes only within ref classes
+      // For ref classes, check other classes if not found else where
       for (IDLClass idlClass : _idlRefClasses) {
         idlClass.setBaseClassRef(findClass(_idlRefClasses, idlClass.getPackageName(), idlClass.getBaseClassName()));
+        if (idlClass.getBaseClassRef() == null) {
+          idlClass.setBaseClassRef(findClass(_idlClasses, idlClass.getPackageName(), idlClass.getBaseClassName()));
+        }
       }
       // For other classes, check ref classes if not found else where
       for (IDLClass idlClass : _idlClasses) {

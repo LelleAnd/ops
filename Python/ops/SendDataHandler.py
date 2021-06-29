@@ -126,7 +126,7 @@ class McSendDataHandler(AbstractSendDataHandler):
 
 def __makeKey(topic):
 	if topic.transport == TRANSPORT_TCP and topic.port == 0:
-		return topic.channelID + "::" + topic.transport + "::" + topic.domainAddress + "::" + str(topic.port)
+		return topic.domainID + "::" + topic.channelID + "::" + topic.transport + "::" + topic.domainAddress + "::" + str(topic.port)
 	else:
 		return topic.transport + "::" + topic.domainAddress + "::" + str(topic.port)
 

@@ -23,6 +23,8 @@ import java.io.FileFilter;
 import java.io.FileWriter;
 import java.io.FileReader;
 import java.util.Vector;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.net.URL;
@@ -47,6 +49,7 @@ public class OpsCompiler
     boolean _bGenMemoryPool = false;
     boolean _bJsonVersion = true;
     boolean _bPythonInit = false;
+    boolean _bPythonPackage = false;
     String _strOps4GprPath = "";
 
     /** An instance of ProjectProperties is used to hold defaults
@@ -57,7 +60,7 @@ public class OpsCompiler
     /** The IDL parser creates IDLClass instances from idl files */
     private opsc.IDLParser _parser;
 
-    /** A verbosity flag. Currently supports 0 or not 0 */
+    /** A verbosity flag. */
     int _verbose = 0;
     boolean _dumpFlag = false;
 
@@ -67,6 +70,8 @@ public class OpsCompiler
     protected opsc.DelphiCompiler _DelphiCompiler;
     protected opsc.AdaCompiler _AdaCompiler;
     protected opsc.JSONCompiler _JSONCompiler;
+
+    HashSet<String> _packageNamesInCompilation = new HashSet<String>();
 
     public OpsCompiler() {
         // create a parser to generate IDLClasses for us
@@ -113,7 +118,7 @@ public class OpsCompiler
         System.out.println("FEATURE");
         System.out.println("  for generate: ALL, ada, cpp(*), csharp(*), delphi, java(*), json, python(*), debug");
         System.out.println("  for build:    ALL, csharp, java");
-        System.out.println("  for special:  mempool, jsonver(*), pyinit");
+        System.out.println("  for special:  mempool, jsonver(*), pyinit, pypack");
         System.out.println("                (*) == Default enabled");
         System.out.println("");
     }
@@ -373,6 +378,7 @@ public class OpsCompiler
                 if(special.equals("mempool")) _bGenMemoryPool = arg.equals("-s");
                 if(special.equals("jsonver")) _bJsonVersion = arg.equals("-s");
                 if(special.equals("pyinit")) _bPythonInit = arg.equals("-s");
+                if(special.equals("pypack")) _bPythonPackage = arg.equals("-s");
             } else if(arg.equals("-ref")) {
                 refIdl = true;
             } else {
@@ -447,6 +453,8 @@ public class OpsCompiler
         opsc.PythonCompiler compiler = new opsc.PythonCompiler(_strProjectName);
         compiler.setVerbose(_verbose);
         compiler.setGenPythonInit(_bPythonInit);
+        compiler.setGenPythonPackage(_bPythonPackage);
+        compiler.setPackageNamesInCompilation(_packageNamesInCompilation);
         Property propTemplatePath = _props.getProperty("templatePath");
         if(propTemplatePath != null)
             compiler.setTemplateDir(propTemplatePath.value);
@@ -661,6 +669,9 @@ public class OpsCompiler
       _parser.connectClasses();
 
       for (IDLClass idlClass : _parser._idlClasses) {
+        //
+        _packageNamesInCompilation.add(idlClass.getPackageName());
+
         // Fix some things that the parser couldn't
         int version = -1;
         for (IDLField field : idlClass.getFields()) {
@@ -687,6 +698,14 @@ public class OpsCompiler
         }
         idlClass.setVersion(version);
       }
+
+      Iterator<String> it = _packageNamesInCompilation.iterator();
+      System.out.print("Info: IDL packages:");
+      while(it.hasNext()) {
+        System.out.print(" " + it.next());
+      }
+      System.out.println("");
+
     }
 
     // ------------------------------------------------------------------------

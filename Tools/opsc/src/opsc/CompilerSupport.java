@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Vector;
+import java.util.HashSet;
 import java.util.Comparator;
 import parsing.AbstractTemplateBasedIDLCompiler;
 import parsing.IDLClass;
@@ -41,6 +42,8 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
     protected boolean _onlyGenTypeSupport = false;
     protected boolean _genMemoryPool = false;
 
+    HashSet<String> _packageNamesInCompilation = new HashSet<String>();
+
     /** A verbosity flag. Currently supports 0 or not 0 */
     protected int _verbose = 0;
 
@@ -60,6 +63,16 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
     // Declare it here so specific compilers don't need to
     public void compileTopicConfig(Vector<TopicInfo> topics, String name, String packageString, String projectDirectory)
     {
+    }
+
+    public void setPackageNamesInCompilation(HashSet<String> value)
+    {
+        _packageNamesInCompilation = new HashSet<String>(value);
+    }
+
+    public boolean packageNameInCompilation(String value)
+    {
+        return _packageNamesInCompilation.contains(value);
     }
 
     public void setVerbose(int value) {

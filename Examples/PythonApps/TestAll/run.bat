@@ -1,7 +1,9 @@
+@setlocal
 @set OPS_PATH=%~dp0\..\..\..\Python
 @set GEN_PATH=%~dp0\..\..\OPSIdls\TestAll\Generated\Python
-@set GEN_PATH2=%GEN_PATH%\TestAll
-@set SAVED_PP=%PYHONPATH%
-@set PYTHONPATH=%OPS_PATH%;%GEN_PATH%;%GEN_PATH2%;%PYTHONPATH%
+@rem -- @set GEN_PATH2=%GEN_PATH%\TestAll
+@rem -- @set PYTHONPATH=%OPS_PATH%;%GEN_PATH%;%GEN_PATH2%;%PYTHONPATH%
+@set PYTHONPATH=%OPS_PATH%;%GEN_PATH%;%PYTHONPATH%
+@echo %PYTHONPATH%
 @python VerifySerDes.py
-@set PYTHONPATH=%SAVED_PP%
+@rem @python -m cProfile VerifySerDes.py

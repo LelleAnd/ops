@@ -6,8 +6,8 @@ import os
 import platform
 import math
 
-import TestAll
-import TestAllTypeFactory
+from TestAll import TestAll
+from TestAll import TestAllTypeFactory
 
 from ops import Participant,Publisher,Subscriber,Print_Archiver,OPS_Archiver,Checksum_Archiver
 

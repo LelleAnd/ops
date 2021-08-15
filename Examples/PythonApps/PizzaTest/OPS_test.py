@@ -5,9 +5,9 @@ import os
 import platform
 
 #import PizzaData
-import pizza
-import pizza_special
-import PizzaProjectTypeFactory
+from PizzaProject import pizza
+from PizzaProject import pizza_special
+from PizzaProject import PizzaProjectTypeFactory
 from ops import Participant,Publisher,Subscriber,Print_Archiver
 from ops.opsTypes import IdlVersionError
 

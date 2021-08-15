@@ -163,6 +163,7 @@
         <DCCReference Include="..\..\..\Common\idl\Generated\Delphi\opsidls\opsidls.SendAckPatternData.pas"/>
         <DCCReference Include="..\..\..\Common\idl\Generated\Delphi\opsidls\opsidls.DebugRequestResponseData.pas"/>
         <DCCReference Include="..\..\..\Common\idl\Generated\Delphi\opsidls\opsidls.opsidlsTypeFactory.pas"/>
+        <DCCReference Include="..\..\OPSIdls\PizzaProject\Generated\Delphi\pizza\extra\pizza.extra.Secret.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

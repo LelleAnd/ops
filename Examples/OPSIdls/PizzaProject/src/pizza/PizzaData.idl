@@ -9,4 +9,5 @@ class PizzaData extends sds.MessageHeaderData
     //@version = 1 .. 5 //@version = 10
     int Kalle;
 
+    pizza.extra.Secret sec;
 }

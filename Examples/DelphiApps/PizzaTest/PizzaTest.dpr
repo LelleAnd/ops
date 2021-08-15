@@ -72,7 +72,8 @@ uses
   opsidls.OPSConstants in '..\..\..\Common\idl\Generated\Delphi\opsidls\opsidls.OPSConstants.pas',
   opsidls.SendAckPatternData in '..\..\..\Common\idl\Generated\Delphi\opsidls\opsidls.SendAckPatternData.pas',
   opsidls.DebugRequestResponseData in '..\..\..\Common\idl\Generated\Delphi\opsidls\opsidls.DebugRequestResponseData.pas',
-  opsidls.opsidlsTypeFactory in '..\..\..\Common\idl\Generated\Delphi\opsidls\opsidls.opsidlsTypeFactory.pas';
+  opsidls.opsidlsTypeFactory in '..\..\..\Common\idl\Generated\Delphi\opsidls\opsidls.opsidlsTypeFactory.pas',
+  pizza.extra.Secret in '..\..\OPSIdls\PizzaProject\Generated\Delphi\pizza\extra\pizza.extra.Secret.pas';
 
 {$R *.res}
 

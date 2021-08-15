@@ -7,6 +7,7 @@ set(IDLS_SOURCE
   ${IDLS_GEN_PATH}/pizza/special/ExtraAllt.cs
   ${IDLS_GEN_PATH}/pizza/special/LHCData.cs
   ${IDLS_GEN_PATH}/pizza/special/Parmesan.cs
+  ${IDLS_GEN_PATH}/pizza/extra/Secret.cs
   ${IDLS_GEN_PATH}/pizza/CapricosaData.cs
   ${IDLS_GEN_PATH}/pizza/PizzaData.cs
   ${IDLS_GEN_PATH}/pizza/VessuvioData.cs

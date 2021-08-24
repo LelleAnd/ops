@@ -57,8 +57,11 @@ use Ops_Pa,
 
 package body PizzaTest_Pa is
 
+  use type UInt64;
   use type Int64;
   use type Ops_Class_At;
+
+  UserParamCounter : UInt64 := 1;
 
   procedure ErrorLog(Sender : in out Ops_Class_At; Item : Error_Class_At; Arg : Ops_Class_At) is
   begin
@@ -223,6 +226,10 @@ package body PizzaTest_Pa is
           --          myStream << " Win(" << _getpid() << ")" << std::ends;
           Self.pub.SetName("Ada Testprog ( TBD )");
           Self.pub.addListener( Ops_Pa.Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface_At(Self.SelfAt) );
+
+          -- Test
+          Self.pub.SetUserParam(UserParamCounter);
+          UserParamCounter := UserParamCounter + 1;
         end;
       end if;
     exception
@@ -301,6 +308,10 @@ package body PizzaTest_Pa is
           Self.sub.addListener( MessageNotifier_Pa.Listener_Interface_At(Self.SelfAt) );
           Self.sub.addDeadlineListener( Deadline_Pa.DeadlineListener_Interface_At(Self.SelfAt) );
           Self.sub.addListener( Ops_Pa.Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface_At(Self.SelfAt) );
+
+          -- Test
+          Self.sub.SetUserParam(UserParamCounter);
+          UserParamCounter := UserParamCounter + 1;
 
 --          -- Add a publication ID Checker
 --          sub->pubIdChecker = new ops::PublicationIdChecker;
@@ -563,7 +574,8 @@ package body PizzaTest_Pa is
                    ") PizzaData(v" & Byte'Image(data.PizzaData_version) &
                    "):: Cheese: " & X(data.cheese) &
                    ", Tomato sauce: " & X(data.tomatoSauce) &
-                   ", spareBytes: " & XL(data.SpareBytes)
+                   ", spareBytes: " & XL(data.SpareBytes) &
+                   ", UserParam: " & UInt64'Image(sub.GetUserParam)
                 );
       end if;
     end;

@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2020 Lennart Andersson.
+-- Copyright (C) 2016-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -38,6 +38,30 @@ package body Ops_Pa.PublisherAbs_Pa.Publisher_Pa is
       Free(Self);
       raise;
   end Create;
+
+  -- ---------------------------------------------------------------------------
+
+  procedure SetUserParam( Self : in out Publisher_Class; Value : UInt64 ) is
+  begin
+    Self.UserParam := Value;
+  end;
+
+  procedure SetUserRef( Self : in out Publisher_Class; Value : Ops_Class_At ) is
+  begin
+    Self.UserRef := Value;
+  end;
+
+  function GetUserParam( Self : Publisher_Class ) return UInt64 is
+  begin
+    return Self.UserParam;
+  end;
+
+  function GetUserRef( Self : Publisher_Class ) return Ops_Class_At is
+  begin
+    return Self.UserRef;
+  end;
+
+  -- ---------------------------------------------------------------------------
 
   overriding procedure Start( Self : in out Publisher_Class ) is
   begin

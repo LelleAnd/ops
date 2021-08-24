@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2020 Lennart Andersson.
+-- Copyright (C) 2016-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -82,6 +82,28 @@ package body Ops_Pa.Subscriber_Pa is
     Deadline_Pa.Free(Self.DeadlineNotifier);
     Transport_Pa.ConnectStatusNotifier_Pa.Free(Self.CsNotifier);
     MessageNotifier_Pa.Free(Self.DataNotifier);
+  end;
+
+  -- ---------------------------------------------------------------------------
+
+  procedure SetUserParam( Self : in out Subscriber_Class; Value : UInt64 ) is
+  begin
+    Self.UserParam := Value;
+  end;
+
+  procedure SetUserRef( Self : in out Subscriber_Class; Value : Ops_Class_At ) is
+  begin
+    Self.UserRef := Value;
+  end;
+
+  function GetUserParam( Self : Subscriber_Class ) return UInt64 is
+  begin
+    return Self.UserParam;
+  end;
+
+  function GetUserRef( Self : Subscriber_Class ) return Ops_Class_At is
+  begin
+    return Self.UserRef;
   end;
 
   -- ---------------------------------------------------------------------------

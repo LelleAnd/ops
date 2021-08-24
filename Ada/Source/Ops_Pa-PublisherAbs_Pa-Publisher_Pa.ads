@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2020 Lennart Andersson.
+-- Copyright (C) 2016-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -56,7 +56,14 @@ package Ops_Pa.PublisherAbs_Pa.Publisher_Pa is
   procedure addListener( Self : in out Publisher_Class; Client : Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface_At );
   procedure removeListener( Self : in out Publisher_Class; Client : Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface_At );
 
-  overriding procedure WriteOPSObject( Self : in out Publisher_Class; obj : OpsObject_Class_At);
+  overriding procedure WriteOPSObject( Self : in out Publisher_Class; obj : OpsObject_Class_At );
+
+  -- Methods to store and retrieve user parameters.
+  -- These are not used by OPS in any way, the usage is up to the user of OPS.
+  procedure SetUserParam( Self : in out Publisher_Class; Value : UInt64 );
+  procedure SetUserRef( Self : in out Publisher_Class; Value : Ops_Class_At );
+  function GetUserParam( Self : Publisher_Class ) return UInt64;
+  function GetUserRef( Self : Publisher_Class ) return Ops_Class_At;
 
 private
 -- ==========================================================================
@@ -83,6 +90,10 @@ private
 
       -- The SendDataHandler used by the Publisher (NOTE: we don't own the object)
       SendDataHandler : SendDataHandler_Class_At := null;
+
+      -- User variables
+      UserParam : UInt64 := 0;
+      UserRef : Ops_Class_At := null;
     end record;
 
   procedure Write( Self : in out Publisher_Class; data : OpsObject_Class_At);

@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2020 Lennart Andersson.
+-- Copyright (C) 2016-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -136,12 +136,19 @@ package Ops_Pa.Subscriber_Pa is
   -- The deadline timout [ms] for this subscriber.
   -- If no message is received within deadline, listeners to deadlines will be notified
   -- == 0, --> Infinite wait
-  procedure SetDeadlineQoS( Self : in out Subscriber_Class; millis : TimeMs_T);
+  procedure SetDeadlineQoS( Self : in out Subscriber_Class; millis : TimeMs_T );
 
   -- Sets the minimum time separation [ms] between to consecutive messages.
   -- Received messages in between will be ignored by this Subscriber
   -- == 0, no filtering on time
   procedure SetTimeBasedFilterQoS( Self : in out Subscriber_Class; TimeMs : Integer );
+
+  -- Methods to store and retrieve user parameters.
+  -- These are not used by OPS in any way, the usage is up to the user of OPS.
+  procedure SetUserParam( Self : in out Subscriber_Class; Value : UInt64 );
+  procedure SetUserRef( Self : in out Subscriber_Class; Value : Ops_Class_At );
+  function GetUserParam( Self : Subscriber_Class ) return UInt64;
+  function GetUserRef( Self : Subscriber_Class ) return Ops_Class_At;
 
 private
 -- ==========================================================================
@@ -216,6 +223,10 @@ private
 
 --not used      FirstDataReceived : Boolean := False;
       HasUnreadData : Boolean := False;
+
+      -- User variables
+      UserParam : UInt64 := 0;
+      UserRef : Ops_Class_At := null;
     end record;
 
   procedure AddToBuffer( Self : in out Subscriber_Class; mess : OPSMessage_Class_At);

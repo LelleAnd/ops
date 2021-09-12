@@ -114,6 +114,7 @@ public class OpsCompiler
         System.out.println("                    (default is to use GPR_PROJECT_PATH to find ops4.gpr)");
         System.out.println("  -dll <file>       used when building C# to give any dll dependencies (eg. OpsLibrary.dll)");
         System.out.println("  -jar <file>       used when building Java to give any jar dependencies");
+        System.out.println("  -pypac <file>     used when generating Python packages to give any Python package dependencies (*.opsc files)");
         System.out.println("");
         System.out.println("FEATURE");
         System.out.println("  for generate: ALL, ada, cpp(*), csharp(*), delphi, java(*), json, python(*), debug");
@@ -358,6 +359,9 @@ public class OpsCompiler
                 _props.javaBuildJarDependencies.add(new JarDependency(extraArgs.elementAt(i)));
             } else if(arg.equals("-parse")) {
                 _bOnlyParse = true;
+            } else if (arg.equals("-pypac") && (i < extraArgs.size())) {
+                i++;
+                _props.pythonPackageDependencies.add(new JarDependency(extraArgs.elementAt(i)));
             } else if(arg.equals("-?") || arg.equals("-h") || arg.equals("--help")) {
                 usage();
                 System.exit(1);
@@ -455,6 +459,7 @@ public class OpsCompiler
         compiler.setGenPythonInit(_bPythonInit);
         compiler.setGenPythonPackage(_bPythonPackage);
         compiler.setPackageNamesInCompilation(_packageNamesInCompilation);
+        compiler.setPythonPackageDependencies(_props.pythonPackageDependencies);
         Property propTemplatePath = _props.getProperty("templatePath");
         if(propTemplatePath != null)
             compiler.setTemplateDir(propTemplatePath.value);

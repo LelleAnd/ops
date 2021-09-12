@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -54,14 +56,53 @@ public class PythonCompiler extends opsc.CompilerSupport
 
     private boolean genPythonInit = false;
     private boolean genPythonPackage = false;
+    private HashMap<String,String> externalPythonPackages = new HashMap<String,String>();
 
     void setGenPythonInit(boolean value)
     {
-      genPythonInit = value;
+        genPythonInit = value;
     }
+
     void setGenPythonPackage(boolean value)
     {
-      genPythonPackage = value;
+        genPythonPackage = value;
+    }
+
+    public void setPythonPackageDependencies(Vector<JarDependency> pyDeps)
+    {
+        for (JarDependency pyPack : pyDeps) {
+            // Extract Python Package Name
+            String packageName = pyPack.path.replace("\\", "/");
+            int idx = packageName.lastIndexOf("/");
+            if (idx > 0) {
+                packageName = packageName.substring(idx+1);
+                idx = packageName.lastIndexOf(".");
+                if (idx > 0) {
+                    packageName = packageName.substring(0, idx);
+                }
+            }
+            //System.out.println(">>>>>>>>>>>>>>>>>> packageName = " + packageName);
+
+            // Read file, loop over all lines
+            try {
+                //System.out.println(">>>>>>>>>>>>>>>>>> " + pyPack.path);
+                BufferedReader br = new BufferedReader(new FileReader(pyPack.path));
+                try {
+                    String line = br.readLine();
+                    while (line != null) {
+                        // For each line create 'class --> Python package Name'
+                        //System.out.println(">>>>>>>>>>>>>>>>>> className = " + line + " in external package: " + packageName);
+                        externalPythonPackages.put(line, packageName);
+                        line = br.readLine();
+                    }
+                } finally {
+                    br.close();
+                }
+            } catch (IOException ex) {
+                //System.out.println(">>>>: IOException");
+                Logger.getLogger(CompilerSupport.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
 
 /*
@@ -292,6 +333,13 @@ public class PythonCompiler extends opsc.CompilerSupport
                 if (relative) {
                     // Add a '.' to indicate relative import
                     packageStr = "." + packageStr;
+                } else {
+                    String key = packageStr + "." + classStr;
+                    if (externalPythonPackages.containsKey(key)) {
+                        String extPack = externalPythonPackages.get(key);
+                        System.out.println("Info: Using class " + key + " from external package " + extPack);
+                        packageStr = extPack + "." + packageStr;
+                    }
                 }
             }
             imports.add("from " + packageStr + " import " + classStr + endl());
@@ -507,8 +555,6 @@ public class PythonCompiler extends opsc.CompilerSupport
                 {
                     if (helper.canBeSaved())
                     {
-                        //helper.createBaseImport();
-
                         String packageName = helper.getPackageName();
 
                         if (packages.containsKey(packageName)==false)
@@ -532,7 +578,6 @@ public class PythonCompiler extends opsc.CompilerSupport
 
         java.io.InputStream stream = findTemplateFile("pythonpackagetemplate.tpl");
         setTemplateTextFromResource(stream);
-
 
         for(String key: packages.keySet())
         {
@@ -605,6 +650,7 @@ public class PythonCompiler extends opsc.CompilerSupport
 
         ArrayList<String> importString = new ArrayList<String>();
         ArrayList<String> createBodyText = new ArrayList<String>();
+        ArrayList<String> classNames = new ArrayList<String>();
 
         for (IDLClass idlClass : idlClasses)
         {
@@ -613,6 +659,7 @@ public class PythonCompiler extends opsc.CompilerSupport
             if (genPythonPackage) { relPath = "."; }
             importString.add("from " + relPath + idlClass.getPackageName().replace(".","_") + " import " + idlClass.getClassName() + endl());
             createBodyText.add(tab(2) + "self.addType(\"" + idlClass.getPackageName() + "." + idlClass.getClassName() + "\"," + idlClass.getClassName() + ")" + endl());
+            classNames.add(idlClass.getPackageName().replace(".","_") + "." + idlClass.getClassName() + endl());
         }
 
         Collections.sort(importString);
@@ -627,6 +674,12 @@ public class PythonCompiler extends opsc.CompilerSupport
         if (genPythonPackage) {
             setOutputFileName(_outputDir + File.separator + projectName + File.separator + "__init__.py");
             saveOutputText("");
+
+            setOutputFileName(_outputDir + File.separator + projectName + ".opsc");
+            ///TODO save all class names in file (to be read by opsc when using a generated Python package from another compilation)
+            ///Need to have the Python package name to be able to generate a correct import statement
+            Collections.sort(classNames);
+            saveOutputText(StringJoin("", classNames));
         }
     }
 

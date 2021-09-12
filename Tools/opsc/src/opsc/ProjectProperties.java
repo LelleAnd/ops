@@ -32,6 +32,7 @@ public class ProjectProperties implements Serializable
     public String defaultOPSTopicConfigFile = "src/ops_config.xml";
     public Vector<JarDependency> javaBuildJarDependencies = new Vector<JarDependency>();
     public Vector<JarDependency> csBuildDllDependencies = new Vector<JarDependency>();
+    public Vector<JarDependency> pythonPackageDependencies = new Vector<JarDependency>();
     public boolean generateOPSConfigClass = false;
     public boolean opsConfigClassNamespace = false;
     public boolean generateOPSConfigXMLFileFromSourceComments = false;
@@ -60,6 +61,7 @@ public class ProjectProperties implements Serializable
         generateOPSConfigClass = archiver.inout("generateOPSConfigClass", generateOPSConfigClass);
         javaBuildJarDependencies = (Vector<JarDependency>) archiver.inoutSerializableList("javaBuildJarDependencies", javaBuildJarDependencies);
         csBuildDllDependencies = (Vector<JarDependency>) archiver.inoutSerializableList("csBuildDllDependencies", csBuildDllDependencies);
+        pythonPackageDependencies = (Vector<JarDependency>) archiver.inoutSerializableList("pythonPackageDependencies", pythonPackageDependencies);
         vsExampleTopicName = archiver.inout("vsExampleTopicName", vsExampleTopicName);
         vsExampleDataType = archiver.inout("vsExampleDataType", vsExampleDataType);
         vsExampleDomainID = archiver.inout("vsExampleDomainID", vsExampleDomainID);
@@ -133,6 +135,10 @@ public class ProjectProperties implements Serializable
       for (JarDependency dep : csBuildDllDependencies) {
         out.println("C# dll dependency: " + dep);
       }
+      for (JarDependency pac : pythonPackageDependencies) {
+        out.println("Python package dependency: " + pac);
+      }
+
       ///boolean generateOPSConfigClass = false;
       ///boolean opsConfigClassNamespace = false;
       ///boolean generateOPSConfigXMLFileFromSourceComments = false;

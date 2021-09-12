@@ -311,7 +311,6 @@ public class OpsCompiler
         }
 
         boolean refIdl = false;
-        String pathSep = File.separator;
 
         // finally parse remaining arguments
         for(int i = 0 ; i < extraArgs.size() ; i++) {
@@ -388,7 +387,7 @@ public class OpsCompiler
             } else {
                 // not a known option - regard as input file
                 tmpFiles.clear();
-                if(arg.endsWith(pathSep)) {
+                if(arg.endsWith("/") || arg.endsWith("\\")) {
                     // directory, add all files recursively
                     File dir = new File(arg);
                     if (!dir.isDirectory()) {

@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2019 Lennart Andersson.
+-- Copyright (C) 2016-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -256,7 +256,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
         dummy:= tcpClient.SetSendBufferSize(Integer(Self.OutSocketBufferSize));
         if tcpClient.GetSendBufferSize /= Integer(Self.OutSocketBufferSize) then
           Self.LastErrorCode := Ops_Pa.Socket_Pa.SOCKET_ERROR_C;
-          Report(Self, "Run", "Socket buffer size could not be set");
+          Report(Self, "Run", "Socket buffer size could not be set for connected client socket");
         end if;
       end if;
 
@@ -291,18 +291,18 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
         -- Setup server socket for listening
         if not Self.TcpServer.Open then
           Self.LastErrorCode := Self.TcpServer.GetLatestError;
-          Report(Self, "Run", "Socket could not be created");
+          Report(Self, "Run", "Socket could not be created [" & Self.IpAddress.all & ":" & Integer'Image(Self.Port) & "]");
         end if;
         if not Self.TcpServer.SetReuseAddress(True) then
-          Report(Self, "Run", "Failed to set REUSE_ADDRESS for server socket");
+          Report(Self, "Run", "Failed to set REUSE_ADDRESS for server socket [" & Self.IpAddress.all & ":" & Integer'Image(Self.Port) & "]");
         end if;
         if not Self.TcpServer.Bind( Self.IpAddress.all, Self.Port ) then
           Self.LastErrorCode := Self.TcpServer.GetLatestError;
-          Report(Self, "Run", "Socket could not be bound");
+          Report(Self, "Run", "Socket could not be bound [" & Self.IpAddress.all & ":" & Integer'Image(Self.Port) & "]");
         end if;
         if not Self.TcpServer.Listen( 10 ) then
           Self.LastErrorCode := Self.TcpServer.GetLatestError;
-          Report(Self, "Run", "Socket Listen failed");
+          Report(Self, "Run", "Socket Listen failed [" & Self.IpAddress.all & ":" & Integer'Image(Self.Port) & "]");
         end if;
 
         if not Self.TcpServer.IsListening then

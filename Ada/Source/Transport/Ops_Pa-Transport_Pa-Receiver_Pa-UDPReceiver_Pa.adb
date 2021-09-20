@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2019 Lennart Andersson.
+-- Copyright (C) 2016-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -59,19 +59,19 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.UDPReceiver_Pa is
     -- Set blocking calls
     if not Self.UdpSocket.SetNonBlocking( False ) then
       Self.LastErrorCode := Self.UdpSocket.GetLatestError;
-      Report(Self, "Start", "Failed to set Blocking calls");
+      Report(Self, "Start", "Failed to set Blocking calls [" & Self.IpAddress.all & ":" & Integer'Image(Self.Port) & "]");
     end if;
 
     -- Set reuse address
     if not Self.UdpSocket.SetReuseAddress( True ) then
       Self.LastErrorCode := Self.UdpSocket.GetLatestError;
-      Report(Self, "Start", "Failed to set REUSE ADDR");
+      Report(Self, "Start", "Failed to set REUSE ADDR [" & Self.IpAddress.all & ":" & Integer'Image(Self.Port) & "]");
     end if;
 
     -- Bind socket to local address
     if not Self.UdpSocket.Bind( Self.IpAddress.all, Self.Port ) then
       Self.LastErrorCode := Self.UdpSocket.GetLatestError;
-      Report(Self, "Start", "Bind error");
+      Report(Self, "Start", "Bind error [" & Self.IpAddress.all & ":" & Integer'Image(Self.Port) & "]");
       return;
     end if;
 
@@ -88,7 +88,7 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.UDPReceiver_Pa is
         if Self.LastErrorCode = 0 then
           Self.LastErrorCode := Ops_Pa.Socket_Pa.SOCKET_ERROR_C;
         end if;
-        Report(Self, "Start", "Socket buffer size could not be set");
+        Report(Self, "Start", "Socket buffer size could not be set [" & Self.IpAddress.all & ":" & Integer'Image(Self.Port) & "]");
       end if;
     end if;
   end;

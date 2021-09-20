@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2019 Lennart Andersson.
+-- Copyright (C) 2016-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -91,7 +91,7 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.MulticastReceiver_Pa is
 
     if not Self.UdpSocket.Open then
       Self.LastErrorCode := Self.UdpSocket.GetLatestError;
-      Report(Self, "Start", "Socket could not be created");
+      Report(Self, "Start", "Socket could not be created [" & Self.IpAddress.all & ":" & Integer'Image(Self.Port) & "]");
       return False;
     end if;
 
@@ -103,13 +103,13 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.MulticastReceiver_Pa is
     -- Set reuse address
     if not Self.UdpSocket.SetReuseAddress( True ) then
       Self.LastErrorCode := Self.UdpSocket.GetLatestError;
-      Report(Self, "Start", "Failed to set REUSE ADDR");
+      Report(Self, "Start", "Failed to set REUSE ADDR [" & Self.IpAddress.all & ":" & Integer'Image(Self.Port) & "]");
     end if;
 
     -- Bind socket to local address
     if not Self.UdpSocket.Bind( "0.0.0.0", Self.Port ) then
       Self.LastErrorCode := Self.UdpSocket.GetLatestError;
-      Report(Self, "Start", "Bind error");
+      Report(Self, "Start", "Bind error [0.0.0.0:" & Integer'Image(Self.Port) & "]");
       return False;
     end if;
 
@@ -126,14 +126,14 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.MulticastReceiver_Pa is
         if Self.LastErrorCode = 0 then
           Self.LastErrorCode := Ops_Pa.Socket_Pa.SOCKET_ERROR_C;
         end if;
-        Report(Self, "Start", "Socket buffer size could not be set");
+        Report(Self, "Start", "Socket buffer size could not be set [" & Self.IpAddress.all & ":" & Integer'Image(Self.Port) & "]");
       end if;
     end if;
 
     -- Join the Multicast group
     if not Self.UdpSocket.AddMulticastMembership( Self.IpAddress.all, Self.LocalInterface.all ) then
       Self.LastErrorCode := Self.UdpSocket.GetLatestError;
-      Report(Self, "Start", "Failed to join Multicast Group");
+      Report(Self, "Start", "Failed to join Multicast Group [" & Self.IpAddress.all & ":" & Integer'Image(Self.Port) & "]");
     end if;
 
     if Self.Buffer /= null then

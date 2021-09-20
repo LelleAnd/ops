@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2019 Lennart Andersson.
+-- Copyright (C) 2016-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -127,7 +127,7 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa is
 
     if not Self.TcpClient.Open then
       Self.LastErrorCode := Self.TcpClient.GetLatestError;
-      Report(Self, "Start", "Socket could not be created");
+      Report(Self, "Start", "Client socket could not be created [Server: " & Self.IpAddress.all & ":" & Integer'Image(Self.Port) & "]");
       return False;
     end if;
 

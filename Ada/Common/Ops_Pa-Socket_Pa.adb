@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2017-2020 Lennart Andersson.
+-- Copyright (C) 2017-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -313,6 +313,14 @@ package body Ops_Pa.Socket_Pa is
     when e: others =>
       Self.ExtractErrorCode( e );
       return -1;
+  end;
+
+  -- Used to Abort a ReceiveBuf() with timeout
+  procedure AbortReceiveBuf( Self : in out Socket_Class ) is
+  begin
+    if Self.Timeout_Used then
+      GNAT.Sockets.Abort_Selector( Self.Timeout_Selector );
+    end if;
   end;
 
   -- Saves from address internally and it is available via API

@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2017-2020 Lennart Andersson.
+-- Copyright (C) 2017-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -72,6 +72,8 @@ package Ops_Pa.Socket_Pa is
                        Buf : out Ada.Streams.Stream_Element_Array;
                        Dur : GNAT.Sockets.Timeval_Duration;
                        Timedout : out Boolean ) return Integer;
+  -- Used to Abort a ReceiveBuf() with timeout
+  procedure AbortReceiveBuf( Self : in out Socket_Class );
 
   function SendTo( Self : in out Socket_Class; Buf : Ada.Streams.Stream_Element_Array; Ip : String; Port : Integer ) return Integer;
 

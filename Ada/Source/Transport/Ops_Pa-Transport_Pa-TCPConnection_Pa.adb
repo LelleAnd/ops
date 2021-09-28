@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2019 Lennart Andersson.
+-- Copyright (C) 2016-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -300,6 +300,8 @@ package body Ops_Pa.Transport_Pa.TCPConnection_Pa is
   procedure Stop( Self : in out TCPConnection_Class ) is
   begin
     Self.StopFlag := True;
+    -- In case waiting on a ReceiveBuf with timeout
+    Self.Socket.AbortReceiveBuf;
   end;
 
   procedure SetupForReadingSize( Self : in out TCPConnection_Class ) is

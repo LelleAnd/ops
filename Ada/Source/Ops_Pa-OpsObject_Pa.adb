@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2020 Lennart Andersson.
+-- Copyright (C) 2016-2021 Lennart Andersson.
 --  
 -- This file is part of OPS (Open Publish Subscribe).
 --  
@@ -69,7 +69,11 @@ package body Ops_Pa.OpsObject_pa is
   --------------------------------------------------------------------------
   function Key( Self : OpsObject_Class ) return String is
   begin
-    return Self.Key.all;
+    if Self.Key /= null then
+      return Self.Key.all;
+    else
+      return "";
+    end if;
   end Key;
 
   procedure Key( Self : in out OpsObject_Class; Value : String ) is

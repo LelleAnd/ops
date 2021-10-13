@@ -15,7 +15,10 @@ procedure GenSub is
 
 begin
   begin
-    --Listener("D:\OPS\ops4\Examples\AdaApps\PizzaTest\ops_config.xml", "PizzaDomain", "PizzaTopic");
+    SetUpErrorLog;
+
+    --Listener("D:\OPS\ops4\Examples\OPSIdls\PizzaProject\ops_config.xml", "PizzaDomain", "PizzaTopic");
+
     if Argument_Count >= 3 then
       declare
         cfgfile : String := Argument(1);

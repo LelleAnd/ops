@@ -31,4 +31,3 @@ project Example1 is
    end Linker;
 
 end Example1;
-

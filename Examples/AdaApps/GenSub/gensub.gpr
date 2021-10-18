@@ -1,4 +1,4 @@
-with "ops4.gpr";
+with "../../../Ada/ops4.gpr";
 
 project gensub is
 

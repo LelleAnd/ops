@@ -3,10 +3,16 @@ with "../../OPSIdls/TestAll/Generated/Ada/TestAll.gpr";
 
 project VerifySerDes is
 
+   type Os_Type is
+      ("Windows_NT", "LINUX");
+   OS : Os_Type := external ("OS");
+   type Build_Kind is
+      ("static", "relocatable", "static-pic");
+   XMLADA_BUILD : Build_Kind := external ("XMLADA_BUILD");
+
    for Object_Dir use ".obj";
    for Exec_Dir use ".";
    for Main use ("VerifySerDes_Main.adb");
-
    for Source_Files use ("VerifySerDes_Main.adb", "VerifySerDes_Pa.adb", "VerifySerDes_Pa.ads");
 
    package Naming is
@@ -14,20 +20,14 @@ project VerifySerDes is
    end Naming;
 
    package Builder is
-
-     for Global_Compilation_switches ("ada") use ("-g"
-                                                  , "-gnatE"
-                                                 );
+      for Global_Compilation_Switches ("ada") use ("-g");
 
    end Builder;
 
    package Compiler is
-
    end Compiler;
 
    package Linker is
-
    end Linker;
 
 end VerifySerDes;
-

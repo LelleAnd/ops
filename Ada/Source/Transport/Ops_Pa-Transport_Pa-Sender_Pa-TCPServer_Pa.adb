@@ -79,6 +79,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
     Self.OutSocketBufferSize := outSocketBufferSize;
     Self.HeartbeatPeriod := HeartbeatPeriod;
     Self.HeartbeatTimeout := HeartbeatTimeout;
+    if TraceEnabled then Self.Trace("InitInstance()"); end if;
 
     Self.TcpServer := Ops_Pa.Socket_Pa.Create;
     Self.SocketWaits := Ops_Pa.Socket_Pa.Create;
@@ -88,6 +89,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
 
   overriding procedure Finalize( Self : in out TCPServerSender_Class ) is
   begin
+    if TraceEnabled then Self.Trace("Finalize()"); end if;
     Close( Self );
 
     Self.TerminateFlag := True;
@@ -107,6 +109,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
   overriding procedure Open( Self : in out TCPServerSender_Class ) is
   begin
     if not Self.Opened then
+      if TraceEnabled then Self.Trace("Open()"); end if;
       Self.Opened := True;
       Self.StopFlag := False;
 
@@ -139,6 +142,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
     dummy : Boolean;
   begin
     if Self.Opened then
+      if TraceEnabled then Self.Trace("Close()"); end if;
       Self.Opened := False;
 
       -- Tell thread to terminate
@@ -156,6 +160,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
             Self.DeleteConnection( i, 0 );
           end if;
         end loop;
+        if TraceEnabled then Self.Trace("Close(): Num: " & Integer'Image(Integer(Self.ConnectedSockets.Length))); end if;
       end;
     end if;
   end;

@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2020 Lennart Andersson.
+-- Copyright (C) 2016-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -79,7 +79,11 @@ package body Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
 
   function getSourceIP( Self : OPSMessage_Class ) return String is
   begin
-    return Self.SourceIP.all;
+    if Self.SourceIP /= null then
+      return Self.SourceIP.all;
+    else
+      return "";
+    end if;
   end;
 
   function getSourcePort( Self : OPSMessage_Class ) return Integer is
@@ -109,7 +113,11 @@ package body Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
 
   function PublisherName( Self : OPSMessage_Class ) return String is
   begin
-    return Self.publisherName.all;
+    if Self.publisherName /= null then
+      return Self.publisherName.all;
+    else
+      return "";
+    end if;
   end;
 
   procedure SetPublisherName( Self : in out OPSMessage_Class; value : String ) is
@@ -119,7 +127,11 @@ package body Ops_Pa.OpsObject_Pa.OPSMessage_Pa is
 
   function TopicName( Self : OPSMessage_Class ) return String is
   begin
-    return Self.topicName.all;
+    if Self.topicName /= null then
+      return Self.topicName.all;
+    else
+      return "";
+    end if;
   end;
 
   procedure SetTopicName( Self : in out OPSMessage_Class; value : String ) is

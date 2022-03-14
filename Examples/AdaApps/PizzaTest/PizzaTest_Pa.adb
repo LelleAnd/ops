@@ -12,6 +12,8 @@ with Ops_Pa.OpsObject_Pa.OPSConfig_Pa; use Ops_Pa.OpsObject_Pa.OPSConfig_Pa;
 with Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa;
 with Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa;
 with Ops_Pa.Transport_Pa.TCPConnection_Pa;
+with Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa;
+with Ops_Pa.ArchiverInOut_Pa.ArchiverIn_Pa;
 
 with Ops_Pa,
      Ops_Pa.Error_Pa,
@@ -759,12 +761,8 @@ package body PizzaTest_Pa is
     Put_Line(HT & " M ver Set Pizzadata version [" & Integer'Image(PD_Version) & "]");
     Put_Line(HT & " W     Write data");
     Put_Line(HT & " Q     Quite (minimize program output)");
+    Put_Line(HT & " D     Toggle Trace on/off");
     Put_Line(HT & " X     Exit program");
-  end;
-
-  procedure MyTraceProc( NameStr : String; ValueStr : String ) is
-  begin
-    Ada.Text_IO.Put_Line( ">>>>>> [ " & NameStr & " ]  " & ValueStr);
   end;
 
   procedure setup_alt_config(cfg_rel_ops4 : String) is
@@ -787,6 +785,22 @@ package body PizzaTest_Pa is
     end if;
   end;
 
+  procedure MyTraceProc( NameStr : String; ValueStr : String ) is
+  begin
+    Ada.Text_IO.Put_Line( ">>>>>> [ " & NameStr & " ]  " & ValueStr);
+  end;
+
+  TraceFlag : Boolean := True;
+
+  procedure ControlTrace( value : Boolean ) is
+  begin
+--    Ops_Pa.ArchiverInOut_Pa.ArchiverIn_Pa.TraceEnabled := Value;
+--    Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa.TraceEnabled := Value;
+--    Ops_Pa.Transport_Pa.TCPConnection_Pa.TraceEnabled := Value;
+    Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa.TraceEnabled := Value;
+    Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa.TraceEnabled := Value;
+  end;
+
   procedure PizzaTest is
     participant : Participant_Class_At := null;
     otherParticipant : Participant_Class_At := null;
@@ -794,10 +808,8 @@ package body PizzaTest_Pa is
     dummy : Boolean;
   begin
     -- Enable TCP Client trace
---        Ops_Pa.InstallTrace(MyTraceProc'Access);
---        Ops_Pa.Transport_Pa.Receiver_Pa.TCPClient_Pa.TraceEnabled := True;
---        Ops_Pa.Transport_Pa.TCPConnection_Pa.TraceEnabled := True;
---        Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa.TraceEnabled := True;
+    Ops_Pa.InstallTrace(MyTraceProc'Access);
+    ControlTrace( TraceFlag );
 
     -- Setup the OPS static error service (common for all participants, reports errors during participant creation)
     StaticErrorService.addListener(ErrorLog'Access, null);
@@ -1049,6 +1061,10 @@ package body PizzaTest_Pa is
                 end if;
               end;
               Menu;
+
+            elsif Ada.Strings.Fixed.Index(line, "d") = 1 then
+              TraceFlag := not TraceFlag;
+              ControlTrace( TraceFlag );
 
             elsif Ada.Strings.Fixed.Index(line, "w") = 1 then
               WriteToAllSelected;

@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2018 Lennart Andersson.
+-- Copyright (C) 2016-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -58,6 +58,8 @@ package Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
 
   function getSendDataHandler( Self : in out SendDataHandlerFactory_Class; top : Topic_Class_At) return SendDataHandler_Class_At;
   procedure releaseSendDataHandler( Self : in out SendDataHandlerFactory_Class; top : Topic_Class_At);
+
+  TraceEnabled : Boolean := False;
 
 private
 -- ==========================================================================

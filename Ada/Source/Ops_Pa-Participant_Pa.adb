@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2019 Lennart Andersson.
+-- Copyright (C) 2016-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -130,16 +130,16 @@ package body Ops_Pa.Participant_Pa is
     Result : SendDataHandler_Class_At := null;
   begin
     Result := Self.SendDataHandlerFactory.getSendDataHandler(top);
-    if Result /= null then
-      declare
-        S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.PartInfoDataMutex'Access);
-      begin
-        -- Need to add topic to partInfoData.publishTopics
-        addTopic(Self.PartInfoData.publishTopics, top);
-      end;
-    end if;
+    -- We can't update Participant Info here, delayed until updateSendPartInfo()
     return Result;
   end;
+
+  overriding procedure updateSendPartInfo( Self: in out Participant_Class; top : Topic_Class_At ) is
+    S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.PartInfoDataMutex'Access);
+	begin
+    -- Need to add topic to partInfoData.publishTopics
+    addTopic(Self.PartInfoData.publishTopics, top);
+	end;
 
   overriding procedure releaseSendDataHandler( Self: in out Participant_Class; top : Topic_Class_At ) is
   begin
@@ -309,6 +309,22 @@ package body Ops_Pa.Participant_Pa is
     Self.PartInfoData.mc_udp_port := port;
   end;
 
+  -- Method prototype to call when we want to register a TCP RDH for the participant info data
+  -- Override this to react on the TCP setup callback
+  procedure OnTcpTransport( Self : in out Participant_Class;
+                            topicName : String;
+                            rdh : ReceiveDataHandler_Class_At;
+                            register : Boolean ) is
+  begin
+    if Self.PartInfoListener /= null then
+      if register then
+        Self.PartInfoListener.connectTcp( topicName, rdh );
+      else
+        Self.PartInfoListener.disconnectTcp( topicName, rdh );
+      end if;
+    end if;
+  end;
+
   -- Method prototype to call when we connect/disconnect UDP topics with the participant info data listener
   -- Override this to react on the UDP setup callback
   procedure OnUdpTransport( Self : in out Participant_Class;
@@ -378,7 +394,7 @@ package body Ops_Pa.Participant_Pa is
     --
     Self.SendDataHandlerFactory := Create(Self.Domain, Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa.OnUdpTransport_Interface_At(Self.SelfAt), Self.ErrorService);
 
-    Self.ReceiveDataHandlerFactory := Create( Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa.OnUdpTransport_Interface_At(Self.SelfAt), Self.ErrorService);
+    Self.ReceiveDataHandlerFactory := Create( Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa.OnSetupTransport_Interface_At(Self.SelfAt), Self.ErrorService);
 
     -- Partinfo topic / Listener
     Self.PartInfoTopic := Self.createParticipantInfoTopic;

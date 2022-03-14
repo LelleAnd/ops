@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2020 Lennart Andersson.
+-- Copyright (C) 2016-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -17,6 +17,9 @@
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
 with Ops_Pa.OpsObject_Pa.Topic_Pa,
+     Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa.Udp_Pa,
+     Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa.Tcp_Pa,
+     Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa.Mc_Pa,
      Ops_Pa.Socket_Pa,
      Ops_Pa.Error_Pa;
 
@@ -27,7 +30,7 @@ package body Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa is
 
   use type MyMap.cursor;
 
-  function Create( Client : OnUdpTransport_Interface_At;
+  function Create( Client : OnSetupTransport_Interface_At;
                    Reporter : Ops_Pa.Error_Pa.ErrorService_Class_At )
                   return ReceiveDataHandlerFactory_Class_At is
     Self : ReceiveDataHandlerFactory_Class_At := null;
@@ -52,10 +55,10 @@ package body Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa is
   end;
 
   procedure InitInstance( Self : in out ReceiveDataHandlerFactory_Class;
-                          Client : OnUdpTransport_Interface_At;
+                          Client : OnSetupTransport_Interface_At;
                           Reporter : Ops_Pa.Error_Pa.ErrorService_Class_At ) is
   begin
-    Self.OnUdpTransportInfoClient := Client;
+    Self.OnSetupTransportInfoClient := Client;
     Self.ErrorService := Reporter;
   end;
 
@@ -84,6 +87,10 @@ package body Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa is
     -- Make a key with the transport info that uniquely defines the receiver.
     if (top.Transport = TRANSPORT_UDP) and (not Ops_Pa.Socket_Pa.isMyNodeAddress(top.DomainAddress)) then
       return top.Transport;
+
+    elsif (top.Transport = TRANSPORT_TCP) and (top.Port = 0) then
+      return top.Transport & "::" & top.ChannelId & "::" & top.DomainAddress & "::" & Int32'Image(top.Port);
+
     else
       return top.Transport & "::" & top.DomainAddress & "::" & Int32'Image(top.Port);
     end if;
@@ -129,21 +136,27 @@ package body Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa is
         end if;
       end if;
 
-    elsif (top.Transport = TRANSPORT_MC) or (top.Transport = TRANSPORT_TCP) then
-      Result := Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa.Create(top, dom, opsObjectFactory, Self.ErrorService);
+    elsif (top.Transport = TRANSPORT_MC) then
+      Result := ReceiveDataHandler_Class_At(Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa.Mc_Pa.Create(top, dom, opsObjectFactory, Self.ErrorService));
+      info.handler := Result;
+      --info.numUsers := 1;
+      Self.ReceiveDataHandlerInstances.Insert(key, info);
+
+    elsif (top.Transport = TRANSPORT_TCP) then
+      Result := ReceiveDataHandler_Class_At(Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa.Tcp_Pa.Create(top, dom, opsObjectFactory, Self.ErrorService, Self.OnSetupTransportInfoClient));
       info.handler := Result;
       --info.numUsers := 1;
       Self.ReceiveDataHandlerInstances.Insert(key, info);
 
     elsif top.Transport = TRANSPORT_UDP then
-      Result := Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa.Create(top, dom, opsObjectFactory, Self.ErrorService);
-
-      if key = top.Transport then
-        if Self.OnUdpTransportInfoClient /= null then
-          Self.OnUdpTransportInfoClient.
-            OnUdpTransport( Result.getReceiver.Address, Int32(Result.getReceiver.Port) );
+      declare
+        client : OnSetupTransport_Interface_At := null;
+      begin
+        if key = top.Transport then
+          client := Self.OnSetupTransportInfoClient;
         end if;
-      end if;
+        Result := ReceiveDataHandler_Class_At(Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa.Udp_Pa.Create(top, dom, opsObjectFactory, Self.ErrorService, client));
+      end;
 
       info.handler := Result;
       --info.numUsers := 1;
@@ -183,8 +196,8 @@ package body Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa is
 
         if top.Transport = TRANSPORT_UDP then
           if key = top.Transport then
-            if Self.OnUdpTransportInfoClient /= null then
-              Self.OnUdpTransportInfoClient.OnUdpTransport("", 0);
+            if Self.OnSetupTransportInfoClient /= null then
+              Self.OnSetupTransportInfoClient.OnUdpTransport("", 0);
             end if;
           end if;
         end if;

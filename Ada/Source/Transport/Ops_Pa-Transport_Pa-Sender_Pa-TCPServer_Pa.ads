@@ -76,6 +76,7 @@ private
     record
       Opened : Boolean := False;
 
+      ActualPort : Integer := 0;
       Port : Integer := 0;
       IpAddress : String_At := null;
       OutSocketBufferSize : Int64 := -1;

@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2019 Lennart Andersson.
+-- Copyright (C) 2016-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -53,6 +53,13 @@ package body Ops_Pa.Transport_Pa.SendDataHandler_Pa is
     if Self.Users.Length = 0 then
       Self.Sender.Close;
     end if;
+  end;
+
+  -- At least one publisher must be added to us for this call to work correct
+  -- Updates topic with the used transport info
+  procedure updateTransportInfo( Self : in out SendDataHandler_Class; topic : Topic_Class_At ) is
+  begin
+    null;
   end;
 
   function Equal( Left, Right : Ops_Class_At ) return Boolean is

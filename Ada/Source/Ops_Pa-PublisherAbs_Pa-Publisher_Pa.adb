@@ -180,6 +180,16 @@ package body Ops_Pa.PublisherAbs_Pa.Publisher_Pa is
     Self.Message.SetDataOwner( False );
 
     Start( Self );
+
+    -- We need our own copy since we update the topic
+    declare
+      top : Topic_Class_At := Topic_Class_At(t.Clone);
+    begin
+      -- If we let the OS define the port, the transport info isn't available until after start()
+      Self.SendDataHandler.updateTransportInfo( top );
+      Self.Participant.updateSendPartInfo( top );
+      Free( top );
+    end;
   end;
 
   overriding procedure Finalize( Self : in out Publisher_Class ) is

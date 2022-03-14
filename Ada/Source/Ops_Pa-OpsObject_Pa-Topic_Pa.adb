@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2020 Lennart Andersson.
+-- Copyright (C) 2016-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -193,6 +193,16 @@ package body Ops_Pa.OpsObject_Pa.Topic_Pa is
     Self.HeartbeatTimeout := Value;
   end;
 
+  function ChannelId( Self : Topic_Class ) return String is
+  begin
+    return Self.ChannelId.all;
+  end;
+
+  procedure SetChannelId( Self : in out Topic_Class; Value : String ) is
+  begin
+    Replace(Self.ChannelId, Value);
+  end;
+
   function Topic_version( Self : Topic_Class ) return Byte is
   begin
     return Self.Topic_version;
@@ -274,6 +284,9 @@ package body Ops_Pa.OpsObject_Pa.Topic_Pa is
       Replace(Topic_Class(obj.all).Transport, Self.Transport);
       Topic_Class(obj.all).OutSocketBufferSize := Self.OutSocketBufferSize;
       Topic_Class(obj.all).InSocketBufferSize := Self.InSocketBufferSize;
+      Topic_Class(obj.all).HeartbeatPeriod := Self.HeartbeatPeriod;
+      Topic_Class(obj.all).HeartbeatTimeout := Self.HeartbeatTimeout;
+      Replace(Topic_Class(obj.all).ChannelId, Self.ChannelId);
     end if;
   end;
 
@@ -288,6 +301,7 @@ package body Ops_Pa.OpsObject_Pa.Topic_Pa is
     Self.LocalInterface := Copy("");
     Self.DomainID := Copy("");
     Self.Transport := Copy("");
+    Self.ChannelId := Copy("");
   end;
 
   procedure InitInstance( Self : in out Topic_Class ) is
@@ -300,6 +314,7 @@ package body Ops_Pa.OpsObject_Pa.Topic_Pa is
     Self.LocalInterface := Copy("");
     Self.DomainID := Copy("");
     Self.Transport := Copy("");
+    Self.ChannelId := Copy("");
   end;
 
   overriding procedure Finalize( Self : in out Topic_Class ) is
@@ -324,6 +339,9 @@ package body Ops_Pa.OpsObject_Pa.Topic_Pa is
     end if;
     if Self.Transport /= null then
       Dispose(Self.Transport);
+    end if;
+    if Self.ChannelId /= null then
+      Dispose(Self.ChannelId);
     end if;
 
     Finalize( OpsObject_Class(Self) );

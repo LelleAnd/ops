@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2017-2019 Lennart Andersson.
+-- Copyright (C) 2017-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -30,6 +30,10 @@ package Ops_Pa.Transport_Pa.SendDataHandler_Pa.TCP_Pa is
   function Create( topic : Topic_Class_At; Reporter : ErrorService_Class_At ) return TcpSendDataHandler_Class_At;
 
   overriding function sendData( Self : in out TcpSendDataHandler_Class; buf : Byte_Arr_At; bufSize : Integer; topic : Topic_Class_At) return Boolean;
+
+  -- At least one publisher must be added to us for this call to work correct
+  -- Updates topic with the used transport info
+  overriding procedure updateTransportInfo( Self : in out TcpSendDataHandler_Class; topic : Topic_Class_At );
 
 private
 -- ==========================================================================

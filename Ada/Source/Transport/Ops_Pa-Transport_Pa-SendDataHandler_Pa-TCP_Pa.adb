@@ -16,6 +16,8 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
+with Ops_Pa.Socket_Pa;
+
 package body Ops_Pa.Transport_Pa.SendDataHandler_Pa.TCP_Pa is
 
   function Create( topic : Topic_Class_At; Reporter : ErrorService_Class_At ) return TcpSendDataHandler_Class_At is
@@ -36,11 +38,19 @@ package body Ops_Pa.Transport_Pa.SendDataHandler_Pa.TCP_Pa is
                           Reporter : ErrorService_Class_At ) is
   begin
     InitInstance( SendDataHandler_Class(Self), SendDataHandler_Class_At(SelfAt) );
-    Self.Sender := createTCPServer( ip                  => topic.DomainAddress,
-                                    port                => Integer(topic.Port),
-                                    HeartbeatPeriod     => topic.HeartbeatPeriod,
-                                    HeartbeatTimeout    => topic.HeartbeatTimeout,
-                                    outSocketBufferSize => topic.OutSocketBufferSize );
+    if Socket_Pa.isValidNodeAddress( topic.DomainAddress ) then
+      Self.Sender := createTCPServer( ip                  => topic.DomainAddress,
+                                      port                => Integer(topic.Port),
+                                      HeartbeatPeriod     => topic.HeartbeatPeriod,
+                                      HeartbeatTimeout    => topic.HeartbeatTimeout,
+                                      outSocketBufferSize => topic.OutSocketBufferSize );
+    else
+      Self.Sender := createTCPServer( ip                  => "0.0.0.0",
+                                      port                => Integer(topic.Port),
+                                      HeartbeatPeriod     => topic.HeartbeatPeriod,
+                                      HeartbeatTimeout    => topic.HeartbeatTimeout,
+                                      outSocketBufferSize => topic.OutSocketBufferSize );
+    end if;
     Self.Sender.SetErrorService( Reporter );
     Self.Sender.SetConnectStatusClient( ConnectStatus_Interface_At(SelfAt) );
   end;
@@ -57,6 +67,17 @@ package body Ops_Pa.Transport_Pa.SendDataHandler_Pa.TCP_Pa is
     end;
 
     Finalize( SendDataHandler_Class(Self) );
+  end;
+
+  -- At least one publisher must be added to us for this call to work correct
+  -- ie. sender must be opened for this to be correct
+  overriding procedure updateTransportInfo( Self : in out TcpSendDataHandler_Class; topic : Topic_Class_At ) is
+  begin
+    -- Set port to the one actually used (for tcp server where OS defines port)
+    topic.SetPort( Int32(Self.Sender.getPort) );
+    if not Socket_Pa.isValidNodeAddress( topic.DomainAddress ) then
+      topic.setDomainAddress(Socket_Pa.doSubnetTranslation(topic.LocalInterface));
+    end if;
   end;
 
   overriding function sendData( Self : in out TcpSendDataHandler_Class; buf : Byte_Arr_At; bufSize : Integer; topic : Topic_Class_At) return Boolean is

@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2019 Lennart Andersson.
+-- Copyright (C) 2016-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -32,10 +32,11 @@ package Ops_Pa.Transport_Pa.Receiver_Pa is
   type Receiver_Class    is abstract new Transport_Class with private;
   type Receiver_Class_At is access all Receiver_Class'Class;
 
-  package ReceiveNotifier_Pa is new Notifier_Pa(10, BytesSizePair_T);
+  package ReceiverNotifier_Pa is new Notifier_Pa(1, BytesSizePair_T);
 
-  procedure addListener( Self : in out Receiver_Class; Client : ReceiveNotifier_Pa.Listener_Interface_At );
-  procedure removeListener( Self : in out Receiver_Class; Client : ReceiveNotifier_Pa.Listener_Interface_At );
+  -- Note: Only one listener is allowed
+  procedure addListener( Self : in out Receiver_Class; Client : ReceiverNotifier_Pa.Listener_Interface_At );
+  procedure removeListener( Self : in out Receiver_Class; Client : ReceiverNotifier_Pa.Listener_Interface_At );
 
   -- Start():
   -- Starts the receiver, and reads bytes into given buffer.
@@ -94,8 +95,8 @@ private
       pragma volatile(TerminateFlag);
       EventsToTask : Ops_Pa.Signal_Pa.Signal_T;
 
-      -- Used for notifications to users of the Receiver
-      DataNotifier : ReceiveNotifier_Pa.Notifier_Class_At := null;
+      -- Used for notifications to user of the Receiver
+      DataNotifier : ReceiverNotifier_Pa.SingleNotifier_Class_At := null;
     end record;
 
   procedure Run( Self : in out Receiver_Class );

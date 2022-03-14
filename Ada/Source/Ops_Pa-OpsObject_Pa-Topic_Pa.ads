@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2020 Lennart Andersson.
+-- Copyright (C) 2016-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -94,6 +94,9 @@ package Ops_Pa.OpsObject_Pa.Topic_Pa is
   function HeartbeatTimeout( Self : Topic_Class ) return Int32;
   procedure SetHeartbeatTimeout( Self : in out Topic_Class; Value : Int32);
 
+  function ChannelId( Self : Topic_Class ) return String;
+  procedure SetChannelId( Self : in out Topic_Class; Value : String );
+
   function Topic_version( Self : Topic_Class ) return Byte;
   procedure SetTopic_version( Self : in out Topic_Class; Version : Byte );
 
@@ -121,6 +124,7 @@ private
       OptNonVirt : Boolean := False;
       HeartbeatPeriod : Int32 := 0;
       HeartbeatTimeout : Int32 := 0;
+      ChannelId : String_At := null;
     end record;
 
   procedure InitInstance( Self : in out Topic_Class; namee : String; portt : Int32; typeIDd : String; domainAddresss : String);

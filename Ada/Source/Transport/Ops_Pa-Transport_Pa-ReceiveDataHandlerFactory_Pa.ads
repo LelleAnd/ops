@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2018 Lennart Andersson.
+-- Copyright (C) 2016-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -36,12 +36,19 @@ package Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa is
 -- ==========================================================================
 --      C l a s s    D e c l a r a t i o n.
 -- ==========================================================================
-  type OnUdpTransport_Interface is limited interface;
-  type OnUdpTransport_Interface_At is access all OnUdpTransport_Interface'Class;
+  type OnSetupTransport_Interface is limited interface;
+  type OnSetupTransport_Interface_At is access all OnSetupTransport_Interface'Class;
 
   -- Method prototype to call when we want to set UDP transport info for the participant info data
   -- Override this to react on the UDP setup callback
-  procedure OnUdpTransport( Self : in out OnUdpTransport_Interface; ipaddress : String; port : Int32 ) is abstract;
+  procedure OnUdpTransport( Self : in out OnSetupTransport_Interface; ipaddress : String; port : Int32 ) is abstract;
+
+  -- Method prototype to call when we want to register a TCP RDH for the participant info data
+  -- Override this to react on the TCP setup callback
+  procedure OnTcpTransport( Self : in out OnSetupTransport_Interface;
+                            topicName : String;
+                            rdh : ReceiveDataHandler_Class_At;
+                            register : Boolean ) is abstract;
 
 -- ==========================================================================
 --      C l a s s    D e c l a r a t i o n.
@@ -49,7 +56,7 @@ package Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa is
   type ReceiveDataHandlerFactory_Class    is new Ops_Class with private;
   type ReceiveDataHandlerFactory_Class_At is access all ReceiveDataHandlerFactory_Class'Class;
 
-  function Create( Client : OnUdpTransport_Interface_At;
+  function Create( Client : OnSetupTransport_Interface_At;
                    Reporter : Ops_Pa.Error_Pa.ErrorService_Class_At )
                   return ReceiveDataHandlerFactory_Class_At;
 
@@ -83,7 +90,7 @@ private
   type ReceiveDataHandlerFactory_Class is new Ops_Class with
     record
       -- Borrowed references
-      OnUdpTransportInfoClient : OnUdpTransport_Interface_At := null;
+      OnSetupTransportInfoClient : OnSetupTransport_Interface_At := null;
       ErrorService : Ops_Pa.Error_Pa.ErrorService_Class_At := null;
 
       -- By Singelton, one ReceiveDataHandler per 'key' on this Participant
@@ -95,7 +102,7 @@ private
 
 
   procedure InitInstance( Self : in out ReceiveDataHandlerFactory_Class;
-                          Client : OnUdpTransport_Interface_At;
+                          Client : OnSetupTransport_Interface_At;
                           Reporter : Ops_Pa.Error_Pa.ErrorService_Class_At );
 
   --------------------------------------------------------------------------

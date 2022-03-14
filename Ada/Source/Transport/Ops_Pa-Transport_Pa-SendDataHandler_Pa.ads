@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2019 Lennart Andersson.
+-- Copyright (C) 2016-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -42,6 +42,10 @@ package Ops_Pa.Transport_Pa.SendDataHandler_Pa is
 
   procedure addListener( Self : in out SendDataHandler_Class; Client : ConnectStatusNotifier_Pa.Listener_Interface_At );
   procedure removeListener( Self : in out SendDataHandler_Class; Client : ConnectStatusNotifier_Pa.Listener_Interface_At );
+
+  -- At least one publisher must be added to us for this call to work correct
+  -- Updates topic with the used transport info
+  procedure updateTransportInfo( Self : in out SendDataHandler_Class; topic : Topic_Class_At );
 
 private
 -- ==========================================================================

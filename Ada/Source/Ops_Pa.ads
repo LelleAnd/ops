@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2018 Lennart Andersson.
+-- Copyright (C) 2016-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -141,6 +141,7 @@ package Ops_Pa is
   Illegal_Array_Length : exception;
   Null_Object_In_Array : exception;
   Null_Object_Not_Allowed : exception;
+  ApiViolation : exception;
 
   -- String helpers
   function Copy( Str : String ) return String_At;

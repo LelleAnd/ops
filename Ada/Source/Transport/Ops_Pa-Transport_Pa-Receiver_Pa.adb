@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2020 Lennart Andersson.
+-- Copyright (C) 2016-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -32,7 +32,7 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa is
 
   procedure InitInstance( Self : in out Receiver_Class; SelfAt : Receiver_Class_At ) is
   begin
-    Self.DataNotifier := ReceiveNotifier_Pa.Create( Ops_Class_At(SelfAt) );
+    Self.DataNotifier := ReceiverNotifier_Pa.Create( Ops_Class_At(SelfAt) );
     Self.Receiver_Pr.Start;
   end;
 
@@ -41,17 +41,17 @@ package body Ops_Pa.Transport_Pa.Receiver_Pa is
     Self.TerminateFlag := True;
     Self.EventsToTask.Signal(TerminateEvent_C);
     Self.Receiver_Pr.Finish;
-    ReceiveNotifier_Pa.Free(Self.DataNotifier);
+    ReceiverNotifier_Pa.Free(Self.DataNotifier);
   end;
 
-  procedure addListener( Self : in out Receiver_Class; Client : ReceiveNotifier_Pa.Listener_Interface_At ) is
+  procedure addListener( Self : in out Receiver_Class; Client : ReceiverNotifier_Pa.Listener_Interface_At ) is
   begin
-    Self.DataNotifier.addListener( Client );
+    Self.DataNotifier.connectListener( Client );
   end;
 
-  procedure removeListener( Self : in out Receiver_Class; Client : ReceiveNotifier_Pa.Listener_Interface_At ) is
+  procedure removeListener( Self : in out Receiver_Class; Client : ReceiverNotifier_Pa.Listener_Interface_At ) is
   begin
-    Self.DataNotifier.removeListener( Client );
+    Self.DataNotifier.disconnectListener;
   end;
 
   task body Receiver_Pr_T is

@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2018 Lennart Andersson.
+-- Copyright (C) 2016-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -55,7 +55,7 @@ package Ops_Pa.Participant_Pa is
   type Participant_Class is new Ops_Class and
     Ops_Pa.Participant_Interface_Pa.Participant_Interface and
     Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa.OnUdpTransport_Interface and
-    Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa.OnUdpTransport_Interface with private;
+    Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa.OnSetupTransport_Interface with private;
   type Participant_Class_At is access all Participant_Class'Class;
 
   -- Get a Participant instance
@@ -86,6 +86,7 @@ package Ops_Pa.Participant_Pa is
 
   -- Should only be used by Publishers
   overriding function getSendDataHandler( Self: in out Participant_Class; top : Topic_Class_At) return SendDataHandler_Class_At;
+  overriding procedure updateSendPartInfo( Self: in out Participant_Class; top : Topic_Class_At );
   overriding procedure releaseSendDataHandler( Self: in out Participant_Class; top : Topic_Class_At );
 
   -- Should only be used by Subscribers
@@ -121,7 +122,7 @@ private
   type Participant_Class is new Ops_Class and
     Ops_Pa.Participant_Interface_Pa.Participant_Interface and
     Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa.OnUdpTransport_Interface and
-    Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa.OnUdpTransport_Interface with
+    Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa.OnSetupTransport_Interface with
      record
        -- Task that handle participant work
        Part_Pr : Participant_Pr_T(Participant_Class'Access);
@@ -170,6 +171,13 @@ private
   -- Method prototype to call when we want to set UDP transport info for the participant info data
   -- Override this to react on the UDP setup callback
   procedure OnUdpTransport( Self : in out Participant_Class; ipaddress : String; port : Int32 );
+
+  -- Method prototype to call when we want to register a TCP RDH for the participant info data
+  -- Override this to react on the TCP setup callback
+  procedure OnTcpTransport( Self : in out Participant_Class;
+                            topicName : String;
+                            rdh : ReceiveDataHandler_Class_At;
+                            register : Boolean );
 
   -- Method prototype to call when we connect/disconnect UDP topics with the participant info data listener
   -- Override this to react on the UDP setup callback

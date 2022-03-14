@@ -122,7 +122,7 @@ package body Ops_Pa.Subscriber_Pa is
   begin
     if not Self.Started then
       Self.ReceiveDataHandler := Self.Participant.GetReceiveDataHandler(Self.Topic);
-      Self.ReceiveDataHandler.addListener(Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa.MessageNotifier_Pa.Listener_Interface_At(Self.SelfAt));
+      Self.ReceiveDataHandler.addListener(Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa.MessageNotifier_Pa.Listener_Interface_At(Self.SelfAt), Self.Topic);
       Self.ReceiveDataHandler.addListener(Ops_Pa.Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface_At(Self.SelfAt));
 
       if Self.DeadlineTimeout > 0 then
@@ -142,7 +142,7 @@ package body Ops_Pa.Subscriber_Pa is
       end if;
 
       Self.ReceiveDataHandler.removeListener(Ops_Pa.Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface_At(Self.SelfAt));
-      Self.ReceiveDataHandler.removeListener(Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa.MessageNotifier_Pa.Listener_Interface_At(Self.SelfAt));
+      Self.ReceiveDataHandler.removeListener(Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa.MessageNotifier_Pa.Listener_Interface_At(Self.SelfAt), Self.Topic);
       Self.ReceiveDataHandler := null;
       Self.Participant.ReleaseReceiveDataHandler(Self.Topic);
 

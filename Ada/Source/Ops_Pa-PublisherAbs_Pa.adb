@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2019 Lennart Andersson.
+-- Copyright (C) 2016-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -26,7 +26,11 @@ package body Ops_Pa.PublisherAbs_Pa is
 
   function Name( Self : PublisherAbs_Class ) return String is
   begin
-    return Self.Name.all;
+    if Self.Name /= null then
+      return Self.Name.all;
+    else
+      return "";
+    end if;
   end;
 
   procedure SetName( Self : in out PublisherAbs_Class; Value : String ) is
@@ -36,7 +40,11 @@ package body Ops_Pa.PublisherAbs_Pa is
 
   function Key( Self : PublisherAbs_Class ) return String is
   begin
-    return Self.Key.all;
+    if Self.Key /= null then
+      return Self.Key.all;
+    else
+      return "";
+    end if;
   end;
 
   procedure SetKey( Self : in out PublisherAbs_Class; Value : String ) is

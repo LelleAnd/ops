@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2017-2020 Lennart Andersson.
+-- Copyright (C) 2017-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -18,13 +18,34 @@
 
 with Ops_Pa.OpsObject_Pa.ParticipantInfoData_Pa,
      Ops_Pa.OpsObject_Pa.TopicInfoData_Pa,
-     Ops_Pa.Transport_Pa.SendDataHandler_Pa.McUdp_Pa;
+     Ops_Pa.Transport_Pa.SendDataHandler_Pa.McUdp_Pa,
+     Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa.Tcp_Pa;
 
 use  Ops_Pa.OpsObject_Pa.ParticipantInfoData_Pa,
      Ops_Pa.OpsObject_Pa.TopicInfoData_Pa,
-     Ops_Pa.Transport_Pa.SendDataHandler_Pa.McUdp_Pa;
+     Ops_Pa.Transport_Pa.SendDataHandler_Pa.McUdp_Pa,
+     Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa.Tcp_Pa;
 
 package body Ops_Pa.ParticipantInfoDataListener_Pa is
+
+  use type Ada.Containers.Count_Type;
+  use type SendMap.cursor;
+  use type RcvMap.cursor;
+
+  function Less (Left, Right : String) return Boolean is
+  begin
+    return Left < Right;
+  end;
+
+  function Equal (Left, Right : SendDataHandler_Class_At) return Boolean is
+  begin
+    return Left = Right;
+  end;
+
+  function Equal (Left, Right : ReceiveDataHandler_Class_At) return Boolean is
+  begin
+    return Left = Right;
+  end;
 
   function Create(dom : Domain_Class_At; partInfoTopic : Topic_Class_At; Reporter : ErrorService_Class_At) return ParticipantInfoDataListener_Class_At is
     Self : ParticipantInfoDataListener_Class_At := null;
@@ -86,47 +107,69 @@ package body Ops_Pa.ParticipantInfoDataListener_Pa is
     if Self.NumUdpTopics = 0 then
       Self.SendDataHandler := null;
 
---TODO  if num tcp topics = 0 then begin
+      if Self.RcvDataHandlers.Length = 0 then
         Self.removeSubscriber;
---    end;
+      end if;
     end if;
   end;
 
---  procedure TParticipantInfoDataListener.connectTcp(top: TTopic;
---    handler: TObject);
---  begin
---    FMutex.Acquire;
---    try
---      if not Assigned(FPartInfoSub) then
---        if not setupSubscriber then
---          -- Generate an error message if we come here with domain->getMetaDataMcPort() == 0,
---          -- it means that we have TCP topics that require meta data but user has disabled it.
---          if Assigned(FErrorService) then
---            FErrorService.Report(TBasicError.Create(
---              'ParticipantInfoDataListener', 'connectTcp',
---              'TCP topic "' + string(top.Name) + '" won''t work since Meta Data disabled in config-file'));
---          end if;
---          Exit;
---        end if;
---      end if;
---
---      --TODO add to map
---
---    finally
---      FMutex.Release;
---    end;
---  end;
+  procedure connectTcp( Self : in out ParticipantInfoDataListener_Class; topicName : String; handler : ReceiveDataHandler_Class_At) is
+    S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
+    pos : RcvMap.Cursor;
+    rdh : ReceiveDataHandler_Class_At := null;
+  begin
+    if Self.PartInfoSub = null then
+      if not Self.setupSubscriber then
+        -- Generate an error message if we come here with domain->getMetaDataMcPort() == 0,
+        -- it means that we have TCP topics that require meta data but user has disabled it.
+        if Self.ErrorService /= null then
+          Self.ErrorService.Report(
+            "ParticipantInfoDataListener", "connectTcp",
+            "TCP topic '" & topicName & "' won't work since Meta Data disabled in config-file");
+        end if;
+        return;
+      end if;
+    end if;
 
---  procedure TParticipantInfoDataListener.disconnectTcp(top: TTopic;
---    handler: TObject);
---  begin
---    FMutex.Acquire;
---    try
---      --TODO remove from map
---    finally
---      FMutex.Release;
---    end;
---  end;
+    -- add to map
+    pos := Self.RcvDataHandlers.Find( topicName );
+    if pos /= RcvMap.No_Element then
+      rdh := RcvMap.Element(pos);
+      if rdh /= handler then
+        if Self.ErrorService /= null then
+          Self.ErrorService.Report(
+            "ParticipantInfoDataListener", "connectTcp",
+            "TCP topic '" & topicName & "' already registered for another RDH");
+        end if;
+      end if;
+    else
+			Self.RcvDataHandlers.Insert(topicName, handler);
+    end if;
+  end;
+
+  procedure disconnectTcp( Self : in out ParticipantInfoDataListener_Class; topicName : String; handler : ReceiveDataHandler_Class_At) is
+    S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
+    pos : RcvMap.Cursor;
+    rdh : ReceiveDataHandler_Class_At := null;
+  begin
+    pos := Self.RcvDataHandlers.Find( topicName );
+    if pos /= RcvMap.No_Element then
+      rdh := RcvMap.Element(pos);
+      if rdh /= handler then
+        Self.ErrorService.Report(
+          "ParticipantInfoDataListener", "disconnectTcp",
+          "TCP topic '" & topicName & "' atempt to remove topic for another RDH");
+      else
+        Self.RcvDataHandlers.Delete(pos);
+
+        if Self.RcvDataHandlers.Length = 0 then
+          if Self.NumUdpTopics = 0 then
+            Self.removeSubscriber;
+          end if;
+        end if;
+      end if;
+    end if;
+  end;
 
   function setupSubscriber( Self : in out ParticipantInfoDataListener_Class) return Boolean is
   begin
@@ -161,9 +204,11 @@ package body Ops_Pa.ParticipantInfoDataListener_Pa is
         if partInfo.Domain.all = Self.Domain.DomainID then
           declare
             S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
+            pos : RcvMap.Cursor;
+            rdh : ReceiveDataHandler_Class_At := null;
           begin
             -- Checks for UDP transport
-            if Self.SendDataHandler /= null and partInfo.subscribeTopics /= null then
+            if Self.SendDataHandler /= null and partInfo.subscribeTopics /= null and partInfo.mc_udp_port /= 0 then
               for i in partInfo.subscribeTopics'Range loop
                 if partInfo.subscribeTopics(i).transport.all = TRANSPORT_UDP
                   --TODO participant->hasPublisherOn(partInfo->subscribeTopics[i].name) )
@@ -176,12 +221,23 @@ package body Ops_Pa.ParticipantInfoDataListener_Pa is
             end if;
 
             -- Checks for TCP transport
-            --  //          for (unsigned int i = 0; i < partInfo->publishTopics.size(); i++)
-            --  //          {
-            --  //						if (partInfo->publishTopics[i].transport == Topic::TRANSPORT_TCP) {
-            --  //							--/TODO lookup topic in map. If found call handler
-            --  //            }
-            --  //          }
+            if partInfo.publishTopics /= null then
+              for i in partInfo.publishTopics'Range loop
+                if partInfo.publishTopics(i).transport.all = TRANSPORT_TCP
+                  --TODO participant->hasSubscriberOn(partInfo->publishTopics[i].name) )
+                then
+                  -- Lookup topic in map. If found call handler
+                  pos := Self.RcvDataHandlers.Find( partInfo.publishTopics(i).name.all );
+                  if pos /= RcvMap.No_Element then
+                    rdh := RcvMap.Element(pos);
+                    TcpReceiveDataHandler_Class_At(rdh).AddReceiveChannel(
+                       partInfo.publishTopics(i).name.all,
+                       partInfo.publishTopics(i).address.all,
+                       partInfo.publishTopics(i).port);
+                  end if;
+                end if;
+              end loop;
+            end if;
           end;
         end if;
       else

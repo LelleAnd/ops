@@ -26,6 +26,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
 
   use type Ada.Containers.Count_Type;
   use type Ops_Pa.Socket_Pa.TCPClientSocket_Class_At;
+  use type Ops_Pa.Socket_Pa.TCPServerSocket_Class_At;
   use type TCPConnection_Pa.TCPServerConnection_Class_At;
   use type Ops_Pa.Signal_Pa.Event_T;
 
@@ -35,7 +36,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
   end;
 
   procedure Trace(Self : TCPServerSender_Class; Msg : String) is
-    NameStr : String := "TcpServer (" & Integer'Image(Self.Port) & ")";
+    NameStr : String := "TcpServer (" & Integer'Image(Self.ActualPort) & ")";
   begin
     Trace(NameStr, Msg);
   end;
@@ -75,6 +76,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
                           outSocketBufferSize : Int64) is
   begin
     Self.Port := serverPort;
+    Self.ActualPort := Self.Port;
     Self.IpAddress := Copy(serverIP);
     Self.OutSocketBufferSize := outSocketBufferSize;
     Self.HeartbeatPeriod := HeartbeatPeriod;
@@ -110,6 +112,22 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
   begin
     if not Self.Opened then
       if TraceEnabled then Self.Trace("Open()"); end if;
+
+      if not Self.TcpServer.Open then
+        Self.LastErrorCode := Self.TcpServer.GetLatestError;
+        Report(Self, "Run", "Socket could not be created [" & Self.IpAddress.all & ":" & Integer'Image(Self.Port) & "]");
+        return;
+      end if;
+      if not Self.TcpServer.SetReuseAddress(True) then
+        Report(Self, "Run", "Failed to set REUSE_ADDRESS for server socket [" & Self.IpAddress.all & ":" & Integer'Image(Self.Port) & "]");
+      end if;
+      if not Self.TcpServer.Bind( Self.IpAddress.all, Self.Port ) then
+        Self.LastErrorCode := Self.TcpServer.GetLatestError;
+        Report(Self, "Run", "Socket could not be bound [" & Self.IpAddress.all & ":" & Integer'Image(Self.Port) & "]");
+      end if;
+
+      Self.ActualPort := Self.TcpServer.GetBoundPort;
+
       Self.Opened := True;
       Self.StopFlag := False;
 
@@ -151,6 +169,8 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
 
       dummy := Self.TcpServer.Close;
 
+      Self.ActualPort := Self.Port;
+
       -- Free all connected sockets, which implicitly will close all connections
       declare
         S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.ConnectedSocketsMutex'Access);
@@ -160,6 +180,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
             Self.DeleteConnection( i, 0 );
           end if;
         end loop;
+        Self.ConnectedSockets.Clear;
         if TraceEnabled then Self.Trace("Close(): Num: " & Integer'Image(Integer(Self.ConnectedSockets.Length))); end if;
       end;
     end if;
@@ -174,7 +195,7 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
 
   overriding function getPort( Self : in out TCPServerSender_Class ) return Integer is
   begin
-    return Self.Port;
+    return Self.ActualPort;
   end;
 
   -- ==========================================================================
@@ -294,20 +315,9 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
     while not Self.StopFlag loop
       begin
         -- Setup server socket for listening
-        if not Self.TcpServer.Open then
-          Self.LastErrorCode := Self.TcpServer.GetLatestError;
-          Report(Self, "Run", "Socket could not be created [" & Self.IpAddress.all & ":" & Integer'Image(Self.Port) & "]");
-        end if;
-        if not Self.TcpServer.SetReuseAddress(True) then
-          Report(Self, "Run", "Failed to set REUSE_ADDRESS for server socket [" & Self.IpAddress.all & ":" & Integer'Image(Self.Port) & "]");
-        end if;
-        if not Self.TcpServer.Bind( Self.IpAddress.all, Self.Port ) then
-          Self.LastErrorCode := Self.TcpServer.GetLatestError;
-          Report(Self, "Run", "Socket could not be bound [" & Self.IpAddress.all & ":" & Integer'Image(Self.Port) & "]");
-        end if;
         if not Self.TcpServer.Listen( 10 ) then
           Self.LastErrorCode := Self.TcpServer.GetLatestError;
-          Report(Self, "Run", "Socket Listen failed [" & Self.IpAddress.all & ":" & Integer'Image(Self.Port) & "]");
+          Report(Self, "Run", "Socket Listen failed [" & Self.IpAddress.all & ":" & Integer'Image(Self.ActualPort) & "]");
         end if;
 
         if not Self.TcpServer.IsListening then
@@ -363,7 +373,6 @@ package body Ops_Pa.Transport_Pa.Sender_Pa.TCPServer_Pa is
           null;
       end;
 
-      dummy := Self.TcpServer.Close;
       delay 0.100;
 
       if tcpClient /= null then

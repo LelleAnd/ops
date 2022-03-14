@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2020 Lennart Andersson.
+-- Copyright (C) 2016-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -25,6 +25,12 @@ with Ops_Pa.Socket_Pa;
 package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
 
   use type MyMap.cursor;
+
+  procedure Trace(Self : SendDataHandlerFactory_Class; Msg : String) is
+    NameStr : String := "SendDataHandlerFactory";
+  begin
+    Trace(NameStr, Msg);
+  end;
 
   -- Constructors
   function Create(Dom : Domain_Class_At;
@@ -54,7 +60,12 @@ package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
   -- Generate the key used in the dictionary
   function getKey(top : Topic_Class_At) return String is
   begin
-    return top.Transport & "::" & top.DomainAddress & "::" & Int32'Image(top.Port);
+    if top.Transport = TRANSPORT_TCP and top.Port = 0 then
+      -- We add the channel name so different channels get different TCP Servers
+      return top.Transport & "::" & top.ChannelId & "::" & top.DomainAddress & "::" & Int32'Image(top.Port);
+    else
+      return top.Transport & "::" & top.DomainAddress & "::" & Int32'Image(top.Port);
+    end if;
   end;
 
   function getSendDataHandler( Self : in out SendDataHandlerFactory_Class; top : Topic_Class_At) return SendDataHandler_Class_At is
@@ -77,6 +88,7 @@ package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
 
     S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
+    if TraceEnabled then Self.Trace("getSendDataHandler(), Key: " & key); end if;
     pos := Self.SendDataHandlers.Find( key );
 
     if pos /= MyMap.No_Element then
@@ -150,6 +162,7 @@ package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
 
     S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.Mutex'Access);
   begin
+    if TraceEnabled then Self.Trace("releaseSendDataHandler(), Key: " & key); end if;
     if top.Transport = TRANSPORT_UDP then
       if self.OnUdpConnectDisconnectClient /= null then
         Self.OnUdpConnectDisconnectClient.OnUdpTransport(top, Self.UdpSendDataHandler, False);

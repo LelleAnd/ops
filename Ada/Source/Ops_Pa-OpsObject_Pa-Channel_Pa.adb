@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2020 Lennart Andersson.
+-- Copyright (C) 2016-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -133,6 +133,7 @@ package body Ops_Pa.OpsObject_Pa.Channel_Pa is
     top.SetOutSocketBufferSize( Self.OutSocketBufferSize );
     top.SetInSocketBufferSize( Self.InSocketBufferSize );
     top.SetTimeToLive( Self.TimeToLive );
+    top.SetChannelId( Self.ChannelID.all );
   end;
 
 end Ops_Pa.OpsObject_Pa.Channel_Pa;

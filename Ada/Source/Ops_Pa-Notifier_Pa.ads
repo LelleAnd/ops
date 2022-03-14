@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2020 Lennart Andersson.
+-- Copyright (C) 2016-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -21,9 +21,9 @@ with Ada.Containers.Vectors;
 with Ops_Pa.Mutex_Pa;
 
 generic
-  MinCapacity : Positive;
+  MinCapacity : Positive;           -- Not used for the SingleNotifier_Class
   type Item_T is private;
-  LateArrivals : Boolean := False;
+  LateArrivals : Boolean := False;  -- Not used for the SingleNotifier_Class
 package Ops_Pa.Notifier_Pa is
 
 -- ==========================================================================
@@ -38,13 +38,20 @@ package Ops_Pa.Notifier_Pa is
 
 -- ==========================================================================
 --      C l a s s    D e c l a r a t i o n.
+--
+-- Note:
+--   A mutex is held while adding/removing a listener and while performing
+--   notification (doNotify()) which guarantees that when removeListener() is
+--   finished there can't be a call in the listerners callback and it won't be
+--   called anymore.
 -- ==========================================================================
   type Notifier_Class    is new Ops_Class with private;
   type Notifier_Class_At is access all Notifier_Class'Class;
 
+  -- The 'owner' will be used as 'Sender' in notification calls
   function Create( Owner : Ops_Class_At ) return Notifier_Class_At;
 
-  -- Called by "Owner" that wishes to notify its listeners.
+  -- Called by "Owner" that wishes to notify its listeners
   procedure doNotify( Self : in out Notifier_Class; Item : in Item_T );
 
   type OnNotifyEvent_T is access procedure( Sender : in out Ops_Class_At; Item : Item_T; Arg : Ops_Class_At );
@@ -67,6 +74,32 @@ package Ops_Pa.Notifier_Pa is
 
   function numListeners(Self : in out Notifier_Class) return Integer;
 
+-- ==========================================================================
+--      C l a s s    D e c l a r a t i o n.
+--
+-- Note:
+--   It is the listeners responsibility to ensure no activity when the
+--   listener and/or this class instans is removed.
+--   There is no lock used as in the Notifier_Class above.
+-- ==========================================================================
+  type SingleNotifier_Class( Owner : Ops_Class_At ) is new Ops_Class with private;
+  type SingleNotifier_Class_At is access all SingleNotifier_Class'Class;
+
+  -- The 'owner' will be used as 'Sender' in notification calls
+  function Create( Owner : Ops_Class_At ) return SingleNotifier_Class_At;
+
+  -- Called by "Owner" that wishes to notify its connected listener
+  procedure doNotify( Self : in out SingleNotifier_Class; Item : in Item_T );
+
+  -- Connect a Listener for callback using a "listener" class
+  procedure connectListener( Self     : in out SingleNotifier_Class;
+                             Listener : in Listener_Interface_At );
+
+  procedure disconnectListener( Self : in out SingleNotifier_Class );
+
+-- ==========================================================================
+--
+-- ==========================================================================
 private
   type Listener_T is record
     Proc    : OnNotifyEvent_T := null;
@@ -95,6 +128,20 @@ private
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
   overriding procedure Finalize( Self : in out Notifier_Class );
+
+-- ==========================================================================
+--
+-- ==========================================================================
+  type SingleNotifier_Class( Owner : Ops_Class_At ) is new Ops_Class with
+    record
+      Listener     : Listener_Interface_At := null;
+    end record;
+
+  --------------------------------------------------------------------------
+  --  Finalize the object
+  --  Will be called automatically when object is deleted.
+  --------------------------------------------------------------------------
+  overriding procedure Finalize( Self : in out SingleNotifier_Class );
 
 end Ops_Pa.Notifier_Pa;
 

@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2020 Lennart Andersson.
+-- Copyright (C) 2016-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -154,6 +154,59 @@ package body Ops_Pa.Notifier_Pa is
   --  Will be called automatically when object is deleted.
   --------------------------------------------------------------------------
   overriding procedure Finalize( Self : in out Notifier_Class ) is
+  begin
+    null;
+  end Finalize;
+
+  --------------------------------------------------------------------------
+  --
+  --------------------------------------------------------------------------
+  function Create( Owner : Ops_Class_At ) return SingleNotifier_Class_At is
+    Self : SingleNotifier_Class_At := null;
+  begin
+    Self := new SingleNotifier_Class( Owner );
+    return Self;
+  exception
+    when others =>
+      Free(Self);
+      raise;
+  end;
+
+  --------------------------------------------------------------------------
+  -- Called by "owner" that wishes to notify its connected listener
+  --------------------------------------------------------------------------
+  procedure doNotify( Self : in out SingleNotifier_Class; Item : in Item_T ) is
+  begin
+    if Self.Listener /= null then
+      OnNotify( Self.Listener.all, Self.Owner, Item );
+    end if;
+  end;
+
+  --------------------------------------------------------------------------
+  -- Connect a Listener for callback using a "listener" class
+  --------------------------------------------------------------------------
+  procedure connectListener( Self     : in out SingleNotifier_Class;
+                             Listener : in Listener_Interface_At ) is
+  begin
+    if Self.Listener /= null and Listener /= null then
+      raise ApiViolation;
+    end if;
+    Self.Listener := Listener;
+  end;
+
+  --------------------------------------------------------------------------
+  --
+  --------------------------------------------------------------------------
+  procedure disconnectListener( Self : in out SingleNotifier_Class ) is
+  begin
+    Self.Listener := null;
+  end;
+
+  --------------------------------------------------------------------------
+  --  Finalize the object
+  --  Will be called automatically when object is deleted.
+  --------------------------------------------------------------------------
+  overriding procedure Finalize( Self : in out SingleNotifier_Class ) is
   begin
     null;
   end Finalize;

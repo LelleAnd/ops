@@ -33,7 +33,7 @@ namespace ops
 		// NOTE. Must be kept in sync with other OPS language implementations
 		char TopicInfoData_version = TopicInfoData_idlVersion;
 
-        static const char TopicInfoData_idlVersion = 0;
+        static constexpr char TopicInfoData_idlVersion = 0;
 
         TopicInfoData()
 		{

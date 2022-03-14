@@ -64,7 +64,7 @@ namespace ops
 		}
 
     public:
-        static const char OPSObject_idlVersion = 0;
+        static constexpr char OPSObject_idlVersion = 0;
 
 		ObjectKey_T getKey() const noexcept;
 		const TypeId_T& getTypeString() const noexcept;

@@ -35,7 +35,7 @@ namespace ops
 	{
 	public:
         char OPSConfig_version = OPSConfig_idlVersion;
-        static const char OPSConfig_idlVersion = 0;
+        static constexpr char OPSConfig_idlVersion = 0;
 
         static std::shared_ptr<OPSConfig> getConfig();
 		static std::shared_ptr<OPSConfig> getConfig(FileName_T configFile);

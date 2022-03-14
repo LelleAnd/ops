@@ -38,7 +38,7 @@ namespace ops
 	public:
         char Topic_version = Topic_idlVersion;
 
-        static const char Topic_idlVersion = 0;
+        static constexpr char Topic_idlVersion = 0;
 
         Topic();
         Topic(const ObjectName_T namee, int portt, const TypeId_T typeIDd, const Address_T domainAddresss);

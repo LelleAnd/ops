@@ -8,7 +8,7 @@ namespace ops
 	class BasicWarning : public Error
 	{
 	public:
-		static const int ERROR_CODE = 1;
+		static constexpr int ERROR_CODE = 1;
 		BasicWarning(ErrorMessage_T className, ErrorMessage_T method, ErrorMessage_T mess)
 		{
 			_message = className;

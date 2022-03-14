@@ -150,7 +150,7 @@ namespace ops
             InternalKey_T _key;
             bool _alwaysAlive{ false };
             ops_clock::time_point _lastTimeAlive;
-            const static int ALIVE_TIMEOUT = 3000;
+            static constexpr int ALIVE_TIMEOUT = 3000;
         };
 
 		typedef struct entry {

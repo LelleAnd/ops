@@ -1,6 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
+ * Copyright (C) 2021 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -39,7 +40,7 @@ namespace ops
     {
         std::ostream& os;
         int currentTabDepth;
-        const static int tabSize = 3;
+        static constexpr int tabSize = 3;
 
     private:
 

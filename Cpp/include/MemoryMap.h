@@ -152,7 +152,7 @@ private:
     int segment_size{ 0 };
     bool dataCreator{ false };
 	char** bytes;
-	static const int smallWidthOpt = 4;
+	static constexpr int smallWidthOpt = 4;
     char* small_width_vector[smallWidthOpt]{ nullptr };
 };
 

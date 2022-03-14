@@ -314,7 +314,7 @@ namespace ops { namespace strings {
 			return fixed_string<M, POL>(&_array[pos], len);
 		}
 
-		static const size_type npos = static_cast<size_type>(-1);
+		static constexpr size_type npos = static_cast<size_type>(-1);
 	};
 
 	// Relational operators

@@ -146,7 +146,7 @@ namespace ops
         ///Sets the deadline timeout for this subscriber (== 0 --> no deadline timeout (default)).
         ///If no message is received within deadline,
         ///listeners to deadlineMissedEvent will be notified
-        const static int64_t MAX_DEADLINE_TIMEOUT = TimeHelper::infinite;
+        static constexpr int64_t MAX_DEADLINE_TIMEOUT = TimeHelper::infinite;
 #ifdef OPS_C14_DETECTED
         [[deprecated("Deprecated. Replaced by setDeadline() taking chrono duration")]]
 #endif

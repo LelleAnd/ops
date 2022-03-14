@@ -32,7 +32,7 @@ namespace ops
     public:
         char Channel_version = Channel_idlVersion;
 
-        static const char Channel_idlVersion = 0;
+        static constexpr char Channel_idlVersion = 0;
         ChannelId_T channelID;
         Transport_T linktype;
         Address_T localInterface;     // If multicast, this specifies interface to use

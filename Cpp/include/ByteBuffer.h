@@ -50,7 +50,7 @@ namespace ops
         int currentSegment{ 0 };
 
 		///"Short" string optimization for ReadString()
-		static const int shortStringBufferLength = 255;
+		static constexpr int shortStringBufferLength = 255;
         char shortStringBuffer[shortStringBufferLength + 1]{ 0 };
 	public:
         ///Writes the length first chars from chars to the buffer and increments index by length.

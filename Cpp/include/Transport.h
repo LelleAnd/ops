@@ -31,7 +31,7 @@ namespace ops
     public:
         char Transport_version = Transport_idlVersion;
 
-        static const char Transport_idlVersion = 0;
+        static constexpr char Transport_idlVersion = 0;
         ChannelId_T channelID;
         std::vector<ObjectName_T> topics;
 

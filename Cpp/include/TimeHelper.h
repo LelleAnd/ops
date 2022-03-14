@@ -55,7 +55,7 @@ namespace ops
 		///Returns the current time as a number of milliseconds since Epoch 1970-01-01.
 	    static int64_t getEpochTime() noexcept;
 
-		const static int64_t infinite = 0xffffffffLL; 
+		static constexpr int64_t infinite = 0xffffffffLL;
 	};
 
 }

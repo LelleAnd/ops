@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2020 Lennart Andersson.
+* Copyright (C) 2019-2021 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -31,7 +31,7 @@ namespace ops
 	public:
 		char Reply_version = Reply_idlVersion;
 
-        static const char Reply_idlVersion = 0;
+        static constexpr char Reply_idlVersion = 0;
         std::string requestId;
         bool requestAccepted{ false };
         std::string message;

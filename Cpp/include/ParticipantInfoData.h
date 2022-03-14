@@ -34,7 +34,7 @@ namespace ops
 		// NOTE. Must be kept in sync with other OPS language implementations
 		char ParticipantInfoData_version = ParticipantInfoData_idlVersion;
 
-        static const char ParticipantInfoData_idlVersion = 0;
+        static constexpr char ParticipantInfoData_idlVersion = 0;
 
         ParticipantInfoData()
 		{

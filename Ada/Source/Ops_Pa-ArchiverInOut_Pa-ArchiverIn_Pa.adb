@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2020 Lennart Andersson.
+-- Copyright (C) 2016-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -20,6 +20,12 @@ with Ops_Pa.OpsObject_Pa;
 use  Ops_Pa.OpsObject_Pa;
 
 package body Ops_Pa.ArchiverInOut_Pa.ArchiverIn_Pa is
+
+  procedure Trace(Self : ArchiverIn_Class; Msg : String) is
+    NameStr : String := "ArchiverIn";
+  begin
+    Trace(NameStr, Msg);
+  end;
 
   -- Constructors
   function Create( buf : ByteBuffer_Class_At;
@@ -133,6 +139,8 @@ package body Ops_Pa.ArchiverInOut_Pa.ArchiverIn_Pa is
           SetTypesString(result.all, types.all(start..types'Last));
 
           result.Serialize(ArchiverInOut_Class_At(Self.SelfAt));
+        else
+          if TraceEnabled then Self.Trace("Failed to create object. Typestring: " & types.all(start..types'Last)); end if;
         end if;
       end;
       Dispose(types);

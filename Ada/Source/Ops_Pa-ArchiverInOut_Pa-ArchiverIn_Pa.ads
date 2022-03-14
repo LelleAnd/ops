@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2019 Lennart Andersson.
+-- Copyright (C) 2016-2021 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -71,6 +71,9 @@ package Ops_Pa.ArchiverInOut_Pa.ArchiverIn_Pa is
 
   overriding function beginList( Self : in out ArchiverIn_Class; name : String; size : Integer) return Integer;
   overriding procedure endList( Self : in out ArchiverIn_Class; name : String);
+
+  -- Set this flag to enable trace from the ArchiverIn class
+  TraceEnabled : Boolean := False;
 
 private
 -- ==========================================================================

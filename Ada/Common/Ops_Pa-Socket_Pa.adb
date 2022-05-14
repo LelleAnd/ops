@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2017-2021 Lennart Andersson.
+-- Copyright (C) 2017-2022 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -34,6 +34,12 @@ package body Ops_Pa.Socket_Pa is
   begin
     return GNAT.Sockets.Host_Name;
   end;
+
+  -- Dummy selector used in some GNAT Socket calls, to avoid GNAT to create/destroy
+  -- handles for each call. In these cases we actually don't use the selector
+  -- for anything, but we need the timeout handling in the call.
+  DummySelector : aliased GNAT.Sockets.Selector_Type;
+
 
   -- ===========================================================================
 
@@ -600,9 +606,18 @@ package body Ops_Pa.Socket_Pa is
           (Family => GNAT.Sockets.Family_Inet,
            Addr => GNAT.Sockets.Inet_Addr( Ip ),
            Port => GNAT.Sockets.Port_Type( Port ));
+        Status : GNAT.Sockets.Selector_Status;
+        use type GNAT.Sockets.Selector_Status;
       begin
-        GNAT.Sockets.Connect_Socket( Self.SocketID, addr );
-        Self.Connected := True;
+        -- We use the timeout version due to problems with shutdown/close on some OS:es
+        GNAT.Sockets.Connect_Socket( Socket   => Self.SocketID,
+                                     Server   => addr,
+                                     Timeout  => 1.0,
+                                     Selector => DummySelector'Access,
+                                     Status   => Status);
+        if Status = GNAT.Sockets.Completed then
+          Self.Connected := True;
+        end if;
       exception
         when e: others =>
           Self.ExtractErrorCode( e );
@@ -672,22 +687,18 @@ package body Ops_Pa.Socket_Pa is
     return Self.Listening;
   end;
 
-  AbortSelector : aliased GNAT.Sockets.Selector_Type;
-
   function AcceptClient( Self : in out TCPServerSocket_Class; Client : TCPClientSocket_Class_At ) return Boolean is
     Address : GNAT.Sockets.Sock_Addr_Type;
     Socket : GNAT.Sockets.Socket_Type;
     Status : GNAT.Sockets.Selector_Status;
     use type GNAT.Sockets.Selector_Status;
   begin
-    -- GNAT.Sockets.Accept_Socket( Server => Self.SocketID,
-    --                             Socket => Socket,
-    --                             Address => Address );
+    -- We use the timeout version due to problems with shutdown/close on some OS:es
     GNAT.Sockets.Accept_Socket( Server => Self.SocketID,
                                 Socket => Socket,
                                 Address => Address,
                                 Timeout => 1.0,
-                                Selector => AbortSelector'Access,
+                                Selector => DummySelector'Access,
                                 Status => Status );
     if Status = GNAT.Sockets.Completed then
       client.Initialize( Socket, True );
@@ -844,6 +855,6 @@ package body Ops_Pa.Socket_Pa is
   end;
 
 begin
-  GNAT.Sockets.Create_Selector(AbortSelector);
+  GNAT.Sockets.Create_Selector(DummySelector);
 end Ops_Pa.Socket_Pa;
 

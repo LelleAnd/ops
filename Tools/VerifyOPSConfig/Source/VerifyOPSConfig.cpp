@@ -12,7 +12,7 @@
 
 #include "Configuration.h"
 
-const std::string sVersion = "Version 2021-05-10";
+const std::string sVersion = "Version 2022-04-04";
 
 
 bool gErrorGiven = false;
@@ -800,6 +800,7 @@ void Usage()
 	std::cout << std::endl;
 	std::cout << "    -?          Help" << std::endl;
 	std::cout << "    -debug      Print some debug info during work" << std::endl;
+	std::cout << "    -list       List known interfaces" << std::endl;
 }
 
 int main(const int argc, const char* argv[])
@@ -808,6 +809,7 @@ int main(const int argc, const char* argv[])
 	bool printUsage = false;
 	bool printDescription = false;
 	bool debug = false;
+	bool printList = false;
 
 	for (int i = 1; i < argc; i++) {
 		std::string const arg = argv[i];
@@ -819,13 +821,24 @@ int main(const int argc, const char* argv[])
 			printUsage = true;
 			printDescription = true;
 
-		} else if (arg == "-debug") {
+		}
+		else if (arg == "-debug") {
 			debug = true;
+
+		} else if (arg == "-list") {
+			printList = true;
 
 		} else {
 			infile = arg;
 			break;
 		}
+	}
+
+	if (printList) {
+		std::unique_ptr<ops::IOService> ioServ(ops::IOService::create());
+		ops::ShowKnownInterfaces(ioServ.get());
+		std::cout << ">>>> " << ops::GetHostName() << " <<<<\n";
+		return 0;
 	}
 
 	if (printUsage || (infile == "")) {

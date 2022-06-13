@@ -74,6 +74,8 @@ namespace ops
 		// Make a key with the transport info that uniquely defines the receiver.
 		const InternalKey_T key = makeKey(top, participant.getIOService());
 
+        OPS_CH_TRACE("getReceiveDataHandler() topic: " << top.getName() << ", key: " << key << "\n");
+
         const SafeLock lock(garbageLock);
         if (receiveDataHandlerInstances.find(key) != receiveDataHandlerInstances.end()) {
             // If we already have a ReceiveDataHandler for this transport, use it.
@@ -92,6 +94,8 @@ namespace ops
                     msg += ") is used with Topics with 'sampleMaxSize' > ";
                     msg += NumberToString(OPSConstants::USABLE_SEGMENT_SIZE);
                 }
+                msg += ", key: ";
+                msg += key;
                 BasicError err("ReceiveDataHandlerFactory", "getReceiveDataHandler", msg);
                 participant.reportError(&err);
             }
@@ -100,6 +104,8 @@ namespace ops
                 ErrorMessage_T msg("Error: Topic '");
                 msg += top.getName();
                 msg += "' has larger 'sampleMaxSize' than previous topics using same transport and port";
+                msg += ", key: ";
+                msg += key;
                 BasicError err("ReceiveDataHandlerFactory", "getReceiveDataHandler", msg);
                 participant.reportError(&err);
             }

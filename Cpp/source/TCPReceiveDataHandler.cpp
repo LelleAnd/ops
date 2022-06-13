@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2021 Lennart Andersson.
+ * Copyright (C) 2018-2022 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -48,6 +48,8 @@ namespace ops
         UNUSED(topicName);
 		OPS_PIFO_TRACE("Partinfo: name: " << topicName << ", ip: " << ip << ", port: " << port << "\n");
 
+		if (port == 0) { return; }
+
 		// We need to check if a new publisher has emerged that we need to connect to
 		InternalKey_T key(ip);
 		key += "::";
@@ -65,15 +67,22 @@ namespace ops
 			OPS_PIFO_TRACE("Partinfo: CREATED name: " << topicName << ", ip: " << ip << ", port: " << port << "\n");
 			topic.setDomainAddress(ip);
 			topic.setPort(port);
-			ReceiveDataChannel* const rdc_ = new TCPReceiveDataChannel(topic, participant);
-			rdc_->key = key;
-			rdc_->connect(this);
+			try {
+				ReceiveDataChannel* const rdc_ = new TCPReceiveDataChannel(topic, participant);
+				rdc_->key = key;
+				rdc_->connect(this);
 
-			const SafeLock lock(messageLock);
-            rdc.push_back(rdc_);
+				const SafeLock lock(messageLock);
+				rdc.push_back(rdc_);
 
-			if (Notifier<OPSMessage*>::getNrOfListeners() > 0) {
-				rdc_->start();
+				if (Notifier<OPSMessage*>::getNrOfListeners() > 0) {
+					rdc_->start();
+				}
+			} catch (const std::exception &e) {
+				ExceptionMessage_T msg("Unknown exception: ");
+				msg += e.what();
+				ops::BasicError err("TCPReceiveDataHandler", "AddReceiveChannel", msg);
+				Participant::reportStaticError(&err);
 			}
 		}
 	}

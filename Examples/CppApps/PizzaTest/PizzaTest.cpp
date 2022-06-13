@@ -764,9 +764,13 @@ void printDomainInfo(const ops::Participant& part)
 
 struct OPS_Trace_Sink : public ops::trace::Sink
 {
+    bool Enabled = true;
+
 	void Log(const ops::trace::level_t level, const char* grp, const char* msg) noexcept override
 	{
-		std::cout << "[mySink:" << std::setw(5) << std::left << level << "] " << grp << ": " << msg;
+        if (Enabled) {
+            std::cout << "[mySink:" << std::setw(5) << std::left << level << "] " << grp << ": " << msg;
+        }
 	}
 };
 
@@ -804,6 +808,7 @@ void menu()
 	std::cout << "\t M ver Set Pizzadata version [" << PD_version << "]" << std::endl;
 	std::cout << "\t W     Write data" << std::endl;
 	std::cout << "\t Q     Quite (minimize program output)" << std::endl;
+	std::cout << "\t D     Toggle trace" << std::endl;
 	std::cout << "\t X     Exit program" << std::endl;
 
 #if defined(DEBUG_OPSOBJECT_COUNTER)
@@ -1088,6 +1093,10 @@ int main(const int argc, const char* argv[])
 
 			case 'd':
 			case 'D':
+				if (func == TFunction::NONE) {
+					mySink.Enabled = !mySink.Enabled;
+					break;
+				}
 				for (unsigned int i = 0; i < ItemInfoList.size(); i++) {
 					ItemInfo* const info = ItemInfoList[i];
 					if (!info->selected) { continue; }

@@ -2,7 +2,7 @@ unit uOps.Transport.TCPSendDataHandler;
 
 (**
 *
-* Copyright (C) 2016-2021 Lennart Andersson.
+* Copyright (C) 2016-2022 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -36,17 +36,25 @@ type
     constructor Create(topic : TTopic; Reporter : TErrorService);
     destructor Destroy; override;
 
+    procedure updateTransportInfo(topic : TTopic); override;
+
     function sendData(buf : PByte; bufSize : Integer; topic : TTopic) : Boolean; override;
   end;
 
 implementation
 
-uses SysUtils;
+uses
+  SysUtils,
+  uOps.NetworkSupport;
 
 constructor TTCPSendDataHandler.Create(topic : TTopic; Reporter : TErrorService);
 begin
   inherited Create;
-  FSender := TSenderFactory.createTCPServer(string(topic.DomainAddress), topic.Port, topic.OutSocketBufferSize);
+  if isValidNodeAddress( topic.DomainAddress ) then begin
+    FSender := TSenderFactory.createTCPServer(string(topic.DomainAddress), topic.Port, topic.OutSocketBufferSize);
+  end else begin
+    FSender := TSenderFactory.createTCPServer('0.0.0.0', topic.Port, topic.OutSocketBufferSize);
+  end;
   FSender.ErrorService := Reporter;
   FSender.setConnectStatusListener(onConnectStatusChanged);
 end;
@@ -60,6 +68,15 @@ begin
     FMutex.Release;
   end;
   inherited;
+end;
+
+procedure TTCPSendDataHandler.updateTransportInfo(topic : TTopic);
+begin
+  // Set port to the one actually used (for tcp server where OS defines port)
+  topic.Port := FSender.getPort;
+  if not isValidNodeAddress( topic.DomainAddress ) then begin
+    topic.DomainAddress := doSubnetTranslation( topic.LocalInterface );
+  end;
 end;
 
 function TTCPSendDataHandler.sendData(buf : PByte; bufSize : Integer; topic : TTopic) : Boolean;

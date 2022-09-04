@@ -2,7 +2,7 @@ unit uOps.TopicInfoData;
 
 (**
 *
-* Copyright (C) 2016-2020 Lennart Andersson.
+* Copyright (C) 2016-2022 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -115,6 +115,8 @@ end;
 
 // Fills the parameter obj with all values from this object.
 procedure TTopicInfoData.FillClone(var obj : TOPSObject);
+var
+  i : Integer;
 begin
 	inherited FillClone(obj);
   with obj as TTopicInfoData do begin
@@ -124,7 +126,10 @@ begin
     Transport := Self.Transport;
     Address := Self.Address;
     Port := Self.Port;
-    Keys := Self.Keys;
+    SetLength(Keys, Length(Self.Keys));
+    for i := 0 to High(Self.Keys) do begin
+      Keys[i] := Self.Keys[i];
+    end;
 	end;
 end;
 

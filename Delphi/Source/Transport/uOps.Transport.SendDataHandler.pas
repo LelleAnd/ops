@@ -2,7 +2,7 @@ unit uOps.Transport.SendDataHandler;
 
 (**
 *
-* Copyright (C) 2016-2021 Lennart Andersson.
+* Copyright (C) 2016-2022 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -53,6 +53,10 @@ type
 
 		procedure addUser(client : TObject); virtual;
 		procedure removeUser(client : TObject); virtual;
+
+    // At least one publisher must be added to us for this call to work correct
+    // Updates given topic with the used transport info
+    procedure updateTransportInfo(topic : TTopic); virtual;
   end;
 
 implementation
@@ -119,6 +123,10 @@ begin
   finally
     FMutex.Release;
   end;
+end;
+
+procedure TSendDataHandler.updateTransportInfo(topic : TTopic);
+begin
 end;
 
 end.

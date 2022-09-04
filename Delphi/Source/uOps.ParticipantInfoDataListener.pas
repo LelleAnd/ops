@@ -2,7 +2,7 @@ unit uOps.ParticipantInfoDataListener;
 
 (**
 *
-* Copyright (C) 2016-2017 Lennart Andersson.
+* Copyright (C) 2016-2022 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -24,13 +24,15 @@ interface
 
 uses
   System.SyncObjs,
+  System.Generics.Collections,
   uNotifier,
   uOps.Error,
   uOps.Topic,
   uOps.Domain,
   uOps.OPSMessage,
   uOPs.ParticipantInfoData,
-  uOps.Transport.SendDataHandler;
+  uOps.Transport.SendDataHandler,
+  UOps.Transport.ReceiveDataHandler;
 
 type
   // Method prototype to call when we want to check if a specific topic is published on the participant
@@ -43,6 +45,7 @@ type
     FPartInfoTopic : TTopic;
     FErrorService : TErrorService;
     FSendDataHandler : TSendDataHandler;
+    FRcvDataHandlers : TDictionary<AnsiString, TReceiveDataHandler>;
     FOnHasPublisherOnProc : TOnHasPublisherOnProc;
 
     //
@@ -67,8 +70,8 @@ type
     procedure connectUdp(top : TTopic; handler : TSendDataHandler);
     procedure disconnectUdp(top : TTopic; handler : TSendDataHandler);
 
-    procedure connectTcp(top : TTopic; handler : TObject);
-    procedure disconnectTcp(top : TTopic; handler : TObject);
+    procedure connectTcp(top : TTopic; handler : TReceiveDataHandler);
+    procedure disconnectTcp(top : TTopic; handler : TReceiveDataHandler);
   end;
 
 implementation
@@ -89,11 +92,13 @@ begin
   FOnHasPublisherOnProc := Proc;
   FErrorService := Reporter;
   FMutex := TMutex.Create;
+  FRcvDataHandlers := TDictionary<AnsiString, TReceiveDataHandler>.Create;
 end;
 
 destructor TParticipantInfoDataListener.Destroy;
 begin
   removeSubscriber;       // Just to be sure
+  FreeAndNil(FRcvDataHandlers);
   FreeAndNil(FMutex);
   inherited;
 end;
@@ -144,17 +149,18 @@ begin
     if FNumUdpTopics = 0 then begin
       FSendDataHandler := nil;
 
-//TODO  if num tcp topics = 0 then begin
+      if FRcvDataHandlers.Count = 0 then begin
         removeSubscriber();
-//    end;
+      end;
     end;
   finally
     FMutex.Release;
   end;
 end;
 
-procedure TParticipantInfoDataListener.connectTcp(top: TTopic;
-  handler: TObject);
+procedure TParticipantInfoDataListener.connectTcp(top: TTopic; handler: TReceiveDataHandler);
+var
+  rdh : TReceiveDataHandler;
 begin
   FMutex.Acquire;
   try
@@ -171,19 +177,45 @@ begin
       end;
     end;
 
-    ///TODO add to map
+    // Add to map
+    if FRcvDataHandlers.TryGetValue(top.Name, rdh) then begin
+      if rdh <> handler then begin
+        FErrorService.Report(TBasicError.Create(
+          'ParticipantInfoDataListener', 'connectTcp',
+          'TCP topic "' + string(top.Name) + '" already registered for another RDH'));
+      end;
+    end else begin
+      FRcvDataHandlers.Add(top.name, handler);
+    end;
 
   finally
     FMutex.Release;
   end;
 end;
 
-procedure TParticipantInfoDataListener.disconnectTcp(top: TTopic;
-  handler: TObject);
+procedure TParticipantInfoDataListener.disconnectTcp(top: TTopic; handler: TReceiveDataHandler);
+var
+  rdh : TReceiveDataHandler;
 begin
   FMutex.Acquire;
   try
-    ///TODO remove from map
+    // Remove from map
+    if FRcvDataHandlers.TryGetValue(top.Name, rdh) then begin
+      if rdh <> handler then begin
+        FErrorService.Report(TBasicError.Create(
+          'ParticipantInfoDataListener', 'connectTcp',
+          'TCP topic "' + string(top.Name) + '" attempt to remove topic for another RDH'));
+      end else begin
+        FRcvDataHandlers.Remove(top.Name);
+      end;
+    end;
+
+    if FRcvDataHandlers.Count = 0 then begin
+      if FNumUdpTopics = 0 then begin
+        removeSubscriber();
+      end;
+    end;
+
   finally
     FMutex.Release;
   end;
@@ -212,6 +244,7 @@ procedure TParticipantInfoDataListener.OnOpsMessage(Sender : TObject; obj : TOPS
 var
   i : Integer;
   partInfo : TParticipantInfoData;
+  rdh : TReceiveDataHandler;
 begin
   if Assigned(obj) then begin
     if obj.Data is TParticipantInfoData then begin
@@ -237,12 +270,19 @@ begin
             end;
 
             // Checks for TCP transport
-//          for (unsigned int i = 0; i < partInfo->publishTopics.size(); i++)
-//          {
-//						if (partInfo->publishTopics[i].transport == Topic::TRANSPORT_TCP) {
-//							///TODO lookup topic in map. If found call handler
-//            }
-//          }
+            if FRcvDataHandlers.Count > 0 then begin
+              for i := 0 to Length(partInfo.publishTopics) - 1 do begin
+                if partInfo.publishTopics[i].transport = TTopic.TRANSPORT_TCP then begin
+                  // lookup topic in map. If found call handler
+                  if FRcvDataHandlers.TryGetValue(partInfo.publishTopics[i].Name, rdh) then begin
+                    TTcpReceiveDataHandler(rdh).addReceiveChannel(
+                      string(partInfo.publishTopics[i].Name),
+                      string(partInfo.publishTopics[i].Address),
+                      partInfo.publishTopics[i].Port);
+                  end;
+                end;
+              end;
+            end;
           finally
             FMutex.Release;
           end;

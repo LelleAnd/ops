@@ -2,7 +2,7 @@ unit uOps.Transport.SendDataHandlerFactory;
 
 (**
 *
-* Copyright (C) 2016-2017 Lennart Andersson.
+* Copyright (C) 2016-2022 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -126,7 +126,11 @@ end;
 
 function TSendDataHandlerFactory.getKey(top : TTopic) : string;
 begin
-  Result := string(top.Transport) + '::' + string(top.DomainAddress) + '::' + IntToStr(top.Port);
+  if (top.Transport = TTopic.TRANSPORT_TCP) and (top.Port = 0) then begin
+    Result := string(top.Transport) + '::' + top.ChannelID + '::' + string(top.DomainAddress) + '::' + IntToStr(top.Port);
+  end else begin
+    Result := string(top.Transport) + '::' + string(top.DomainAddress) + '::' + IntToStr(top.Port);
+  end;
 end;
 
 function TSendDataHandlerFactory.getSendDataHandler(top: TTopic): TSendDataHandler;

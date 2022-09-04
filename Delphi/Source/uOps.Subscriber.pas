@@ -2,7 +2,7 @@ unit uOps.Subscriber;
 
 (**
 *
-* Copyright (C) 2016-2021 Lennart Andersson.
+* Copyright (C) 2016-2022 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -237,7 +237,7 @@ begin
 
   FReceiveDataHandler := FParticipant.GetReceiveDataHandler(FTopic);
   FReceiveDataHandler.addListener(onConnectStatusChanged);
-  FReceiveDataHandler.addListener(onNewMessage);
+  FReceiveDataHandler.addListener(onNewMessage, FTopic);
 
   if FDeadlineTimeout > 0 then FDeadlineNotifier.Start(FDeadlineTimeout);
   FStarted := True;
@@ -250,7 +250,7 @@ begin
   if FDeadlineTimeout > 0 then FDeadlineNotifier.Cancel;
 
   FReceiveDataHandler.aquireMessageLock;
-  FReceiveDataHandler.removeListener(onNewMessage);
+  FReceiveDataHandler.removeListener(onNewMessage, FTopic);
   FReceiveDataHandler.removeListener(onConnectStatusChanged);
   FReceiveDataHandler.releaseMessageLock;
   FReceiveDataHandler := nil;

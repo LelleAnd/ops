@@ -63,6 +63,7 @@ type
     destructor Destroy; override;
 
     // Start():
+
     // Starts the receiver, and reads bytes into given buffer.
     // When a message is read, a callback (notification) will be done with the
     // buffer and actual number of bytes read.
@@ -83,8 +84,8 @@ type
     // Aborts an ongoing read. NOTE: Must NOT be called from the callback.
     procedure Stop; override;
 
-  end;
-
+  end;
+
 implementation
 
 uses SysUtils,
@@ -175,7 +176,6 @@ begin
   FBuffer := nil;
   FBufferSize := 0;
 end;
-
 (**************************************************************************
 *
 **************************************************************************)
@@ -316,6 +316,5 @@ begin
     notifyConnectStatus(FConnectStatus);
   end;
 end;
-
 end.
 

@@ -2,7 +2,7 @@ unit uOps.Transport.ReceiveDataHandlerFactory;
 
 (**
 *
-* Copyright (C) 2016-2017 Lennart Andersson.
+* Copyright (C) 2016-2022 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -35,13 +35,14 @@ uses System.Generics.Collections,
      uOps.Transport.ReceiveDataHandler;
 
 type
-  // Method prototype to call when we want to set UDP transport info for the participant info data
-  TOnUdpTransportInfoProc = procedure(ipaddress : string; port : Integer) of object;
+  // Method prototype to call when we connect/disconnect TCP topics with the participant info data listener
+  TOnTcpConnectDisconnectProc = procedure(top : TTopic; rdh : TReceiveDataHandler; connect : Boolean) of object;
 
   TReceiveDataHandlerFactory = class(TObject)
   private
     // Borrowed references
     FOnUdpTransportInfoProc : TOnUdpTransportInfoProc;
+    FOnTcpConnectDisconnectProc : TOnTcpConnectDisconnectProc;
     FErrorService : TErrorService;
 
     // By Singelton, one ReceiveDataHandler per 'key' on this Participant
@@ -50,8 +51,14 @@ type
 
 		function makeKey(top : TTopic) : string;
 
+    // Called when a TCP RDH want to register a topic for the participant info data
+    procedure onTcpTransportInfoProc(top : TTopic; rdh : TTcpReceiveDataHandler; regist : Boolean);
+
   public
-    constructor Create(Proc : TOnUdpTransportInfoProc; Reporter : TErrorService);
+    constructor Create(
+                  udpProc : TOnUdpTransportInfoProc;
+                  tcpProc : TOnTcpConnectDisconnectProc;
+                  Reporter : TErrorService);
     destructor Destroy; override;
 
     function getReceiveDataHandler(
@@ -68,10 +75,14 @@ uses SysUtils,
      uOps.NetworkSupport,
      uOps.Transport.UDPReceiver;
 
-constructor TReceiveDataHandlerFactory.Create(Proc : TOnUdpTransportInfoProc; Reporter : TErrorService);
+constructor TReceiveDataHandlerFactory.Create(
+              udpProc : TOnUdpTransportInfoProc;
+              tcpProc : TOnTcpConnectDisconnectProc;
+              Reporter : TErrorService);
 begin
   inherited Create;
-  FOnUdpTransportInfoProc := Proc;
+  FOnUdpTransportInfoProc := udpProc;
+  FOnTcpConnectDisconnectProc := tcpProc;
   FErrorService := Reporter;
   FReceiveDataHandlerInstances := TDictionary<string,TReceiveDataHandler>.Create;
   FLock := TMutex.Create;
@@ -84,6 +95,13 @@ begin
   inherited;
 end;
 
+procedure TReceiveDataHandlerFactory.onTcpTransportInfoProc(top : TTopic; rdh : TTcpReceiveDataHandler; regist : Boolean);
+begin
+  if Assigned(FOnTcpConnectDisconnectProc) then begin
+    FOnTcpConnectDisconnectProc(top, rdh, regist);
+  end;
+end;
+
 function TReceiveDataHandlerFactory.makeKey(top : TTopic) : string;
 begin
   // Since topics can use the same port for transports multicast & tcp, or
@@ -92,6 +110,8 @@ begin
   // Make a key with the transport info that uniquely defines the receiver.
   if (top.Transport = TTopic.TRANSPORT_UDP) and (not isMyNodeAddress(top.DomainAddress)) then begin
     Result := string(top.Transport);
+  end else if (top.Transport = TTopic.TRANSPORT_TCP) and (top.Port = 0) then begin
+    Result := string(top.Transport) + '::' + string(top.ChannelID) + '::' + string(top.DomainAddress) + '::' + IntToStr(top.Port);
   end else begin
     Result := string(top.Transport) + '::' + string(top.DomainAddress) + '::' + IntToStr(top.Port);
   end;
@@ -111,6 +131,7 @@ function TReceiveDataHandlerFactory.getReceiveDataHandler(
 
 var
   key : string;
+  onUdpTransportInfoProc : TOnUdpTransportInfoProc;
 begin
   Result := nil;
 
@@ -134,21 +155,20 @@ begin
         end;
       end;
 
-    end else if (top.Transport = TTopic.TRANSPORT_MC) or (top.Transport = TTopic.TRANSPORT_TCP) then begin
-      Result := TReceiveDataHandler.Create(top, dom, opsObjectFactory, FErrorService);
+    end else if top.Transport = TTopic.TRANSPORT_MC then begin
+      Result := TMcReceiveDataHandler.Create(top, dom, opsObjectFactory, FErrorService);
+      FReceiveDataHandlerInstances.Add(key, Result);
+
+    end else if top.Transport = TTopic.TRANSPORT_TCP then begin
+      Result := TTcpReceiveDataHandler.Create(top, dom, opsObjectFactory, FErrorService, onTcpTransportInfoProc);
       FReceiveDataHandlerInstances.Add(key, Result);
 
     end else if top.Transport = TTopic.TRANSPORT_UDP then begin
-      Result := TReceiveDataHandler.Create(top, dom, opsObjectFactory, FErrorService);
-
+      onUdpTransportInfoProc := nil;
       if key = string(top.Transport) then begin
-        if Assigned(FOnUdpTransportInfoProc) then begin
-          FOnUdpTransportInfoProc(
-            (Result.getReceiver as TUDPReceiver).Address,
-            (Result.getReceiver as TUDPReceiver).Port);
-        end;
+        onUdpTransportInfoProc := FOnUdpTransportInfoProc;
       end;
-
+      Result := TUdpReceiveDataHandler.Create(top, dom, opsObjectFactory, FErrorService, onUdpTransportInfoProc);
       FReceiveDataHandlerInstances.Add(key, Result);
 
     end else begin // For now we can not handle more transports

@@ -2,7 +2,7 @@ unit uOps.ParticipantInfoData;
 
 (**
 *
-* Copyright (C) 2016-2020 Lennart Andersson.
+* Copyright (C) 2016-2022 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *

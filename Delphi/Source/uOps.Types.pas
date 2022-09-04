@@ -2,7 +2,7 @@ unit uOps.Types;
 
 (**
 *
-* Copyright (C) 2016-2021 Lennart Andersson.
+* Copyright (C) 2016-2022 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -45,6 +45,9 @@ type
     Connected : Boolean;
     TotalNo : Integer;
   end;
+
+  // Method prototype to call when we want to set UDP transport info for the participant info data
+  TOnUdpTransportInfoProc = procedure(ipaddress : string; port : Integer) of object;
 
 var
   Logger : TLogger;

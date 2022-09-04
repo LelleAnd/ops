@@ -2,7 +2,7 @@ unit uOps.Topic;
 
 (**
 *
-* Copyright (C) 2016-2020 Lennart Andersson.
+* Copyright (C) 2016-2022 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -45,7 +45,7 @@ type
 		FLocalInterface : AnsiString;
 		FParticipantID : string;
 		FDomainID : string;
-		//bool reliable;
+    FChannelId : string;
 		FSampleMaxSize : Integer;
 		FDeadline : Int64;
 		FMinSeparation : Int64;
@@ -75,6 +75,7 @@ type
     property ParticipantID : string read FParticipantID write FParticipantID;
     property Transport : AnsiString read FTransport write FTransport;
     property DomainAddress : AnsiString read FDomainAddress write FDomainAddress;
+    property ChannelID : string read FChannelID write FChannelID;
     property LocalInterface : AnsiString read FLocalInterface write FLocalInterface;
     property SampleMaxSize : Integer read FSampleMaxSize write SetSampleMaxSize;
     property Port : Integer read FPort write FPort;
@@ -97,7 +98,6 @@ begin
   FTypeID := typeIDd;
   FDomainAddress := domainAddresss;
   FParticipantID := 'DEFAULT_PARTICIPANT';
-  //reliable(false),
   FSampleMaxSize := uOps.Types.PACKET_MAX_SIZE;
   FDeadline := uOps.Types.MAX_DEADLINE_TIMEOUT;
   FMinSeparation := 0;
@@ -113,7 +113,6 @@ begin
   inherited;
   FTopic_version := 0;
   FParticipantID := 'DEFAULT_PARTICIPANT';
-	//reliable(false),
   FSampleMaxSize := uOps.Types.PACKET_MAX_SIZE;
   FDeadline := uOps.Types.MAX_DEADLINE_TIMEOUT;
   FMinSeparation := 0;
@@ -184,14 +183,20 @@ begin
     FTopic_version := Self.FTopic_version;
     FName := Self.FName;
 		FPort := Self.FPort;
+		FTimeToLive := Self.FTimeToLive;
 		FTypeID := Self.FTypeID;
     FDomainAddress := Self.FDomainAddress;
+		FLocalInterface := Self.FLocalInterface;
 		FParticipantID := Self.FParticipantID;
 		FDomainID := Self.FDomainID;
+    FChannelID := Self.FChannelID;
 		FSampleMaxSize := Self.FSampleMaxSize;
+		FDeadline := Self.FDeadline;
+		FMinSeparation := Self.FMinSeparation;
 		FTransport := Self.FTransport;
 		FOutSocketBufferSize := Self.FOutSocketBufferSize;
 		FInSocketBufferSize := Self.FInSocketBufferSize;
+		FOptNonVirt := Self.FOptNonVirt;
   end;
 end;
 

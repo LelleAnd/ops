@@ -2,7 +2,7 @@ unit uOps.Domain;
 
 (**
 *
-* Copyright (C) 2016-2020 Lennart Andersson.
+* Copyright (C) 2016-2022 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -75,14 +75,14 @@ type
     procedure Serialize(archiver : TArchiverInOut); override;
 
 		// Returns a newely allocated deep copy/clone of this object.
-		function Clone : TOPSObject; override;
+		function Clone : TOPSObject; override;
 
 		// Fills the parameter obj with all values from this object.
 		procedure FillClone(var obj : TOPSObject); override;
 
     property Domain_Version : Byte read FDomain_version write FDomain_version;
 		property DomainAddress : AnsiString read FDomainAddress;
-		property DomainID : AnsiString read FDomainID;
+		property DomainID : AnsiString read FDomainID;
 		property MetaDataMcPort : Integer read FMetaDataMcPort;
     property TimeToLive : Integer read FTimeToLive;
     property LocalInterface : AnsiString read FLocalInterface;
@@ -231,6 +231,7 @@ begin
 
 		FDomainID := Self.FDomainID;
 		FMetaDataMcPort := Self.FMetaDataMcPort;
+		FOptNonVirt := Self.FOptNonVirt;
 
     SetLength(FChannels, Length(Self.FChannels));
     for i := 0 to High(Self.FChannels) do begin

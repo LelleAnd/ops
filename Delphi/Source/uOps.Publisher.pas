@@ -2,7 +2,7 @@ unit uOps.Publisher;
 
 (**
 *
-* Copyright (C) 2016-2021 Lennart Andersson.
+* Copyright (C) 2016-2022 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -78,6 +78,8 @@ uses SysUtils,
      uOps.ArchiverInOut;
 
 constructor TPublisher.Create(t : TTopic);
+var
+  top : TTopic;
 begin
   inherited Create;
   FTopic := t;
@@ -101,6 +103,15 @@ begin
   FMessage.DataOwner := False;
 
 	Start();
+
+  // We need our own copy since we update the topic
+  top := t.Clone as TTopic;
+  try
+    FSendDataHandler.updateTransportInfo(top);
+    FParticipant.updateSendPartInfo(top);
+  finally
+    FreeAndNil(top);
+  end;
 end;
 
 destructor TPublisher.Destroy;

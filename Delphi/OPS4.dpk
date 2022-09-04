@@ -90,6 +90,7 @@ contains
   uOps.RequestReply.Request in 'Source\RequestReply\uOps.RequestReply.Request.pas',
   uOps.NetworkSupport in 'Source\uOps.NetworkSupport.pas',
   opsidls.OPSConstants in '..\Common\idl\Generated\Delphi\opsidls\opsidls.OPSConstants.pas',
-  opsidls.SendAckPatternData in '..\Common\idl\Generated\Delphi\opsidls\opsidls.SendAckPatternData.pas';
+  opsidls.SendAckPatternData in '..\Common\idl\Generated\Delphi\opsidls\opsidls.SendAckPatternData.pas',
+  uOps.Transport.ReceiveDataChannel in 'Source\Transport\uOps.Transport.ReceiveDataChannel.pas';
 
 end.

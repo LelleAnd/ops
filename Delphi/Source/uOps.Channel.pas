@@ -2,7 +2,7 @@ unit uOps.Channel;
 
 (**
 *
-* Copyright (C) 2016-2020 Lennart Andersson.
+* Copyright (C) 2016-2022 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -51,7 +51,7 @@ type
     procedure Serialize(archiver : TArchiverInOut); override;
 
 		// Returns a newely allocated deep copy/clone of this object.
-		function Clone : TOPSObject; override;
+		function Clone : TOPSObject; override;
 
 		// Fills the parameter obj with all values from this object.
 		procedure FillClone(var obj : TOPSObject); override;
@@ -140,6 +140,7 @@ begin
   top.OutSocketBufferSize := outSocketBufferSize;
   top.InSocketBufferSize := inSocketBufferSize;
   top.TimeToLive := timeToLive;
+  top.ChannelID := string(channelID);
 end;
 
 end.

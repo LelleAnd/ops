@@ -73,7 +73,8 @@ uses
   TestAll.Definitions in '..\..\OPSIdls\TestAll\Generated\Delphi\TestAll\TestAll.Definitions.pas',
   uOps.ChecksumArchiver in '..\..\..\Delphi\Source\uOps.ChecksumArchiver.pas',
   opsidls.OPSConstants in '..\..\..\Common\idl\Generated\Delphi\opsidls\opsidls.OPSConstants.pas',
-  opsidls.SendAckPatternData in '..\..\..\Common\idl\Generated\Delphi\opsidls\opsidls.SendAckPatternData.pas';
+  opsidls.SendAckPatternData in '..\..\..\Common\idl\Generated\Delphi\opsidls\opsidls.SendAckPatternData.pas',
+  uOps.Transport.ReceiveDataChannel in '..\..\..\Delphi\Source\Transport\uOps.Transport.ReceiveDataChannel.pas';
 
 procedure Logger(str : string);
   begin

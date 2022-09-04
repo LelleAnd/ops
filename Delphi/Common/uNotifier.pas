@@ -2,7 +2,7 @@ unit uNotifier;
 
 (**
 *
-* Copyright (C) 2016-2021 Lennart Andersson.
+* Copyright (C) 2016-2022 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -70,47 +70,65 @@ type
 
     // Called by subclasses that wishes to notify its listeners.
 		procedure doNotify(arg : T); virtual;
-
+
     // Register a Listener via Interface
     procedure addListener(listener : IListener<T>); overload;
-
     // Register a Listener via callback event
     procedure addListener(proc : TOnNotifyEvent<T>); overload;
 
-    // Remove a Listener via Interface
-    procedure removeListener(listener : IListener<T>); overload;
-
+    // Remove a Listener via Interface
+    procedure removeListener(listener : IListener<T>); overload;
     // Remove a Listener via callback event
     procedure removeListener(proc : TOnNotifyEvent<T>); overload;
-
     property numListeners : Integer read GetNumListeners;
   end;
 
-  // A Notifier that is restricted to value types so that we safely can store
-  // the latest notified value to be used for late arrivals.
-  TNotifierValue<T: record> = class(TNotifier<T>)
-  private
-    // Late arrivals handling
-    FLateArrivals : Boolean;
+  // A Notifier that is restricted to value types so that we safely can store
+  // the latest notified value to be used for late arrivals.
+  TNotifierValue<T: record> = class(TNotifier<T>)
+  private
+    // Late arrivals handling
+    FLateArrivals : Boolean;
     FValue : T;
     FValueValid : Boolean;
   public
-    constructor Create(Owner : TObject; LateArrivals : Boolean = False);
+    constructor Create(Owner : TObject; LateArrivals : Boolean = False);
 
-    // Called by subclasses that wishes to notify its listeners.
-		procedure doNotify(arg : T); override;
-
+    // Called by subclasses that wishes to notify its listeners.
+		procedure doNotify(arg : T); override;
+
     // Register a Listener via Interface
-    procedure addListener(listener : IListener<T>); overload;
-
+    procedure addListener(listener : IListener<T>); overload;
     // Register a Listener via callback event
     procedure addListener(proc : TOnNotifyEvent<T>); overload;
   end;
+
+  // class which in the conjunction with Listener forms an implementation of the
+  // observer GoF-pattern. classes extending this class extends an interface to which
+  // a Listener can register its interest to be notified.
+  // Note: No lock is held
+  TSingleNotifier<T> = class(TObject)
+  private
+    FOwner : TObject;
+    FListerner : TOnNotifyEvent<T>;
+  public
+    constructor Create(Owner : TObject);
+    destructor Destroy; override;
+
+    // Called by subclasses that wishes to notify its listener.
+		procedure doNotify(arg : T); virtual;
+
+    // Register a Listener via Interface
+    procedure connectListener(proc : TOnNotifyEvent<T>); virtual;
+
+    // Remove a Listener via Interface
+    procedure disconnectListener(proc : TOnNotifyEvent<T>); virtual;
+  end;
+
 
 implementation
 
 uses SysUtils;
-
 { TNotifier }
 
 constructor TNotifier<T>.Create(Owner : TObject);
@@ -230,7 +248,7 @@ end;
 
 procedure TNotifierValue<T>.doNotify(arg : T);
 begin
-  FMutex.Acquire;
+  FMutex.Acquire;
   try
     FValue := arg;
     FValueValid := True;
@@ -268,6 +286,39 @@ begin
   finally
     FMutex.Release;
   end;
+end;
+
+constructor TSingleNotifier<T>.Create(Owner : TObject);
+begin
+  FOwner := Owner;
+  FListerner := nil;
+end;
+
+destructor TSingleNotifier<T>.Destroy;
+begin
+  inherited;
+end;
+
+// Called by subclasses that wishes to notify its listener.
+procedure TSingleNotifier<T>.doNotify(arg : T);
+begin
+  if Assigned(FListerner) then begin
+    FListerner(FOwner, arg);
+  end;
+end;
+
+// Register a Listener via Interface
+procedure TSingleNotifier<T>.connectListener(proc : TOnNotifyEvent<T>);
+begin
+  if not Assigned(FListerner) then begin
+    FListerner := proc;
+  end;
+end;
+
+// Remove a Listener via Interface
+procedure TSingleNotifier<T>.disconnectListener(proc : TOnNotifyEvent<T>);
+begin
+  FListerner := nil;
 end;
 
 end.

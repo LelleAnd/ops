@@ -2,7 +2,7 @@ unit uOps.Participant;
 
 (**
 *
-* Copyright (C) 2016-2017 Lennart Andersson.
+* Copyright (C) 2016-2022 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -87,6 +87,7 @@ type
 
 		// Should only be used by Publishers
 		function getSendDataHandler(top : TTopic) : TSendDataHandler;
+    procedure updateSendPartInfo(top : TTopic);
 		procedure releaseSendDataHandler(top : TTopic);
 
     // Should only be used by Subscribers
@@ -131,7 +132,6 @@ type
     // Our thread running our Run() method
     FRunner : TRunner;
     FTerminated : Boolean;
-
     procedure Run;
 
     // Constructor is private, instances are acquired through getInstance()
@@ -140,6 +140,10 @@ type
     // Called from SendDataHandlerFactory when UDP topics should be connected/disconnected
     // to/from the participant info data listener
     procedure OnUdpConnectDisconnectProc(top : TTopic; sdh : TSendDataHandler; connect : Boolean);
+
+    // Called from ReceiveDataHandlerFactory when a TCP Reciver starts/stop to use a specific topic, so
+    // we can connect TCP transports
+    procedure OnTcpConnectDisconnectProc(top : TTopic; rdh : TReceiveDataHandler; connect : Boolean);
 
     // Called from ReceiveDataHandlerFactory when an UDP Reciver is created/deleted, so
     // we can send the correct UDP transport info in the participant info data
@@ -285,7 +289,7 @@ begin
   FPartInfoData.domain := AnsiString(FDomainID);
 
   FSendDataHandlerFactory := TSendDataHandlerFactory.Create(FDomain, OnUdpConnectDisconnectProc, FErrorService);
-  FReceiveDataHandlerFactory := TReceiveDataHandlerFactory.Create(OnUdpTransportInfoProc, FErrorService);
+  FReceiveDataHandlerFactory := TReceiveDataHandlerFactory.Create(OnUdpTransportInfoProc, OnTcpConnectDisconnectProc, FErrorService);
 
   FPartInfoTopic := createParticipantInfoTopic;
   FPartInfoListener := TParticipantInfoDataListener.Create(FDomain, FPartInfoTopic, HasPublisherOn, FErrorService);
@@ -302,13 +306,11 @@ begin
   // Tell thread to terminate
   FTerminated := True;
   if Assigned(FRunner) then FRunner.Terminate;
-
   // If thread exist, wait for thread to terminate and then delete the object
   FreeAndNil(FRunner);
 
   FreeAndNil(FPartInfoListener);    // Must be done before send/receive factory delete below
   FreeAndNil(FPartInfoTopic);
-
   FreeAndNil(FReceiveDataHandlerFactory);
   FreeAndNil(FSendDataHandlerFactory);
 
@@ -339,15 +341,17 @@ end;
 function TParticipant.getSendDataHandler(top : TTopic) : TSendDataHandler;
 begin
   Result := FSendDataHandlerFactory.getSendDataHandler(top);
+  // We can't update Participant Info here, delayed until updateSendPartInfo()
+end;
 
-  if Assigned(Result) then begin
-    FPartInfoDataMutex.Acquire;
-    try
-      // Need to add topic to partInfoData.publishTopics
-      FPartInfoData.addTopic(FPartInfoData.publishTopics, top);
-    finally
-      FPartInfoDataMutex.Release;
-    end;
+procedure TParticipant.updateSendPartInfo(top : TTopic);
+begin
+  FPartInfoDataMutex.Acquire;
+  try
+    // Need to add topic to partInfoData.publishTopics
+    FPartInfoData.addTopic(FPartInfoData.publishTopics, top);
+  finally
+    FPartInfoDataMutex.Release;
   end;
 end;
 
@@ -451,6 +455,17 @@ begin
   end;
 end;
 
+procedure TParticipant.OnTcpConnectDisconnectProc(top : TTopic; rdh : TReceiveDataHandler; connect : Boolean);
+begin
+  if not Assigned(FPartInfoListener) then Exit;
+
+  if connect then begin
+    FPartInfoListener.connectTcp(top, rdh);
+  end else begin
+    FPartInfoListener.disconnectTcp(top, rdh);
+  end;
+end;
+
 // Called from ReceiveDataHandlerFactory when an UDP Reciver is created/deleted, so
 // we can send the correct UDP transport info in the participant info data
 procedure TParticipant.OnUdpTransportInfoProc(ipaddress : string; port : Integer);
@@ -493,7 +508,6 @@ var
 begin
   partInfoTopic := nil;
   partInfoPub := nil;
-
   while not FTerminated do begin
     Sleep(FAliveTimeout);
     if FTerminated then Break;

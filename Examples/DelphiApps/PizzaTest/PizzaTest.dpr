@@ -73,7 +73,8 @@ uses
   opsidls.SendAckPatternData in '..\..\..\Common\idl\Generated\Delphi\opsidls\opsidls.SendAckPatternData.pas',
   opsidls.DebugRequestResponseData in '..\..\..\Common\idl\Generated\Delphi\opsidls\opsidls.DebugRequestResponseData.pas',
   opsidls.opsidlsTypeFactory in '..\..\..\Common\idl\Generated\Delphi\opsidls\opsidls.opsidlsTypeFactory.pas',
-  pizza.extra.Secret in '..\..\OPSIdls\PizzaProject\Generated\Delphi\pizza\extra\pizza.extra.Secret.pas';
+  pizza.extra.Secret in '..\..\OPSIdls\PizzaProject\Generated\Delphi\pizza\extra\pizza.extra.Secret.pas',
+  uOps.Transport.ReceiveDataChannel in '..\..\..\Delphi\Source\Transport\uOps.Transport.ReceiveDataChannel.pas';
 
 {$R *.res}
 

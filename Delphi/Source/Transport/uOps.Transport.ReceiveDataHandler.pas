@@ -2,7 +2,7 @@ unit uOps.Transport.ReceiveDataHandler;
 
 (**
 *
-* Copyright (C) 2016-2021 Lennart Andersson.
+* Copyright (C) 2016-2022 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -28,14 +28,10 @@ uses System.Generics.Collections,
      uOps.Types,
      uOps.Error,
      uOps.Topic,
-     uOps.MemoryMap,
-     uOps.ByteBuffer,
      uOps.OPSMessage,
-     uOps.ArchiverInOut,
-     uOps.OPSArchiverIn,
      uOps.SerializableInheritingTypeFactory,
      uOps.Domain,
-     uOps.Transport.Receiver;
+     uOps.Transport.ReceiveDataChannel;
 
 type
   TReceiveDataHandler = class(TObject)
@@ -47,33 +43,17 @@ type
     FDataNotifier : TNotifier<TOPSMessage>;
     FCsNotifier : TNotifierValue<TConnectStatus>;
 
-    // The receiver used for this ReceiveHandler.
-    FReceiver : TReceiver;
+    // The ReceiveDataChannel(s) used for this ReceiveHandler.
+    // The list owns the objects
+    FRdc : TObjectList<TReceiveDataChannel>;
 
-    // Preallocated MemoryMap and buffer for receiving data
-    FMemMap : TMemoryMap;
-    FBuffer : TByteBuffer;
     FSampleMaxSize : Integer;
-
-    // Archiver used for deserializing byte buffers into messages
-    FArchiver : TOPSArchiverIn;
-
-    // Temporary MemoryMap and buffer used during basic validation of a segment
-    FTmpMemMap : TMemoryMap;
-    FTmpBuffer : TByteBuffer;
 
 		// Current OPSMessage, valid until next sample arrives.
     FMessage : TOPSMessage;
 
-    // The accumulated size in bytes of the current message being received
-    FCurrentMessageSize : Integer;
-
     //
     FMessageLock : TMutex;
-
-    // Status variables for the reception
-    FExpectedSegment : Uint32;
-    FFirstReceived : Boolean;
 
     function GetNumListeners : Integer;
     procedure onConnectStatusChanged(Sender : TObject; arg : TConnectStatus);
@@ -82,80 +62,125 @@ type
     constructor Create(top : TTopic;
                        dom : TDomain;
                        opsObjectFactory : TSerializableInheritingTypeFactory;
-                       Reporter : TErrorService);
+                       Reporter : TErrorService;
+                       rdc : TReceiveDataChannel);
     destructor Destroy; override;
 
     function aquireMessageLock : Boolean;
     procedure releaseMessageLock;
 
-    procedure Stop;
-
-		procedure addListener(Proc : TOnNotifyEvent<TOPSMessage>); overload;
-		procedure removeListener(Proc : TOnNotifyEvent<TOPSMessage>); overload;
+		procedure addListener(Proc : TOnNotifyEvent<TOPSMessage>; top : TTopic); overload;
+		procedure removeListener(Proc : TOnNotifyEvent<TOPSMessage>; top : TTopic); overload;
 
 		procedure addListener(Proc : TOnNotifyEvent<TConnectStatus>); overload;
 		procedure removeListener(Proc : TOnNotifyEvent<TConnectStatus>); overload;
-
-    function getReceiver : TReceiver;
 
     property SampleMaxSize : Integer read FSampleMaxSize;
     property NumListeners : Integer read GetNumListeners;
 
 	protected
-    // Called whenever the receiver has new data.
-    procedure onNewEvent(Sender : TObject; arg : TBytesSizePair);
+    // Called whenever the ReceiveDataChannel has a new message.
+    procedure onNewEvent(Sender : TObject; arg : TOPSMessage);
 
-    // Handles spare bytes, i.e. extra bytes in buffer not consumed by created message
-    procedure calculateAndSetSpareBytes(mess : TOPSMessage; segmentPaddingSize : Integer);
+    procedure addRdc(Rdc : TReceiveDataChannel);
+
+    procedure topicUsage(top : TTopic; used : Boolean); virtual; abstract;
 	end;
+
+  // ========================
+
+  TMcReceiveDataHandler = class(TReceiveDataHandler)
+  public
+    constructor Create(top : TTopic;
+                       dom : TDomain;
+                       opsObjectFactory : TSerializableInheritingTypeFactory;
+                       Reporter : TErrorService);
+  protected
+    procedure topicUsage(top : TTopic; used : Boolean); override;
+  end;
+
+  // ========================
+
+  TTcpReceiveDataHandler = class;
+
+  // Method prototype to call when we want to register a TCP RDH for the participant info data
+  TOnTcpTransportInfoProc = procedure(top : TTopic; rdh : TTcpReceiveDataHandler; regist : Boolean) of object;
+
+  TTcpReceiveDataHandler = class(TReceiveDataHandler)
+  public
+    constructor Create(top : TTopic;
+                       dom : TDomain;
+                       opsObjectFactory : TSerializableInheritingTypeFactory;
+                       Reporter : TErrorService;
+                       regProc : TOnTcpTransportInfoProc);
+    destructor Destroy; override;
+    procedure addReceiveChannel(topicName : string; ip: string; port : Integer);
+
+  protected
+    procedure topicUsage(top : TTopic; used : Boolean); override;
+
+  private
+    // Borrowed
+    FDom : TDomain;
+    FOpsObjectFactory : TSerializableInheritingTypeFactory;
+    FRegProc : TOnTcpTransportInfoProc;
+
+    // Owned
+    FTop : TTopic;
+    FUsingPartInfo : Boolean;
+    FTopicInfoMap : TDictionary<AnsiString,Integer>;
+    FTopicInfoLock : TMutex;
+  end;
+
+  // ========================
+
+  TUdpReceiveDataHandler = class(TReceiveDataHandler)
+  public
+    constructor Create(top : TTopic;
+                       dom : TDomain;
+                       opsObjectFactory : TSerializableInheritingTypeFactory;
+                       Reporter : TErrorService;
+                       onUdpTransportInfoProc : TOnUdpTransportInfoProc);
+  protected
+    procedure topicUsage(top : TTopic; used : Boolean); override;
+  end;
 
 implementation
 
 uses SysUtils,
-     uOps.Exceptions;
+     uOps.Exceptions,
+     uOps.Transport.UDPReceiver;
 
 constructor TReceiveDataHandler.Create(
               top : TTopic;
               dom : TDomain;
               opsObjectFactory : TSerializableInheritingTypeFactory;
-              Reporter : TErrorService);
+              Reporter : TErrorService;
+              rdc : TReceiveDataChannel);
 begin
   inherited Create;
   FErrorService := Reporter;
   FDataNotifier := TNotifier<TOPSMessage>.Create(Self);
   FMessageLock := TMutex.Create;
   FCsNotifier := TNotifierValue<TConnectStatus>.Create(Self, True);
+  FRdc := TObjectList<TReceiveDataChannel>.Create;
 
-  FMemMap := TMemoryMap.Create(top.SampleMaxSize div PACKET_MAX_SIZE + 1, PACKET_MAX_SIZE);
-  FBuffer := TByteBuffer.Create(FMemMap);
-	FSampleMaxSize := top.SampleMaxSize;
-
-  FArchiver := TOPSArchiverIn.Create(FBuffer, opsObjectFactory);
-
-  // Temporary MemoryMap and buffer
-  FTmpMemMap := TMemoryMap.Create(nil, 0);
-  FTmpBuffer := TByteBuffer.Create(FTmpMemMap);
-
-  FReceiver := TReceiverFactory.getReceiver(top, dom, FErrorService);
-  if not Assigned(FReceiver) then begin
-    raise ECommException.Create('Could not create receiver');
+  if Assigned(rdc) then begin
+    FSampleMaxSize := rdc.SampleMaxSize;
+    addRdc(rdc);
   end;
-  FReceiver.addListener(onNewEvent);
-  FReceiver.setConnectStatusListener(onConnectStatusChanged);
 end;
 
 destructor TReceiveDataHandler.Destroy;
 begin
-  Stop;
-  FreeAndNil(FReceiver);
-  FreeAndNil(FTmpBuffer);
-  FreeAndNil(FTmpMemMap);
-  FreeAndNil(FArchiver);
-  FreeAndNil(FBuffer);
-  FreeAndNil(FMemMap);
+  FreeAndNil(FRdc);
   FreeAndNil(FCsNotifier);
   FreeAndNil(FMessageLock);
   FreeAndNil(FDataNotifier);
+  // Need to release the last message we received, if any.
+  // (We always keep a reference to the last message received)
+  if Assigned(FMessage) then FMessage.Unreserve;
+  FMessage := nil;
   inherited;
 end;
 
@@ -170,29 +195,57 @@ begin
   FMessageLock.Release;
 end;
 
-procedure TReceiveDataHandler.addListener(Proc : TOnNotifyEvent<TOPSMessage>);
+procedure TReceiveDataHandler.addRdc(Rdc : TReceiveDataChannel);
 begin
   FMessageLock.Acquire;
   try
-    FDataNotifier.addListener(Proc);
-    if FDataNotifier.numListeners = 1 then begin
-      FExpectedSegment := 0;
-      FCurrentMessageSize := 0;
-      FReceiver.Start(FMemMap.getSegment(FExpectedSegment), FMemMap.SegmentSize);
+    FRdc.Add(Rdc);
+    Rdc.addListener(onNewEvent);
+    Rdc.addListener(onConnectStatusChanged);
+
+    if FDataNotifier.numListeners > 0 then begin
+      Rdc.Start;
     end;
   finally
     FMessageLock.Release;
   end;
 end;
 
-procedure TReceiveDataHandler.removeListener(Proc : TOnNotifyEvent<TOPSMessage>);
+procedure TReceiveDataHandler.addListener(Proc : TOnNotifyEvent<TOPSMessage>; top : TTopic);
+var
+  i : Integer;
 begin
   FMessageLock.Acquire;
   try
-  FDataNotifier.removeListener(Proc);
-  if FDataNotifier.numListeners = 0 then begin
-    FReceiver.Stop;
+    FDataNotifier.addListener(Proc);
+    if FDataNotifier.numListeners = 1 then begin
+      for i := 0 to FRdc.Count - 1 do begin
+        if Assigned(FRdc.Items[i]) then begin
+          FRdc.Items[i].Start;
+        end;
+      end;
+    end;
+    topicUsage(top, True);
+  finally
+    FMessageLock.Release;
   end;
+end;
+
+procedure TReceiveDataHandler.removeListener(Proc : TOnNotifyEvent<TOPSMessage>; top : TTopic);
+var
+  i : Integer;
+begin
+  FMessageLock.Acquire;
+  try
+    topicUsage(top, False);
+    FDataNotifier.removeListener(Proc);
+    if FDataNotifier.numListeners = 0 then begin
+      for i := 0 to FRdc.Count - 1 do begin
+        if Assigned(FRdc.Items[i]) then begin
+          FRdc.Items[i].Stop;
+        end;
+      end;
+    end;
   finally
     FMessageLock.Release;
   end;
@@ -201,11 +254,6 @@ end;
 function TReceiveDataHandler.GetNumListeners : Integer;
 begin
   Result := FDataNotifier.numListeners;
-end;
-
-function TReceiveDataHandler.getReceiver : TReceiver;
-begin
-  Result := FReceiver;
 end;
 
 procedure TReceiveDataHandler.addListener(Proc : TOnNotifyEvent<TConnectStatus>);
@@ -224,191 +272,181 @@ begin
 end;
 
 // Called whenever the receiver has new data.
-procedure TReceiveDataHandler.onNewEvent(Sender : TObject; arg : TBytesSizePair);
-
-  procedure Report(msg : string); overload;
-  begin
-    if Assigned(FErrorService) then begin
-      FErrorService.Report(TBasicError.Create('ReceiveDataHandler', 'onNewEvent', msg));
-    end;
-  end;
-
-  procedure Report(msg : string; addr : string; port : Integer); overload;
-  begin
-    Report(msg + ' [' + addr + '::' + IntToStr(port) + ']');
-  end;
-
+procedure TReceiveDataHandler.onNewEvent(Sender : TObject; arg : TOPSMessage);
 var
-  nrOfFragments : UInt32;
-  currentFragment : UInt32;
-  segmentPaddingSize : Integer;
-  oldMessage, newMessage : TOPSMessage;
-  srcAddr : string;
-  srcPort : Integer;
+  oldMessage : TOPSMessage;
 begin
-  if arg.size <= 0 then begin
-//            //Inform participant that we had an error waiting for data,
-//            //this means the underlying socket is down but hopefully it will reconnect, so no need to do anything.
-//            //Only happens with tcp connections so far.
-//
-//            if (byteSizePair.size == -5)
-//            {
-//                Report('Connection was lost but is now reconnected.');
-//            }
-//            else
-//            {
-//                Report('Empty message or error.');
-//            }
+  if Assigned(arg) then begin
+    FMessageLock.Acquire;
+    try
+      oldMessage := FMessage;
+      FMessage := arg;
 
-    // Continue with the same buffer, so just exit
-    Exit;
+      // Increment ref count for message
+      FMessage.Reserve;
+
+      // Send it to Subscribers
+      FDataNotifier.doNotify(FMessage);
+
+      // This will delete the old message if no one has reserved it in the application layer.
+      if Assigned(oldMessage) then oldMessage.Unreserve;
+    finally
+      FMessageLock.Release;
+    end;
   end;
+end;
 
-  // TODO Check that all segments come from the same source (IP and port)
-  FReceiver.GetSource(srcAddr, srcPort);
+// ========================
 
-  // Use a temporary map and buf to peek data before putting it in to FMemMap
-  FTmpMemMap.ChangeBuffer(FMemMap.getSegment(FExpectedSegment), FMemMap.SegmentSize);
-  FTmpBuffer.Reset;   // Reset buffer to use changed memmap values
+constructor TMcReceiveDataHandler.Create(
+              top : TTopic;
+              dom : TDomain;
+              opsObjectFactory : TSerializableInheritingTypeFactory;
+              Reporter : TErrorService);
+begin
+  inherited Create(top, dom, opsObjectFactory, Reporter, TReceiveDataChannel.Create(top, dom, opsObjectFactory, Reporter));
+end;
 
-  // Check protocol
-  if FTmpBuffer.CheckProtocol then begin
-    //Read of message ID and fragmentation info, this is ignored so far.
-    //std::string messageID = tBuf.ReadString();
-    nrOfFragments := FTmpBuffer.ReadInt;
-    currentFragment := FTmpBuffer.ReadInt;
+procedure TMcReceiveDataHandler.topicUsage(top : TTopic; used : Boolean);
+begin
+  // Nothing to do
+end;
 
-    if (currentFragment <> (nrOfFragments - 1)) and (arg.size <> PACKET_MAX_SIZE) then begin
-      Report('Debug: Received broken package.', srcAddr, srcPort);
-    end;
+// ========================
 
-    Inc(FCurrentMessageSize, arg.size);
+constructor TTcpReceiveDataHandler.Create(
+              top : TTopic;
+              dom : TDomain;
+              opsObjectFactory : TSerializableInheritingTypeFactory;
+              Reporter : TErrorService;
+              regProc : TOnTcpTransportInfoProc);
+var
+  rdc : TReceiveDataChannel;
+begin
+  inherited Create(top, dom, opsObjectFactory, Reporter, nil);
 
-    if currentFragment <> FExpectedSegment then begin
-      // Error
-      if FFirstReceived then begin
-        Report('Segment Error, sample will be lost.', srcAddr, srcPort);
-        FFirstReceived := False;
-      end;
-      FExpectedSegment := 0;
-      FCurrentMessageSize := 0;
-      FReceiver.SetReceiveBuffer(FMemMap.getSegment(FExpectedSegment), FMemMap.SegmentSize);
-      Exit;
-    end;
+  FTopicInfoMap := TDictionary<AnsiString,Integer>.Create;
+  FTopicInfoLock := TMutex.Create;
 
-    if currentFragment = (nrOfFragments - 1) then begin
-      // We have got all segments
-      FFirstReceived := True;
-      FExpectedSegment := 0;
-      FBuffer.Reset;
+  // Make a copy of the topic since we will change it
+  FTop := top.Clone as TTopic;
 
-      // Skip some protocol parts already checked
-      FBuffer.checkProtocol;
-      FBuffer.ReadInt;
-      FBuffer.ReadInt;
-      segmentPaddingSize := FBuffer.GetSize;
+  // Just borrow these
+  FDom := dom;
+  FOpsObjectFactory := opsObjectFactory;
+  FRegProc := regProc;
 
-      // Read of the actual OPSMessage
-      newMessage := nil;
-      try
-        newMessage := TOPSMessage(FArchiver.inout2('message', TSerializable(newMessage)));
-        if Assigned(newMessage) then begin
-          // Check that we succeded in creating the actual data message
-          if Assigned(newMessage.Data) then begin
-            // Put spare bytes in data-field of message
-            calculateAndSetSpareBytes(newMessage, segmentPaddingSize);
-
-            // Add IP and port for source as meta data into OPSMessage
-            newMessage.setSource(srcAddr, srcPort);
-          end else begin
-            Report('Failed to deserialize message. Check added Factories.', srcAddr, srcPort);
-            FreeAndNil(newMessage);
-          end;
-        end else begin
-          // Inform participant that invalid data is on the network.
-          Report('Unexpected type received. Type creation failed.', srcAddr, srcPort);
-        end;
-      except
-        on E : Exception do begin
-          FreeAndNil(newMessage);
-          Report('Invalid data on network. Exception: ' + e.ToString, srcAddr, srcPort);
-        end;
-      end;
-
-      FCurrentMessageSize := 0;
-
-      if Assigned(newMessage) then begin
-        FMessageLock.Acquire;
-        try
-          oldMessage := FMessage;
-          FMessage := newMessage;
-          newMessage := nil;
-
-          // Increment ref count for message
-          FMessage.Reserve;
-
-          // Send it to Subscribers
-          FDataNotifier.doNotify(FMessage);
-
-          // This will delete the old message if no one has reserved it in the application layer.
-          if Assigned(oldMessage) then oldMessage.Unreserve;
-        finally
-          FMessageLock.Release;
-        end;
-      end;
-
-    end else begin
-      Inc(FExpectedSegment);
-
-  		if FExpectedSegment >= FMemMap.NrOfSegments then begin
-        Report('Buffer too small for received message.', srcAddr, srcPort);
-        FExpectedSegment := 0;
-        FCurrentMessageSize := 0;
-			end;
-    end;
-    FReceiver.SetReceiveBuffer(FMemMap.getSegment(FExpectedSegment), FMemMap.SegmentSize);
+  // Handle TCP channels specified with address and port
+  if (top.Transport = TTopic.TRANSPORT_TCP) and (top.Port <> 0) then begin
+    FUsingPartInfo := False;
+    rdc := TReceiveDataChannel.Create(top, dom, opsObjectFactory, Reporter);
+    rdc.Key := string(top.DomainAddress) + '::' + IntToStr(top.Port);
+    addRdc(rdc);
   end else begin
-    //Inform participant that invalid data is on the network.
-    Report('Protocol ERROR.', srcAddr, srcPort);
-    FReceiver.SetReceiveBuffer(FMemMap.getSegment(FExpectedSegment), FMemMap.SegmentSize);
+    // Since we use the same "topic" parameters for all created RDC's, we can set sampleMaxSize here
+    FSampleMaxSize := calcSampleMaxSize(top);
+    FUsingPartInfo := True;
   end;
 end;
 
-procedure TReceiveDataHandler.Stop;
+destructor TTcpReceiveDataHandler.Destroy;
 begin
-  FReceiver.removeListener(onNewEvent);
-
-  // Need to release the last message we received, if any.
-  // (We always keep a reference to the last message received)
-  if Assigned(FMessage) then FMessage.Unreserve;
-  FMessage := nil;
-
-///TODO  receiver->stop(); ???
-
+  FreeAndNil(FTop);
+  FreeAndNil(FTopicInfoLock);
+  FreeAndNil(FTopicInfoMap);
+  inherited;
 end;
 
-procedure TReceiveDataHandler.calculateAndSetSpareBytes(mess : TOPSMessage; segmentPaddingSize : Integer);
+procedure TTcpReceiveDataHandler.addReceiveChannel(topicName : string; ip: string; port : Integer);
 var
-  nrOfSerializedBytes : Integer;
-  totalNrOfSegments : Integer;
-  nrOfSerializedSegements : Integer;
-  nrOfUnserializedSegments : Integer;
-  nrOfSpareBytes : Integer;
+  key : string;
+  i : Integer;
+  found : Boolean;
+  rdc : TReceiveDataChannel;
 begin
-  // We must calculate how many unserialized segment headers we have and substract
-  // that total header size from the size of spareBytes.
-  nrOfSerializedBytes := FBuffer.GetSize;
-  totalNrOfSegments := FCurrentMessageSize div Integer(FMemMap.SegmentSize);
-  nrOfSerializedSegements := nrOfSerializedBytes div Integer(FMemMap.SegmentSize);
-  nrOfUnserializedSegments := totalNrOfSegments - nrOfSerializedSegements;
+  // Create key
+  key := ip + '::' + IntToStr(port);
 
-  nrOfSpareBytes := FCurrentMessageSize - FBuffer.GetSize - (nrOfUnserializedSegments * segmentPaddingSize);
-
-  if nrOfSpareBytes > 0 then begin
-    SetLength(mess.Data.spareBytes, nrOfSpareBytes);
-    // This will read the rest of the bytes as raw bytes and put them into spareBytes field of data.
-    FBuffer.ReadChars(@mess.Data.spareBytes[0], nrOfSpareBytes);
+  // Look after it in FRdc
+  found := False;
+  for i := 0 to FRdc.Count - 1 do begin
+    if Assigned(FRdc.Items[i]) then begin
+      if FRdc.Items[i].Key = key then begin
+        found := True;
+        Break;
+      end;
+    end;
   end;
+
+  // if not found, create a new RDC
+  if not found then begin
+    FTop.DomainAddress := AnsiString(ip);
+    FTop.Port := port;
+    rdc := TReceiveDataChannel.Create(FTop, FDom, FOpsObjectFactory, FErrorService);
+    rdc.Key := key;
+    addRdc(rdc);
+  end;
+end;
+
+procedure TTcpReceiveDataHandler.topicUsage(top : TTopic; used : Boolean);
+var
+  Count : Integer;
+begin
+  if FUsingPartInfo then begin
+    FTopicInfoLock.Acquire;
+    try
+      // Only register topic once
+      Count := 0;
+      // lookup
+  		if FTopicInfoMap.ContainsKey(top.Name) then begin
+        Count := FTopicInfoMap.Items[top.Name];
+      end;
+      if used then begin
+        Inc(Count);
+        if Count = 1 then begin
+          if Assigned(FRegProc) then begin
+            FRegProc(top, Self, True);
+          end;
+        end;
+      end else begin
+        Dec(Count);
+        if Count = 0 then begin
+          if Assigned(FRegProc) then begin
+            FRegProc(top, Self, False);
+          end;
+        end;
+      end;
+      FTopicInfoMap.AddOrSetValue(top.Name, Count);
+    finally
+      FTopicInfoLock.Release;
+    end;
+  end;
+end;
+
+// ========================
+
+constructor TUdpReceiveDataHandler.Create(
+              top : TTopic;
+              dom : TDomain;
+              opsObjectFactory : TSerializableInheritingTypeFactory;
+              Reporter : TErrorService;
+              onUdpTransportInfoProc : TOnUdpTransportInfoProc);
+var
+  rdc : TReceiveDataChannel;
+begin
+  inherited Create(top, dom, opsObjectFactory, Reporter, TReceiveDataChannel.Create(top, dom, opsObjectFactory, Reporter));
+
+  if Assigned(onUdpTransportInfoProc) then begin
+    rdc := FRdc.Items[0];
+    onUdpTransportInfoProc(
+      (rdc.getReceiver as TUDPReceiver).Address,
+      (rdc.getReceiver as TUDPReceiver).Port);
+  end;
+end;
+
+procedure TUdpReceiveDataHandler.topicUsage(top : TTopic; used : Boolean);
+begin
+  // Nothing to do
 end;
 
 end.

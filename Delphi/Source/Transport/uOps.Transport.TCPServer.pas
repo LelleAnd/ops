@@ -2,7 +2,7 @@ unit uOps.Transport.TCPServer;
 
 (**
 *
-* Copyright (C) 2016-2021 Lennart Andersson.
+* Copyright (C) 2016-2022 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -33,6 +33,7 @@ type
   TTCPServerSender = class(TSender)
   private
     FPort : Integer;
+    FActualPort : Integer;
     FIpAddress : string;
     FOutSocketBufferSize : Int64;
 
@@ -102,8 +103,15 @@ begin
 end;
 
 procedure TTCPServerSender.Open();
+var
+  LocalIP : AnsiString;
 begin
   if Assigned(FRunner) then Exit;
+
+  FTcpServer.Open;
+  FTcpServer.Bind;
+
+  FTcpServer.GetLocalAddress(LocalIp, FActualPort);
 
   FTerminated := False;
 
@@ -139,7 +147,7 @@ end;
 
 function TTCPServerSender.getPort() : Integer;
 begin
-  Result := FPort;
+  Result := FActualPort;
 end;
 
 function TTCPServerSender.getAddress() : string;
@@ -206,12 +214,9 @@ begin
   while not FTerminated do begin
     try
       // Setup server socket for listening
-      FTcpServer.Open;
-      FTcpServer.Bind;
       FTcpServer.Listen;
 
       if not FTcpServer.Listening then begin
-        FTcpServer.Close;
         Sleep(100);
         Continue;
       end;

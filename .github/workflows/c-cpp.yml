@@ -32,7 +32,8 @@ jobs:
       - name: GTest Get
         run: git clone https://github.com/google/googletest/ $HOME/gtest
       - name: GTest Build
-        run: pushd $HOME/gtest && mkdir mybuild && cd mybuild && cmake -DCMAKE_INSTALL_PREFIX=$HOME/gtest/deploy .. && make install && popd
+        # Currently we need v1.12.x to have C++11 support 
+        run: pushd $HOME/gtest && git checkout v1.12.x && mkdir mybuild && cd mybuild && cmake -DCMAKE_INSTALL_PREFIX=$HOME/gtest/deploy .. && make install && popd
       - name: GTest Set GOOGLETEST_HOME
         run: echo "GOOGLETEST_HOME=$HOME/gtest/deploy" >> $GITHUB_ENV
       #- name: debug

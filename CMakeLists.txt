@@ -37,6 +37,7 @@ project(OPS VERSION 4.2.0)
 #       OPS_FIXED_FILENAME_SIZE     default: 1024
 #
 #   CMAKE:
+#     CMAKE_CXX_STANDARD            default: 11 ( 11 / 14 / 17 )
 #     CMAKE_BUILD_TYPE              Bootstrap / Debug / Opt
 #     BOOST_ARCH                    -
 #     OPS_BUILD_CPP                 default: ON
@@ -50,9 +51,13 @@ project(OPS VERSION 4.2.0)
 #
 ################################################################################
 
+if(NOT "${CMAKE_CXX_STANDARD}")
 set(CMAKE_CXX_STANDARD 11)
+endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+message(STATUS ">>> CMAKE_CXX_STANDARD:  " ${CMAKE_CXX_STANDARD})
 
 option(OPS_BUILD_CPP "Enable to build C++ Core, apps and tools" ON)
 option(OPS_BUILD_CSHARP "Enable to build C# Core and apps" ON)

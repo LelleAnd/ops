@@ -33,6 +33,11 @@ Make sure you have boost installed, otherwise download pre-built binaries for bo
 OPS has been used with Boost versions 1.38, 1.48, 1.53, 1.55, 1.60, 1.64, 1.66, 1.67, 1.71 and 1.72.
 Versions older than 1.60 hasn't been used/tested for quite a while. It is recommended to use a more modern version.
 
+## TinyXML-2 (required for OPS C++ Core) ##
+TinyXML-2 can be downloaded from https://github.com/leethomason/tinyxml2.
+
+OPS has been used with TinyXML-2 version 9.0.0.
+
 ## CMake ##
 Version 3.7.0 or later is required to build OPS with CMake. Make sure the cmake command is in your path. CMake can be downloaded at https://cmake.org/.
 
@@ -65,7 +70,7 @@ OPS uses JavaCC version 6.0.
 Support exist for Python 2.7 and Python 3.
 
 ## Delphi ##
-OPS has been used with Delphi XE2, Delphi 10.1, 10.2 and 10.3.
+OPS has been used with Delphi XE2, Delphi 10.1, 10.2, 10.3 and 10.4.
 
 ## Ada ##
 The Ada implementation requires Ada 2012 support.

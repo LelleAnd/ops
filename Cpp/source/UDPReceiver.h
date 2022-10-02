@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2020-2021 Lennart Andersson.
+ * Copyright (C) 2020-2022 Lennart Andersson.
 *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -107,7 +107,7 @@ namespace ops
 			} catch (...) {
 				ops::BasicError err("UDPReceiver", "UDPReceiver", "Failed to setup UDP socket. Check address");
 				Participant::reportStaticError(&err);
-				stop();
+				UDPReceiver::stop();
 			}
         }
 

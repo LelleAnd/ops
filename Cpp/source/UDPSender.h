@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2021 Lennart Andersson.
+* Copyright (C) 2019-2022 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -44,11 +44,11 @@ namespace ops
     class UDPSender : public Sender
     {
     public:
-        ///Costructs a new UDPSender an binds its underlying socket to local host
+        ///Constructs a new UDPSender an binds its underlying socket to local host
         ///and a dynamically allocated local port.
 		///This class accepts synchronous write operations through sendTo().
 
-        UDPSender(IOService* ioServ, Address_T localInterface = "0.0.0.0", int ttl = 1, int outSocketBufferSize = 16000000, bool multicastSocket = false);
+        explicit UDPSender(IOService* ioServ, Address_T localInterface = "0.0.0.0", int ttl = 1, int outSocketBufferSize = 16000000, bool multicastSocket = false);
         ~UDPSender();
         
 		virtual bool open() override;

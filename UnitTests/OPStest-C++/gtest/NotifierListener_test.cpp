@@ -221,11 +221,20 @@ TEST(Test_NotifierListener, TestDataNotifierListener) {
 	EXPECT_EQ(listener1.counter, 2);
 	EXPECT_EQ(listener2.counter, 1);
 
+	// Disable expected deprecated warning below
 #if defined(_MSC_VER)
 #pragma warning(disable : 4996) 
 #endif
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+	// This call is deprecated and gives warning if compiled with C++14 or later
 	notifier.addDataListener(MyCallback, (void*)&listener2);
 	notifier.notify();
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 	EXPECT_EQ(listener1.counter, 3);
 	EXPECT_EQ(listener2.counter, 3);

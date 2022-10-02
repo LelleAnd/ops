@@ -26,7 +26,7 @@ jobs:
       - name: TinyXML2 Get
         run: git clone https://github.com/leethomason/tinyxml2.git $HOME/tinyxml2
       - name: TinyXML2 Build
-        run: pushd $HOME/tinyxml2 && mkdir mybuild && cd mybuild && cmake -DCMAKE_INSTALL_PREFIX=$HOME/tinyxml2/deploy .. && make install && popd
+        run: pushd $HOME/tinyxml2 && mkdir mybuild && cd mybuild && CCXFLAGS=-fPIC cmake -DCMAKE_INSTALL_PREFIX=$HOME/tinyxml2/deploy .. && make install && popd
       #
       - name: GTest Get
         run: git clone https://github.com/google/googletest/ $HOME/gtest

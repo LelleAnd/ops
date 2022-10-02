@@ -7,13 +7,15 @@
 #include <iostream>
 #include <sstream>
 
-#include "xml/xmlParser.h"
+#include "tinyxml2.h"
 
 	class Configuration
 	{
 	private:
-		opsXML::XMLNode rootNode, currentNode;
-		opsXML::XMLResults parseResult;
+		tinyxml2::XMLDocument doc;
+        tinyxml2::XMLNode *rootNode{nullptr};
+        tinyxml2::XMLNode *currentNode{nullptr};
+        tinyxml2::XMLError parseResult;
 		std::string xmlString;
 		std::string parseString;
 	public:
@@ -26,50 +28,63 @@
 				xmlString += tmp + " ";
 				is >> tmp;			
 			}
+            parseResult = doc.Parse(xmlString.c_str());
+            if (parseResult != tinyxml2::XML_SUCCESS) {
+                /// TODO
+            }
 			if (topNode_ != "") {
-				rootNode = currentNode = opsXML::XMLNode::parseString(xmlString.c_str(), topNode_.c_str(), &parseResult);
+				rootNode = currentNode = doc.FirstChildElement(topNode_.c_str());
 			} else {
-				rootNode = currentNode = opsXML::XMLNode::parseString(xmlString.c_str(), 0, &parseResult);
+				rootNode = currentNode = &doc;
 			}
-		}
+        }
 
 		Configuration(std::string filename, std::string topNode_ = "") 
 		{
+            parseResult = doc.LoadFile(filename.c_str());
+            if (parseResult != tinyxml2::XML_SUCCESS) {
+                /// TODO
+            }
 			if (topNode_ != "") {
-				rootNode = currentNode = opsXML::XMLNode::parseFile(filename.c_str(), topNode_.c_str(), &parseResult);
+				rootNode = currentNode = doc.FirstChildElement(topNode_.c_str());
 			} else {
-				rootNode = currentNode = opsXML::XMLNode::parseFile(filename.c_str(), 0, &parseResult);
+				rootNode = currentNode = &doc;
 			}
 		}
 
 		bool SaveToFile(std::string filename)
 		{
-			return currentNode.writeToFile(filename.c_str()) == opsXML::eXMLErrorNone;
+			return false; ///TODO currentNode.writeToFile(filename.c_str()) == opsXML::eXMLErrorNone;
 		}
 
 		std::string getParseResult()
 		{
-			if (parseResult.error == opsXML::eXMLErrorNone) return "";
-			char tmp[256];
-#ifdef _WIN32
-			sprintf_s(tmp, sizeof(tmp), "Error parsing XML string. Position: %d", parseResult.nColumn);
-#else
-			sprintf(tmp, "Error parsing XML string. Position: %d", parseResult.nColumn);
-#endif
-			return tmp;
+			if (parseResult == tinyxml2::XML_SUCCESS) { return ""; }
+			return doc.ErrorStr();
 		}
 
-		bool enter(std::string name, int i = 0) 
+		tinyxml2::XMLElement* getChildElement(tinyxml2::XMLNode* el, const char* name, size_t idx = 0)
 		{
-			opsXML::XMLNode newNode = currentNode.getChildNode(name.c_str(), i);
-			if (newNode.isEmpty()) return false;
+			size_t count = 0;
+			tinyxml2::XMLElement* el2 = el->FirstChildElement(name);
+			while ((el2 != nullptr) && (count < idx)) {
+				count++;
+				el2 = el2->NextSiblingElement(name);
+			}
+			return el2;
+		}
+
+		bool enter(std::string name, int i = 0)
+		{
+			tinyxml2::XMLElement* newNode = getChildElement(currentNode, name.c_str(), (size_t)i);
+			if (newNode == nullptr) { return false; }
 			currentNode = newNode;
 			return true;
 		}
 
 		void exit()
 		{
-			currentNode = currentNode.getParentNode();
+			currentNode = currentNode->Parent()->ToElement();
 		}
 
 		void root()
@@ -77,56 +92,115 @@
 			currentNode = rootNode;
 		}
 
+		size_t countChildElements(tinyxml2::XMLNode* el, const char* name)
+		{
+			size_t count = 0;
+			tinyxml2::XMLElement* el2 = el->FirstChildElement(name);
+			while (el2 != nullptr) {
+				count++;
+				el2 = el2->NextSiblingElement(name);
+			}
+			return count;
+		}
+
 		int numEntries(std::string name = "")
 		{
-			if (name == "") return currentNode.nChildNode();
-			return currentNode.nChildNode(name.c_str());
+			if (name == "") { return (int)countChildElements(currentNode, nullptr); }
+			return (int)countChildElements(currentNode, name.c_str());
 		}
 
 		~Configuration(){};
 
 		std::string getString(std::string name, int i = 0)
 		{
-			if(!currentNode.getChildNode(name.c_str(), i).isEmpty()) {
-				if(currentNode.getChildNode(name.c_str(), i).getText() != NULL) {
-					std::string s(currentNode.getChildNode(name.c_str(), i).getText());
-					return s;
+			tinyxml2::XMLElement* el = getChildElement(currentNode, name.c_str(), (size_t)i);
+			if (el != nullptr) {
+				tinyxml2::XMLNode* node = el->FirstChild();
+				if (node != nullptr) {
+					tinyxml2::XMLText* t = node->ToText();
+					if (t != nullptr) {
+						return t->Value();
+					}
 				}
-			}			
+			}
 			return "";
 		}
 
 		std::string getNodeName(int i = 0)
 		{
-			return currentNode.getChildNode(i).getName();
+			tinyxml2::XMLElement* el = getChildElement(currentNode, nullptr, (size_t)i);
+			if (el != nullptr) {
+				return el->Name();
+			}
+			return "";
 		}
 
 		bool updateString(std::string name, std::string value, int i = 0)
 		{
-			if(!currentNode.getChildNode(name.c_str(), i).isEmpty()) {
-				if(currentNode.getChildNode(name.c_str(), i).getText() != NULL) {
-					currentNode.getChildNode(name.c_str(), i).updateText(value.c_str());
-					return true;
+			tinyxml2::XMLElement* el = getChildElement(currentNode, name.c_str(), (size_t)i);
+			if (el != nullptr) {
+				tinyxml2::XMLNode* node = el->FirstChild();
+				if (node != nullptr) {
+					tinyxml2::XMLText* t = node->ToText();
+					if (t != nullptr) {
+						node->SetValue(value.c_str());
+						return true;
+					}
 				}
-			}			
+			}
 			return false;
+		}
+
+		size_t countAttributes(tinyxml2::XMLNode *node)
+		{
+			size_t count = 0;
+			tinyxml2::XMLElement* el = node->ToElement();
+			if (el != nullptr) {
+				const tinyxml2::XMLAttribute* at2 = el->FirstAttribute();
+				while (at2 != nullptr) {
+					count++;
+					at2 = at2->Next();
+				}
+			}
+			return count;
 		}
 
 		int numAttributes()
 		{
-			return currentNode.nAttribute();
+			return (int)countAttributes(currentNode);
+		}
+
+		const tinyxml2::XMLAttribute *getAttribute(tinyxml2::XMLNode *node, size_t idx = 0)
+		{
+			const tinyxml2::XMLAttribute* at2 = nullptr;
+			tinyxml2::XMLElement* el = node->ToElement();
+			if (el != nullptr) {
+				size_t count = 0;
+				at2 = el->FirstAttribute();
+				while ((at2 != nullptr) && (count < idx)) {
+					count++;
+					at2 = at2->Next();
+				}
+			}
+			return at2;
 		}
 
 		std::string getAttributeName(int i = 0)
 		{
-			return currentNode.getAttributeName(i);
+			const tinyxml2::XMLAttribute* at = getAttribute(currentNode, i);
+			if (at != nullptr) {
+				return at->Name();
+			}
+			return "";
 		}
 		
 		std::string getAttribute(std::string name, std::string defaultValue = "")
 		{
-			for (int i = 0; i < currentNode.nAttribute(); i++) {
-				if (currentNode.getAttributeName(i) == name) {
-					return currentNode.getAttributeValue(i);
+			tinyxml2::XMLElement* el = currentNode->ToElement();
+			if (el != nullptr) {
+				const tinyxml2::XMLAttribute* at = el->FindAttribute(name.c_str());
+				if (at != nullptr) {
+					return at->Value();
 				}
 			}
 			return defaultValue;

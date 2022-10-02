@@ -3,7 +3,7 @@
 * Copyright (C) 2010-2012 Saab Dynamics AB
 *   author Lennart Andersson <nnnn@saabgroup.com>
 *
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2022 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -26,16 +26,18 @@
 #include <iostream>
 #include <sstream>
 
-#include "xml/xmlParser.h"
+#include "tinyxml2.h"
 
 namespace opsbridge {
 
 	class Configuration
 	{
 	private:
+		tinyxml2::XMLDocument doc;
+        tinyxml2::XMLNode *rootNode{nullptr};
+        tinyxml2::XMLNode *currentNode{nullptr};
+        tinyxml2::XMLError parseResult;
 		std::istream& is;
-		opsXML::XMLNode rootNode, currentNode;
-		opsXML::XMLResults parseResult;
 		std::string xmlString;
 		std::string parseString;
 	public:
@@ -47,32 +49,45 @@ namespace opsbridge {
 				xmlString += tmp + " ";
 				is >> tmp;			
 			}
-			rootNode = currentNode = opsXML::XMLNode::parseString(xmlString.c_str(), topNode_.c_str(), &parseResult);
+            parseResult = doc.Parse(xmlString.c_str());
+            if (parseResult != tinyxml2::XML_SUCCESS) {
+                /// TODO
+            }
+			if (topNode_ != "") {
+				rootNode = currentNode = doc.FirstChildElement(topNode_.c_str());
+			} else {
+				rootNode = currentNode = &doc;
+			}
 		}
 
 		std::string getParseResult()
 		{
-			if (parseResult.error == opsXML::eXMLErrorNone) return "";
-			char tmp[256];
-#ifdef _WIN32
-			sprintf_s(tmp, sizeof(tmp), "Error parsing XML string. Position: %d", parseResult.nColumn);
-#else
-			sprintf(tmp, "Error parsing XML string. Position: %d", parseResult.nColumn);
-#endif
-			return tmp;
+			if (parseResult == tinyxml2::XML_SUCCESS) { return ""; }
+			return doc.ErrorStr();
+		}
+
+		tinyxml2::XMLElement* getChildElement(tinyxml2::XMLNode* el, const char* name, size_t idx = 0)
+		{
+			size_t count = 0;
+			tinyxml2::XMLElement* el2 = el->FirstChildElement(name);
+			while ((el2 != nullptr) && (count < idx)) {
+				count++;
+				el2 = el2->NextSiblingElement(name);
+			}
+			return el2;
 		}
 
 		bool enter(std::string name, int i = 0) 
 		{
-			opsXML::XMLNode newNode = currentNode.getChildNode(name.c_str(), i);
-			if (newNode.isEmpty()) return false;
+			tinyxml2::XMLElement* newNode = getChildElement(currentNode, name.c_str(), (size_t)i);
+			if (newNode == nullptr) { return false; }
 			currentNode = newNode;
 			return true;
 		}
 
 		void exit()
 		{
-			currentNode = currentNode.getParentNode();
+			currentNode = currentNode->Parent()->ToElement();
 		}
 
 		void root()
@@ -80,30 +95,47 @@ namespace opsbridge {
 			currentNode = rootNode;
 		}
 
+		size_t countChildElements(tinyxml2::XMLNode* el, const char* name)
+		{
+			size_t count = 0;
+			tinyxml2::XMLElement* el2 = el->FirstChildElement(name);
+			while (el2 != nullptr) {
+				count++;
+				el2 = el2->NextSiblingElement(name);
+			}
+			return count;
+		}
+
 		int numEntries(std::string name = "")
 		{
-			if (name == "") return currentNode.nChildNode();
-			return currentNode.nChildNode(name.c_str());
+			if (name == "") { return (int)countChildElements(currentNode, nullptr); }
+			return (int)countChildElements(currentNode, name.c_str());
 		}
 
 		~Configuration(){};
 
 		std::string getString(std::string name, int i = 0)
 		{
-			if(!currentNode.getChildNode(name.c_str(), i).isEmpty()) {
-				if(currentNode.getChildNode(name.c_str(), i).getText() != nullptr) {
-					std::string s(currentNode.getChildNode(name.c_str(), i).getText());
-					return s;
+			tinyxml2::XMLElement* el = getChildElement(currentNode, name.c_str(), (size_t)i);
+			if (el != nullptr) {
+				tinyxml2::XMLNode* node = el->FirstChild();
+				if (node != nullptr) {
+					tinyxml2::XMLText* t = node->ToText();
+					if (t != nullptr) {
+						return t->Value();
+					}
 				}
-			}			
+			}
 			return "";
 		}
 
 		std::string getAttribute(std::string name, std::string defaultValue = "")
 		{
-			for (int i = 0; i < currentNode.nAttribute(); i++) {
-				if (currentNode.getAttributeName(i) == name) {
-					return currentNode.getAttributeValue(i);
+			tinyxml2::XMLElement* el = currentNode->ToElement();
+			if (el != nullptr) {
+				const tinyxml2::XMLAttribute* at = el->FindAttribute(name.c_str());
+				if (at != nullptr) {
+					return at->Value();
 				}
 			}
 			return defaultValue;

@@ -28,10 +28,10 @@ set_target_properties(${APP2_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(${APP3_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(${APP4_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
 
-target_link_libraries(${APP1_NAME} ${Boost_LIBRARIES} ops-static)
-target_link_libraries(${APP2_NAME} ${Boost_LIBRARIES} ops-static)
-target_link_libraries(${APP3_NAME} ${Boost_LIBRARIES} ops-static)
-target_link_libraries(${APP4_NAME} ${Boost_LIBRARIES} ops-static)
+target_link_libraries(${APP1_NAME} ${Boost_LIBRARIES} ops-static tinyxml2::tinyxml2)
+target_link_libraries(${APP2_NAME} ${Boost_LIBRARIES} ops-static tinyxml2::tinyxml2)
+target_link_libraries(${APP3_NAME} ${Boost_LIBRARIES} ops-static tinyxml2::tinyxml2)
+target_link_libraries(${APP4_NAME} ${Boost_LIBRARIES} ops-static tinyxml2::tinyxml2)
 
 if(MSVC)
   # under visual studio the time functions uses function in Winmm.lib

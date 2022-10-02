@@ -340,7 +340,7 @@ protected:
 	};
 	std::string content_linkudp{
 		" <root>"
-		"	<linkType>udp</linkType>"
+		"	<linktype>udp</linktype>"
 		" </root>"
 		" "
 	};
@@ -475,7 +475,7 @@ TEST_F(ChannelTestFixture, Test_Serialize) {
 	{
 		std::string content1(
 			" <root>"
-			"	<linkType>multicast</linkType>"
+			"	<linktype>multicast</linktype>"
 			" </root>"
 			" "
 		);
@@ -485,7 +485,7 @@ TEST_F(ChannelTestFixture, Test_Serialize) {
 	{
 		std::string content1(
 			" <root>"
-			"	<linkType>tcp</linkType>"
+			"	<linktype>tcp</linktype>"
 			" </root>"
 			" "
 		);
@@ -499,7 +499,7 @@ TEST_F(ChannelTestFixture, Test_Serialize) {
 	{
 		std::string content1(
 			" <root>"
-			"	<linkType>world</linkType>"
+			"	<linktype>world</linktype>"
 			" </root>"
 			" "
 		);
@@ -721,7 +721,7 @@ protected:
 		"			<name>Channel-A</name>"
 		"			<localInterface>127.0.0.1</localInterface>"
 		"			<address>236.5.6.7</address>"
-		"			<linkType>udp</linkType>"
+		"			<linktype>udp</linktype>"
 		"			<timeToLive>3</timeToLive>"
 		"			<port>6689</port>"
 		"			<outSocketBufferSize>100000</outSocketBufferSize>"

@@ -20,7 +20,7 @@ add_dependencies(${APP_NAME} PizzaProject)
 
 set_target_properties(${APP_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
 
-target_link_libraries(${APP_NAME} ${Boost_LIBRARIES} ops-static)
+target_link_libraries(${APP_NAME} ${Boost_LIBRARIES} ops-static tinyxml2::tinyxml2)
 
 # under visual studio the time functions uses function in Winmm.lib
 if(MSVC)

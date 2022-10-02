@@ -80,7 +80,7 @@ if(NOT OPS_BOOTSTRAP_BUILD)
   # Add compile definition so that users of the library get the correct include definitions
   target_compile_definitions(${LIB_NAME} PUBLIC OPS_LIBRARY_IMPORT)
 
-  target_link_libraries(${LIB_NAME} ${Boost_LIBRARIES})
+  target_link_libraries(${LIB_NAME} ${Boost_LIBRARIES} tinyxml2::tinyxml2)
 
   if(MINGW)
     target_link_libraries(${LIB_NAME} ws2_32 mswsock)
@@ -120,7 +120,7 @@ if(NOT OPS_BOOTSTRAP_BUILD)
   # Add compile definition so that users of the static library get the correct include definitions
   target_compile_definitions(${LIB_STATIC} PUBLIC OPS_LIBRARY_STATIC)
 
-  target_link_libraries(${LIB_STATIC} ${Boost_LIBRARIES})
+  target_link_libraries(${LIB_STATIC} ${Boost_LIBRARIES} tinyxml2::tinyxml2)
 
   # ----------------------------------------------------------------------------
   # library installation

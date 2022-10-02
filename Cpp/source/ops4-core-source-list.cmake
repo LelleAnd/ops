@@ -81,7 +81,6 @@ set(LIB_OPS_PUBLIC_HEADERS
   ${OPS_HEADER_PATH}/Trace.h
   ${OPS_HEADER_PATH}/TraceStream.h
   ${OPS_HEADER_PATH}/Transport.h
-  ${OPS_HEADER_PATH}/xml/xmlParser.h
   ${OPS_HEADER_PATH}/XMLArchiverIn.h
   ${OPS_HEADER_PATH}/XMLArchiverOut.h
 )
@@ -150,7 +149,6 @@ set(LIB_OPS_CORE_SRCS
   ${OPS_SRC_PATH}/Transport.cpp
   ${OPS_SRC_PATH}/UDPReceiveDataHandler.cpp
   ${OPS_SRC_PATH}/UDPReceiveDataHandler.h
-  ${OPS_SRC_PATH}/xml/xmlParser.cpp
   ${OPS_SRC_PATH}/XMLArchiverIn.cpp
   ${OPS_SRC_PATH}/XMLArchiverOut.cpp
 )

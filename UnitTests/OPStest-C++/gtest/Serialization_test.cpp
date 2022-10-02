@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018-2020 Lennart Andersson.
+* Copyright (C) 2018-2022 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -110,6 +110,7 @@ TEST(Test_Serialization, TestCoreTypesXml) {
 	EXPECT_TRUE(arcOut.isOut());
 
 	obj1.serialize(&arcOut);
+	arcOut.close();
 
 	std::istringstream is(os.str());
 
@@ -192,6 +193,7 @@ TEST(Test_Serialization, TestVectorTypesXml) {
 	EXPECT_TRUE(arcOut.isOut());
 
 	obj1.serialize(&arcOut);
+	arcOut.close();
 
 	std::istringstream is(os.str());
 
@@ -307,6 +309,7 @@ TEST(Test_Serialization, TestFixedArraysXml) {
 	EXPECT_TRUE(arcOut.isOut());
 
 	obj1.serialize(&arcOut);
+	arcOut.close();
 
 	std::istringstream is(os.str());
 
@@ -484,6 +487,7 @@ TEST(Test_Serialization, TestObjectsXml) {
 	EXPECT_TRUE(arcOut.isOut());
 
 	obj1.serialize(&arcOut);
+	arcOut.close();
 
 	std::istringstream is(os.str());
 

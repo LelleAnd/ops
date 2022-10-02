@@ -24,6 +24,9 @@ project(OPS VERSION 4.2.0)
 #       JAVA_HOME                   -
 #       Python_ROOT_DIR             -
 #       BOOST_HOME or BOOST_ROOT    -
+#       TINYXML2_INSTALL_DIR        Used by CMake find_package()
+#       (TINYXML2_INCLUDE_DIR       Used if no package found)
+#       (TINYXML2_LIB               Used if no package found)
 #
 #     C++ compile flags:
 #       CXXFLAGS                    Init value for CMAKE_CXX_FLAGS (C++ compile flags).
@@ -151,7 +154,6 @@ if (OPS_BUILD_CPP)
   message(STATUS "BOOST_ROOT: " ${BOOST_ROOT})
 
   if(BOOST_ARCH)
-    ###  set(Boost_ARCHITECTURE "-x64")    ## Needed to work on GitHub CI test
     set(Boost_ARCHITECTURE ${BOOST_ARCH})
   endif()
 
@@ -165,6 +167,41 @@ if (OPS_BUILD_CPP)
   message(STATUS "Boost_INCLUDE_DIRS: " ${Boost_INCLUDE_DIRS})
   message(STATUS "Boost_LIBRARY_DIRS: " ${Boost_LIBRARY_DIRS})
   message(STATUS "Boost_LIBRARIES: " ${Boost_LIBRARIES})
+
+  # TINYXML2_INSTALL_DIR        Used by CMake find_package()
+  # (TINYXML2_INCLUDE_DIR       Used if no package found)
+  # (TINYXML2_LIB               Used if no package found)
+
+  if(TARGET tinyxml2::tinyxml2)
+    # If added in a parent project, use it
+    message(STATUS ">>>>>> Using tinyxml2::tinyxml2 target from parent project <<<<<<")
+
+  else()
+    find_package(tinyxml2 CONFIG COMPONENTS static PATHS ${TINYXML2_INSTALL_DIR})
+    if (tinyxml2_FOUND)
+      # if a package was found, use it
+      message(STATUS ">>>>>> Using tinyxml2 target from found CMake package <<<<<<")
+      message(STATUS "TINYXML2_INSTALL_DIR: " ${TINYXML2_INSTALL_DIR})
+
+    else()
+      # Set up our own imported target
+      message(STATUS ">>>>>> DEFINING tinyxml2 as an IMPORTED target <<<<<<")
+      message(STATUS "TINYXML2_INCLUDE_DIR: " ${TINYXML2_INCLUDE_DIR})
+      message(STATUS "TINYXML2_LIB:         " ${TINYXML2_LIB})
+
+      add_library(tinyxml2::tinyxml2 STATIC IMPORTED)
+      set_target_properties(tinyxml2::tinyxml2 PROPERTIES
+                     IMPORTED_LOCATION "${TINYXML2_LIB}"
+                     IMPORTED_LOCATION_DEBUG "${TINYXML2_LIB}"
+                     IMPORTED_CONFIGURATIONS "RELEASE;DEBUG"
+                   )
+      target_include_directories(tinyxml2::tinyxml2 INTERFACE ${TINYXML2_INCLUDE_DIR})
+    endif()
+  endif()
+
+  ##include(../ops-build-tests/cmakedebug.cmake)
+  ##print_target_properties(tinyxml2::tinyxml2)
+
 endif ()
 
 ## ----------------------------------------------------------------------------

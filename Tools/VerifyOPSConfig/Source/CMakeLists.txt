@@ -4,8 +4,8 @@ set(EXE_NAME VerifyOPSConfig)
 
 
 set(EXE_SRCS
-Configuration.h
-VerifyOPSConfig.cpp
+  Configuration.h
+  VerifyOPSConfig.cpp
 )
 
 # generate the library target
@@ -13,7 +13,7 @@ add_executable(${EXE_NAME}
     ${EXE_SRCS}
 )
 
-target_link_libraries(${EXE_NAME} ${Boost_LIBRARIES} ops-static)
+target_link_libraries(${EXE_NAME} ${Boost_LIBRARIES} ops-static tinyxml2::tinyxml2)
 
 if(WIN32)
   target_link_libraries(${EXE_NAME} winmm)

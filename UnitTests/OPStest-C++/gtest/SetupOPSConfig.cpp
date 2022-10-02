@@ -36,7 +36,7 @@ SetupOPSConfig::SetupOPSConfig()
 void SetupOPSConfig::InternalSetup()
 {
 	std::string content(
-		"<?xml version=\"1.0\" encoding=\"UTF - 8\"?>"
+		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 		"<!--"
 		"	Description:"
 		"-->"

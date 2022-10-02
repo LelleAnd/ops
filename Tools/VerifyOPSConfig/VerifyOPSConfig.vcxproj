@@ -57,7 +57,7 @@
     </BuildLog>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\Cpp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\Cpp\include;D:\Git-Clones\tinyxml2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -103,11 +103,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Cpp\source\xml\xmlParser.cpp" />
+    <ClCompile Include="..\..\..\..\Git-Clones\tinyxml2\tinyxml2.cpp" />
     <ClCompile Include="Source\VerifyOPSConfig.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Middleware\OPS\C++\include\xml\xmlParser.h" />
     <ClInclude Include="Source\Configuration.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

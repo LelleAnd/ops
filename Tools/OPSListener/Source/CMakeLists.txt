@@ -3,13 +3,13 @@
 set(EXE_NAME OPSListener)
 
 set(EXE_SRCS
-COpsConfigHelper.h
-FilterMessage.h
-MessageDump.cpp
-MessageDump.h
-OPSListener.cpp
-SdsSystemTime.cpp
-SdsSystemTime.h
+  COpsConfigHelper.h
+  FilterMessage.h
+  MessageDump.cpp
+  MessageDump.h
+  OPSListener.cpp
+  SdsSystemTime.cpp
+  SdsSystemTime.h
 )
 
 # generate the library target
@@ -17,7 +17,7 @@ add_executable(${EXE_NAME}
     ${EXE_SRCS}
 )
 
-target_link_libraries(${EXE_NAME} ${Boost_LIBRARIES} ops-static)
+target_link_libraries(${EXE_NAME} ${Boost_LIBRARIES} ops-static tinyxml2::tinyxml2)
 
 if(WIN32)
   target_link_libraries(${EXE_NAME} winmm)

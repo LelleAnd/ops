@@ -12,7 +12,7 @@
 
 #include "Configuration.h"
 
-const std::string sVersion = "Version 2022-04-04";
+const std::string sVersion = "Version 2022-09-26";
 
 
 bool gErrorGiven = false;

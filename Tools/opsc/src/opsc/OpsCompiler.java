@@ -792,6 +792,9 @@ public class OpsCompiler
 
     public static void main(String args[]) {
 
+        long startMs = System.currentTimeMillis();
+        long mainStartMs = startMs;
+
         // instantiate this class
         OpsCompiler opsc = new OpsCompiler();
         if(!opsc.parseCommandLineArgs(args)) {
@@ -831,6 +834,10 @@ public class OpsCompiler
         ///TODO Check that all types, which are not prefixed with a 'name.',
         /// are core types or defined with the idl's we parsed.
 
+        long stopMs = System.currentTimeMillis();
+        long parseMs = stopMs - startMs;
+        startMs = stopMs;
+
         // Quit if we only should parse
         if(opsc._bOnlyParse) return;
 
@@ -839,12 +846,20 @@ public class OpsCompiler
             opsc.compilePython();
         }
 
+        stopMs = System.currentTimeMillis();
+        long pythonMs = stopMs - startMs;
+        startMs = stopMs;
+
         System.out.flush();
 
         // generate C++ if requested
         if(opsc._props.generateCpp) {
             opsc.compileCpp();
         }
+
+        stopMs = System.currentTimeMillis();
+        long cppMs = stopMs - startMs;
+        startMs = stopMs;
 
         System.out.flush();
 
@@ -857,6 +872,10 @@ public class OpsCompiler
             }
         }
 
+        stopMs = System.currentTimeMillis();
+        long javaMs = stopMs - startMs;
+        startMs = stopMs;
+
         System.out.flush();
 
         // generate C# if so requested
@@ -868,12 +887,20 @@ public class OpsCompiler
             }
         }
 
+        stopMs = System.currentTimeMillis();
+        long csharpMs = stopMs - startMs;
+        startMs = stopMs;
+
         System.out.flush();
 
         // generate Delphi if so requested
         if(opsc._props.generateDelphi) {
             opsc.compileDelphi();
         }
+
+        stopMs = System.currentTimeMillis();
+        long delphiMs = stopMs - startMs;
+        startMs = stopMs;
 
         System.out.flush();
 
@@ -882,12 +909,20 @@ public class OpsCompiler
             opsc.compileAda();
         }
 
+        stopMs = System.currentTimeMillis();
+        long adaMs = stopMs - startMs;
+        startMs = stopMs;
+
         System.out.flush();
 
         // generate JSON if so requested
         if(opsc._props.generateJSON) {
             opsc.compileJSON();
         }
+
+        stopMs = System.currentTimeMillis();
+        long jsonMs = stopMs - startMs;
+        startMs = stopMs;
 
         System.out.flush();
 
@@ -897,6 +932,10 @@ public class OpsCompiler
             opsc.buildDebugProject();
         }
 
+        stopMs = System.currentTimeMillis();
+        long debugMs = stopMs - startMs;
+        startMs = stopMs;
+
         System.out.flush();
 
         // generate VS Example
@@ -904,6 +943,29 @@ public class OpsCompiler
             System.out.println("");
             opsc.buildVSExample();
         }
+
+        stopMs = System.currentTimeMillis();
+        long vsexampleMs = stopMs - startMs;
+        startMs = stopMs;
+
+        System.out.flush();
+
+        long mainEndMs = startMs;
+
+        System.out.println("");
+        System.out.println("Info: Exec times [ms], " +
+            " Parsing: " + parseMs +
+            ", Ada: " + adaMs +
+            ", C++: " + cppMs +
+            ", C#: " + csharpMs +
+            ", Debug: " + debugMs +
+            ", Delphi: " + delphiMs +
+            ", Java: " + javaMs +
+            ", JSON: " + jsonMs +
+            ", Python: " + pythonMs +
+            ", VSExample: " + vsexampleMs +
+            ", Total: " + (mainEndMs - mainStartMs)
+        );
 
         System.out.flush();
 

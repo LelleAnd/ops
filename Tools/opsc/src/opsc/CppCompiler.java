@@ -212,7 +212,7 @@ public class CppCompiler extends opsc.Compiler
     {
         String ret = "";
         for (int i = 0; i < idlClass.getEnumNames().size(); i++) {
-            ret += tab(1) + "const static int " + idlClass.getEnumNames().get(i) + " = " + i + ";" + endl();
+            ret += tab(1) + "const static int " + nonReservedName(idlClass.getEnumNames().get(i)) + " = " + i + ";" + endl();
         }
         ret += tab(1) + "const static int UNDEFINED = " + idlClass.getEnumNames().size() + ";" + endl();
         return ret;
@@ -223,20 +223,14 @@ public class CppCompiler extends opsc.Compiler
         return "CppCompiler";
     }
 
-    protected String checkReservedName(String name)
-    {
-        if (isReservedName(name)) return name + "_";
-        return name;
-    }
-
     protected String getClassName(IDLClass idlclass)
     {
-        return checkReservedName(idlclass.getClassName());
+        return nonReservedName(idlclass.getClassName());
     }
 
     protected String getFieldName(IDLField field)
     {
-        return checkReservedName(field.getName());
+        return nonReservedName(field.getName());
     }
 
     protected void compilePublisher(IDLClass idlClass) throws IOException
@@ -545,7 +539,7 @@ public class CppCompiler extends opsc.Compiler
                 } else if (field.isEnumType()) {
                     if (field.getValue().length() > 0) {
                       ret += tab(2) + "for(unsigned int __i = 0; __i < " + field.getArraySize() + "; __i++) {" + endl();
-                      ret += tab(3) +   fieldName + "[__i] = " + languageType(field) + "::" + field.getValue() + ";" + endl();
+                      ret += tab(3) +   fieldName + "[__i] = " + languageType(field) + "::" + nonReservedName(field.getValue()) + ";" + endl();
                       ret += tab(2) + "}" + endl();
                     }
                 } else {
@@ -571,7 +565,7 @@ public class CppCompiler extends opsc.Compiler
                 //Do nothing in head
             } else if (field.isEnumType()) {
                 if (field.getValue().length() > 0) {
-                    ret += ", " + fieldName + "(" + languageType(field) + "::" + field.getValue() + ")";
+                    ret += ", " + fieldName + "(" + languageType(field) + "::" + nonReservedName(field.getValue()) + ")";
                 }
             } else {
                 //Numeric
@@ -598,7 +592,7 @@ public class CppCompiler extends opsc.Compiler
           String values = "";
           for (String eName : et.getEnumNames()) {
               if (values != "") values += ", ";
-              values += eName;
+              values += nonReservedName(eName);
           }
           ret += tab(2) + values + endl();
           ret += tab(1) + "};" + endl();
@@ -929,6 +923,12 @@ public class CppCompiler extends opsc.Compiler
             }
         }
         return ret;
+    }
+
+    protected String nonReservedName(String name)
+    {
+        if (isReservedName(name)) return name + "_";
+        return name;
     }
 
     public boolean isReservedName(String name)

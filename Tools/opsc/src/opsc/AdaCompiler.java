@@ -640,7 +640,7 @@ public class AdaCompiler extends opsc.Compiler
     {
         String ret = "";
         for (int i = 0; i < idlClass.getEnumNames().size(); i++) {
-            ret += idlClass.getEnumNames().get(i);
+            ret += nonReservedName(idlClass.getEnumNames().get(i));
             if (i < idlClass.getEnumNames().size()-1) {
               ret += ",";
             }
@@ -650,12 +650,7 @@ public class AdaCompiler extends opsc.Compiler
 
     protected String getFieldName(IDLField field)
     {
-        String name = field.getName();
-        if (isReservedName(name)) name = name + "_";
-        // Ada don't allow leading and trailing "_" so change them
-        if (name.charAt(0) == '_') name = "a" + name;
-        if (name.charAt(name.length()-1) == '_') name = name + "a";
-        return name;
+        return nonReservedName(field.getName());
     }
 
     protected String getInitValue(IDLField field, IDLClass idlClass)
@@ -669,7 +664,7 @@ public class AdaCompiler extends opsc.Compiler
       if (field.isEnumType()) {
         //Set first enum value as init value
         if (field.getValue().length() > 0) {
-            return field.getValue();
+            return nonReservedName(field.getValue());
         }
       }
       return "0";
@@ -807,7 +802,7 @@ public class AdaCompiler extends opsc.Compiler
           String values = "";
           for (String eName : et.getEnumNames()) {
               if (values != "") values += ", ";
-              values += eName;
+              values += nonReservedName(eName);
           }
           ret += tab(4) + values + endl();
           ret += tab(3) + ");" + endl();
@@ -995,6 +990,15 @@ public class AdaCompiler extends opsc.Compiler
             }
         }
         return ret;
+    }
+
+    protected String nonReservedName(String name)
+    {
+        if (isReservedName(name)) name = name + "_";
+        // Ada don't allow leading and trailing "_" so change them
+        if (name.charAt(0) == '_') name = "a" + name;
+        if (name.charAt(name.length()-1) == '_') name = name + "a";
+        return name;
     }
 
     public boolean isReservedName(String name)

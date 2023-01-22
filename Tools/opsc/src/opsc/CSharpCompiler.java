@@ -173,9 +173,7 @@ public class CSharpCompiler extends opsc.Compiler
 
     protected String getFieldName(IDLField field)
     {
-        String name = field.getName();
-        if (isReservedName(name)) return name + "_";
-        return name;
+        return nonReservedName(field.getName());
     }
 
 //    private void compilePublisher(IDLClass idlClass) throws IOException
@@ -348,7 +346,7 @@ public class CSharpCompiler extends opsc.Compiler
         String ret = "";
         for (int i = 0; i < idlClass.getEnumNames().size(); i++)
         {
-            ret += idlClass.getEnumNames().get(i);
+            ret += nonReservedName(idlClass.getEnumNames().get(i));
             ret += ",";
         }
         return ret;
@@ -375,7 +373,7 @@ public class CSharpCompiler extends opsc.Compiler
             String values = "";
             for (String eName : et.getEnumNames()) {
                 if (values != "") values += ", ";
-                values += eName;
+                values += nonReservedName(eName);
             }
             ret += tab(3) + values + endl();
             ret += tab(2) + "};" + endl();
@@ -721,9 +719,15 @@ public class CSharpCompiler extends opsc.Compiler
       }
     }
 
+    protected String nonReservedName(String name)
+    {
+        if (isReservedName(name)) return name + "_";
+        return name;
+    }
+
     public boolean isReservedName(String name)
     {
-        return Arrays.binarySearch(reservedNames, name.toLowerCase()) >= 0;
+        return Arrays.binarySearch(reservedNames, name) >= 0;
     }
 
     // Array of all reserved keywords in ascending order (for binarySearch() to work)

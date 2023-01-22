@@ -370,10 +370,6 @@ public class PythonCompiler extends opsc.CompilerSupport
             return StringJoin("", temp); }
     }
 
-
-
-
-
     //private HashMap<String,Vector<PythonHelper>> packagesMap;
     private ArrayList<PythonHelper> helpers;
 
@@ -384,9 +380,7 @@ public class PythonCompiler extends opsc.CompilerSupport
 
     protected String getFieldName(IDLField field)
     {
-        String name = field.getName();
-        if (isReservedName(name)) return name + "_";
-        return name;
+        return nonReservedName(field.getName());
     }
 
     public PythonCompiler(String projectName)
@@ -487,7 +481,7 @@ public class PythonCompiler extends opsc.CompilerSupport
         templateText = templateText.replace(CONSTANTS_REGEX, getConstantDeclarations(idlClass) + getEnumClassDeclarations(idlClass));
         templateText = templateText.replace(DECLARATIONS_REGEX, getDeclarations(idlClass));
         if (genPythonInit) {
-            templateText = templateText.replace(INITPARAMETERS_REGEX, getInitParams(idlClass, false));
+            templateText = templateText.replace(INITPARAMETERS_REGEX, getInitParams(idlClass, false, false));
             templateText = templateText.replace(BASE_INITPARAMETERS_REGEX, getBaseInitParams(idlClass));
         } else {
             templateText = templateText.replace(INITPARAMETERS_REGEX, "");
@@ -692,8 +686,7 @@ public class PythonCompiler extends opsc.CompilerSupport
         String ret = "";
         for (int i = 0; i < idlClass.getEnumNames().size(); i++)
         {
-            ret += tab(1) + idlClass.getEnumNames().get(i) + " = " + i + endl();
-
+            ret += tab(1) + nonReservedName(idlClass.getEnumNames().get(i)) + " = " + i + endl();
         }
         return ret;
     }
@@ -739,7 +732,7 @@ public class PythonCompiler extends opsc.CompilerSupport
             ret += tab(1) + "class " + et.getName() + "(object):" + endl();
             int num = 0;
             for (String eName : et.getEnumNames()) {
-                ret += tab(2) + eName + " = " + num + endl();
+                ret += tab(2) + nonReservedName(eName) + " = " + num + endl();
                 num++;
             }
         }
@@ -749,7 +742,7 @@ public class PythonCompiler extends opsc.CompilerSupport
     protected String getBaseInitParams(IDLClass idlClass)
     {
         // Get init params for base class
-        String ret = getInitParams(idlClass.getBaseClassRef(), true);
+        String ret = getInitParams(idlClass.getBaseClassRef(), true, true);
         if (ret != "") {
             // Remove leading ','
             ret = ret.substring(1);
@@ -757,7 +750,7 @@ public class PythonCompiler extends opsc.CompilerSupport
         return ret;
     }
 
-    protected String getInitParams(IDLClass idlClass, boolean onlyName)
+    protected String getInitParams(IDLClass idlClass, boolean onlyName, boolean forBase)
     {
         if (idlClass == null) {
             // For the implicit base class OPS_Object
@@ -772,7 +765,7 @@ public class PythonCompiler extends opsc.CompilerSupport
         String className = idlClass.getClassName() + ".";
 
         // Get baseclass parameters and put them first
-        String ret = getInitParams(idlClass.getBaseClassRef(), onlyName);
+        String ret = getInitParams(idlClass.getBaseClassRef(), onlyName, true);
 
         for (IDLField field : idlClass.getFields()) {
             if (field.isStatic()) continue;
@@ -788,10 +781,10 @@ public class PythonCompiler extends opsc.CompilerSupport
                         if (typeName.startsWith(packageName)) {
                             typeName = typeName.substring(packageName.length());
                         }
-                        if (typeName.startsWith(className)) {
+                        if (!forBase && typeName.startsWith(className)) {
                             typeName = typeName.substring(className.length());
                         }
-                        ret += "=" + typeName + "." + field.getValue();
+                        ret += "=" + typeName + "." + nonReservedName(field.getValue());
                     } else {
                         ret += "=0";
                     }
@@ -855,7 +848,7 @@ public class PythonCompiler extends opsc.CompilerSupport
                     if (typeName.startsWith(packageName)) {
                         typeName = typeName.substring(packageName.length());
                     }
-                    typeInit = typeName + "." + field.getValue();
+                    typeInit = typeName + "." + nonReservedName(field.getValue());
                 } else {
                     typeInit = "0";
                 }
@@ -1091,14 +1084,21 @@ public class PythonCompiler extends opsc.CompilerSupport
         return "### ERROR";
     }
 
+    protected String nonReservedName(String name)
+    {
+        if (isReservedName(name)) return name + "_";
+        return name;
+    }
+
     public boolean isReservedName(String name)
     {
-        return Arrays.binarySearch(reservedNames, name.toLowerCase()) >= 0;
+        return Arrays.binarySearch(reservedNames, name) >= 0;
     }
 
     // Array of all reserved keywords in ascending order (for binarySearch() to work)
     private static final String[] reservedNames = {
-      "and", "assert",
+      "False", "None", "True",
+      "and", "as", "assert",
       "break",
       "class", "continue",
       "def", "del",
@@ -1107,12 +1107,12 @@ public class PythonCompiler extends opsc.CompilerSupport
       "global",
       "if", "import", "in", "is",
       "lambda",
-      "not",
+      "nonlocal", "not",
       "or",
       "pass", "print",
       "raise", "return",
       "try",
-      "while",
+      "while", "with",
       "yield"
     };
 

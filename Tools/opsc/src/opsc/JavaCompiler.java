@@ -173,9 +173,7 @@ public class JavaCompiler extends opsc.Compiler
 
     protected String getFieldName(IDLField field)
     {
-        String name = field.getName();
-        if (isReservedName(name)) return name + "_";
-        return name;
+        return nonReservedName(field.getName());
     }
 
     protected void compilePublisher(IDLClass idlClass) throws IOException
@@ -287,7 +285,7 @@ public class JavaCompiler extends opsc.Compiler
             if (field.isEnumType()) {
                 //Set first enum value as init value
                 if (field.getValue().length() > 0) {
-                    iVal = eType + "." + field.getValue();
+                    iVal = eType + "." + nonReservedName(field.getValue());
                 }
             }
             String fieldName = getFieldName(field);
@@ -347,7 +345,7 @@ public class JavaCompiler extends opsc.Compiler
     {
         String ret = "";
         for (int i = 0; i < idlClass.getEnumNames().size(); i++) {
-            ret += idlClass.getEnumNames().get(i);
+            ret += nonReservedName(idlClass.getEnumNames().get(i));
             ret += ",";
         }
         return ret;
@@ -370,7 +368,7 @@ public class JavaCompiler extends opsc.Compiler
             String values = "";
             for (String eName : et.getEnumNames()) {
                 if (values != "") values += ", ";
-                values += eName;
+                values += nonReservedName(eName);
             }
             ret += tab(2) + values + endl();
             ret += tab(1) + "};" + endl();
@@ -785,6 +783,12 @@ public class JavaCompiler extends opsc.Compiler
         }
     }
 
+    protected String nonReservedName(String name)
+    {
+        if (isReservedName(name)) return name + "_";
+        return name;
+    }
+
     public boolean isReservedName(String name)
     {
         return Arrays.binarySearch(reservedNames, name) >= 0;
@@ -796,17 +800,18 @@ public class JavaCompiler extends opsc.Compiler
       "boolean", "break", "byte",
       "case", "catch", "char", "class", "const", "continue",
       "default", "do", "double",
-      "else", "enum", "extends",
+      "else", "enum", "exports", "extends",
       "final", "finally", "float", "for",
       "goto",
       "if", "implements", "import", "instanceof", "int", "interface",
       "long",
+      "module",
       "native", "new",
       "package", "private", "protected", "public",
-      "return",
+      "requires", "return",
       "short", "static", "strictfp", "super", "switch", "synchronized",
       "this", "throw", "throws", "transient", "try",
-      "void", "volatile",
+      "var", "void", "volatile",
       "while"
     };
 

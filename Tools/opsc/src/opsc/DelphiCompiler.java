@@ -230,20 +230,14 @@ public class DelphiCompiler extends opsc.Compiler
       }
     }
 
-    protected String checkReservedName(String name)
-    {
-        if (isReservedName(name)) return name + "_";
-        return name;
-    }
-
     protected String getClassName(IDLClass idlclass)
     {
-        return checkReservedName(idlclass.getClassName());
+        return nonReservedName(idlclass.getClassName());
     }
 
     protected String getFieldName(IDLField field)
     {
-        return checkReservedName(field.getName());
+        return nonReservedName(field.getName());
     }
 
     private String elementType(String type)
@@ -287,7 +281,7 @@ public class DelphiCompiler extends opsc.Compiler
     {
       String s = elementType(className);
       // We return the unitname.classname
-      return getUnitName(s) + "." + convOpsName(checkReservedName(getLastPart(s)));
+      return getUnitName(s) + "." + convOpsName(nonReservedName(getLastPart(s)));
     }
 
     protected String getConstructorHead(IDLClass idlClass)
@@ -451,7 +445,7 @@ public class DelphiCompiler extends opsc.Compiler
     {
         String ret = "";
         for (int i = 0; i < idlClass.getEnumNames().size(); i++) {
-            ret += idlClass.getEnumNames().get(i);
+            ret += nonReservedName(idlClass.getEnumNames().get(i));
             if (i < idlClass.getEnumNames().size()-1) {
               ret += ",";
             }
@@ -556,7 +550,7 @@ public class DelphiCompiler extends opsc.Compiler
             String values = "";
             for (String eName : et.getEnumNames()) {
                 if (values != "") values += ", ";
-                values += eName;
+                values += nonReservedName(eName);
             }
             ret += tab(4) + values + endl();
             ret += tab(3) + ");" + endl();
@@ -769,6 +763,12 @@ public class DelphiCompiler extends opsc.Compiler
             }
         }
         return ret;
+    }
+
+    protected String nonReservedName(String name)
+    {
+        if (isReservedName(name)) return name + "_";
+        return name;
     }
 
     public boolean isReservedName(String name)

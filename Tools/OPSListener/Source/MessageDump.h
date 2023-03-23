@@ -210,14 +210,24 @@ namespace message_dump {
                         } else {
                             if (row >= msgDump.rowlimit) { std::cout << indent(level) << name << "[" << std::setw(w) << " " << " ... " << std::setw(w) << " " << "]\n"; }
                         }
-                        std::cout << indent(level) << name << "[" << std::setw(w) << i << " ... " << std::setw(w) << (i + num - 1) << "] <" << sizeof(T) << ">: ";
+                        std::cout << indent(level) << name << "[" << std::setw(w) << i << " ... " << std::setw(w) << (i + num - 1) << "] <" << sizeof(T);
+                        if (std::is_same<T, uint8_t>::value) {
+                            std::cout << "> (hex): " << std::hex << std::setfill('0');
+                        } else {
+                            std::cout << ">: ";
+                        }
                         for (int j = 0; (i < len) && (j < numw); ++i, ++j) {
                             if (std::is_same<T, bool>::value) {
                                 std::cout << (*ptr ? "true" : "false") << "  ";
+                            } else if (std::is_same<T, uint8_t>::value) {
+                                std::cout << std::setw(2) << (P) * (T*)ptr << "  ";
                             } else {
                                 std::cout << (P) * (T*)ptr << "  ";
                             }
                             ptr += sizeof(T);
+                        }
+                        if (std::is_same<T, uint8_t>::value) {
+                            std::cout << std::dec << std::setfill(' ');
                         }
                         std::cout << "\n";
                     } else {
@@ -228,7 +238,7 @@ namespace message_dump {
             }
         };
         using DumpVectorBoolean = DumpVector<bool, 8>;
-        using DumpVectorByte = DumpVector<int8_t, 16, int>;
+        using DumpVectorByte = DumpVector<uint8_t, 16, int>;
         using DumpVectorShort = DumpVector<int16_t, 16>;
         using DumpVectorInt = DumpVector<int32_t>;
         using DumpVectorLong = DumpVector<int64_t>;

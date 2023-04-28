@@ -125,11 +125,11 @@ namespace ops
 
 	public:
 		TCPOpsProtocol(timeFunc func, int heartbeatPeriod, int heartbeatTimeout) :
-			_timeFuncMs(func),
-			_sizeInfoBuffer("opsp_tcp_size_info"),
-			_probeBuffer   ("opsprobeNNNN______"),
-			_heartbeatPeriod(heartbeatPeriod),
-			_heartbeatTimeout(heartbeatTimeout)
+			_timeFuncMs{ func },
+			_sizeInfoBuffer{ "opsp_tcp_size_info" },
+			_probeBuffer{ "opsprobeNNNN______" },
+			_heartbeatPeriod{ heartbeatPeriod },
+			_heartbeatTimeout{ heartbeatTimeout }
 		{
 			// In _probeBuffer the NNNN is the current TCP protocol version
 			*((uint32_t*)(_probeBuffer + 8)) = protocol_version;

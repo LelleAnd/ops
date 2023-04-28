@@ -141,6 +141,8 @@ if (OPS_BUILD_CPP)
   # find Boost. If not found we can't build c++ libs
   option(Boost_DEBUG "Set to ON to debug Boost paths" OFF)
 
+  #set(BOOST_LIB_DIAGNOSTIC ON)
+
   # this prevents the FindBoost.cmake to search for cmake-built Boost
   set(Boost_NO_BOOST_CMAKE ON)
 
@@ -151,16 +153,23 @@ if (OPS_BUILD_CPP)
   message(STATUS "BOOST_ROOT: " ${BOOST_ROOT})
 
   if(BOOST_ARCH)
-    ###  set(Boost_ARCHITECTURE "-x64")    ## Needed to work on GitHub CI test
     set(Boost_ARCHITECTURE ${BOOST_ARCH})
   endif()
 
   if(MSVC)
     set(Boost_USE_STATIC_LIBS ON)
+    ##set(Boost_USE_STATIC_RUNTIME ON)
     find_package(Boost MODULE COMPONENTS system thread regex)
   else()
     find_package(Boost MODULE COMPONENTS system thread)
   endif()
+
+  ## Boost's -mt-s corresponds to VS' Runtime Library setting /MT
+  ## Boost's -mt-sgd corresponds to VS' Runtime Library setting /MTd
+  ## Boost's -mt corresponds to VS' Runtime Library setting /MD
+  ## Boost's -mt-gd corresponds to VS' Runtime Library setting /MDd
+  ## First and second can be built with ./b2 runtime-link=static threading=multi
+  ## Third and fourth can be built with ./b2 runtime-link=shared threading=multi
 
   message(STATUS "Boost_INCLUDE_DIRS: " ${Boost_INCLUDE_DIRS})
   message(STATUS "Boost_LIBRARY_DIRS: " ${Boost_LIBRARY_DIRS})
@@ -194,6 +203,8 @@ if (OPS_BUILD_CPP)
   message(STATUS ">>> CMAKE_CXX_FLAGS: " ${CMAKE_CXX_FLAGS})
   message(STATUS ">>> CMAKE_CXX_FLAGS_DEBUG: " ${CMAKE_CXX_FLAGS_DEBUG})
   message(STATUS ">>> CMAKE_CXX_FLAGS_RELEASE: " ${CMAKE_CXX_FLAGS_RELEASE})
+
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
   set(warnings "")
   if(MSVC)

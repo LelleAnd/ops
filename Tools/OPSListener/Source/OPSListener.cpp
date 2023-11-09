@@ -42,7 +42,7 @@
 
 #endif
 
-const char c_program_version[] = "OPSListener Version 2021-06-12";
+const char c_program_version[] = "OPSListener Version 2023-03-23";
 
 void showDescription()
 {

@@ -639,18 +639,23 @@ public class OpsCompiler
     // ------------------------------------------------------------------------
 
     // Called for idlTypes to check if we can narrow them to more specific types
-    protected void lookupType(IDLClass cl, IDLField field)
+    protected boolean lookupType(Vector<IDLClass> list, IDLClass cl, IDLField field)
     {
       String fieldTypeName = field.getType().replace("[]","");
-      String cName = "", tName = "";
-      int idx = fieldTypeName.indexOf('.');
+      String pName = "", cName = "", tName = "";
+      int idx = fieldTypeName.lastIndexOf('.');
       if (idx > 0) {
         cName = fieldTypeName.substring(0, idx);
         tName = fieldTypeName.substring(idx+1);
       }
-      if (cName.equals("")) return;
-      //System.out.println(">>>> lookupType(), cName: " + cName + " tName: " + tName);
-      for (IDLClass idlClass : _parser._idlClasses) {
+      if (cName.equals("")) return false;
+      idx = cName.lastIndexOf('.');
+      if (idx > 0) {
+        pName = cName.substring(0, idx);
+        cName = cName.substring(idx+1);
+      }
+      //System.out.println(">>>> lookupType(), pName: " + pName + " cName: " + cName + " tName: " + tName);
+      for (IDLClass idlClass : list) {
         if (idlClass.getClassName().equals(cName)) {
           for (IDLEnumType et : idlClass.getEnumTypes()) {
             if (et.getName().equals(tName)) {
@@ -658,13 +663,21 @@ public class OpsCompiler
               field.setIdlType(false);
               field.setEnumType(true);
               field.setValue(et.getEnumNames().get(0));
-              field.setFullyQualifiedType(idlClass.getPackageName() + "." + field.getType());
+              if (pName.equals("")) {
+                field.setFullyQualifiedType(idlClass.getPackageName() + "." + field.getType());
+              }
               // Add an import so that we include the class containing the enum definition
-              cl.addImport(cName);
+              if (pName.equals("") || (pName.equals(cl.getPackageName()))) {
+                cl.addImport(cName);
+              } else {
+                cl.addImport(pName + "." + cName);
+              }
+              return true;
             }
           }
         }
       }
+      return false;
     }
 
     protected void secondStage()
@@ -694,7 +707,10 @@ public class OpsCompiler
           // Check if any idl types actually are enum types from other idls
           // ex: Definitions.Command
           if (field.isIdlType()) {
-            lookupType(idlClass, field);
+            // First look in the 'normal' classes and if not found in the 'ref' classes
+            if (lookupType(_parser._idlClasses, idlClass, field) == false) {
+              boolean dummy = lookupType(_parser._idlRefClasses, idlClass, field);
+            }
           }
           // Check if any field specified the version directive and if so save the highest version found
           int v = CompilerSupport.highestVersion(idlClass.getClassName() + "." + field.getName(), field.getDirective());

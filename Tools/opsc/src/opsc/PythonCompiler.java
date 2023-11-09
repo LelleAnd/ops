@@ -614,6 +614,18 @@ public class PythonCompiler extends opsc.CompilerSupport
                 helper.addImport(packageStr,classStr,true);
             }
         }
+        for (String typeName : idlClass.getImports()) {
+            int splitIndex = typeName.lastIndexOf(".");
+            if (splitIndex == -1) continue;
+
+            String packageStr = typeName.substring(0,splitIndex);
+            String classStr   = typeName.substring(splitIndex+1);
+
+            if (packageStr.equals(packageName)) continue;
+
+            if (_verbose > 0) System.out.println(">>>>> checkForImports() : " + packageStr);
+            helper.addImport(packageStr,classStr,true);
+        }
     }
 
 
@@ -778,8 +790,10 @@ public class PythonCompiler extends opsc.CompilerSupport
                     //Set first enum value as init value
                     if (field.getValue().length() > 0) {
                         String typeName = field.getFullyQualifiedType().replace("[]", "");
-                        if (typeName.startsWith(packageName)) {
-                            typeName = typeName.substring(packageName.length());
+                        // Remove package name, we import the class from the package so package name not used
+                        int idx = typeName.indexOf('.');
+                        if (idx > 0) {
+                          typeName = typeName.substring(idx+1);
                         }
                         if (!forBase && typeName.startsWith(className)) {
                             typeName = typeName.substring(className.length());
@@ -845,8 +859,10 @@ public class PythonCompiler extends opsc.CompilerSupport
                 //Set first enum value as init value
                 if (field.getValue().length() > 0) {
                     String typeName = field.getFullyQualifiedType().replace("[]", "");
-                    if (typeName.startsWith(packageName)) {
-                        typeName = typeName.substring(packageName.length());
+                    // Remove package name, we import the class from the package so package name not used
+                    int idx = typeName.indexOf('.');
+                    if (idx > 0) {
+                      typeName = typeName.substring(idx+1);
                     }
                     typeInit = typeName + "." + nonReservedName(field.getValue());
                 } else {

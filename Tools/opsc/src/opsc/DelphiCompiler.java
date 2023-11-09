@@ -284,6 +284,18 @@ public class DelphiCompiler extends opsc.Compiler
       return getUnitName(s) + "." + convOpsName(nonReservedName(getLastPart(s)));
     }
 
+    protected String getFullyQualifiedEnumType(String fieldType)
+    {
+      // Temorarily remove the enumname and convert then the classname
+      String cName = "", tName = "";
+      int idx = fieldType.lastIndexOf('.');
+      if (idx > 0) {
+          cName = fieldType.substring(0, idx);
+          tName = fieldType.substring(idx+1);
+      }
+      return getFullyQualifiedClassName(cName) + "." + tName;
+    }
+
     protected String getConstructorHead(IDLClass idlClass)
     {
       String ret = "";
@@ -456,21 +468,25 @@ public class DelphiCompiler extends opsc.Compiler
     protected String getDeclareVector(IDLField field)
     {
         String fieldType = getLastPart(field.getType());
-        String fieldName = getFieldName(field);
-        String ret = fieldName + " : ";
+        String ret = "";
         if (field.getArraySize() == 0) {
             // idl = type[] name;
             if (field.isIdlType()) {
-                ret += languageType(getFullyQualifiedClassName(fieldType) + "[]") + ";" + endl();
+                ret += languageType(getFullyQualifiedClassName(fieldType) + "[]");
+            } else if (field.isEnumType()) {
+                ret += languageType(getFullyQualifiedEnumType(field.getType()));
             } else {
-                ret += languageType(fieldType) + ";" + endl();
+                ret += languageType(fieldType);
             }
         } else {
             // idl = type[size] name;
+            ret += "array [0.." + (field.getArraySize() - 1) + "] of ";
             if (field.isIdlType()) {
-                ret += "array [0.." + (field.getArraySize() - 1) + "] of " + languageType(getFullyQualifiedClassName(field.getType())) + ";" + endl();
+                ret += languageType(getFullyQualifiedClassName(field.getType()));
+            } else if (field.isEnumType()) {
+                ret += getFullyQualifiedEnumType(elementType(field.getType()));
             } else {
-                ret += "array [0.." + (field.getArraySize() - 1) + "] of " + languageType(elementType(field.getType())) + ";" + endl();
+                ret += languageType(elementType(field.getType()));
             }
         }
         return ret;
@@ -489,7 +505,6 @@ public class DelphiCompiler extends opsc.Compiler
 
         for (IDLField field : idlClass.getFields()) {
             if (field.isStatic()) continue;
-            String fieldName = getFieldName(field);
             if(!field.getComment().equals("")) {
                 ret += convertComment(2, field.getComment());
             }
@@ -497,16 +512,20 @@ public class DelphiCompiler extends opsc.Compiler
             if (vers.length() > 0) {
                 ret += tab(2) + "/// " + vers + endl();
             }
-            String fieldType = field.getType(); ///TEST getLastPart(field.getType());
+            ret += tab(2) + getFieldName(field) + " : ";
+            String fieldType = field.getType();
             if (field.isArray()) {
-                ret += tab(2) + getDeclareVector(field);
-            } else if(field.getType().equals("string")) {
-                ret += tab(2) + fieldName + " : " + languageType(fieldType) + ";" + endl();
-            } else if(field.isIdlType()) {
-                ret += tab(2) + fieldName + " : " + languageType(getFullyQualifiedClassName(fieldType)) + ";" + endl();
+                ret += getDeclareVector(field);
+            } else if (field.getType().equals("string")) {
+                ret += languageType(fieldType);
+            } else if (field.isIdlType()) {
+                ret += languageType(getFullyQualifiedClassName(fieldType));
+            } else if (field.isEnumType()) {
+                ret += getFullyQualifiedEnumType(fieldType);
             } else {
-                ret += tab(2) + fieldName + " : " + languageType(fieldType) + ";" + endl();
+                ret += languageType(fieldType);
             }
+            ret += ";" + endl();
         }
         return ret;
     }
@@ -733,7 +752,7 @@ public class DelphiCompiler extends opsc.Compiler
                     fieldName += "[__i__]";
                     ret += tab(2);
                 }
-                ret += "__tmp__ := Int16(" + fieldName + "); archiver.Inout('" + field.getName() + "', __tmp__); " + fieldName + " := " + elementType(field.getType()) + "(__tmp__); " + endl();
+                ret += "__tmp__ := Int16(" + fieldName + "); archiver.Inout('" + field.getName() + "', __tmp__); " + fieldName + " := " + getFullyQualifiedEnumType(elementType(field.getType())) + "(__tmp__); " + endl();
                 if (field.isArray()) {
                     ret += tab(1) + "end;" + endl();
                     ret += tab(1) + "archiver.endList('" + field.getName() + "');" + endl();

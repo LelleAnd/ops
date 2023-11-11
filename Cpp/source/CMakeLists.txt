@@ -60,8 +60,14 @@ if(NOT OPS_BOOTSTRAP_BUILD)
   add_dependencies(${LIB_NAME} opsidls)
 
   if (DEFINED OPS_NO_SEPARATE_BOOTSTRAP)
-    target_include_directories(${LIB_NAME} PUBLIC ${OPS4_CPP_ROOT}/include)
-    target_include_directories(${LIB_NAME} PUBLIC ${OPSIDLS_GENERATED_PATH}/Cpp)
+    target_include_directories(${LIB_NAME} PUBLIC
+      $<BUILD_INTERFACE:${OPS4_CPP_ROOT}/include>
+      $<INSTALL_INTERFACE:${HEADER_INSTALL_DIR}>
+    )
+    target_include_directories(${LIB_NAME} PUBLIC
+      $<BUILD_INTERFACE:${OPSIDLS_GENERATED_PATH}/Cpp>
+      $<INSTALL_INTERFACE:${HEADER_INSTALL_DIR}>
+    )
   else()
     target_include_directories(${LIB_NAME} PUBLIC ${HEADER_INSTALL_DIR})
   endif()
@@ -97,8 +103,14 @@ if(NOT OPS_BOOTSTRAP_BUILD)
   add_dependencies(${LIB_STATIC} opsidls)
 
   if (DEFINED OPS_NO_SEPARATE_BOOTSTRAP)
-    target_include_directories(${LIB_STATIC} PUBLIC ${OPS4_CPP_ROOT}/include)
-    target_include_directories(${LIB_STATIC} PUBLIC ${OPSIDLS_GENERATED_PATH}/Cpp)
+    target_include_directories(${LIB_STATIC} PUBLIC
+      $<BUILD_INTERFACE:${OPS4_CPP_ROOT}/include>
+      $<INSTALL_INTERFACE:${HEADER_INSTALL_DIR}>
+    )
+    target_include_directories(${LIB_STATIC} PUBLIC
+      $<BUILD_INTERFACE:${OPSIDLS_GENERATED_PATH}/Cpp>
+      $<INSTALL_INTERFACE:${HEADER_INSTALL_DIR}>
+    )
   else()
     target_include_directories(${LIB_STATIC} PUBLIC ${HEADER_INSTALL_DIR})
   endif()

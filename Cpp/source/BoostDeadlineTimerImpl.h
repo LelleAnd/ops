@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2021 Lennart Andersson.
+* Copyright (C) 2021-2023 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -29,7 +29,7 @@
 #endif
 
 #include <boost/asio.hpp>
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -85,6 +85,7 @@ namespace ops
             deadlineTimer.cancel();
             deadlineTimer.expires_from_now(timeout);
             // Here we pass in a shared_ptr to our instance
+            using namespace boost::placeholders;
             deadlineTimer.async_wait(boost::bind(&impl::asynchHandleDeadlineTimeout, shared_from_this(), boost::asio::placeholders::error));
         }
 

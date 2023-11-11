@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2022 Lennart Andersson.
+* Copyright (C) 2019-2023 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -30,7 +30,6 @@
 #endif
 
 #include <boost/asio.hpp>
-#include <boost/bind.hpp>
 
 #ifdef __GNUC__
 #pragma GCC diagnostic pop

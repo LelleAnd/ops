@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2020 Lennart Andersson.
+* Copyright (C) 2020-2023 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -30,7 +30,7 @@
 #endif
 
 #include <boost/asio.hpp>
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
@@ -180,6 +180,7 @@ namespace ops
 			// Set variables indicating that we are "active"
 			m_working = true;
 			m_asyncCallActive = true;
+			using namespace boost::placeholders;
 			sock->async_receive_from(
 				boost::asio::buffer(data, max_length),
 				sendingEndPoint,

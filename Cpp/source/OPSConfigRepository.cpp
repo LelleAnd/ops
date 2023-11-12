@@ -56,8 +56,8 @@ bool OPSConfigRepository::domainExist(const ObjectName_T& domainID )
 {
     const SafeLock lock(repoLock);
     std::vector<Domain*>& doms = m_config->getRefToDomains();
-    for (unsigned int i = 0; i < doms.size(); i++) {
-        if (doms[i]->getDomainID() == domainID) { return true; }
+    for (const Domain* x : doms) {
+        if (x->getDomainID() == domainID) { return true; }
     }
     return false;
 }

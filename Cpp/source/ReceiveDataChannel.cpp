@@ -64,13 +64,13 @@ namespace ops
 	static void ReportError(Participant& participant, ErrorMessage_T message, uint32_t const addr, uint16_t const port)
 	{
 		message += " [";
-        message += NumberToString((addr >> 24) & 0xFF);
+        message += NumberToString((addr >> 24u) & 0xFFu);
         message += ".";
-        message += NumberToString((addr >> 16) & 0xFF);
+        message += NumberToString((addr >> 16u) & 0xFFu);
         message += ".";
-        message += NumberToString((addr >>  8) & 0xFF);
+        message += NumberToString((addr >>  8u) & 0xFFu);
         message += ".";
-        message += NumberToString((addr      ) & 0xFF);
+        message += NumberToString((addr       ) & 0xFFu);
 		message += "::";
 		message += NumberToString(port);
 		message += ']';

@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2021 Lennart Andersson.
+* Copyright (C) 2018-2022 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -81,6 +81,10 @@ public:
         failed      // When Ack is enabled, and at least one expected Ack sender failed to send Ack after x resends
     };
     SendState getSendState() const noexcept { return _sendState; }
+
+    // For debug it can be handy to access the PublicationID to be able to synchronize with external tools as eg. Wireshark.
+    // Note that the value is the ID to be used in the next message (ie. the number of sent messages, excluding ev. resends).
+    int64_t getPublicationID() const noexcept { return currentPublicationID; }
 
 protected:
     int64_t currentPublicationID{ 0 };

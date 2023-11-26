@@ -170,7 +170,7 @@ void ListDomains()
 
 void ForAllTopics(DebugListener& listener, opsidls::DebugRequestResponseDataPublisher& pub)
 {
-	for (const auto n : listener._topics) {
+	for (const auto& n : listener._topics) {
 		request.Name = n;
 		pub.write(request);
 		ops::TimeHelper::sleep(std::chrono::milliseconds(20));

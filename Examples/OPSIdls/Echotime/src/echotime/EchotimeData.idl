@@ -1,0 +1,8 @@
+package Echotime;
+
+class EchotimeData
+{
+    long SendTime;
+    long RecvTive;
+    byte[] Data;
+}

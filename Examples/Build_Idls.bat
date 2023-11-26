@@ -2,6 +2,8 @@
 @set OPS4_GPR_REL_PATH=../../../../../Ada/
 call ..\Tools\opsc\opsc.bat -P OPSIdls\ChatExample -g ALL -gpr %OPS4_GPR_REL_PATH%
 @if errorlevel 1 goto :error
+call ..\Tools\opsc\opsc.bat -P OPSIdls\Echotime -g ALL -gpr %OPS4_GPR_REL_PATH%
+@if errorlevel 1 goto :error
 call ..\Tools\opsc\opsc.bat -P OPSIdls\HelloRequestReply -g ALL -gpr %OPS4_GPR_REL_PATH%
 @if errorlevel 1 goto :error
 call ..\Tools\opsc\opsc.bat -P OPSIdls\HelloWorld -g ALL -gpr %OPS4_GPR_REL_PATH%

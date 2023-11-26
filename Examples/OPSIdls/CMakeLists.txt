@@ -1,6 +1,7 @@
 
 # this one generates all example IDLs
 add_subdirectory(ChatExample)
+add_subdirectory(Echotime)
 add_subdirectory(HelloRequestReply)
 add_subdirectory(HelloWorld)
 add_subdirectory(MultiLibs/BaseIDLs)

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Description:
+-->
+<root>
+  <ops_config type = "DefaultOPSConfigImpl">
+    <domains>
+      <!-- First domain -->
+      <element type = "Domain">
+        <domainID>EchoDomain</domainID>
+        <domainAddress>234.5.6.8</domainAddress>
+        <localInterface>192.168.0.0/24</localInterface>
+        <!-- <localInterface>127.0.0.1</localInterface>-->
+        <!-- <localInterface>192.168.0.26</localInterface>-->
+        <!--optional <timeToLive>1</timeToLive>-->
+        <inSocketBufferSize>16000000</inSocketBufferSize>
+        <outSocketBufferSize>16000000</outSocketBufferSize>
+        <optNonVirt>true</optNonVirt>
+        <!--heartbeatPeriod>0</heartbeatPeriod>-->
+        <!--heartbeatTimeout>3000</heartbeatTimeout>-->
+        <resendNum>5</resendNum>
+        <resendTimeMs>10</resendTimeMs>
+
+        <!-- metaDataMcPort is necessary for TCP/UDP many-to-many transports to work -->
+        <metaDataMcPort>9494</metaDataMcPort>
+        <debugMcPort>0</debugMcPort>
+
+        <channels>
+          <element type = "Channel">
+            <!-- UDP many-to-many transport -->
+            <name>Channel-udp</name>
+            <linktype>udp</linktype>
+          </element>
+          <element type = "Channel">
+            <!-- UDP many-to-one transport, subscriber side -->
+            <name>Channel-master-udp</name>
+            <linktype>udp</linktype>
+            <address>192.168.0.25</address>
+            <port>12000</port>
+          </element>
+          <element type = "Channel">
+            <!-- UDP many-to-one transport, subscriber side -->
+            <name>Channel-slave-udp</name>
+            <linktype>udp</linktype>
+            <address>192.168.0.30</address>
+            <port>12001</port>
+          </element>
+
+          <element type = "Channel">
+            <!-- MC many-to-many transport -->
+            <name>Channel-mc</name>
+            <linktype>multicast</linktype>
+            <port>9876</port>
+          </element>
+
+          <element type = "Channel">
+            <!-- TCP many-to-many transport -->
+            <name>Channel-tcp</name>
+            <linktype>tcp</linktype>
+          </element>
+        </channels>
+
+        <transports>
+          <element type = "Transport">
+            <channelID>Channel-udp</channelID>
+            <topics>
+              <element>EchotimeRequestTopic</element>
+              <element>EchotimeReplyTopic</element>
+            </topics>
+          </element>
+          <element type = "Transport">
+            <channelID>Channel-master-udp</channelID>
+            <topics>
+            </topics>
+          </element>
+          <element type = "Transport">
+            <channelID>Channel-slave-udp</channelID>
+            <topics>
+            </topics>
+          </element>
+        </transports>
+
+        <topics>
+          <element type = "Topic">
+            <name>EchotimeRequestTopic</name>
+            <dataType>Echotime.EchotimeData</dataType>
+            <sampleMaxSize>1000000</sampleMaxSize>
+          </element>
+          <element type = "Topic">
+            <name>EchotimeReplyTopic</name>
+            <dataType>Echotime.EchotimeData</dataType>
+            <sampleMaxSize>1000000</sampleMaxSize>
+          </element>
+        </topics>
+      </element>
+
+    </domains>
+  </ops_config>
+</root>

@@ -13,6 +13,7 @@
 @IF NOT DEFINED OPS_BUILD_EXAMPLES set OPS_BUILD_EXAMPLES=ON
 @IF NOT DEFINED OPS_BUILD_UNITTESTS set OPS_BUILD_UNITTESTS=ON
 @IF NOT DEFINED OPS_CXXSTANDARD set OPS_CXXSTANDARD=11
+@IF NOT DEFINED OPS_MSBUILD_M set OPS_MSBUILD_M=-m
 
 @echo Using OPS_BUILD_BOOTSTRAP_DIR = %OPS_BUILD_BOOTSTRAP_DIR%
 @echo Using OPS_BUILD_DBG_DIR = %OPS_BUILD_DBG_DIR%
@@ -23,6 +24,8 @@
 @echo Using OPS_BUILD_PYTHON = %OPS_BUILD_PYTHON%
 @echo Using OPS_BUILD_EXAMPLES = %OPS_BUILD_EXAMPLES%
 @echo Using OPS_BUILD_UNITTESTS = %OPS_BUILD_UNITTESTS%
+@echo Using OPS_CXXSTANDARD = %OPS_CXXSTANDARD%
+@echo Using OPS_MSBUILD_M = %OPS_MSBUILD_M%
 @echo Using OPS_TINYXML2_DBG_DIR = %OPS_TINYXML2_DBG_DIR%
 @echo Using OPS_TINYXML2_OPT_DIR = %OPS_TINYXML2_OPT_DIR%
 
@@ -41,7 +44,7 @@
 cmake -DCMAKE_BUILD_TYPE=Bootstrap -DCMAKE_INSTALL_PREFIX=%OPS_INSTALL_PREFIX% %LANG_OPTIONS% -A Win32 %~dp0
 @IF ERRORLEVEL 1 goto :BUILD_FAILED
 @rem cmake --build . --target ALL_BUILD --config Debug
-msbuild -m ALL_BUILD.vcxproj -p:Configuration=Debug
+msbuild %OPS_MSBUILD_M% ALL_BUILD.vcxproj -p:Configuration=Debug
 @IF ERRORLEVEL 1 goto :BUILD_FAILED
 cmake -DBUILD_TYPE=Bootstrap -DCMAKE_INSTALL_PREFIX=%OPS_INSTALL_PREFIX% -P cmake_install.cmake
 @IF ERRORLEVEL 1 goto :BUILD_FAILED
@@ -51,11 +54,10 @@ cmake -DBUILD_TYPE=Bootstrap -DCMAKE_INSTALL_PREFIX=%OPS_INSTALL_PREFIX% -P cmak
 @pushd %~dp0
 @IF NOT EXIST %OPS_BUILD_DBG_DIR% mkdir %OPS_BUILD_DBG_DIR%
 @cd %OPS_BUILD_DBG_DIR%
-@rem cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%OPS_INSTALL_PREFIX% -DOPS_BUILD_EXAMPLES=%OPS_BUILD_EXAMPLES% -DOPS_BUILD_UNITTESTS=%OPS_BUILD_UNITTESTS% -A Win32 %~dp0
 cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%OPS_INSTALL_PREFIX% %LANG_OPTIONS% %MISC_OPTIONS% %XML_OPTIONS_DBG% -A Win32 %~dp0
 @IF ERRORLEVEL 1 goto :BUILD_FAILED
 @rem cmake --build . --target ALL_BUILD --config Debug
-msbuild -m ALL_BUILD.vcxproj -p:Configuration=Debug
+msbuild %OPS_MSBUILD_M% ALL_BUILD.vcxproj -p:Configuration=Debug
 @IF ERRORLEVEL 1 goto :BUILD_FAILED
 cmake -DBUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%OPS_INSTALL_PREFIX% -P cmake_install.cmake
 @IF ERRORLEVEL 1 goto :BUILD_FAILED
@@ -68,12 +70,12 @@ cmake -DBUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%OPS_INSTALL_PREFIX% -P cmake_in
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=%OPS_INSTALL_PREFIX% %LANG_OPTIONS% %XML_OPTIONS_REL% -A Win32 %~dp0
 @IF ERRORLEVEL 1 goto :BUILD_FAILED
 @rem cmake --build . --target ALL_BUILD --config Release
-msbuild -m ALL_BUILD.vcxproj -p:Configuration=Release
+msbuild %OPS_MSBUILD_M% ALL_BUILD.vcxproj -p:Configuration=Release
 @IF ERRORLEVEL 1 goto :BUILD_FAILED
 @rem @pushd Cpp\source
-@rem msbuild -m ops-static.vcxproj -p:Configuration=MinSizeRel
+@rem msbuild %OPS_MSBUILD_M% ops-static.vcxproj -p:Configuration=MinSizeRel
 @rem @IF ERRORLEVEL 1 goto :BUILD_FAILED
-@rem msbuild -m ops-static.vcxproj -p:Configuration=RelWithDebInfo
+@rem msbuild %OPS_MSBUILD_M% ops-static.vcxproj -p:Configuration=RelWithDebInfo
 @rem @IF ERRORLEVEL 1 goto :BUILD_FAILED
 @rem @popd
 cmake -DBUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=%OPS_INSTALL_PREFIX% -P cmake_install.cmake

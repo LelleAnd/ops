@@ -110,7 +110,7 @@ void Publisher(const ops::Topic& reqTopic, const ops::Topic& replyTopic)
         ops::TimeHelper::sleep(std::chrono::milliseconds(1000));
 
         // Output result from the echo test
-        uint32_t num = vec.size();
+        size_t num = vec.size();
         std::cout << "Got " << num << " messages\n";
 
         // Calculate transfer time

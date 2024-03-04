@@ -287,13 +287,14 @@ public class DelphiCompiler extends opsc.Compiler
     protected String getFullyQualifiedEnumType(String fieldType)
     {
       // Temorarily remove the enumname and convert then the classname
-      String cName = "", tName = "";
       int idx = fieldType.lastIndexOf('.');
       if (idx > 0) {
+          String cName = "", tName = "";
           cName = fieldType.substring(0, idx);
           tName = fieldType.substring(idx+1);
+          return getFullyQualifiedClassName(cName) + "." + tName;
       }
-      return getFullyQualifiedClassName(cName) + "." + tName;
+      return fieldType;
     }
 
     protected String getConstructorHead(IDLClass idlClass)

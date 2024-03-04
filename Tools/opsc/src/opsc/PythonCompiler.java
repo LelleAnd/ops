@@ -68,6 +68,16 @@ public class PythonCompiler extends opsc.CompilerSupport
         genPythonPackage = value;
     }
 
+    // Get last part of a name, removing any '.' and all content before
+    private String getLastPart(String name)
+    {
+        int idx = name.lastIndexOf(".");
+        if (idx > 0) {
+            return name.substring(idx+1);
+        }
+        return name;
+    }
+
     public void setPythonPackageDependencies(Vector<JarDependency> pyDeps)
     {
         for (JarDependency pyPack : pyDeps) {
@@ -225,8 +235,8 @@ public class PythonCompiler extends opsc.CompilerSupport
                 for (int i=0;i<dependencyName.size();i++)
                 {
                     if (dependencyHelper.get(i) != null) continue;
-                    if (_verbose > 1) System.out.print("For " + className + "  comparing " + dependencyName.get(i) +" to " + other.className + ": ");
-                    if (dependencyName.get(i).equals(other.className))
+                    if (_verbose > 1) System.out.print("For " + className + "  comparing " + getLastPart(dependencyName.get(i)) + " to " + other.className + ": ");
+                    if (getLastPart(dependencyName.get(i)).equals(other.className))
                     {
                         dependencyHelper.set(i,other);
                         if (_verbose > 1) System.out.println("success");

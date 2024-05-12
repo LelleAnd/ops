@@ -14,7 +14,7 @@ uses
   pizza.VessuvioData,
   pizza.special.ExtraAllt,
   pizza.special.Cheese,
-  Vcl.CheckLst;
+  Vcl.CheckLst, Vcl.Mask;
 
 type
   TAbsHelper = class(TObject)
@@ -73,6 +73,8 @@ type
     LabeledEdit_SendPeriod: TLabeledEdit;
     Timer_Send: TTimer;
     LabeledEdit_PizzadataVersion: TLabeledEdit;
+    Edit1: TEdit;
+    Button_GetHostAddress: TButton;
     procedure FormCreate(Sender: TObject);
     procedure Button_CreateParticipantsClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -96,6 +98,7 @@ type
     procedure Button_SetDeadlineClick(Sender: TObject);
     procedure LabeledEdit_SendPeriodExit(Sender: TObject);
     procedure Timer_SendTimer(Sender: TObject);
+    procedure Button_GetHostAddressClick(Sender: TObject);
   private
     { Private declarations }
     FMsgLog : TStringList;
@@ -138,6 +141,7 @@ uses
   uOps.XMLArchiverOut,
   uOps.OPSConfig,
   uOps.OPSConfigRepository,
+  uOps.NetworkSupport,
   PizzaProject.PizzaProjectTypeFactory;
 
 {$R *.dfm}
@@ -691,6 +695,25 @@ begin
 		info.Helper.DeleteSubscriber;
   end;
   UpdateListbox;
+end;
+
+procedure TForm1.Button_GetHostAddressClick(Sender: TObject);
+var
+  List : TStringList;
+begin
+  List := TStringList.Create;
+  try
+    Memo1.Lines.Add('Addreses for Host: ' + Edit1.Text);
+    GetHostAddresses(AnsiString(Trim(Edit1.Text)), List);
+    if List.Count = 0 then begin
+      Memo1.Lines.Add('  None ');
+    end else begin
+      Memo1.Lines.AddStrings(List);
+    end;
+    Memo1.Lines.Add('Selected: ' + Edit1.Text + ' --> ' + string(GetHostAddressEx(AnsiString(Trim(Edit1.text)))));
+  finally
+    List.Free;
+  end;
 end;
 
 procedure TForm1.Button_SetDeadlineClick(Sender: TObject);

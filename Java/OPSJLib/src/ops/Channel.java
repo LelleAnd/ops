@@ -1,6 +1,6 @@
 /**
  *
- * Copyright (C) 2016-2020 Lennart Andersson.
+ * Copyright (C) 2016-2024 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -21,6 +21,7 @@ package ops;
 
 import configlib.ArchiverInOut;
 import java.io.IOException;
+import ops.NetworkSupport;
 
 public class Channel extends OPSObject
 {
@@ -69,7 +70,7 @@ public class Channel extends OPSObject
         //archiver->inout(std::string("address"), domainAddress);
         channelID = archive.inout("name", channelID);
         linktype = archive.inout("linktype", linktype);
-        localInterface = archive.inout("localInterface", localInterface);
+        localInterface = NetworkSupport.GetHostAddressEx(archive.inout("localInterface", localInterface));
         domainAddress = archive.inout("address", domainAddress);
 
         //archiver->inout(std::string("timeToLive"), timeToLive);
@@ -81,11 +82,18 @@ public class Channel extends OPSObject
         outSocketBufferSize = archive.inout("outSocketBufferSize", outSocketBufferSize);
         inSocketBufferSize = archive.inout("inSocketBufferSize", inSocketBufferSize);
 
-        if (linktype.equals(""))
+        if (linktype.equals("") || (linktype.equals(LINKTYPE_MC)))
         {
             linktype = LINKTYPE_MC;
         }
-        else if ((!linktype.equals(LINKTYPE_MC)) && (!linktype.equals(LINKTYPE_TCP)) && (!linktype.equals(LINKTYPE_UDP)))
+        else if ((linktype.equals(LINKTYPE_TCP)) || (linktype.equals(LINKTYPE_UDP)))
+        {
+            if (domainAddress.length() > 0)
+            {
+                domainAddress = NetworkSupport.GetHostAddress(domainAddress);
+            }
+        }
+        else
         {
             throw new IOException(
                 "Illegal linktype: '" + linktype +

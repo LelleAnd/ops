@@ -16,6 +16,7 @@ with Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa;
 with Ops_Pa.ArchiverInOut_Pa.ArchiverIn_Pa;
 
 with Ops_Pa,
+     Ops_Pa.Socket_Pa,
      Ops_Pa.Error_Pa,
      Ops_Pa.OpsObject_Pa,
      Ops_Pa.OpsObject_Pa.OPSMessage_Pa,
@@ -746,23 +747,24 @@ package body PizzaTest_Pa is
     end loop;
 
     New_Line;
-    Put_Line(HT & " PC    Create Publishers");
-    Put_Line(HT & " PD    Delete Publishers");
-    Put_Line(HT & " PS    Start Publishers");
-    Put_Line(HT & " PT    Stop Publishers");
-    Put_Line(HT & " SC    Create Subscriber");
-    Put_Line(HT & " SD    Delete Subscriber");
-    Put_Line(HT & " SS    Start Subscriber");
-    Put_Line(HT & " ST    Stop Subscriber");
-    Put_Line(HT & " L num Set num Vessuvio Bytes [" & Integer'Image(NumVessuvioBytes) & "]");
-    Put_Line(HT & " T ms  Set deadline timeout [ms]");
-    Put_Line(HT & " V ms  Set send period [ms] [" & Int64'Image(sendPeriod) & "]");
-    Put_Line(HT & " A     Start/Stop periodical Write with set period");
-    Put_Line(HT & " M ver Set Pizzadata version [" & Integer'Image(PD_Version) & "]");
-    Put_Line(HT & " W     Write data");
-    Put_Line(HT & " Q     Quite (minimize program output)");
-    Put_Line(HT & " D     Toggle Trace on/off");
-    Put_Line(HT & " X     Exit program");
+    Put_Line(HT & " PC      Create Publishers");
+    Put_Line(HT & " PD      Delete Publishers");
+    Put_Line(HT & " PS      Start Publishers");
+    Put_Line(HT & " PT      Stop Publishers");
+    Put_Line(HT & " SC      Create Subscriber");
+    Put_Line(HT & " SD      Delete Subscriber");
+    Put_Line(HT & " SS      Start Subscriber");
+    Put_Line(HT & " ST      Stop Subscriber");
+    Put_Line(HT & " L num   Set num Vessuvio Bytes [" & Integer'Image(NumVessuvioBytes) & "]");
+    Put_Line(HT & " T ms    Set deadline timeout [ms]");
+    Put_Line(HT & " V ms    Set send period [ms] [" & Int64'Image(sendPeriod) & "]");
+    Put_Line(HT & " A       Start/Stop periodical Write with set period");
+    Put_Line(HT & " M ver   Set Pizzadata version [" & Integer'Image(PD_Version) & "]");
+    Put_Line(HT & " W       Write data");
+    Put_Line(HT & " I name  Lookup host name");
+    Put_Line(HT & " Q       Quite (minimize program output)");
+    Put_Line(HT & " D       Toggle Trace on/off");
+    Put_Line(HT & " X       Exit program");
   end;
 
   procedure setup_alt_config(cfg_rel_ops4 : String) is
@@ -1016,6 +1018,15 @@ package body PizzaTest_Pa is
                   ItemInfoList(i).helper.StopSubscriber;
                 end if;
               end loop;
+
+            elsif Ada.Strings.Fixed.Index(line, "i") = 1 then
+              line(1) := ' ';
+              declare
+                name : String := Ada.Strings.Fixed.Trim(line, Ada.Strings.Both);
+              begin
+                Ops_Pa.Socket_Pa.ListHostAddresses( name );
+                Put_Line("Selected: " & name & " --> " & Ops_Pa.Socket_Pa.GetHostAddressEx( name ));
+              end;
 
             elsif Ada.Strings.Fixed.Index(line, "l") = 1 then
               line(1) := ' ';

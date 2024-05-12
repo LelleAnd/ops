@@ -638,34 +638,34 @@ namespace OPSTest
             //    }
             //}
 
-            test("0.0.0.0");
-            test("127.0.0.1");
-            test("192.168.1.0/255.255.255.0");
-            test("192.168.117.0/24");
-            test("192.168.0.0/255.255.255.0");
-            test("192.168.0.0/24");
-            test("192.168.0.24");
-            test("192.168.0.25");
-            test("192.168.0.26");
-            test("172.17.205.209");
+            //test("0.0.0.0");
+            //test("127.0.0.1");
+            //test("192.168.1.0/255.255.255.0");
+            //test("192.168.117.0/24");
+            //test("192.168.0.0/255.255.255.0");
+            //test("192.168.0.0/24");
+            //test("192.168.0.24");
+            //test("192.168.0.25");
+            //test("192.168.0.26");
+            //test("172.17.205.209");
 
-            System.Net.NetworkInformation.IPGlobalProperties computerProperties = System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties();
-            System.Net.NetworkInformation.NetworkInterface[] nics = System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces();
+            //System.Net.NetworkInformation.IPGlobalProperties computerProperties = System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties();
+            //System.Net.NetworkInformation.NetworkInterface[] nics = System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces();
 
-            Log("Interface information for " + computerProperties.HostName + " . " + computerProperties.DomainName);
-            if (nics == null || nics.Length < 1)
-            {
-                Log("  No network interfaces found.");
-                return;
-            }
-  
-            Log("  Number of interfaces .................... : " + nics.Length);
-            foreach (System.Net.NetworkInformation.NetworkInterface adapter in nics)
-            {
-                System.Net.NetworkInformation.IPInterfaceProperties properties = adapter.GetIPProperties();
-                Log(adapter.Description);
-                Log(String.Empty.PadLeft(adapter.Description.Length, '='));
-                Log("  Interface type .......................... : " + adapter.NetworkInterfaceType);
+            //Log("Interface information for " + computerProperties.HostName + " . " + computerProperties.DomainName);
+            //if (nics == null || nics.Length < 1)
+            //{
+            //    Log("  No network interfaces found.");
+            //    return;
+            //}
+
+            //Log("  Number of interfaces .................... : " + nics.Length);
+            //foreach (System.Net.NetworkInformation.NetworkInterface adapter in nics)
+            //{
+                //System.Net.NetworkInformation.IPInterfaceProperties properties = adapter.GetIPProperties();
+                //Log(adapter.Description);
+                //Log(String.Empty.PadLeft(adapter.Description.Length, '='));
+                //Log("  Interface type .......................... : " + adapter.NetworkInterfaceType);
                 //Log("  Physical Address ........................ : " + adapter.GetPhysicalAddress().ToString());
                 //Log("  Operational status ...................... : " + adapter.OperationalStatus);
 
@@ -687,7 +687,7 @@ namespace OPSTest
                 //}
                 //Log("  IP version .............................. : " + versions);
 
-                ShowIPAddresses(properties);
+                //ShowIPAddresses(properties);
 
                 // The following information is not useful for loopback adapters.
 
@@ -703,6 +703,25 @@ namespace OPSTest
                 //    Log("  MTU...................................... : " + ipv4.Mtu);
                 //}
 
+            //}
+
+            string host2 = "tlavivo";
+            string addr2 = InetAddress.GetHostAddressEx(host2);
+            Log("  GetHostAddressEx( " + host2 + " ) --> " + addr2);
+
+            string host = "tlavivo/24";
+            string addr = InetAddress.GetHostAddressEx(host);
+            Log("  GetHostAddressEx( " + host + " ) --> " + addr );
+
+            System.Net.IPAddress[] list = InetAddress.GetHostAddresses(host);
+            foreach(System.Net.IPAddress address in list)
+            {
+                if (address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork) Log("  --> " + address);
+            }
+            System.Net.IPAddress[] list2 = InetAddress.GetHostAddresses( "" );
+            foreach (System.Net.IPAddress address in list2)
+            {
+                if (address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork) Log(" '' --> " + address);
             }
         }
 

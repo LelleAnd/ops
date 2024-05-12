@@ -123,11 +123,12 @@
             // 
             // textBoxMessages
             // 
-            this.textBoxMessages.Location = new System.Drawing.Point(12, 277);
+            this.textBoxMessages.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.textBoxMessages.Location = new System.Drawing.Point(0, 289);
             this.textBoxMessages.Multiline = true;
             this.textBoxMessages.Name = "textBoxMessages";
             this.textBoxMessages.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBoxMessages.Size = new System.Drawing.Size(710, 220);
+            this.textBoxMessages.Size = new System.Drawing.Size(734, 236);
             this.textBoxMessages.TabIndex = 6;
             this.textBoxMessages.WordWrap = false;
             // 
@@ -417,7 +418,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(734, 509);
+            this.ClientSize = new System.Drawing.Size(734, 525);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.textBoxPizzaDataVersion);
             this.Controls.Add(this.label2);

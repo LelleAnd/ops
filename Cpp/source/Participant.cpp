@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2021 Lennart Andersson.
+* Copyright (C) 2019-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -284,7 +284,8 @@ namespace ops
 	ops::Topic Participant::createParticipantInfoTopic() const
 	{
 		ops::Topic infoTopic("ops.bit.ParticipantInfoTopic", domain->getMetaDataMcPort(), "ops.ParticipantInfoData", domain->getDomainAddress());
-		infoTopic.setLocalInterface(domain->getLocalInterface());
+        Address_T addr = GetAddrFromNameEx(domain->getLocalInterface(), ioService.get());
+        infoTopic.setLocalInterface(addr);
 		infoTopic.setTimeToLive(domain->getTimeToLive());
 		infoTopic.setDomainID(domainID);
 		infoTopic.setParticipantID(participantID);
@@ -296,7 +297,8 @@ namespace ops
 	ops::Topic Participant::createDebugTopic() const
 	{
 		ops::Topic debugTopic("ops.DebugTopic", domain->getDebugMcPort(), opsidls::DebugRequestResponseData::getTypeName(), domain->getDomainAddress());
-		debugTopic.setLocalInterface(domain->getLocalInterface());
+        Address_T addr = GetAddrFromNameEx(domain->getLocalInterface(), ioService.get());
+        debugTopic.setLocalInterface(addr);
 		debugTopic.setTimeToLive(domain->getTimeToLive());
 		debugTopic.setDomainID(domainID);
 		debugTopic.setParticipantID(participantID);
@@ -427,6 +429,14 @@ namespace ops
 		topic.setParticipantID(participantID);
 		topic.setDomainID(domainID);
 //		topic.participant = this;
+
+		Address_T addr = GetAddrFromNameEx(topic.getLocalInterface(), ioService.get());
+		if (addr != "") { topic.setLocalInterface(addr); }
+
+		if ((topic.getTransport() == Topic::TRANSPORT_TCP) || ((topic.getTransport() == Topic::TRANSPORT_UDP))) {
+			addr = GetAddrFromName(topic.getDomainAddress(), ioService.get());
+			if (addr != "") { topic.setDomainAddress(addr); }
+		}
 
 		return topic;
 	}

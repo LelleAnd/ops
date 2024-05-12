@@ -105,7 +105,7 @@ namespace Ops
             domainID = archive.Inout("domainID", domainID);
             topics = (List<Topic>)archive.InoutSerializableList("topics", topics);
             domainAddress = archive.Inout("domainAddress", domainAddress);
-            localInterface = archive.Inout("localInterface", localInterface);
+            localInterface = InetAddress.GetHostAddressEx(archive.Inout("localInterface", localInterface));
             
             //archiver->inout(std::string("timeToLive"), timeToLive);
             //archiver->inout(std::string("inSocketBufferSize"), inSocketBufferSize);

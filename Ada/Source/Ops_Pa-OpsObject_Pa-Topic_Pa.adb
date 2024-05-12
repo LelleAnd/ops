@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2021 Lennart Andersson.
+-- Copyright (C) 2016-2024 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -17,6 +17,7 @@
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
 with Ops_Pa.ArchiverInOut_Pa,
+     Ops_Pa.Socket_Pa,
      Ops_Pa.Error_Pa;
 use  Ops_Pa.ArchiverInOut_Pa,
      Ops_Pa.Error_Pa;
@@ -240,13 +241,15 @@ package body Ops_Pa.OpsObject_Pa.Topic_Pa is
     if Self.Transport = null then
       Self.Transport := Copy(TRANSPORT_MC);
 
-    elsif Self.Transport.all = "" then
+    elsif (Self.Transport.all = "") or (Self.Transport.all = TRANSPORT_MC) then
       Replace(Self.Transport, TRANSPORT_MC);
 
-    elsif (Self.Transport.all /= TRANSPORT_MC) and
-      (Self.Transport.all /= TRANSPORT_TCP) and
-      (Self.Transport.all /= TRANSPORT_UDP)
-    then
+    elsif (Self.Transport.all = TRANSPORT_TCP) or (Self.Transport.all = TRANSPORT_UDP) then
+      if Self.DomainAddress'Length > 0 then
+        Replace(Self.DomainAddress, Ops_Pa.Socket_Pa.GetHostAddress(Self.DomainAddress.all));
+      end if;
+
+    else
       StaticErrorService.
         Report( "Domain", "CheckTransport",
                 "Illegal transport: '" & Self.Transport.all &

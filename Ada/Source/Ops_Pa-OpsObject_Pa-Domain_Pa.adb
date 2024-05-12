@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2020 Lennart Andersson.
+-- Copyright (C) 2016-2024 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -17,6 +17,7 @@
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
 with Ops_Pa.Error_Pa,
+     OPs_Pa.Socket_Pa,
      Ops_Pa.ArchiverInOut_Pa.XMLArchiverIn_Pa;
 
 use Ops_Pa.Error_Pa;
@@ -119,6 +120,8 @@ package body Ops_Pa.OpsObject_Pa.Domain_Pa is
     archiver.Inout("inSocketBufferSize", Self.inSocketBufferSize);
     archiver.Inout("outSocketBufferSize", Self.outSocketBufferSize);
     archiver.Inout("metaDataMcPort", Self.metaDataMcPort);
+
+    Replace(Self.LocalInterface, Ops_Pa.Socket_Pa.GetHostAddressEx(Self.LocalInterface.all));
 
     -- To not break binary compatibility we only do this when we know we are
     -- reading from an XML-file

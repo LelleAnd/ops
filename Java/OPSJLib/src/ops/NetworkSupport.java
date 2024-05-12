@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2019-2020 Lennart Andersson.
+* Copyright (C) 2019-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -24,9 +24,59 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class NetworkSupport
 {
+  public static String[] GetHostAddresses(String name)
+  {
+      ArrayList<String> al = new ArrayList<>();
+      try
+      {
+          InetAddress[] ads = InetAddress.getAllByName(name);
+          for (InetAddress iAddr : ads) {
+              if (iAddr instanceof Inet4Address) {
+                  al.add(iAddr.getHostAddress());
+              }
+          }
+      }
+      catch (Exception e)
+      {
+      }
+
+      return al.toArray(new String[al.size()]);
+  }
+
+  public static String GetHostAddress(String name)
+  {
+      String[] ads = GetHostAddresses(name);
+      if (ads.length > 0) return GetHostAddresses(name)[0];
+      return name;
+  }
+
+  public static String GetHostAddressEx(String localInterface)
+  {
+    String subnetIp = localInterface;
+    String subnetMask = "";
+
+    int index = subnetIp.indexOf('/');
+    if (index > 0)
+    {
+        subnetIp = localInterface.substring(0, index);
+        subnetMask = localInterface.substring(index + 1);
+    }
+
+    if (subnetIp.length() > 0)
+    {
+        subnetIp = GetHostAddress(subnetIp);
+    }
+
+    if (index > 0) { return subnetIp + "/" + subnetMask; }
+
+    return subnetIp;
+  }
+
   // If argument contains a "/" we assume it is on the form:  subnet-address/subnet-mask
   // e.g "192.168.10.0/255.255.255.0" or "192.168.10.0/24"
   // In that case we loop over all interfaces and take the first one that matches

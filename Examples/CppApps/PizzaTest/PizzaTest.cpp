@@ -525,6 +525,7 @@ struct ItemInfo {
 	ops::ObjectName_T Domain;
 	ops::ObjectName_T TopicName;
 	ops::TypeId_T TypeName;
+	ops::Topic topic;
 
     bool selected{ false };
     IHelper* helper{ nullptr };
@@ -781,35 +782,48 @@ void menu()
 	std::cout << "" << std::endl;
 	for (unsigned int i = 0; i < ItemInfoList.size(); i++) {
 		ItemInfo* const ii = ItemInfoList[i];
+		std::string fullName = ii->Domain.c_str(); fullName += "::"; fullName += ii->TopicName.c_str();
+		std::string xferInfo = ii->topic.getChannelId().c_str();
+		if (xferInfo == "") {
+			xferInfo = ii->topic.getTransport().c_str();
+			xferInfo += "::";
+			xferInfo += ii->topic.getDomainAddress().c_str();
+			xferInfo += "::";
+			xferInfo += ops::NumberToString<int>(ii->topic.getPort()).c_str();
+		}
+
 		std::cout << "\t " << std::setw(2) << i <<
 			" " <<
 		(ii->helper->HasPublisher() ? "P" : " ") <<
 		(ii->helper->HasSubscriber() ? "S" : " ") <<
 		(ii->selected ? "*" : " ") <<
 			" " <<
-		ii->Domain << "::" << ii->TopicName << std::endl;
+			std::setw(40) << fullName <<
+			"  " << xferInfo <<
+			std::endl;
 	}
 
 	std::cout << "" << std::endl;
-	std::cout << "\t PC    Create Publishers" << std::endl;
-	std::cout << "\t PD    Delete Publishers" << std::endl;
-	std::cout << "\t PS    Start Publishers" << std::endl;
-	std::cout << "\t PT    Stop Publishers" << std::endl;
-	std::cout << "\t SC    Create Subscriber" << std::endl;
-	std::cout << "\t SD    Delete Subscriber" << std::endl;
-	std::cout << "\t SS    Start Subscriber" << std::endl;
-	std::cout << "\t ST    Stop Subscriber" << std::endl;
-	std::cout << "\t B num Set number of messages to burst [" << numBurst << "]" << std::endl;
-	std::cout << "\t L num Set num Vessuvio Bytes [" << NumVessuvioBytes << "]" << std::endl;
-	std::cout << "\t T ms  Set deadline timeout [ms]" << std::endl;
-	std::cout << "\t V ms  Set send period [ms] [" << sendPeriod << "]" << std::endl;
-	std::cout << "\t A     Start/Stop periodical Write with set period" << std::endl;
-	std::cout << "\t K     Set key [" << gKey << "]" << std::endl;
-	std::cout << "\t M ver Set Pizzadata version [" << PD_version << "]" << std::endl;
-	std::cout << "\t W     Write data" << std::endl;
-	std::cout << "\t Q     Quite (minimize program output)" << std::endl;
-	std::cout << "\t D     Toggle trace" << std::endl;
-	std::cout << "\t X     Exit program" << std::endl;
+	std::cout << "\t PC      Create Publishers" << std::endl;
+	std::cout << "\t PD      Delete Publishers" << std::endl;
+	std::cout << "\t PS      Start Publishers" << std::endl;
+	std::cout << "\t PT      Stop Publishers" << std::endl;
+	std::cout << "\t SC      Create Subscriber" << std::endl;
+	std::cout << "\t SD      Delete Subscriber" << std::endl;
+	std::cout << "\t SS      Start Subscriber" << std::endl;
+	std::cout << "\t ST      Stop Subscriber" << std::endl;
+	std::cout << "\t B num   Set number of messages to burst [" << numBurst << "]" << std::endl;
+	std::cout << "\t L num   Set num Vessuvio Bytes [" << NumVessuvioBytes << "]" << std::endl;
+	std::cout << "\t T ms    Set deadline timeout [ms]" << std::endl;
+	std::cout << "\t V ms    Set send period [ms] [" << sendPeriod << "]" << std::endl;
+	std::cout << "\t A       Start/Stop periodical Write with set period" << std::endl;
+	std::cout << "\t K       Set key [" << gKey << "]" << std::endl;
+	std::cout << "\t M ver   Set Pizzadata version [" << PD_version << "]" << std::endl;
+	std::cout << "\t W       Write data" << std::endl;
+	std::cout << "\t I name  Lookup host name" << std::endl;
+	std::cout << "\t Q       Quite (minimize program output)" << std::endl;
+	std::cout << "\t D       Toggle trace" << std::endl;
+	std::cout << "\t X       Exit program" << std::endl;
 
 #if defined(DEBUG_OPSOBJECT_COUNTER)
 	std::cout << std::endl << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl << std::endl;
@@ -942,6 +956,9 @@ int main(const int argc, const char* argv[])
 		if (info->Domain == "OtherPizzaDomain") {
 			info->part = otherParticipant;
 		}
+
+		//Create topic to get topics fully populated, might throw ops::NoSuchTopicException
+		info->topic = info->part->createTopic(info->TopicName);
 	}
 
 	// --------------------------------------------------------------------
@@ -1111,6 +1128,13 @@ int main(const int argc, const char* argv[])
 			case 'e':
 				gDoRcvDelay = true;
 				break;
+
+			case 'i': {
+				std::unique_ptr<ops::IOService> ioServ(ops::IOService::create());
+				ops::ShowKnownInterfaces(ioServ.get(), line);
+				std::cout << "Selected: " << line << " --> " << ops::GetAddrFromNameEx(line, ioServ.get());
+				break;
+			}
 
 			case 'l':
 			case 'L':

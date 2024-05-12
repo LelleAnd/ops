@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2020 Lennart Andersson.
+* Copyright (C) 2019-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -25,6 +25,7 @@ import configlib.ArchiverInOut;
 import configlib.XMLArchiverIn;
 import java.io.IOException;
 import java.util.Vector;
+import ops.NetworkSupport;
 
 /**
  *
@@ -116,7 +117,7 @@ public class Domain extends OPSObject
         domainID = archive.inout("domainID", domainID);
         topics = (Vector<Topic>) archive.inoutSerializableList("topics", topics);
         domainAddress = archive.inout("domainAddress", domainAddress);
-        localInterface = archive.inout("localInterface", localInterface);
+        localInterface = NetworkSupport.GetHostAddressEx(archive.inout("localInterface", localInterface));
 
         //archiver->inout(std::string("timeToLive"), timeToLive);
         //archiver->inout(std::string("inSocketBufferSize"), inSocketBufferSize);

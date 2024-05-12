@@ -2,7 +2,7 @@ unit uOps.Transport.UDPSender;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -61,7 +61,7 @@ type
 implementation
 
 uses SysUtils,
-     WinSock,
+     Winapi.Winsock2,
      uOps.Error;
 
 { TUDPSender }
@@ -150,7 +150,7 @@ end;
 
 function TUDPSender.sendTo(buf: PByte; size: Integer; ip: string; port: Integer): Boolean;
 var
-  ToAddr : TSockAddrIn;
+  ToAddr : TSockAddr;
 begin
   Result := False;
   if not Assigned(FSocket) then Exit;

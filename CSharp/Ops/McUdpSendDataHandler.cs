@@ -45,7 +45,7 @@ namespace Ops
                     // Check if this sink is alive
                     if (kvp.Value.IsAlive())
                     {
-                        result &= SendData(bytes, size, InetAddress.GetByName(kvp.Value.Ip), kvp.Value.Port);
+                        result &= SendData(bytes, size, kvp.Value.Ip, kvp.Value.Port);
                     }
                     else //Remove it.
                     {

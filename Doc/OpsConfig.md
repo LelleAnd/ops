@@ -53,8 +53,8 @@ Elements of _Topic_ contains:
 For more flexibility in the configuration, the elements have several optional tags that can be specified. A description of these follows below.
 
 Optional elements of _Domain_:
-  * **localInterface**, defines which local ip interface on which the domain participants shall communicate. If this tag is omitted, the first interface found on the system will be used. If 127.0.0.1 (localinterface) is used, multicast communication will stay on the local machine.
-  The interface can be specified with a specific ip address for the machine, e.g. "192.168.10.72", or using a subnet specification like "192.168.10.0/24" or "192.168.10.0/255.255.255.0". Using a subnet specification instead of a specific ip address, makes it possible to have the same configuration on several nodes.
+  * **localInterface**, defines which local ip interface on which the domain participants shall communicate. If this tag is omitted, the first interface found on the system will be used. If 127.0.0.1 (localhost) is used, multicast communication will stay on the local machine.
+  The interface can be specified with a specific ip address for the machine, e.g. "192.168.10.72", or using a subnet specification like "192.168.10.0/24" or "192.168.10.0/255.255.255.0". Using a subnet specification instead of a specific ip address, makes it possible to have the same configuration on several nodes. Node names like "localhost" can be used instead of a numeric IP address.
   * **timeToLive**, defines the IP4 *ttl* value to use for multicast communication. This can be used to define how far the communication will reach. If this tag is omitted, a value of 1 is used.
   * **inSocketBufferSize**, sets a default underlying socket buffer size used for topics that doesn't specify its own, see *Topic* below. If this tag is omitted, the OS default is used.
   * **outSocketBufferSize**, sets a default underlying socket buffer size used for topics that doesn't specify its own, see *Topic* below. If this tag is omitted, the OS default is used.
@@ -85,7 +85,7 @@ A _Channel_ element defines the transport mechanism, a _Transport_ element defin
 Elements of _Channel_ contains:
   * **name**, name of the channel as a string, must be unique within the domain.
   * **linktype**, configures which transport mechanism to be used for this channel. Supported values are *multicast*, *udp* and *tcp*. If tag is omitted, *multicast* is used.
-  * **address**, usage depends on the used transport mechanism, see description of *Transport Mechanisms* below. Please note that if specified for an UDP transport, it must be on the same subnet as the specified localInterface for the _Domain_.
+  * **address**, usage depends on the used transport mechanism, see description of *Transport Mechanisms* below. Please note that if specified for an UDP transport, it must be on the same subnet as the specified localInterface for the _Channel_.
   * **port**, usage depends on the used transport mechanism, see description of *Transport Mechanisms* below.
   * **localInterface**, see _Domain_ above for a description.
   * **timeToLive**, see _Domain_ above for a description.
@@ -108,11 +108,11 @@ Note that if a topic specify _sampleMaxSize_ > 60000-14, it MUST have its own _C
 
   * *udp*: Without specified **address** and **port** tags, OPS uses the metadata sent by participants to connect publishers and subscribers using dynamic ports. This requires metadata to be enabled to work and it is a _many-to-many_ transport mechanism.
   With specified **address** and **port** tags, the metadata is not used and address and port specify the subscribers address and port. In this case it is a _many-to-one_ transport mechanism.
-  For an example see [udp example](UdpTransport.md).
+  For an example see [udp example](UdpTransport.md). A specified **address** can be a node name or a numeric IP address.
 
   * *tcp*: Without specified **address** and **port** tags, OPS uses the metadata sent by participants to connect publishers and subscribers using dynamic ports. This requires metadata to be enabled to work and it is a _many-to-many_ transport mechanism (Please note: Currently only supported in C++ and Python).
   With specified **address** and **port** tags, the metadata is not used and address and port specify the publishers tcp server address and port to which subscribers connect. In this case it is a _one-to-many_ transport mechanism.
-  For an example see [tcp example](TcpTransport.md).
+  For an example see [tcp example](TcpTransport.md). A specified **address** can be a node name or a numeric IP address.
 
 ## Tools ##
 There is a tool, _VerifyOPSConfig_, that can be used to check the configuration files when they have been edited. For description see [VerifyOPSConfig](VerifyOPSConfig.md).

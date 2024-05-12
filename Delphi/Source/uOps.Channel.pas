@@ -2,7 +2,7 @@ unit uOps.Channel;
 
 (**
 *
-* Copyright (C) 2016-2022 Lennart Andersson.
+* Copyright (C) 2016-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -62,6 +62,7 @@ type
 implementation
 
 uses SysUtils,
+     uOps.NetworkSupport,
      uOps.Exceptions;
 
 { TChannel }
@@ -96,9 +97,17 @@ begin
   archiver.inout('outSocketBufferSize', outSocketBufferSize);
   archiver.inout('inSocketBufferSize', inSocketBufferSize);
 
-  if linktype = '' then begin
+  localInterface := GetHostAddressEx(localInterface);
+
+  if (linktype = '') or (linktype = LINKTYPE_MC) then begin
     linktype := LINKTYPE_MC;
-  end else if (linktype <> LINKTYPE_MC) and (linktype <> LINKTYPE_TCP) and (linktype <> LINKTYPE_UDP) then begin
+
+  end else if (linktype = LINKTYPE_TCP) or (linktype = LINKTYPE_UDP) then begin
+    if Length(domainAddress) > 0 then begin
+      domainAddress := GetHostAddress(domainAddress);
+    end;
+
+  end else begin
     raise EConfigException.Create(
             'Illegal linktype: "' + string(linktype) +
             '". Linktype for Channel must be either "multicast", "tcp", "udp" or left blank( = multicast)');

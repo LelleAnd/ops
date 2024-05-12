@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2022 Lennart Andersson.
+* Copyright (C) 2019-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -35,7 +35,12 @@ namespace ops
 
 	extern Address_T doSubnetTranslation(const Address_T addr, IOService* ioServ);
 
-	extern void ShowKnownInterfaces(IOService* const ioServ);
+	extern void ShowKnownInterfaces(IOService* const ioServ, InternalString_T name = "");
 
 	extern InternalString_T GetHostName();
+	
+	// Return first address found for name
+	extern Address_T GetAddrFromName(const InternalString_T name, IOService* const ioServ);
+	extern Address_T GetAddrFromNameEx(const InternalString_T localInterface, IOService* const ioServ);
+
 }

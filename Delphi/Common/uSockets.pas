@@ -2,7 +2,7 @@ unit uSockets;
 
 (**
 *
-* Copyright (C) 2016-2021 Lennart Andersson.
+* Copyright (C) 2016-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -22,7 +22,7 @@ unit uSockets;
 
 interface
 
-uses WinSock, Classes;
+uses Winapi.Winsock2, Classes;
 
 type
 (**************************************************************************
@@ -191,8 +191,8 @@ begin
   Result := False;
   FLastError := 0;
   if FSocket = INVALID_SOCKET then begin
-    //function socket(af, Struct, protocol: Integer): TSocket; stdcall;
-    FSocket := socket(Integer(AF_INET), FSocketType, FProtocol);
+    //function socket(af, type_, protocol: Integer): TSocket; stdcall;
+    FSocket := Winapi.WinSock2.socket(Integer(AF_INET), FSocketType, FProtocol);
     Result := FSocket <> INVALID_SOCKET;
     if not Result then begin
       FLastError := WSAGetLastError;
@@ -205,7 +205,7 @@ begin
   FLastError := 0;
   if FSocket <> INVALID_SOCKET then begin
     //function closesocket(s: TSocket): Integer; stdcall;
-    if closesocket(FSocket) = SOCKET_ERROR then begin
+    if Winapi.WinSock2.closesocket(FSocket) = SOCKET_ERROR then begin
       FLastError := WSAGetLastError;
     end;
     FSocket := INVALID_SOCKET;
@@ -220,8 +220,8 @@ begin
   FLastError := 0;
   if FSocket <> INVALID_SOCKET then begin
     addr := MakeSockAddr(FLocalHost, FLocalPort);
-    //function bind(s: TSocket; var addr: TSockAddr; namelen: Integer): Integer; stdcall;
-    if WinSock.bind(FSocket, addr, sizeof(addr)) <> 0 then begin
+    //function bind(s: TSocket; var name: TSockAddr; namelen: Integer): Integer; stdcall;
+    if Winapi.WinSock2.bind(FSocket, addr, sizeof(addr)) <> 0 then begin
       FLastError := WSAGetLastError;
     end;
   end;
@@ -231,9 +231,8 @@ end;
 function TBaseIpSocket.SendTo(var Buffer; Buffersize: Integer; ToAddr: TSockAddr; Flags: Integer): Integer;
 begin
   FLastError := 0;
-  //function sendto(s: TSocket; const Buf; len, flags: Integer; var addrto: TSockAddr;
-  //  tolen: Integer): Integer; stdcall;
-  Result := WinSock.sendto(FSocket, Buffer, BufferSize, Flags, ToAddr, sizeof(ToAddr));
+  //function sendto(s: TSocket; const buf; len, flags: Integer; toaddr: PSockAddr; tolen: Integer): Integer; stdcall;
+  Result := Winapi.WinSock2.sendto(FSocket, Buffer, BufferSize, Flags, @ToAddr, sizeof(ToAddr));
   if Result = SOCKET_ERROR then begin
     FLastError := WSAGetLastError;
   end;
@@ -242,9 +241,8 @@ end;
 function TBaseIpSocket.ReceiveFrom(var Buffer; BufferSize: Integer; var FromAddr: TSockAddr; var Len: Integer; Flags: Integer): Integer;
 begin
   FLastError := 0;
-  //function recvfrom(s: TSocket; var Buf; len, flags: Integer;
-  //  var from: TSockAddr; var fromlen: Integer): Integer; stdcall;
-  Result := WinSock.recvfrom(FSocket, Buffer, BufferSize, Flags, FromAddr, Len);
+  //function recvfrom(s: TSocket; var buf; len, flags: Integer; var from: TSockAddr; var fromlen: Integer): Integer; stdcall;
+  Result := Winapi.WinSock2.recvfrom(FSocket, Buffer, BufferSize, Flags, FromAddr, Len);
   if Result = SOCKET_ERROR then begin
     FLastError := WSAGetLastError;
   end;
@@ -253,8 +251,8 @@ end;
 function TBaseIpSocket.ReceiveBuf(var Buffer; BufferSize: Integer; Flags: Integer): Integer;
 begin
   FLastError := 0;
-  //function recv(s: TSocket; var Buf; len, flags: Integer): Integer; stdcall;
-  Result := recv(FSocket, Buffer, BufferSize, Flags);
+  //function recv(s: TSocket; var buf; len, flags: Integer): Integer; stdcall;
+  Result := Winapi.WinSock2.recv(FSocket, Buffer, BufferSize, Flags);
   if Result = SOCKET_ERROR then begin
     FLastError := WSAGetLastError;
   end;
@@ -263,8 +261,8 @@ end;
 function TBaseIpSocket.SendBuf(var Buffer; BufferSize: Integer; Flags: Integer): Integer;
 begin
   FLastError := 0;
-  //function send(s: TSocket; const Buf; len, flags: Integer): Integer; stdcall;
-  Result := send(FSocket, Buffer, BufferSize, Flags);
+  //function send(s: TSocket; const buf; len, flags: Integer): Integer; stdcall;
+  Result := Winapi.WinSock2.send(FSocket, Buffer, BufferSize, Flags);
   if Result = SOCKET_ERROR then begin
     FLastError := WSAGetLastError;
   end;
@@ -281,8 +279,8 @@ begin
   end else begin
     NonBlock := 0;
   end;
-  //function ioctlsocket(s: TSocket; cmd: DWORD; var arg: u_long): Integer; stdcall;
-  if ioctlsocket(FSocket, FIONBIO, NonBlock) = SOCKET_ERROR then begin
+  //function ioctlsocket(s: TSocket; cmd: Longint; var argp: u_long): Integer; stdcall;
+  if Winapi.WinSock2.ioctlsocket(FSocket, Longint(FIONBIO), NonBlock) = SOCKET_ERROR then begin
     FLastError := WSAGetLastError;
   end;
   Result := FlastError = 0;
@@ -295,10 +293,10 @@ var
 begin
   FLastError := 0;
   OptVal := 0;
-  if Handle <> INVALID_SOCKET then begin
+  if FSocket <> INVALID_SOCKET then begin
     OptLen := 4;
-    // function getsockopt(s: TSocket; level, optname: Integer; optval: PAnsiChar; var optlen: Integer): Integer; stdcall;
-    if getsockopt(FSocket, SOL_SOCKET, SO_RCVBUF, PAnsiChar(@OptVal), OptLen) = SOCKET_ERROR then begin
+    //function getsockopt(s: TSocket; level, optname: Integer; optval: MarshaledAString; var optlen: Integer): Integer; stdcall;
+    if Winapi.WinSock2.getsockopt(FSocket, SOL_SOCKET, SO_RCVBUF, MarshaledAString(@OptVal), OptLen) = SOCKET_ERROR then begin
       FLastError := WSAGetLastError;
     end;
   end;
@@ -312,10 +310,10 @@ var
 begin
   FLastError := 0;
   OptVal := 0;
-  if Handle <> INVALID_SOCKET then begin
+  if FSocket <> INVALID_SOCKET then begin
     OptLen := 4;
-    // function getsockopt(s: TSocket; level, optname: Integer; optval: PAnsiChar; var optlen: Integer): Integer; stdcall;
-    if getsockopt(FSocket, SOL_SOCKET, SO_SNDBUF, PAnsiChar(@OptVal), OptLen) = SOCKET_ERROR then begin
+    //function getsockopt(s: TSocket; level, optname: Integer; optval: MarshaledAString; var optlen: Integer): Integer; stdcall;
+    if Winapi.WinSock2.getsockopt(FSocket, SOL_SOCKET, SO_SNDBUF, MarshaledAString(@OptVal), OptLen) = SOCKET_ERROR then begin
       FLastError := WSAGetLastError;
     end;
   end;
@@ -329,12 +327,12 @@ var
 begin
   Result := False;
   FLastError := 0;
-  if Handle = INVALID_SOCKET then Exit;
+  if FSocket = INVALID_SOCKET then Exit;
 
   OptVal := size;
   OptLen := 4;
-  // function setsockopt(s: TSocket; level, optname: Integer; optval: PAnsiChar; optlen: Integer): Integer; stdcall;
-  if setsockopt(FSocket, SOL_SOCKET, SO_RCVBUF, PAnsiChar(@OptVal), OptLen) = SOCKET_ERROR then begin
+  //function setsockopt(s: TSocket; level, optname: Integer; optval: MarshaledAString; optlen: Integer): Integer; stdcall;
+  if Winapi.WinSock2.setsockopt(FSocket, SOL_SOCKET, SO_RCVBUF, MarshaledAString(@OptVal), OptLen) = SOCKET_ERROR then begin
     FLastError := WSAGetLastError;
   end;
   Result := FlastError = 0;
@@ -347,12 +345,12 @@ var
 begin
   Result := False;
   FLastError := 0;
-  if Handle = INVALID_SOCKET then Exit;
+  if FSocket = INVALID_SOCKET then Exit;
 
   OptVal := size;
   OptLen := 4;
-  // function setsockopt(s: TSocket; level, optname: Integer; optval: PAnsiChar; optlen: Integer): Integer; stdcall;
-  if setsockopt(FSocket, SOL_SOCKET, SO_SNDBUF, PAnsiChar(@OptVal), OptLen) = SOCKET_ERROR then begin
+  //function setsockopt(s: TSocket; level, optname: Integer; optval: MarshaledAString; optlen: Integer): Integer; stdcall;
+  if Winapi.WinSock2.setsockopt(FSocket, SOL_SOCKET, SO_SNDBUF, MarshaledAString(@OptVal), OptLen) = SOCKET_ERROR then begin
     FLastError := WSAGetLastError;
   end;
   Result := FlastError = 0;
@@ -360,14 +358,14 @@ end;
 
 class function TBaseIpSocket.GetIpAddress(Addr : TSockAddr) : AnsiString;
 begin
-  //function inet_ntoa(inaddr: TInAddr): PAnsiChar; stdcall;
-  Result := inet_ntoa(addr.sin_addr);
+  //function inet_ntoa(inaddr: in_addr): MarshaledAString; stdcall;
+  Result := Winapi.WinSock2.inet_ntoa(TSockAddrIn(addr).sin_addr);
 end;
 
 class function TBaseIpSocket.GetPort(Addr : TSockAddr) : Integer;
 begin
   //function ntohs(netshort: u_short): u_short; stdcall;
-  Result := ntohs(addr.sin_port);
+  Result := Winapi.WinSock2.ntohs(TSockAddrIn(addr).sin_port);
 end;
 
 function TBaseIpSocket.GetPeerAddress(var PeerIP : AnsiString; var PeerPort : Integer) : Boolean;
@@ -378,7 +376,8 @@ begin
   FLastError := 0;
   len := SizeOf(addr);
 
-  if getpeername(Handle, addr,len) = SOCKET_ERROR then begin
+  //function getpeername(s: TSocket; var name: TSockAddr; var namelen: Integer): Integer; stdcall;
+  if Winapi.WinSock2.getpeername(FSocket, addr, len) = SOCKET_ERROR then begin
     FLastError := WSAGetLastError;
   end;
 
@@ -397,7 +396,7 @@ begin
   len := SizeOf(addr);
 
   //function getsockname(s: TSocket; var name: TSockAddr; var namelen: Integer): Integer; stdcall;
-  if getsockname(Handle, addr, len) = SOCKET_ERROR then begin
+  if Winapi.WinSock2.getsockname(FSocket, addr, len) = SOCKET_ERROR then begin
     FLastError := WSAGetLastError;
   end;
 
@@ -409,21 +408,26 @@ end;
 
 function TBaseIpSocket.MakeSockAddr(IPAddress : AnsiString; Port : Integer) : TSockAddr;
 begin
-  //TSockAddr = sockaddr_in = record
-  //  case Integer of
-  //    0: (sin_family: u_short;
-  //        sin_port: u_short;
-  //        sin_addr: TInAddr;
-  //        sin_zero: array[0..7] of AnsiChar);
-  //    1: (sa_family: u_short;
-  //        sa_data: array[0..13] of AnsiChar)
+  //sockaddr = record
+  //  sa_family: u_short;                 // address family
+  //  sa_data: array [0..13] of a_char; // up to 14 bytes of direct address
   //end;
-  Result.sin_family := AF_INET;
+  //TSockAddr = sockaddr;
+
+  //sockaddr_in = record
+  //  sin_family: Smallint;
+  //  sin_port: u_short;
+  //  sin_addr: in_addr;
+  //  sin_zero: array [0..7] of a_char;
+  //end;
+  //TSockAddrIn = sockaddr_in;
+
+  TSockAddrIn(Result).sin_family := AF_INET;
   //function htons(hostshort: u_short): u_short; stdcall;
-  Result.sin_port := htons(Port);
-  //function inet_addr(cp: PAnsiChar): u_long; stdcall; {PInAddr;}  { TInAddr }
-  Result.sin_addr.s_addr := inet_addr(PAnsiChar(IPAddress));
-  FillChar(Result.sin_zero, SizeOf(Result.sin_zero), 0);
+  TSockAddrIn(Result).sin_port := Winapi.WinSock2.htons(Port);
+  //function inet_addr(cp: MarshaledAString): u_long; stdcall;
+  TSockAddrIn(Result).sin_addr.s_addr := Winapi.WinSock2.inet_addr(MarshaledAString(IPAddress));
+  FillChar(TSockAddrIn(Result).sin_zero, SizeOf(TSockAddrIn(Result).sin_zero), 0);
 end;
 
 // ----------------------------------------------------------------------------
@@ -438,7 +442,7 @@ end;
 function TUdpSocket.Close : Boolean;
 begin
   //function shutdown(s: TSocket; how: Integer): Integer; stdcall;
-  shutdown(FSocket, SD_BOTH);
+  Winapi.WinSock2.shutdown(FSocket, SD_BOTH);
   Result := inherited Close;
 end;
 
@@ -448,15 +452,64 @@ var
 begin
   Result := False;
   FLastError := 0;
-  if Handle = INVALID_SOCKET then Exit;
+  if FSocket = INVALID_SOCKET then Exit;
 
   Flag := value;
-  //function setsockopt(s: TSocket; level, optname: Integer; optval: PAnsiChar; optlen: Integer): Integer; stdcall;
-  if setsockopt(Handle, SOL_SOCKET, SO_REUSEADDR, PAnsiChar(@Flag), SizeOf(Flag)) = SOCKET_ERROR then begin
+  //function setsockopt(s: TSocket; level, optname: Integer; optval: MarshaledAString; optlen: Integer): Integer; stdcall;
+  if Winapi.WinSock2.setsockopt(FSocket, SOL_SOCKET, SO_REUSEADDR, MarshaledAString(@Flag), SizeOf(Flag)) = SOCKET_ERROR then begin
     FLastError := WSAGetLastError;
   end;
   Result := FlastError = 0;
 end;
+
+const
+  /// Constants from ws2ipdef.h (Windows SDK 10.0.22621) missing in Winsock2.pas
+
+  //
+  // Options to use with [gs]etsockopt at the IPPROTO_IP level.
+  // The values should be consistent with the IPv6 equivalents.
+  //
+  IP_OPTIONS                =  1; // Set/get IP options.
+  IP_HDRINCL                =  2; // Header is included with data.
+  IP_TOS                    =  3; // IP type of service.
+  IP_TTL                    =  4; // IP TTL (hop limit).
+  IP_MULTICAST_IF           =  9; // IP multicast interface.
+  IP_MULTICAST_TTL          = 10; // IP multicast TTL (hop limit).
+  IP_MULTICAST_LOOP         = 11; // IP multicast loopback.
+  IP_ADD_MEMBERSHIP         = 12; // Add an IP group membership.
+  IP_DROP_MEMBERSHIP        = 13; // Drop an IP group membership.
+  IP_DONTFRAGMENT           = 14; // Don't fragment IP datagrams.
+  IP_ADD_SOURCE_MEMBERSHIP  = 15; // Join IP group/source.
+  IP_DROP_SOURCE_MEMBERSHIP = 16; // Leave IP group/source.
+  IP_BLOCK_SOURCE           = 17; // Block IP group/source.
+  IP_UNBLOCK_SOURCE         = 18; // Unblock IP group/source.
+  IP_PKTINFO                = 19; // Receive packet information.
+  IP_HOPLIMIT               = 21; // Receive packet hop limit.
+  IP_RECVTTL                = 21; // Receive packet Time To Live (TTL).
+  IP_RECEIVE_BROADCAST      = 22; // Allow/block broadcast reception.
+  IP_RECVIF                 = 24; // Receive arrival interface.
+  IP_RECVDSTADDR            = 25; // Receive destination address.
+  IP_IFLIST                 = 28; // Enable/Disable an interface list.
+  IP_ADD_IFLIST             = 29; // Add an interface list entry.
+  IP_DEL_IFLIST             = 30; // Delete an interface list entry.
+  IP_UNICAST_IF             = 31; // IP unicast interface.
+  IP_RTHDR                  = 32; // Set/get IPv6 routing header.
+  IP_GET_IFLIST             = 33; // Get an interface list.
+  IP_RECVRTHDR              = 38; // Receive the routing header.
+  IP_TCLASS                 = 39; // Packet traffic class.
+  IP_RECVTCLASS             = 40; // Receive packet traffic class.
+  IP_RECVTOS                = 40; // Receive packet Type Of Service (TOS).
+  IP_ORIGINAL_ARRIVAL_IF    = 47; // Original Arrival Interface Index.
+  IP_ECN                    = 50; // IP ECN codepoint.
+  IP_RECVECN                = 50; // Receive ECN codepoints in the IP header.
+  IP_PKTINFO_EX             = 51; // Receive extended packet information.
+  IP_WFP_REDIRECT_RECORDS   = 60; // WFP's Connection Redirect Records.
+  IP_WFP_REDIRECT_CONTEXT   = 70; // WFP's Connection Redirect Context.
+  IP_MTU_DISCOVER           = 71; // Set/get path MTU discover state.
+  IP_MTU                    = 73; // Get path MTU.
+  IP_NRT_INTERFACE          = 74; // Set NRT interface constraint (outbound).
+  IP_RECVERR                = 75; // Receive ICMP errors.
+  IP_USER_MTU               = 76; // Set/get app defined upper bound IP layer MTU.
 
 function TUdpSocket.SetMulticastTtl(Value : Integer) : Boolean;
 var
@@ -465,12 +518,12 @@ var
 begin
   Result := False;
   FLastError := 0;
-  if Handle = INVALID_SOCKET then Exit;
+  if FSocket = INVALID_SOCKET then Exit;
 
   OptVal := value;
   OptLen := 4;
-  //function setsockopt(s: TSocket; level, optname: Integer; optval: PAnsiChar; optlen: Integer): Integer; stdcall;
-  if setsockopt(Handle, IPPROTO_IP, IP_MULTICAST_TTL, PAnsiChar(@OptVal), OptLen) = SOCKET_ERROR then begin
+  //function setsockopt(s: TSocket; level, optname: Integer; optval: MarshaledAString; optlen: Integer): Integer; stdcall;
+  if Winapi.WinSock2.setsockopt(FSocket, IPPROTO_IP, IP_MULTICAST_TTL, MarshaledAString(@OptVal), OptLen) = SOCKET_ERROR then begin
     FLastError := WSAGetLastError;
   end;
   Result := FlastError = 0;
@@ -484,14 +537,14 @@ var
 begin
   Result := False;
   FLastError := 0;
-  if Handle = INVALID_SOCKET then Exit;
+  if FSocket = INVALID_SOCKET then Exit;
 
-  addr := MakeSockAddr(ifaddr, 0);
-  OptVal := addr.sin_addr.S_addr;
+  addr := MakeSockAddr(IFaddr, 0);
+  OptVal := TSockAddrIn(addr).sin_addr.S_addr;
   OptLen := SizeOf(OptVal);
 
-  //function setsockopt(s: TSocket; level, optname: Integer; optval: PAnsiChar; optlen: Integer): Integer; stdcall;
-  if setsockopt(Handle, IPPROTO_IP, IP_MULTICAST_IF, PAnsiChar(@OptVal), OptLen) = SOCKET_ERROR then begin
+  //function setsockopt(s: TSocket; level, optname: Integer; optval: MarshaledAString; optlen: Integer): Integer; stdcall;
+  if Winapi.WinSock2.setsockopt(FSocket, IPPROTO_IP, IP_MULTICAST_IF, MarshaledAString(@OptVal), OptLen) = SOCKET_ERROR then begin
     FLastError := WSAGetLastError;
   end;
   Result := FlastError = 0;
@@ -514,18 +567,18 @@ var
   addr : TSockAddr;
 begin
   FLastError := 0;
-  if Handle = INVALID_SOCKET then Exit;
+  if FSocket = INVALID_SOCKET then Exit;
 
-  addr := MakeSockAddr(mcaddr, 0);
-  OptVal.imr_multiaddr := addr.sin_addr;
+  addr := MakeSockAddr(MCaddr, 0);
+  OptVal.imr_multiaddr := TSockAddrIn(addr).sin_addr;
 
-  addr := MakeSockAddr(ifaddr, 0);
-  OptVal.imr_interface := addr.sin_addr;
+  addr := MakeSockAddr(IFaddr, 0);
+  OptVal.imr_interface := TSockAddrIn(addr).sin_addr;
 
   OptLen := SizeOf(OptVal);
 
-  //function setsockopt(s: TSocket; level, optname: Integer; optval: PAnsiChar; optlen: Integer): Integer; stdcall;
-  if setsockopt(Handle, IPPROTO_IP, IP_ADD_MEMBERSHIP, PAnsiChar(@OptVal), OptLen) = SOCKET_ERROR then begin
+  //function setsockopt(s: TSocket; level, optname: Integer; optval: MarshaledAString; optlen: Integer): Integer; stdcall;
+  if Winapi.WinSock2.setsockopt(FSocket, IPPROTO_IP, IP_ADD_MEMBERSHIP, MarshaledAString(@OptVal), OptLen) = SOCKET_ERROR then begin
     FLastError := WSAGetLastError;
   end;
 end;
@@ -537,18 +590,18 @@ var
   addr : TSockAddr;
 begin
   FLastError := 0;
-  if Handle = INVALID_SOCKET then Exit;
+  if FSocket = INVALID_SOCKET then Exit;
 
-  addr := MakeSockAddr(mcaddr, 0);
-  OptVal.imr_multiaddr := addr.sin_addr;
+  addr := MakeSockAddr(MCaddr, 0);
+  OptVal.imr_multiaddr := TSockAddrIn(addr).sin_addr;
 
-  addr := MakeSockAddr(ifaddr, 0);
-  OptVal.imr_interface := addr.sin_addr;
+  addr := MakeSockAddr(IFaddr, 0);
+  OptVal.imr_interface := TSockAddrIn(addr).sin_addr;
 
   OptLen := SizeOf(OptVal);
 
-  //function setsockopt(s: TSocket; level, optname: Integer; optval: PAnsiChar; optlen: Integer): Integer; stdcall;
-  if setsockopt(Handle, IPPROTO_IP, IP_DROP_MEMBERSHIP, PAnsiChar(@OptVal), OptLen) = SOCKET_ERROR then begin
+  //function setsockopt(s: TSocket; level, optname: Integer; optval: MarshaledAString; optlen: Integer): Integer; stdcall;
+  if Winapi.WinSock2.setsockopt(FSocket, IPPROTO_IP, IP_DROP_MEMBERSHIP, MarshaledAString(@OptVal), OptLen) = SOCKET_ERROR then begin
     FLastError := WSAGetLastError;
   end;
 end;
@@ -568,12 +621,12 @@ var
 begin
   Result := False;
   FLastError := 0;
-  if Handle = INVALID_SOCKET then Exit;
+  if FSocket = INVALID_SOCKET then Exit;
 
   Result := True;
   Flag := value;
-  //function setsockopt(s: TSocket; level, optname: Integer; optval: PAnsiChar; optlen: Integer): Integer; stdcall;
-  if setsockopt(Handle, IPPROTO_TCP, TCP_NODELAY, PAnsiChar(@Flag), SizeOf(Flag)) = SOCKET_ERROR then begin
+  //function setsockopt(s: TSocket; level, optname: Integer; optval: MarshaledAString; optlen: Integer): Integer; stdcall;
+  if Winapi.WinSock2.setsockopt(FSocket, IPPROTO_TCP, TCP_NODELAY, MarshaledAString(@Flag), SizeOf(Flag)) = SOCKET_ERROR then begin
     Result := False;
     FLastError := WSAGetLastError;
   end;
@@ -591,7 +644,7 @@ begin
   if IsOpen and not FConnected then begin
     addr := MakeSockAddr(FRemoteHost, FRemotePort);
     //function connect(s: TSocket; var name: TSockAddr; namelen: Integer): Integer; stdcall;
-    FConnected := WinSock.connect(FSocket, addr, sizeof(addr)) = 0;
+    FConnected := Winapi.WinSock2.connect(FSocket, addr, sizeof(addr)) = 0;
     if not FConnected then begin
       FLastError := WSAGetLastError;
     end;
@@ -605,7 +658,7 @@ begin
   Result := True;
   if FConnected then begin
     //function shutdown(s: TSocket; how: Integer): Integer; stdcall;
-    shutdown(FSocket, SD_BOTH);
+    Winapi.WinSock2.shutdown(FSocket, SD_BOTH);
     FConnected := False;
   end;
 end;
@@ -625,7 +678,7 @@ begin
   FLastError := 0;
   if IsOpen and not FListening then begin
     //function listen(s: TSocket; backlog: Integer): Integer; stdcall;
-    FListening := WinSock.listen(FSocket, SOMAXCONN) = 0;
+    FListening := Winapi.WinSock2.listen(FSocket, SOMAXCONN) = 0;
     if not FListening then begin
       FLastError := WSAGetLastError;
     end;
@@ -645,8 +698,8 @@ begin
   Fillchar(addr, sizeof(addr), 0);
   len := sizeof(addr);
 
-  //function accept(s: TSocket; addr: PSockAddr; addrlen: PInteger): TSocket; stdcall;
-  Sock := WinSock.accept(FSocket, @addr, @len);
+  //function accept(s: TSocket; addr: PSockAddr; addrlen: PINT): TSocket; stdcall;
+  Sock := Winapi.WinSock2.accept(FSocket, @addr, @len);
 
   if Sock <> INVALID_SOCKET then begin
     Result := True;
@@ -667,15 +720,14 @@ var
   WSAData: TWSAData;
 
 initialization
-  //TODO change to $0202 ?
-  //function WSAStartup(wVersionRequired: word; var WSData: TWSAData): Integer; stdcall;
-  if WSAStartup($0101, WSAData) <> 0 then begin
+  //function WSAStartup(wVersionRequired: WORD; var lpWSAData: TWSAData): Integer; stdcall;
+  if Winapi.Winsock2.WSAStartup(Winapi.Winsock2.WINSOCK_VERSION, WSAData) <> 0 then begin
     raise Exception.Create('WSAStartup: Error: ' + IntToStr(WSAGetLastError));
   end;
 
 finalization
   //function WSACleanup: Integer; stdcall;
-  if WSACleanup <> 0 then begin
+  if Winapi.Winsock2.WSACleanup <> 0 then begin
     raise Exception.Create('WSACleanup: Error: ' + IntToStr(WSAGetLastError));
   end;
 

@@ -2,7 +2,7 @@ unit uOps.Transport.TCPServer;
 
 (**
 *
-* Copyright (C) 2016-2022 Lennart Andersson.
+* Copyright (C) 2016-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -70,7 +70,7 @@ uses SysUtils,
 {$IF CompilerVersion >= 31}      // Delphi 10.1 Berlin
      AnsiStrings,
 {$IFEND}
-     WinSock;
+     Winapi.WinSock2;
 
 constructor TTCPServerSender.Create(serverIP : string; serverPort : Integer; outSocketBufferSize : Int64);
 begin

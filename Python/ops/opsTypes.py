@@ -1,6 +1,7 @@
 #import Factory
 #from XML_Archiver import XML_Archiver_In
 from ops.Constants import *
+import ops.Support
 import copy
 
 class ConfigError(Exception):
@@ -184,8 +185,11 @@ class Topic(OPS_Object):
 		self.setSampleMaxSize(temp)
 
 		self.transport = archiver.String("transport",self.transport)
-		if self.transport=="":
+		if self.transport == "":
 			self.transport = TRANSPORT_MC
+		if self.transport == TRANSPORT_TCP or self.transport == TRANSPORT_UDP:
+			if len(self.domainAddress) > 0:
+				self.domainAddress = ops.Support.getHostAddress(self.domainAddress)
 
 	def validate(self):
 		super(Topic,self).validate()
@@ -251,15 +255,18 @@ class Channel(OPS_Object):
 			self.Channel_version = 0
 		self.channelID = archiver.String("name",self.channelID)
 		self.linktype = archiver.String("linktype",self.linktype)
-		self.localInterface = archiver.String("localInterface",self.localInterface)
+		self.localInterface = ops.Support.getHostAddressEx(archiver.String("localInterface",self.localInterface))
 		self.domainAddress = archiver.String("address",self.domainAddress)
 		self.timeToLive = archiver.Int32("timeToLive",self.timeToLive)
 		self.port = archiver.Int32("port",self.port)
 		self.outSocketBufferSize = archiver.Int64("outSocketBufferSize",self.outSocketBufferSize)
 		self.inSocketBufferSize = archiver.Int64("inSocketBufferSize",self.inSocketBufferSize)
 
-		if self.linktype=="":
+		if self.linktype == "":
 			self.linktype = TRANSPORT_MC
+		if self.linktype == TRANSPORT_TCP or self.linktype == TRANSPORT_UDP:
+			if len(self.domainAddress) > 0:
+				self.domainAddress = ops.Support.getHostAddress(self.domainAddress)
 
 	def validate(self):
 		super(Channel,self).validate()
@@ -385,7 +392,7 @@ class Domain(OPS_Object):
 		self.domainID = archiver.String("domainID",self.domainID)
 		archiver.OpsVector("topics",self.topics,Topic)
 		self.domainAddress = archiver.String("domainAddress",self.domainAddress)
-		self.localInterface = archiver.String("localInterface",self.localInterface)
+		self.localInterface = ops.Support.getHostAddressEx(archiver.String("localInterface",self.localInterface))
 		self.timeToLive = archiver.Int32("timeToLive",self.timeToLive)
 		self.inSocketBufferSize = archiver.Int32("inSocketBufferSize",self.inSocketBufferSize)
 		self.outSocketBufferSize = archiver.Int32("outSocketBufferSize",self.outSocketBufferSize)

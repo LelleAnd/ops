@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2021 Lennart Andersson.
+-- Copyright (C) 2016-2024 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -16,7 +16,8 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
-with Ops_Pa.Error_Pa;
+with Ops_Pa.Error_Pa,
+     Ops_Pa.Socket_Pa;
 use  Ops_Pa.Error_Pa;
 
 package body Ops_Pa.OpsObject_Pa.Channel_Pa is
@@ -52,16 +53,21 @@ package body Ops_Pa.OpsObject_Pa.Channel_Pa is
     archiver.Inout("outSocketBufferSize", Self.OutSocketBufferSize);
     archiver.Inout("inSocketBufferSize", Self.InSocketBufferSize);
 
+    Replace(Self.LocalInterface, Ops_Pa.Socket_Pa.GetHostAddressEx(Self.LocalInterface.all));
+
     if Self.Linktype = null then
       Self.linktype := Copy(LINKTYPE_MC);
 
-    elsif Self.Linktype.all = "" then
+    elsif (Self.Linktype.all = "") or (Self.linktype.all = LINKTYPE_MC) then
       Replace(Self.linktype, LINKTYPE_MC);
 
-    elsif (Self.linktype.all /= LINKTYPE_MC) and
-        (Self.Linktype.all /= LINKTYPE_TCP) and
-        (Self.Linktype.all /= LINKTYPE_UDP)
+    elsif (Self.Linktype.all = LINKTYPE_TCP) or (Self.Linktype.all = LINKTYPE_UDP)
     then
+      if Self.DomainAddress'Length > 0 then
+        Replace(Self.DomainAddress, Ops_Pa.Socket_Pa.GetHostAddress(Self.DomainAddress.all));
+      end if;
+
+    else
       StaticErrorService.
         Report( "Domain", "CheckTransport",
                 "Illegal linktype: '" & Self.Linktype.all &

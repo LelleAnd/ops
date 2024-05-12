@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2017-2021 Lennart Andersson.
+-- Copyright (C) 2017-2024 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -29,6 +29,10 @@ package Ops_Pa.Socket_Pa is
   function doSubnetTranslation(addr : String) return String;
   function isValidNodeAddress(addr : String) return Boolean;
   function isMyNodeAddress(addr : String) return Boolean;
+
+  procedure ListHostAddresses(Name : String);
+  function GetHostAddress(Name : String) return String;
+  function GetHostAddressEx(localInterface : String) return String;
 
 -- ==========================================================================
 --      C l a s s    D e c l a r a t i o n.

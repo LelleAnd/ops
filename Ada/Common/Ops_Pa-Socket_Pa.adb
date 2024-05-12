@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2017-2022 Lennart Andersson.
+-- Copyright (C) 2017-2024 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -812,6 +812,66 @@ package body Ops_Pa.Socket_Pa is
       end;
       return subnet;
     end;
+  end;
+
+  procedure ListHostAddresses(Name : String) is
+  begin
+    declare
+      he : GNAT.Sockets.Host_Entry_Type := GNAT.Sockets.Get_Host_By_Name(Name);
+      addr : GNAT.Sockets.Inet_Addr_Type;
+      addrNum : Unsigned_32;
+    begin
+      for i in 1 .. GNAT.Sockets.Addresses_Length( he ) loop
+        addr := GNAT.Sockets.Addresses( he, i );
+        addrNum := To_Unsigned_32(GNAT.Sockets.Image(addr));
+        Ada.Text_IO.Put_Line("  " & Name & " --> " & GNAT.Sockets.Image(addr));
+        --Ada.Text_IO.Put("Translate(), addrnum: "); x.Put(addrnum, 12, 16); Ada.Text_IO.New_Line;
+      end loop;
+    end;
+  exception
+    when e: others => null;
+  end;
+
+  function GetHostAddress(Name : String) return String is
+  begin
+    if Name'Length = 0 then
+      return Name;
+    end if;
+    declare
+      he : GNAT.Sockets.Host_Entry_Type := GNAT.Sockets.Get_Host_By_Name(Name);
+      addr : GNAT.Sockets.Inet_Addr_Type;
+      addrNum : Unsigned_32;
+    begin
+      if GNAT.Sockets.Addresses_Length( he ) > 0 then
+        addr := GNAT.Sockets.Addresses( he, 1 );
+        addrNum := To_Unsigned_32(GNAT.Sockets.Image(addr));
+        return GNAT.Sockets.Image(addr);
+      end if;
+    end;
+    return Name;
+  exception
+    when e: others =>
+      return Name;
+  end;
+
+  function GetHostAddressEx(localInterface : String) return String is
+    Idx : Natural;
+  begin
+    -- If '/' we split the given address
+    Idx := Ada.Strings.Fixed.Index( localInterface, "/" );
+    if Idx > 0 then
+      declare
+        subnet : String := GetHostAddress(localInterface(localInterface'First .. Idx-1));
+        mask   : String := localInterface(Idx+1 .. localInterface'Last);
+      begin
+        return subnet & "/" & mask;
+      end;
+    else
+      return GetHostAddress(localInterface);
+    end if;
+  exception
+    when e: others =>
+      return localInterface;
   end;
 
   function isValidNodeAddress(addr : String) return Boolean is

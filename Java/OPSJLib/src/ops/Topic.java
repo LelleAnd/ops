@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2019-2020 Lennart Andersson.
+ * Copyright (C) 2019-2024 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -22,6 +22,7 @@ package ops;
 
 import configlib.ArchiverInOut;
 import java.io.IOException;
+import ops.NetworkSupport;
 
 /**
  *
@@ -199,6 +200,13 @@ public class Topic<T> extends OPSObject
         if(transport.equals(""))
         {
             transport = TRANSPORT_MC;
+        }
+        else if ((transport.equals(TRANSPORT_TCP)) || (transport.equals(TRANSPORT_UDP)))
+        {
+            if (domainAddress.length() > 0)
+            {
+                domainAddress = NetworkSupport.GetHostAddress(domainAddress);
+            }
         }
 
     }

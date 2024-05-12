@@ -339,22 +339,23 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
 		}
 
     System.out.println("");
-  	System.out.println("\t PC    Create Publishers");
-  	System.out.println("\t PD    Delete Publishers");
-  	//System.out.println("\t PS    Start Publishers");
-  	//System.out.println("\t PT    Stop Publishers");
-  	System.out.println("\t SC    Create Subscriber");
-  	System.out.println("\t SD    Delete Subscriber");
-  	System.out.println("\t SS    Start Subscriber");
-  	System.out.println("\t ST    Stop Subscriber");
-  	System.out.println("\t L num Set num Vessuvio Bytes [" + NumVessuvioBytes + "]");
-  	System.out.println("\t T ms  Set deadline timeout [ms]");
-  	System.out.println("\t V ms  Set send period [ms] [" + sendPeriod + "]");
-    System.out.println("\t M ver Set PizzaData version ["+ pd_version + "]");
-  	System.out.println("\t A     Start/Stop periodical Write with set period");
-  	System.out.println("\t W     Write data");
-  	//System.out.println("\t Q     Quite (minimize program output)");
-  	System.out.println("\t X     Exit program");
+  	System.out.println("\t PC      Create Publishers");
+  	System.out.println("\t PD      Delete Publishers");
+  	//System.out.println("\t PS      Start Publishers");
+  	//System.out.println("\t PT      Stop Publishers");
+  	System.out.println("\t SC      Create Subscriber");
+  	System.out.println("\t SD      Delete Subscriber");
+  	System.out.println("\t SS      Start Subscriber");
+  	System.out.println("\t ST      Stop Subscriber");
+  	System.out.println("\t L num   Set num Vessuvio Bytes [" + NumVessuvioBytes + "]");
+  	System.out.println("\t T ms    Set deadline timeout [ms]");
+  	System.out.println("\t V ms    Set send period [ms] [" + sendPeriod + "]");
+    System.out.println("\t M ver   Set PizzaData version ["+ pd_version + "]");
+  	System.out.println("\t A       Start/Stop periodical Write with set period");
+  	System.out.println("\t W       Write data");
+    System.out.println("\t I name  Lookup host name");
+  	//System.out.println("\t Q       Quite (minimize program output)");
+  	System.out.println("\t X       Exit program");
 	}
 
   public void test(String addr)
@@ -460,6 +461,16 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
       }
       if (input.startsWith("a", 0)) {
         doPeriodicalSends = !doPeriodicalSends;
+      }
+
+      if (input.startsWith("i", 0)) {
+        String name = input.substring(2);
+        String[] ads = NetworkSupport.GetHostAddresses(name);
+        System.out.println("IP Addresses for host: " + name);
+        for (String s : ads) {
+          System.out.println("  " + s);
+        }
+        System.out.println("Selected: " + name + " --> " + NetworkSupport.GetHostAddressEx(name));
       }
 
 			if (input.startsWith("w", 0)) { WriteToAll(NumVessuvioBytes, pd_version); }

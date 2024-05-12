@@ -1,3 +1,5 @@
+__history/
+__recovery/
 *.dproj.local
 *.dsk
 *.identcache

@@ -10,6 +10,7 @@ from PizzaProject import pizza_special
 from PizzaProject import PizzaProjectTypeFactory
 from ops import Participant,Publisher,Subscriber,Print_Archiver
 from ops.opsTypes import IdlVersionError
+import ops.Support
 
 
 beQuite = False
@@ -232,23 +233,25 @@ def menu():
 	for i,k in enumerate(ItemInfoList):
 		print( ("\t %s " % i) + str(k))
 	print("")
-	print("\t PC    Create Publishers")
-	print("\t PD    Delete Publishers")
-	print("\t PS    Start Publishers")
-	print("\t PT    Stop Publishers")
-	print("\t SC    Create Subscriber")
-	print("\t SD    Delete Subscriber")
-	print("\t SS    Start Subscriber")
-	print("\t ST    Stop Subscriber")
-	print("\t L num Set num Vessuvio Bytes [%s]" % NumVessuvioBytes)
-	print("\t T ms  Set deadline timeout [ms]")
-	print("\t V ms  Set send period [ms] [%s]" % sendPeriod)
-	print("\t A     Start/Stop periodical Write with set period")
-	print("\t M ver Set Pizzadata version [%s]" % PD_version)
-	print("\t W     Write data")
-	print("\t R     Resend data")
-	print("\t Q     Quite (minimize program output)")
-	print("\t X     Exit program")
+	print("\t PC     Create Publishers")
+	print("\t PD     Delete Publishers")
+	print("\t PS     Start Publishers")
+	print("\t PT     Stop Publishers")
+	print("\t SC     Create Subscriber")
+	print("\t SD     Delete Subscriber")
+	print("\t SS     Start Subscriber")
+	print("\t ST     Stop Subscriber")
+	print("\t L num  Set num Vessuvio Bytes [%s]" % NumVessuvioBytes)
+	print("\t T ms   Set deadline timeout [ms]")
+	print("\t V ms   Set send period [ms] [%s]" % sendPeriod)
+	print("\t A      Start/Stop periodical Write with set period")
+	print("\t M ver  Set Pizzadata version [%s]" % PD_version)
+	print("\t W      Write data")
+	print("\t R      Resend data")
+	print("\t Q      Quite (minimize program output)")
+	print("\t IF     Show Interfaces")
+	print("\t I name Lookup host name")
+	print("\t X      Exit program")
 
 
 cfg_file = None
@@ -346,6 +349,23 @@ while not doExit:
 		elif (commands[0]=="X"):
 			doExit = True
 			del commands[0]
+
+		elif (commands[0]=="IF"):
+			ifl = ops.Support.getInterfaceList()
+			for x in ifl:
+				print("  IF List: " + x)
+			del commands[0]
+
+		elif (commands[0]=="I"):
+			ifl = ops.Support.getHostAddresses(commands[1])
+			print("IP addresses for host: " + commands[1])
+			if (len(ifl) > 0):
+				for x in ifl:
+					print("  " + x)
+			else:
+				print("  None")
+			print("Selected: " + commands[1] + " --> " + ops.Support.getHostAddressEx(commands[1]))
+			del commands[0:2]
 
 		elif (commands[0]=="PC"):
 			for info in ItemInfoList:

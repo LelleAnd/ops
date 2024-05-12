@@ -79,7 +79,7 @@ namespace Ops
         {
             try
             {
-                return SendTo(bytes, offset, size, InetAddress.GetByName(ip), port);
+                return SendTo(bytes, offset, size, new InetAddress(ip), port);
             } catch (Exception ex)
             {
                 Logger.ExceptionLogger.LogException(ex);

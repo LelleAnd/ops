@@ -178,6 +178,13 @@ namespace Ops
             {
                 this.transport = TRANSPORT_MC;
             }
+            else if ((this.transport == TRANSPORT_TCP) || (this.transport == TRANSPORT_UDP))
+            {
+                if (this.domainAddress.Length > 0)
+                {
+                    this.domainAddress = InetAddress.GetByName(this.domainAddress);
+                }
+            }
         }
 
         public void SetDomainID(string domainID)

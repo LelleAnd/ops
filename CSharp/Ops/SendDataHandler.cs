@@ -73,7 +73,7 @@ namespace Ops
 
         public abstract bool SendData(byte[] bytes, int size, Topic t);
 
-        protected bool SendData(byte[] bytes, int size, InetAddress ip, int port)
+        protected bool SendData(byte[] bytes, int size, string ip, int port)
         {
             int nrSegmentsNeeded = (int)(size / Globals.MAX_SEGMENT_SIZE);
             if (size % Globals.MAX_SEGMENT_SIZE != 0)

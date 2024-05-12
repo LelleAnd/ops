@@ -1,5 +1,6 @@
 using System;
 using System.Net;
+using System.Net.Sockets;
 
 namespace Ops
 {
@@ -68,11 +69,54 @@ namespace Ops
             return Ip;
         }
 
-        public static InetAddress GetByName(string name)
+        public static string GetByName(string name)
 		{
-#pragma warning disable 618
-			return new InetAddress( Dns.GetHostByName(name).AddressList[0] );
-#pragma warning restore 618
+            if ((name.Length > 0) && (Char.IsDigit(name[0]))) return name;
+
+            try
+            {
+                IPHostEntry hostInfo = Dns.GetHostEntry(name);
+                for (int index = 0; index < hostInfo.AddressList.Length; index++)
+                {
+                    if (hostInfo.AddressList[index].AddressFamily == AddressFamily.InterNetwork)
+                    {
+                        return hostInfo.AddressList[index].ToString();
+                    }
+                }
+            } catch {
+            }
+
+            return name;
+        }
+
+        public static string GetHostAddressEx(string localInterface)
+        {
+            string subnetIp = localInterface;
+            string subnetMask = "";
+
+            int index = subnetIp.IndexOf('/');
+            if (index > 0)
+            {
+                subnetIp = localInterface.Substring(0, index);
+                subnetMask = localInterface.Substring(index);
+            }
+
+            if (subnetIp.Length > 0)
+            {
+                subnetIp = GetByName(subnetIp);
+            }
+
+            return subnetIp + subnetMask;
+        }
+
+        public static System.Net.IPAddress[] GetHostAddresses(string hostString)
+        {
+            try
+            {
+                return Dns.GetHostAddresses(hostString);
+            } catch {
+                return new System.Net.IPAddress[0];
+            }
         }
 
         // If argument contains a "/" we assume it is on the form:  subnet-address/subnet-mask
@@ -109,35 +153,53 @@ namespace Ops
 
             for (int j = 0; j < bip.Length; j++) bip[j] = (byte)((int)bip[j] & (int)bmask[j]);
 
-            //            System.Net.NetworkInformation.IPGlobalProperties computerProperties = System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties();
-            System.Net.NetworkInformation.NetworkInterface[] nics = System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces();
-
-            if (nics != null && nics.Length > 0)
+            System.Net.IPAddress[] ads = GetHostAddresses("");
+            foreach (System.Net.IPAddress address in ads)
             {
-                foreach (System.Net.NetworkInformation.NetworkInterface adapter in nics)
+                if (address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
                 {
-                    System.Net.NetworkInformation.IPInterfaceProperties properties = adapter.GetIPProperties();
-                    System.Net.NetworkInformation.UnicastIPAddressInformationCollection uniCast = properties.UnicastAddresses;
-                    if (uniCast == null) continue;
+                    byte[] addr = address.GetAddressBytes();
+                    for (int j = 0; j < addr.Length; j++) addr[j] = (byte)((int)addr[j] & (int)bmask[j]);
 
-                    foreach (System.Net.NetworkInformation.UnicastIPAddressInformation uni in uniCast)
+                    bool eq = true;
+                    for (int j = 0; j < addr.Length; j++) eq = eq & (addr[j] == bip[j]);
+
+                    if (eq)
                     {
-                        if (uni.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork) //IPV4
-                        {
-                            byte[] addr = uni.Address.GetAddressBytes();
-                            for (int j = 0; j < addr.Length; j++) addr[j] = (byte)((int)addr[j] & (int)bmask[j]);
-
-                            bool eq = true;
-                            for (int j = 0; j < addr.Length; j++) eq = eq & (addr[j] == bip[j]);
-
-                            if (eq)
-                            {
-                                return uni.Address.ToString();
-                            }
-                        }
+                        return address.ToString();
                     }
                 }
             }
+
+            ////            System.Net.NetworkInformation.IPGlobalProperties computerProperties = System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties();
+            //System.Net.NetworkInformation.NetworkInterface[] nics = System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces();
+
+            //if (nics != null && nics.Length > 0)
+            //{
+            //    foreach (System.Net.NetworkInformation.NetworkInterface adapter in nics)
+            //    {
+            //        System.Net.NetworkInformation.IPInterfaceProperties properties = adapter.GetIPProperties();
+            //        System.Net.NetworkInformation.UnicastIPAddressInformationCollection uniCast = properties.UnicastAddresses;
+            //        if (uniCast == null) continue;
+
+            //        foreach (System.Net.NetworkInformation.UnicastIPAddressInformation uni in uniCast)
+            //        {
+            //            if (uni.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork) //IPV4
+            //            {
+            //                byte[] addr = uni.Address.GetAddressBytes();
+            //                for (int j = 0; j < addr.Length; j++) addr[j] = (byte)((int)addr[j] & (int)bmask[j]);
+
+            //                bool eq = true;
+            //                for (int j = 0; j < addr.Length; j++) eq = eq & (addr[j] == bip[j]);
+
+            //                if (eq)
+            //                {
+            //                    return uni.Address.ToString();
+            //                }
+            //            }
+            //        }
+            //    }
+            //}
             return subnetIp;
 
             //// This only works on Vista and later

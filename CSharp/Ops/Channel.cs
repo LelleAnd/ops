@@ -64,7 +64,7 @@ namespace Ops
             //archiver->inout(std::string("address"), domainAddress);
             channelID = archive.Inout("name", channelID);
             linktype = archive.Inout("linktype", linktype);
-            localInterface = archive.Inout("localInterface", localInterface);
+            localInterface = InetAddress.GetHostAddressEx(archive.Inout("localInterface", localInterface));
             domainAddress = archive.Inout("address", domainAddress);
 
             //archiver->inout(std::string("timeToLive"), timeToLive);
@@ -76,11 +76,18 @@ namespace Ops
             outSocketBufferSize = archive.Inout("outSocketBufferSize", outSocketBufferSize);
             inSocketBufferSize = archive.Inout("inSocketBufferSize", inSocketBufferSize);
 
-            if (linktype.Equals(""))
+            if (linktype.Equals("") || (linktype == LINKTYPE_MC))
             {
                 linktype = LINKTYPE_MC;
             }
-            else if ((linktype != LINKTYPE_MC) && (linktype != LINKTYPE_TCP) && (linktype != LINKTYPE_UDP))
+            else if ((linktype == LINKTYPE_TCP) || (linktype == LINKTYPE_UDP))
+            {
+                if (domainAddress.Length > 0)
+                {
+                    domainAddress = InetAddress.GetByName(domainAddress);
+                }
+            }
+            else
             {
                 throw new ConfigException(
                     "Illegal linktype: '" + linktype +

@@ -12,12 +12,12 @@ namespace Ops
 {
 	public class McSendDataHandler : SendDataHandler 
     {
-        private readonly InetAddress sinkIP;
+        private readonly string sinkIP;
 
         public McSendDataHandler(Topic t, string localInterface, int ttl) 
         {
             sender = new MulticastSender(0, localInterface, ttl, t.GetOutSocketBufferSize());
-            sinkIP = InetAddress.GetByName(t.GetDomainAddress());
+            sinkIP = t.GetDomainAddress();
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]

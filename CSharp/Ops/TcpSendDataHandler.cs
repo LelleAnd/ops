@@ -8,12 +8,12 @@ namespace Ops
 {
     class TcpSendDataHandler : SendDataHandler
     {
-        private readonly InetAddress sinkIP;
+        private readonly string sinkIP;
 
         public TcpSendDataHandler(Topic t, string localInterface)
         {
             sender = new TcpServerSender(t.GetDomainAddress(), t.GetPort(), t.GetOutSocketBufferSize());
-            sinkIP = InetAddress.GetByName(t.GetDomainAddress());
+            sinkIP = t.GetDomainAddress();
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]

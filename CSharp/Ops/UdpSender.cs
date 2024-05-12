@@ -63,7 +63,7 @@ namespace Ops
         {
             try
             {
-                return this.SendTo(bytes, offset, size, InetAddress.GetByName(ip), port);
+                return this.SendTo(bytes, offset, size, new InetAddress(ip), port);
             }
             catch (Exception)
             {

@@ -1,6 +1,6 @@
 /**
  * Copyright (C) 2006-2010 Anton Gravestam.
- * Copyright (C) 2018-2020 Lennart Andersson.
+ * Copyright (C) 2018-2024 Lennart Andersson.
 *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -29,6 +29,7 @@
 
 #include <string>
 #include <sstream>
+#include <cstdint>
 
 // -----------------------------------------------------------------------------
 // Macros used for trace of some functionality during development
@@ -138,8 +139,8 @@ namespace ops {
 	// Rest of lengths are internal or defined in relation to the above lengths
 	// Need to be able to handle Domain::ParticipantId
 	constexpr int FIXED_PART_KEY_SIZE = (FIXED_OBJECT_NAME_SIZE + 2 + FIXED_OBJECT_NAME_SIZE);
-	// xxx.xxx.xxx.xxx/xxx.xxx.xxx.xxx
-	constexpr int FIXED_ADDRESS_SIZE         = 32;
+	// xxx.xxx.xxx.xxx/xxx.xxx.xxx.xxx or a node-name
+	constexpr int FIXED_ADDRESS_SIZE         = 64;
 	constexpr int FIXED_TRANSPORT_SIZE       = 10;
 	constexpr int FIXED_INTERNAL_STRING_SIZE = 64;
 	constexpr int FIXED_EXCEPTION_MSG_SIZE   = 256;

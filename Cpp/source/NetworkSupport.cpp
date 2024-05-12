@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2022 Lennart Andersson.
+* Copyright (C) 2019-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -151,36 +151,88 @@ Address_T doSubnetTranslation(const Address_T addr, IOService* const ioServ)
 	return subnet;
 }
 
-void ShowKnownInterfaces(IOService* const ioServ)
+void ShowKnownInterfaces(IOService* const ioServ, InternalString_T name)
 {
 	using boost::asio::ip::udp;
 
 	boost::asio::io_service* const ioService = BoostIOServiceImpl::get(ioServ);
 	if (ioService == nullptr) { return; }
 
-	std::cout << "\nHostname: " << boost::asio::ip::host_name() << "\n";
-	std::cout << "Interfaces:\n";
+	if (name == "") {
+		name = GetHostName();
+		std::cout << "\nHostname: " << name << "\n";
+		std::cout << "Interfaces:\n";
+	}
 
 	// Note: The resolver requires that the hostname can be used to resolve to an ip
 	// e.g due to the hostname beeing listed with an ipv4 address in /etc/hosts.
 	// On linux this can be tested by using the command "hostname -i"
 	udp::resolver resolver(*ioService);
-	const udp::resolver::query query(boost::asio::ip::host_name(), "");
-	udp::resolver::iterator it = resolver.resolve(query);
+	const udp::resolver::query query(name.c_str(), "");
+	boost::system::error_code ec;
+	udp::resolver::iterator it = resolver.resolve(query, ec);
 	const udp::resolver::iterator end;
-	while (it != end) {
-		const boost::asio::ip::address ipaddr = it->endpoint().address();
-		if (ipaddr.is_v4()) {
-			std::cout << "  Ip: " << ipaddr.to_string() << "\n";
+
+	if (ec) {
+		std::cout << "Host '" << name << "' not found (" << ec.message() << ")\n";
+
+	} else {
+		while (it != end) {
+			const boost::asio::ip::address ipaddr = it->endpoint().address();
+			if (ipaddr.is_v4()) {
+				std::cout << "  Ip: " << ipaddr.to_string() << "\n";
+			}
+			++it;
 		}
-		++it;
 	}
-	std::cout << "\n";
 }
 
 InternalString_T GetHostName()
 {
 	return boost::asio::ip::host_name();
+}
+
+// Return first address found for name
+Address_T GetAddrFromName(const InternalString_T name, IOService* const ioServ)
+{
+	boost::asio::io_service* const ioService = BoostIOServiceImpl::get(ioServ);
+	if (ioService == nullptr) { return ""; }
+
+	boost::asio::ip::tcp::resolver resolver(*ioService);
+	const boost::asio::ip::tcp::resolver::iterator end;
+	boost::system::error_code ec;
+	boost::asio::ip::tcp::resolver::iterator it = resolver.resolve({ name.c_str(), "" }, ec);
+	if (ec) { return name; }
+
+	while (it != end) {
+        const boost::asio::ip::address ipaddr = it->endpoint().address();
+        if (ipaddr.is_v4()) { return ipaddr.to_string(); }
+        ++it;
+    }
+	return name;
+}
+
+Address_T GetAddrFromNameEx(const InternalString_T localInterface, IOService* const ioServ)
+{
+	Address_T subnet = localInterface;
+	Address_T mask = "";
+
+	Address_T::size_type index = localInterface.find("/");
+	if (index != Address_T::npos) {
+		subnet = localInterface.substr(0, index);
+		mask = localInterface.substr(index + 1);
+	}
+
+	if (subnet.size() > 0) {
+		subnet = GetAddrFromName(subnet, ioServ);
+	}
+
+	if (index != Address_T::npos) {
+		subnet += "/";
+		subnet += mask;
+	}
+
+	return subnet;
 }
 
 }

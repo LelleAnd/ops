@@ -12,7 +12,7 @@
 
 #include "Configuration.h"
 
-const std::string sVersion = "Version 2022-04-04";
+const std::string sVersion = "Version 2024-04-20";
 
 
 bool gErrorGiven = false;
@@ -147,14 +147,31 @@ public:
 				}
 
 				// 
-
-
 				if (bDebug) {
 					// Dump all domains and topics to standard out 
 					ops::PrintArchiverOut prt(std::cout);
 					prt.printObject("", cfg.get());
 					std::cout << std::endl;
 				}
+
+				LOG_INFO("Used MC, Node addresses and Local Interfaces:\n");
+				std::unique_ptr<ops::IOService> ioServ(ops::IOService::create());
+				for (const auto x : vMCAddresses) {
+					std::cout << "  MC: " << x << "\n";
+				}
+				for (const auto x : vNodeAddresses) {
+                    std::string addr{ops::GetAddrFromName(x, ioServ.get()).c_str()};
+                    std::cout << "  Node: " << x;
+                    if (x != addr) { std::cout << " --> " << addr; }
+                    std::cout << "\n";
+                }
+                for (const auto x : vLocalInterfaces) {
+                    std::string addr{ops::GetAddrFromName(x, ioServ.get()).c_str()};
+                    std::cout << "  Local IF: " << x;
+                    if (x != addr) { std::cout << " --> " << addr; }
+                    std::cout << "\n";
+                }
+                
 			}
 		}
 		catch (std::exception& e) {
@@ -230,15 +247,16 @@ public:
 		CheckForUnknownAttributes(config, known, msg);
 	}
 
-	void verifyMCAddress(std::string const address, std::string const msg) const
+	void verifyMCAddress(std::string const address, std::string const msg)
 	{
 		// check that domainaddress is a MC address
-		if (!ops::isValidMCAddress(address)) {
+        CheckDuplicate(address, vMCAddresses);
+        if (!ops::isValidMCAddress(address)) {
 			LOG_ERROR(">>> Invalid MC address '" << address << "' detected " << msg << std::endl);
 		}
 	}
 
-	void verifyValidAddress(std::string const address, std::string const linkType, std::string const msg) const
+	void verifyValidAddress(std::string const address, std::string const linkType, std::string const msg)
 	{
 		if (address == "") { return; }
 		if ((linkType == "multicast") || (linkType == "")) {
@@ -246,21 +264,39 @@ public:
 		}
 		else if ((linkType == "udp") || (linkType == "tcp")) {
 			// subscriber address or tcp server address
-			if (!ops::isValidNodeAddress(address)) {
-				LOG_ERROR(">>> Invalid Node address '" << address << "' detected " << msg << std::endl);
+	        CheckDuplicate(address, vNodeAddresses);
+			try {
+				if (!ops::isValidNodeAddress(address)) {
+					LOG_ERROR(">>> Invalid Node address '" << address << "' detected " << msg << std::endl);
+				}
+			} catch (...) {
+				LOG_WARN(">>> Non-numeric Node address '" << address << "' detected " << msg << std::endl);
 			}
 		}
 	}
 
-
-	void verifyLocalInterface(std::string localIf, std::string const msg) const
+	void verifyLocalInterface(std::string localIf, std::string const msg)
 	{
+        CheckDuplicate(localIf, vLocalInterfaces);
 		std::unique_ptr<ops::IOService> ioServ(ops::IOService::create());
-		ops::Address_T const subnetIf = ops::doSubnetTranslation(localIf, ioServ.get());
-		LOG_INFO(msg + ": localInterface " << localIf << " --> " << subnetIf << std::endl);
-		if (!ops::isValidNodeAddress(subnetIf)) {
-			LOG_ERROR(">>> Invalid Node address '" << subnetIf << "' extracted from localInterface '" << localIf << "'" << std::endl);
-		}
+        try {
+            ops::Address_T const subnetIf = ops::doSubnetTranslation(localIf, ioServ.get());
+            LOG_INFO(msg + ": localInterface " << localIf << " --> " << subnetIf << std::endl);
+            try {
+                if (!ops::isValidNodeAddress(subnetIf)) {
+                    LOG_ERROR(">>> Invalid Node address '" << subnetIf << "' extracted from localInterface '" << localIf << "'"
+                                                           << std::endl);
+                }
+            }
+            catch (...) {
+                LOG_WARN(">>> Non-numeric Node address '" << subnetIf << "' extracted from localInterface '" << localIf << "'"
+                                                          << std::endl);
+            }
+        }
+        catch (...)
+		{
+            LOG_ERROR(">>> Invalid localInterface '" << localIf << "' for " << msg << std::endl);
+        }
 	}
 
 	bool CheckExist(std::string const name, std::vector<std::string>& vect) const
@@ -771,6 +807,9 @@ private:
 	std::vector<std::string> vTopics;
 	std::vector<std::string> vChannels;
 	std::vector<std::string> vTransportTopics;
+	std::vector<std::string> vMCAddresses;
+	std::vector<std::string> vNodeAddresses;
+    std::vector<std::string> vLocalInterfaces;
 	bool bUdpRequireMetadata;
 	bool bTcpRequireMetadata;
 
@@ -798,9 +837,11 @@ void Usage()
 	std::cout << "  Usage:" << std::endl;
 	std::cout << "    VerifyOPSConfig [-?] [-debug] filename " << std::endl;
 	std::cout << std::endl;
-	std::cout << "    -?          Help" << std::endl;
-	std::cout << "    -debug      Print some debug info during work" << std::endl;
-	std::cout << "    -list       List known interfaces" << std::endl;
+	std::cout << "    -?                Help" << std::endl;
+	std::cout << "    -debug            Print some debug info during work" << std::endl;
+	std::cout << "    -host             Show host name" << std::endl;
+	std::cout << "    -list [<name>]    List known interfaces for host or given name" << std::endl;
+	std::cout << "    -resolve <name>   Try to find IP address" << std::endl;
 }
 
 int main(const int argc, const char* argv[])
@@ -809,7 +850,10 @@ int main(const int argc, const char* argv[])
 	bool printUsage = false;
 	bool printDescription = false;
 	bool debug = false;
+	bool showHost = false;
 	bool printList = false;
+	bool doResolveName = false;
+	std::string resName = "";
 
 	for (int i = 1; i < argc; i++) {
 		std::string const arg = argv[i];
@@ -821,12 +865,25 @@ int main(const int argc, const char* argv[])
 			printUsage = true;
 			printDescription = true;
 
-		}
-		else if (arg == "-debug") {
+		} else if (arg == "-debug") {
 			debug = true;
+
+		} else if (arg == "-host") {
+			showHost = true;
 
 		} else if (arg == "-list") {
 			printList = true;
+			i++;
+			if (i < argc) {
+				resName = argv[i];
+			}
+
+		} else if (arg == "-resolve") {
+			doResolveName = true;
+			i++;
+			if (i < argc) {
+				resName = argv[i];
+			}
 
 		} else {
 			infile = arg;
@@ -834,10 +891,18 @@ int main(const int argc, const char* argv[])
 		}
 	}
 
+	if (showHost) {
+		std::cout << "ops::GetHostName(): " << ops::GetHostName() << "\n";
+		return 0;
+	}
 	if (printList) {
 		std::unique_ptr<ops::IOService> ioServ(ops::IOService::create());
-		ops::ShowKnownInterfaces(ioServ.get());
-		std::cout << ">>>> " << ops::GetHostName() << " <<<<\n";
+		ops::ShowKnownInterfaces(ioServ.get(), resName);
+		return 0;
+	}
+	if (doResolveName) {
+		std::unique_ptr<ops::IOService> ioServ(ops::IOService::create());
+		std::cout << "Resolve: " << resName << " --> " << ops::GetAddrFromName(resName, ioServ.get()) << "\n";
 		return 0;
 	}
 

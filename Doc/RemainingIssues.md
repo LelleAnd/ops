@@ -3,7 +3,8 @@
 OPS is far from complete. Remaining Issues and shortcomings include:
 
   * Documentation is Poor, there is no API docs
-  * TCP Transport only allow one publisher per Topic (for Ada, C#, Delphi, Java)
+  * TCP Transport many-to-many are missing for C# and Java
+  * UDP Transport many-to-many is missing for Python
   * OPS has no active community (it is maintained by one person only at the time being)
   * OPS needs more users
   * Java Performance could improve, it is now suffering a bit from C++ optimizations, this is especially true for large messages.

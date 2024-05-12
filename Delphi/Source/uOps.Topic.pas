@@ -2,7 +2,7 @@ unit uOps.Topic;
 
 (**
 *
-* Copyright (C) 2016-2022 Lennart Andersson.
+* Copyright (C) 2016-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -87,7 +87,8 @@ type
 
 implementation
 
-uses uOps.Exceptions;
+uses uOps.NetworkSupport,
+     uOps.Exceptions;
 
 constructor TTopic.Create(namee : AnsiString; portt : Integer; typeIDd : AnsiString; domainAddresss : AnsiString);
 begin
@@ -160,9 +161,15 @@ begin
   SampleMaxSize := tSampleMaxSize;
 
   archiver.inout('transport', FTransport);
-  if FTransport = '' then begin
+  if (FTransport = '') or (FTransport = TRANSPORT_MC) then begin
     FTransport := TRANSPORT_MC;
-  end else if (FTransport <> TRANSPORT_MC) and (FTransport <> TRANSPORT_TCP) and (FTransport <> TRANSPORT_UDP) then begin
+
+  end else if (FTransport = TRANSPORT_TCP) or (FTransport = TRANSPORT_UDP) then begin
+    if Length(FDomainAddress) > 0 then begin
+      FDomainAddress := GetHostAddress(FDomainAddress);
+    end;
+
+  end else begin
     raise EConfigException('Illegal transport: "' + FTransport +
           '". Transport for topic must be either "multicast", "tcp", "udp" or left blank( = multicast)');
   end;

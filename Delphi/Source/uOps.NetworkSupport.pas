@@ -2,7 +2,7 @@ unit uOps.NetworkSupport;
 
 (**
 *
-* Copyright (C) 2016-2020 Lennart Andersson.
+* Copyright (C) 2016-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -22,18 +22,25 @@ unit uOps.NetworkSupport;
 
 interface
 
+uses Classes;
+
   function doSubnetTranslation(addr : AnsiString) : AnsiString;
 
   function isValidNodeAddress(addr : AnsiString) : Boolean;
   function isMyNodeAddress(addr : AnsiString) : Boolean;
 
+  procedure GetHostAddresses(name : AnsiString; List : TStrings);
+  function GetHostAddress(name : AnsiString) : AnsiString;
+  function GetHostAddressEx(localInterface : AnsiString) : AnsiString;
+
 implementation
 
 uses SysUtils,
+     AnsiStrings,
      Winapi.Windows,
      Winapi.IpHlpApi,
      Winapi.IpRtrMib,
-     Winapi.Winsock;
+     Winapi.Winsock2;
 
 /// ------------------------------------------
 /// Helper to get all IP interfaces
@@ -78,9 +85,9 @@ var
   Idx : Integer;
   subnet, mask : AnsiString;
   subnetIp, subnetMask : DWORD;
-  Size: ULONG;
-  p: PMibIpAddrTable;
   i: integer;
+  List : TStringList;
+  dwaddr : DWORD;
 begin
   Result := addr;
 
@@ -96,29 +103,23 @@ begin
     // Expand to the number of bits given
     subnetMask := StrToInt(string(mask));
     subnetMask := (((1 shl subnetMask)-1) shl (32 - subnetMask)) and $FFFFFFFF;
-    subnetMask := DWORD(ntohl(Integer(subnetMask)));
+    subnetMask := DWORD(ntohl(u_long(subnetMask)));
   end else begin
     subnetMask := DWORD(inet_addr(PAnsiChar(mask)));
   end;
 
-  VVGetIpAddrTable(p, Size, False);
-  if Assigned(p) then begin
-    try
-      with p^ do begin
-{$R-}
-        for i := 0 to dwNumEntries - 1 do begin
-          with table[i] do begin
-            if (dwAddr and subnetMask) = (subnetIp and subnetMask) then begin
-              Result := IpAddressToString(dwAddr);
-              Break;
-            end;
-          end;
-        end;
-{$R+}
+  List := TStringList.Create;
+  try
+    GetHostAddresses('', List);
+    for i := 0 to List.Count - 1 do begin
+      dwaddr := DWORD(List.Objects[i]);
+      if (dwAddr and subnetMask) = (subnetIp and subnetMask) then begin
+        Result := AnsiString(List.Strings[i]);
+        Break;
       end;
-    finally
-      FreeMem(p);
     end;
+  finally
+    List.Free;
   end;
 end;
 
@@ -176,6 +177,108 @@ begin
     finally
       FreeMem(p);
     end;
+  end;
+end;
+
+//  Paddrinfo = ^addrinfo;
+//  addrinfo = record
+//    ai_flags: Integer;     // AI_PASSIVE, AI_CANONNAME, AI_NUMERICHOST
+//    ai_family: Integer;    // PF_xxx
+//    ai_socktype: Integer;  // SOCK_xxx
+//    ai_protocol: Integer;  // 0 or IPPROTO_xxx for IPv4 and IPv6
+//    ai_addrlen: SIZE_T;    // Length of ai_addr
+//    ai_canonname: MarshaledAString; // Canonical name for nodename
+//    ai_addr: PSockAddr;    // Binary address
+//    ai_next: Paddrinfo;    // Next structure in linked list
+//  end;
+
+procedure GetHostAddresses(name : AnsiString; List : TStrings);
+var
+  HostName : array[0..100] of AnsiChar;
+  Err : Integer;
+  hints : addrinfo;
+  Res, Ptr : Paddrinfo;
+  Addr : PAnsiChar;
+begin
+  AnsiStrings.StrPLCopy(HostName, name, 100);
+  FillChar(hints, SizeOf(hints), 0);
+  Res := nil;
+
+  //function getaddrinfo(hostname, servname: MarshaledAString; const [Ref] hints: addrinfo; out res: Paddrinfo): Integer; stdcall;
+  Err := Winapi.Winsock2.getaddrinfo(HostName, nil, hints, Res);
+  try
+    if (Err = 0) and Assigned(Res) then begin
+      Ptr := Res;
+      while Assigned(Ptr) do begin
+        if Ptr.ai_family = AF_INET then begin
+          Addr := inet_ntoa(TSockAddrIn(Ptr.ai_addr^).sin_addr);
+          // Save IP both as string and as number
+          List.AddObject(string(addr), TObject(TSockAddrIn(Ptr.ai_addr^).sin_addr));
+        end;
+        Ptr := Ptr.ai_next;
+      end;
+    end;
+  finally
+    //procedure freeaddrinfo(var ai: addrinfo); stdcall;
+    Winapi.Winsock2.freeaddrinfo(Res^);
+  end;
+end;
+
+function GetHostAddress(name : AnsiString) : AnsiString;
+var
+  HostName : array[0..100] of AnsiChar;
+  Err : Integer;
+  hints : addrinfo;
+  Res, Ptr : Paddrinfo;
+  Addr : PAnsiChar;
+begin
+  Result := name;
+
+  AnsiStrings.StrPLCopy(HostName, name, 100);
+  FillChar(hints, SizeOf(hints), 0);
+  Res := nil;
+
+  //function getaddrinfo(hostname, servname: MarshaledAString; const [Ref] hints: addrinfo; out res: Paddrinfo): Integer; stdcall;
+  Err := Winapi.Winsock2.getaddrinfo(HostName, nil, hints, Res);
+  try
+    if (Err = 0) and Assigned(Res) then begin
+      Ptr := Res;
+      while Assigned(Ptr) do begin
+        if Ptr.ai_family = AF_INET then begin
+          Addr := inet_ntoa(TSockAddrIn(Ptr.ai_addr^).sin_addr);
+          Result := addr;
+          Break;
+        end;
+        Ptr := Ptr.ai_next;
+      end;
+    end;
+  finally
+    //procedure freeaddrinfo(var ai: addrinfo); stdcall;
+    Winapi.Winsock2.freeaddrinfo(Res^);
+  end;
+end;
+
+function GetHostAddressEx(localInterface : AnsiString) : AnsiString;
+var
+  Idx : Integer;
+  mask : AnsiString;
+begin
+  Result := localInterface;
+  mask := '';
+
+  // If '/' we split
+  Idx := Pos('/', string(localInterface));
+  if Idx > 0 then begin
+    Result := Copy(localInterface, 1, Idx-1);
+    mask   := Copy(localInterface, Idx+1, MaxInt);
+  end;
+
+  if Length(Result) > 0 then begin
+    Result := getHostAddress(Result);
+  end;
+
+  if Idx > 0 then begin
+    Result := Result + '/' + mask;
   end;
 end;
 

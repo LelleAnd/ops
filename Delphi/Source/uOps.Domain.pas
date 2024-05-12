@@ -2,7 +2,7 @@ unit uOps.Domain;
 
 (**
 *
-* Copyright (C) 2016-2022 Lennart Andersson.
+* Copyright (C) 2016-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -97,8 +97,8 @@ uses SysUtils,
      Winapi.Windows,
      Winapi.IpHlpApi,
      Winapi.IpRtrMib,
-     Winapi.Winsock,
      uOps.Exceptions,
+     uOps.NetworkSupport,
      uOps.XMLArchiverIn;
 
 constructor TDomain.Create;
@@ -193,6 +193,8 @@ begin
 	archiver.inout('outSocketBufferSize', FOutSocketBufferSize);
 	archiver.inout('metaDataMcPort', FMetaDataMcPort);
 
+  FLocalInterface := GetHostAddressEx(FLocalInterface);
+
   // To not break binary compatibility we only do this when we know we are
   // reading from an XML-file
   if archiver is TXMLArchiverIn then begin
@@ -201,7 +203,7 @@ begin
     archiver.inout('optNonVirt', FOptNonVirt);
 		CheckTransports();
   end;
- end;
+end;
 
 // Returns a newely allocated deep copy/clone of this object.
 function TDomain.Clone : TOPSObject;

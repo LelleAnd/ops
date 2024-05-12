@@ -2,7 +2,7 @@ unit uOps.Participant;
 
 (**
 *
-* Copyright (C) 2016-2022 Lennart Andersson.
+* Copyright (C) 2016-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -163,8 +163,8 @@ implementation
 
 uses
   Windows,
+  Winapi.Winsock2,
   SysUtils,
-  WinSock,
   uOps.Exceptions,
   uOps.Publisher;
 
@@ -282,7 +282,7 @@ begin
   FPartInfoDataMutex := TMutex.Create;
 
   hname[0] := #0;
-  gethostname(hname, sizeof(hname));
+  Winapi.Winsock2.gethostname(hname, sizeof(hname));
   FPartInfoData.name := AnsiString(hname) + '(' + AnsiString(IntToStr(GetCurrentProcessId)) + ')';
   FPartInfoData.languageImplementation := 'Delphi';
   FPartInfoData.id := AnsiString(FParticipantID);

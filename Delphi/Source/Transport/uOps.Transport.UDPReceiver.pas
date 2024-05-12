@@ -2,7 +2,7 @@ unit uOps.Transport.UDPReceiver;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -24,7 +24,7 @@ interface
 
 uses System.Generics.Collections,
      System.SyncObjs,
-     WinSock,
+     Winapi.Winsock2,
      uNotifier,
      uRunner,
      uOps.Types,
@@ -46,24 +46,19 @@ type
     // Current read buffer from user
     FBuffer : PByte;
     FBufferSize : Integer;
-
     // Last source for data
     FFromAddress : TSockAddr;
     FFromAddressLen : Integer;
-
     // Our thread running our Run() method
     FRunner : TRunner;
     FTerminated : Boolean;
-
     // Will by called by the FRunner thread
     procedure Run;
-
     procedure Report(method : string; mess : string);
 
   public
     constructor Create(bindPort : Integer; localInterface : string = '0.0.0.0'; inSocketBufferSize : Int64 = 16000000);
     destructor Destroy; override;
-
     // Start():
     // Starts the receiver, and reads bytes into given buffer.
     // When a message is read, a callback (notification) will be done with the
@@ -87,7 +82,6 @@ type
 
     //
     function ReceiveMessage(o: PByte; size: Integer; var fromAddr : TSockAddr; var len : Integer): Integer;
-
     function available : Boolean;
 
     property Port : Integer read FPort;
@@ -174,11 +168,9 @@ begin
     Report('Start', 'Can''t Start after a Stop (NYI)');
     Exit;
   end;
-
   FTerminated := False;
   FBuffer := bytes;
   FBufferSize := size;
-
   if Assigned(FBuffer) then begin
     // Start a thread running our run() method
     FRunner := TRunner.Create(Run);
@@ -211,7 +203,6 @@ begin
   // Tell thread to terminate
   FTerminated := True;
   if Assigned(FRunner) then FRunner.Terminate;
-
   // Thread is probably waiting in a read, so we must close the socket
   FSocket.Close;
 
@@ -226,7 +217,6 @@ function TUDPReceiver.available : Boolean;
 begin
   Result := Assigned(FSocket);
 end;
-
 (**************************************************************************
 *
 **************************************************************************)
@@ -268,9 +258,7 @@ begin
       end else if FLastErrorCode = WSAECONNRESET then begin
         // On a UDP-datagram socket this error indicates a previous send
         // operation resulted in an ICMP Port Unreachable message.
-
       end else begin
-
       end;
 
       Report('Run', 'Receive error');
@@ -280,5 +268,6 @@ begin
   end;
 end;
 
-end.
+
+end.
 

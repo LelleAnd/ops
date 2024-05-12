@@ -2,7 +2,7 @@ unit uOps.Transport.MulticastReceiver;
 
 (**
 *
-* Copyright (C) 2016 Lennart Andersson.
+* Copyright (C) 2016-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -24,7 +24,7 @@ interface
 
 uses System.Generics.Collections,
      System.SyncObjs,
-     WinSock,
+     Winapi.Winsock2,
      uNotifier,
      uRunner,
      uOps.Types,
@@ -42,30 +42,22 @@ type
     FIpAddress : string;
     FLocalInterface : string;
     FInSocketBufferSize : Int64;
-
     FSocket: TUdpSocket;
-
     // Current read buffer from user
     FBuffer : PByte;
     FBufferSize : Integer;
-
     // Last source for data
     FFromAddress : TSockAddr;
     FFromAddressLen : Integer;
-
     // Our thread running our Run() method
     FRunner : TRunner;
     FTerminated : Boolean;
-
     // Will by called by the FRunner thread
     procedure Run;
-
     procedure Report(method : string; mess : string);
-
   public
     constructor Create(mcAddress : string; bindPort : Integer; localInterface : string = '0.0.0.0'; inSocketBufferSize : Int64 = 16000000);
     destructor Destroy; override;
-
     // Start():
     // Starts the receiver, and reads bytes into given buffer.
     // When a message is read, a callback (notification) will be done with the
@@ -89,34 +81,26 @@ type
 
     //
     function ReceiveMessage(o: PByte; size: Integer; var fromAddr : TSockAddr; var len : Integer): Integer;
-
     function available : Boolean;
-
     property Port : Integer read FPort;
     property Address : string read FIpAddress;
   end;
-
 implementation
-
 uses SysUtils,
      uOps.Error;
-
 constructor TMulticastReceiver.Create(mcAddress : string; bindPort : Integer; localInterface : string; inSocketBufferSize : Int64);
 begin
   inherited Create;
-
   FPort := bindPort;
   FIpaddress := mcAddress;
   FLocalInterface := localInterface;
   FInSocketBufferSize := inSocketBufferSize;
 end;
-
 destructor TMulticastReceiver.Destroy;
 begin
 	Stop;   // Make sure socket is closed
   inherited;
 end;
-
 procedure TMulticastReceiver.Report(method : string; mess : string);
 begin
   if Assigned(FErrorService) then begin
@@ -131,11 +115,9 @@ var
 begin
   Result := False;
   if Assigned(FSocket) then Exit;
-
   FTerminated := False;
   FBuffer := bytes;
   FBufferSize := size;
-
   FSocket := TUdpSocket.Create;
 
   if not FSocket.Open then begin
@@ -168,14 +150,12 @@ begin
   end;
 
   FSocket.AddMulticastMembership(AnsiString(FIpAddress), AnsiString(FLocalInterface));
-
   if Assigned(FBuffer) then begin
     // Start a thread running our run() method
     FRunner := TRunner.Create(Run);
   end;
   Result := True;
 end;
-
 // Override from Receiver
 // Used to get the sender IP and port for a received message
 // Only safe to call in callback
@@ -184,7 +164,6 @@ begin
   address := string(TUdpSocket.getIpAddress(FFromAddress));
   port := TUdpSocket.getPort(FFromAddress);
 end;
-
 // Override from Receiver
 // Only safe to call in callback
 procedure TMulticastReceiver.SetReceiveBuffer(bytes : PByte; size : Integer);
@@ -197,27 +176,21 @@ end;
 procedure TMulticastReceiver.Stop;
 begin
   if not Assigned(FSocket) then Exit;
-
   // Tell thread to terminate
   FTerminated := True;
   if Assigned(FRunner) then FRunner.Terminate;
-
   FSocket.Close;
-
   // If thread exist, wait for thread to terminate and then delete the object
   FreeAndNil(FRunner);
-
   FreeAndNil(FSocket);
 
   FBuffer := nil;
   FBufferSize := 0;
 end;
-
 function TMulticastReceiver.available : Boolean;
 begin
   Result := Assigned(FSocket);
 end;
-
 (**************************************************************************
 *
 **************************************************************************)
@@ -259,9 +232,7 @@ begin
       end else if FLastErrorCode = WSAECONNRESET then begin
         // On a UDP-datagram socket this error indicates a previous send
         // operation resulted in an ICMP Port Unreachable message.
-
       end else begin
-
       end;
 
       Report('Run', 'Receive error');
@@ -270,6 +241,4 @@ begin
     end;
   end;
 end;
-
 end.
-

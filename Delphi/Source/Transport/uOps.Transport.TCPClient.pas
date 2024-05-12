@@ -2,7 +2,7 @@ unit uOps.Transport.TCPClient;
 
 (**
 *
-* Copyright (C) 2016-2021 Lennart Andersson.
+* Copyright (C) 2016-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -24,7 +24,7 @@ interface
 
 uses System.Generics.Collections,
      System.SyncObjs,
-     WinSock,
+     Winapi.Winsock2,
      uNotifier,
      uRunner,
      uOps.Types,

@@ -30,7 +30,7 @@ Make sure you have boost installed, otherwise download pre-built binaries for bo
     * Boost System
     * Boost Thread
 
-OPS has been used with Boost versions 1.38, 1.48, 1.53, 1.55, 1.60, 1.64, 1.66, 1.67, 1.71 and 1.72.
+OPS has been used with Boost versions 1.38, 1.48, 1.53, 1.55, 1.60, 1.64, 1.66, 1.67, 1.71, 1.72, 1.74, 1.82 and 1.84.
 Versions older than 1.60 hasn't been used/tested for quite a while. It is recommended to use a more modern version.
 
 ## TinyXML-2 (required for OPS C++ Core) ##
@@ -44,14 +44,14 @@ Version 3.7.0 or later is required to build OPS with CMake. Make sure the cmake 
 OPS has been used with CMake version 3.7.0 and later. To use CMake to build C# libraries and examples, you need CMake later than version 3.8.0.
 
 ## Visual Studio (Windows) ##
-OPS for C++ requires a C++11 compiler and has therefore only support for VS2015, VS2017 and VS2019. Support for earlier VS versions has been dropped.
+OPS for C++ requires a C++11 compiler and has therefore only support for VS2015, VS2017, VS2019 and VS2022. Support for earlier VS versions has been dropped.
 
 OPS for C# requires language version 7.3 or later (due to generics and constraining type parameters to System.Enum), i.e. Visual Studio 2017 version 15.7 or later.
 
 ## gcc (Linux) ##
 OPS for C++ requires a C++11 compiler and has therefore only support for gcc 4.8.1 an later.
 
-OPS has been used with 5.3.0, 5.4.0, 6.2.1, 6.4.1, 7.3.1, 9.2.0 and 9.3.0.
+OPS has been used with 5.3.0, 5.4.0, 6.2.1, 6.4.1, 7.3.1, 9.2.0, 9.3.0 and 11.3.0.
 
 ## .NET ##
 To use C# on Linux, install .NET 5 or later as decribed on
@@ -70,7 +70,7 @@ OPS uses JavaCC version 6.0.
 Support exist for Python 2.7 and Python 3.
 
 ## Delphi ##
-OPS has been used with Delphi XE2, Delphi 10.1, 10.2, 10.3 and 10.4.
+OPS has been used with Delphi XE2, Delphi 10.1, 10.2, 10.3, 10.4 and 11.3.
 
 ## Ada ##
 The Ada implementation requires Ada 2012 support.

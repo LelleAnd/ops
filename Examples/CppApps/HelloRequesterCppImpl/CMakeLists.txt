@@ -21,8 +21,8 @@ add_dependencies(${SUB_NAME} HelloRequestReply)
 set_target_properties(${PUB_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(${SUB_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
 
-target_link_libraries(${PUB_NAME} ${Boost_LIBRARIES} ops-static tinyxml2::tinyxml2)
-target_link_libraries(${SUB_NAME} ${Boost_LIBRARIES} ops-static tinyxml2::tinyxml2)
+target_link_libraries(${PUB_NAME} ${Boost_LIBRARIES} ops-static)
+target_link_libraries(${SUB_NAME} ${Boost_LIBRARIES} ops-static)
 
 if(MSVC)
 

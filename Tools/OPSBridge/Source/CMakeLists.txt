@@ -44,7 +44,7 @@ add_executable(${EXE_NAME}
 )
 add_dependencies(${EXE_NAME} opsbridgeidls)
 
-target_link_libraries(${EXE_NAME} ${Boost_LIBRARIES} ops-static tinyxml2::tinyxml2)
+target_link_libraries(${EXE_NAME} ${Boost_LIBRARIES} ops-static)
 
 if(WIN32)
   target_link_libraries(${EXE_NAME} winmm psapi)

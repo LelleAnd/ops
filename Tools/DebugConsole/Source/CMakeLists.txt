@@ -3,7 +3,7 @@
 set(EXE_NAME DebugConsole)
 
 set(EXE_SRCS
-  DebugConsole.cpp
+DebugConsole.cpp
 )
 
 # generate the library target
@@ -17,7 +17,7 @@ if (NOT DEFINED OPS_NO_SEPARATE_BOOTSTRAP)
   endif()
 endif()
 
-target_link_libraries(${EXE_NAME} ${Boost_LIBRARIES} ops-static tinyxml2::tinyxml2)
+target_link_libraries(${EXE_NAME} ${Boost_LIBRARIES} ops-static)
 
 if(WIN32)
   target_link_libraries(${EXE_NAME} winmm)

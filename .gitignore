@@ -210,4 +210,5 @@ $RECYCLE.BIN/
 /build*/
 /deploy*/
 .vs/
+.vscode/
 /doxy/

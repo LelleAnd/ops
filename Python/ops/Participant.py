@@ -49,6 +49,7 @@ class Participant(object):
 
 		self.shouldRun = False
 		self.tcprdhs = {}
+		self.udpsdhs = {}
 
 		self.partInfoData = ops.ParticipantInfoData.ParticipantInfoData()
 
@@ -70,6 +71,28 @@ class Participant(object):
 
 	def addTypeSupport(self,typeSupport):
 		self.objectFactory.addFactory(typeSupport)
+
+	def setUdpTransportInfo(self,ip,port):
+		with self.partInfoLock:
+			self.partInfoData.ip = ip
+			self.partInfoData.mc_udp_port = port
+
+	def connectUdp(self,topic,sdh):
+		# Should only be one
+		if not topic.name in self.udpsdhs:
+			self.udpsdhs[topic.name] = (sdh, 1)
+		else:
+			print("Participant: Topic already in udpsdhs")
+
+	def disconnectUdp(self,topic,sdh):
+		if topic.name in self.udpsdhs:
+			handler = self.udpsdhs[topic.name][0]
+			if handler == sdh:
+				self.udpsdhs.pop(topic.name)
+			else:
+				print("Participant: Wrong sdh in udpsdhs")
+		else:
+			print("Participant: Topic NOT in udpsdhs")
 
 	def getSendDataHandler(self,topic):
 		self.start()
@@ -184,6 +207,13 @@ class Participant(object):
 		if self.shouldRun:
 			self.shouldRun = False
 
+	def hasPublisherOn(self,topicname):
+		with self.partInfoLock:
+			for pubtop in self.partInfoData.publishTopics:
+				if pubtop.name == topicname:
+					return True
+		return False
+
 	def hasSubscriberOn(self,topicname):
 		with self.partInfoLock:
 			for subtop in self.partInfoData.subscribeTopics:
@@ -199,6 +229,15 @@ class Participant(object):
 		#tempStr +=") PartInfoData: Name: " + data.name
 		#tempStr +=",  languageImplementation: " + data.languageImplementation
 		#print(tempStr)
+
+		if data.mc_udp_port != 0:
+			for subtop in data.subscribeTopics:
+				if subtop.transport == ops.Constants.TRANSPORT_UDP:
+					if self.hasPublisherOn( subtop.name ):
+						if subtop.name in self.udpsdhs:
+							sdh = self.udpsdhs[subtop.name][0]
+							sdh.addSink(subtop.name, (data.ip, data.mc_udp_port), False)
+							#sdh.printSinks()
 
 		for pubtop in data.publishTopics:
 			if pubtop.transport == ops.Constants.TRANSPORT_TCP:

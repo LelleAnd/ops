@@ -12,8 +12,9 @@ def getHostAddresses(name):
 	return ads
 
 def getHostAddress(name):
-	for addr in getHostAddresses(name):
-		return addr
+	if len(name) > 0:
+		for addr in getHostAddresses(name):
+			return addr
 	return name
 
 def getHostAddressEx(localInterface):
@@ -41,7 +42,6 @@ def doSubnetTranslation(localInterface):
 		if ((temp ^ networkAddress) & netMask) == 0:
 			return iface
 
-
 def isValidNodeAddress(addr):
 	if addr == "":
 		return False
@@ -51,3 +51,17 @@ def isValidNodeAddress(addr):
 	if ip >= 0xE0000000:
 	   return False
 	return True
+
+def isMyNodeAddress(addr):
+	if addr == "":
+		return False
+	ip = struct.unpack(">I",socket.inet_aton(addr))[0]
+	if ip == 0:
+		return False
+	if ip == 0x7F000001:
+		return True
+	for iface in getInterfaceList():
+		temp = struct.unpack(">I",socket.inet_aton(iface))[0]
+		if ip == temp:
+			return True
+	return False

@@ -188,8 +188,7 @@ class Topic(OPS_Object):
 		if self.transport == "":
 			self.transport = TRANSPORT_MC
 		if self.transport == TRANSPORT_TCP or self.transport == TRANSPORT_UDP:
-			if len(self.domainAddress) > 0:
-				self.domainAddress = ops.Support.getHostAddress(self.domainAddress)
+			self.domainAddress = ops.Support.getHostAddress(self.domainAddress)
 
 	def validate(self):
 		super(Topic,self).validate()
@@ -265,8 +264,7 @@ class Channel(OPS_Object):
 		if self.linktype == "":
 			self.linktype = TRANSPORT_MC
 		if self.linktype == TRANSPORT_TCP or self.linktype == TRANSPORT_UDP:
-			if len(self.domainAddress) > 0:
-				self.domainAddress = ops.Support.getHostAddress(self.domainAddress)
+			self.domainAddress = ops.Support.getHostAddress(self.domainAddress)
 
 	def validate(self):
 		super(Channel,self).validate()

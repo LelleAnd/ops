@@ -55,7 +55,7 @@ class AbstractReceiveDataHandler(object):
 		super(AbstractReceiveDataHandler,self).__init__()
 		self.topic = topic
 		self.started = False
-		self.channels = set()
+		self.channels = []
 		# subscribers need to be protected. Used from user-land and from internal threads
 		self.subscribers = set()
 		self.subscribersLock = Lock()
@@ -89,28 +89,27 @@ class AbstractReceiveDataHandler(object):
 class UdpReceiveDataChannel(AbstractReceiveDataChannel):
 	def __init__(self,topic,owner):
 		super(UdpReceiveDataChannel,self).__init__(topic,owner)
+		self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+		self.sock.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
+		self.sock.bind(('',self.topic.port))
+		self.actualPort = self.sock.getsockname()[1]
+		if self.topic.inSocketBufferSize > 0:
+			self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, self.topic.inSocketBufferSize)
 
 	def run(self):
-		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-		sock.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
-		sock.bind(('',self.topic.port))
-
-		if self.topic.inSocketBufferSize > 0:
-			sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, self.topic.inSocketBufferSize)
-
 		while self.shouldRun:
 			try:
-				data, addr = sock.recvfrom(PACKET_MAX_SIZE);
+				data, addr = self.sock.recvfrom(PACKET_MAX_SIZE);
 				self.segmentReceived(data,addr)
 			except socket.timeout:
 				pass
 
-		sock.close()
+		self.sock.close()
 
 class UdpReceiveDataHandler(AbstractReceiveDataHandler):
 	def __init__(self,localInterface,topic):
 		super(UdpReceiveDataHandler,self).__init__(topic)
-		self.channels.add(UdpReceiveDataChannel(topic,self))
+		self.channels.append(UdpReceiveDataChannel(topic,self))
 
 def recvall(sock, n):
 	# Helper function to recv n bytes or return None if EOF is hit
@@ -191,7 +190,7 @@ class TcpReceiveDataHandler(AbstractReceiveDataHandler):
 	def __init__(self,localInterface,topic):
 		super(TcpReceiveDataHandler,self).__init__(topic)
 		if topic.port > 0:
-			self.channels.add(TcpReceiveDataChannel(topic, self))
+			self.channels.append(TcpReceiveDataChannel(topic, self))
 
 	def addChannel(self,addr,port):
 		if port == 0:
@@ -207,7 +206,7 @@ class TcpReceiveDataHandler(AbstractReceiveDataHandler):
 		chan = TcpReceiveDataChannel(self.topic, self)
 		if self.started == True:
 			chan.start()
-		self.channels.add(chan)
+		self.channels.append(chan)
 
 class McReceiveDataChannel(AbstractReceiveDataChannel):
 	def __init__(self,topic,localInterface,owner):
@@ -238,13 +237,18 @@ class McReceiveDataChannel(AbstractReceiveDataChannel):
 class McReceiveDataHandler(AbstractReceiveDataHandler):
 	def __init__(self,localInterface,topic):
 		super(McReceiveDataHandler,self).__init__(topic)
-		self.channels.add(McReceiveDataChannel(topic,localInterface,self))
+		self.channels.append(McReceiveDataChannel(topic,localInterface,self))
 
 def __makeKey(topic):
+	# Since topics can use the same port for transports multicast & tcp, or
+	# use transport udp which in most cases use a single ReceiveDataHandler,
+	# we need to return the same ReceiveDataHandler in these cases.
+	# Make a key with the transport info that uniquely defines the receiver.
+	if topic.transport == TRANSPORT_UDP and not ops.Support.isMyNodeAddress(topic.domainAddress):
+		return topic.transport
 	if topic.transport == TRANSPORT_TCP and topic.port == 0:
-		return topic.domainID + "::" + topic.channelID + "::" + topic.transport + "::" + topic.domainAddress + "::" + str(topic.port)
-	else:
-		return topic.transport + "::" + topic.domainAddress + "::" + str(topic.port)
+		return topic.transport + "::" + topic.channelID + "::" + topic.domainAddress + "::" + str(topic.port)
+	return topic.transport + "::" + topic.domainAddress + "::" + str(topic.port)
 
 __ReceiveDataHandlerList = {}
 
@@ -268,10 +272,15 @@ def getReceiveDataHandler(participant,topic):
 		localInterface = ops.Support.doSubnetTranslation(topic.localInterface)
 		if topic.transport == TRANSPORT_MC:
 			rdh = McReceiveDataHandler(localInterface,topic)
+
 		elif topic.transport == TRANSPORT_UDP:
 			rdh = UdpReceiveDataHandler(localInterface,topic)
+			if key == TRANSPORT_UDP:
+				participant.setUdpTransportInfo(localInterface,rdh.channels[0].actualPort)
+
 		elif topic.transport == TRANSPORT_TCP:
 			rdh = TcpReceiveDataHandler(localInterface,topic)
+
 		rdh.start()
 		__ReceiveDataHandlerList[key] = rdh
 	return rdh

@@ -6,7 +6,7 @@ The following table lists OPS Transport features and the support in different pr
 | -------             | --- | --- | -- | ------ | -------|----- |
 | Multicast           | X   | X   | X  | X      | X      | X    |
 | Multicast ACK       | -   | X   | -  | -      | -      | -    |
-| UDP Many2Many       | X   | X   | X  | X      | -      | X    |
+| UDP Many2Many       | X   | X   | X  | X      | X      | X    |
 | UDP Many2One        | X   | X   | X  | X      | X      | X    |
 | TCP V1              | X   | X   | X  | X      | X      | X    |
 | TCP V2              | X   | X   | -  | -      | -      | -    |

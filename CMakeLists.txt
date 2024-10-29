@@ -138,8 +138,10 @@ endif()
 
 ## ----------------------------------------------------------------------------
 if (OPS_BUILD_CPP)
-  message(STATUS "BOOST_HOME: " $ENV{BOOST_HOME})
+  message(STATUS "ENV: BOOST_HOME: " $ENV{BOOST_HOME})
   message(STATUS "BOOST_ARCH: " ${BOOST_ARCH})
+  message(STATUS "ENV: BOOST_LIBRARY_DIR: " $ENV{BOOST_LIBRARY_DIR})
+  message(STATUS "BOOST_LIBRARY_DIR: " ${BOOST_LIBRARY_DIR})
 
   # find Boost. If not found we can't build c++ libs
   option(Boost_DEBUG "Set to ON to debug Boost paths" OFF)

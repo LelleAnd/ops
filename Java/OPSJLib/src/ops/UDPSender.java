@@ -1,6 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -41,14 +42,14 @@ public class UDPSender implements Sender
     private boolean opened = false;
     private SocketAddress ipEndPoint;
 
-    
+
     public UDPSender(int port, String localInterface, int outSocketBufferSize) throws IOException
     {
         this.ipEndPoint = new InetSocketAddress(localInterface, port);
         this.outSocketBufferSize = outSocketBufferSize;
         open();
     }
-    
+
     public final void open() throws IOException
     {
         if (!opened) {
@@ -68,6 +69,11 @@ public class UDPSender implements Sender
             udpSocket.close();
             opened = false;
         }
+    }
+
+    public int getLocalPort()
+    {
+        return this.port;
     }
 
     public boolean sendTo(byte[] bytes, int offset, int size, String ip, int port)

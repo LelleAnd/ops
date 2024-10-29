@@ -1,6 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
+ * Copyright (C) 2024 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -45,6 +46,11 @@ public class TcpSenderList implements Sender
     public void close()
     {
         // Nothing to do
+    }
+
+    public int getLocalPort()
+    {
+        return 0;
     }
 
     public synchronized void emptyList()
@@ -95,7 +101,7 @@ public class TcpSenderList implements Sender
                 failedSenders.add(s);
             }
         }
-        
+
         for (Socket s : failedSenders) {
             try {
                 s.close();
@@ -103,7 +109,7 @@ public class TcpSenderList implements Sender
             }
             remove(s);
         }
-        
+
         return true;
     }
 

@@ -6,6 +6,7 @@
 package opstestapp;
 
 import ops.OPSObject;
+import ops.protocol.OPSMessage;
 
 /**
  *
@@ -13,5 +14,5 @@ import ops.OPSObject;
  */
 public interface IOpsHelperListener extends ILogListener
 {
-    void OnData(String topName, OPSObject arg);
+    void OnData(String topName, OPSMessage msg, OPSObject arg);
 }

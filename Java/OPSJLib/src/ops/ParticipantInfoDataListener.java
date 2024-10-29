@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2020 Lennart Andersson.
+* Copyright (C) 2020-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -24,24 +24,22 @@ package ops;
 import java.io.IOException;
 import java.util.Observer;
 import java.util.Observable;
+import java.util.HashMap;
 
 public class ParticipantInfoDataListener
 {
     private Participant participant;
-    private McUdpSendDataHandler udpSendDataHandler = null;
     private Subscriber partInfoSub = null;
+
+    private HashMap<String, McUdpSendDataHandler> sdhs = new HashMap<String, McUdpSendDataHandler>();
+    private HashMap<String, TcpReceiveDataHandler> rdhs = new HashMap<String, TcpReceiveDataHandler>();
 
     public ParticipantInfoDataListener(Participant part)
     {
         this.participant = part;
     }
 
-    public void connectUdp(McUdpSendDataHandler udpSendDataHandler)
-    {
-        this.udpSendDataHandler = udpSendDataHandler;
-    }
-
-    public void start()
+    private void setupSubscriber()
     {
         if (partInfoSub == null) {
             try {
@@ -61,12 +59,60 @@ public class ParticipantInfoDataListener
         }
     }
 
-    public void stop()
+    private void removeSubscriber()
     {
-      if (partInfoSub != null) {
-          partInfoSub.stop();
-          partInfoSub = null;
-      }
+        if (sdhs.size() == 0) {
+            if (partInfoSub != null) {
+                partInfoSub.stop();
+                partInfoSub = null;
+            }
+        }
+    }
+
+    public void connectUdp(Topic top, McUdpSendDataHandler udpSendDataHandler)
+    {
+        String key = top.getName();
+
+        synchronized (sdhs)
+        {
+            ///TODO check if already there with another sdh
+            sdhs.put(key, udpSendDataHandler);
+        }
+
+        setupSubscriber();
+    }
+
+    public void disconnectUdp(Topic top, McUdpSendDataHandler udpSendDataHandler)
+    {
+        String key = top.getName();
+
+        synchronized (sdhs)
+        {
+            sdhs.remove(key, udpSendDataHandler);
+        }
+
+        removeSubscriber();
+    }
+
+    public void connectTcp(String topicName, TcpReceiveDataHandler rdh)
+    {
+        synchronized (rdhs)
+        {
+            ///TODO check if already there with another rdh
+            rdhs.put(topicName, rdh);
+        }
+
+        setupSubscriber();
+    }
+
+    public void disconnectTcp(String topicName, TcpReceiveDataHandler rdh)
+    {
+        synchronized (rdhs)
+        {
+            rdhs.remove(topicName, rdh);
+        }
+
+        removeSubscriber();
     }
 
     private void subscriberNewData(Subscriber sender, OPSObject data)
@@ -77,14 +123,30 @@ public class ParticipantInfoDataListener
 
         // Is it on our domain?
 	      if (partInfo.domain.equals(participant.domainID)) {
-            for (TopicInfoData tid : partInfo.subscribeTopics) {
-                // We are only interrested in topics with UDP as transport
-                if ( (tid.transport.equals(Topic.TRANSPORT_UDP)) && (participant.hasPublisherOn(tid.name)) ) {
-                    try {
-                        if (udpSendDataHandler != null) udpSendDataHandler.addSink(tid.name, partInfo.ip, partInfo.mc_udp_port, false);
+            synchronized (sdhs)
+            {
+                for (TopicInfoData tid : partInfo.subscribeTopics) {
+                    // We are only interrested in topics with UDP as transport
+                    if ( (tid.transport.equals(Topic.TRANSPORT_UDP)) && (participant.hasPublisherOn(tid.name)) ) {
+                        try {
+                            McUdpSendDataHandler sdh = sdhs.get(tid.name);
+                            if (sdh != null) sdh.addSink(tid.name, partInfo.ip, partInfo.mc_udp_port, false);
+                        }
+                        catch (IOException e)
+                        {
+                        }
                     }
-                    catch (IOException e)
+                }
+            }
+            synchronized (rdhs)
+            {
+                for (TopicInfoData tid : partInfo.publishTopics)
+                {
+                    // We are only interrested in topics with TCP as transport
+                    if ((tid.transport.equals(Topic.TRANSPORT_TCP)) && (participant.hasSubscriberOn(tid.name)))
                     {
+                        TcpReceiveDataHandler rdh = rdhs.get(tid.name);
+                        if (rdh != null) rdh.addReceiveChannel(tid.name, tid.address, tid.port);
                     }
                 }
             }

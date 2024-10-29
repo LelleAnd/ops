@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2019-2020 Lennart Andersson.
+ * Copyright (C) 2019-2024 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -54,7 +54,6 @@ public class Participant
     private Publisher partInfoPub = null;
     private boolean keepRunning = false;
 
-    ///LA Added
     private OPSConfig config = null;
 
     /**
@@ -145,7 +144,6 @@ public class Participant
         setupCyclicThread();
     }
 
-    ///LA Added
     /**
      * Return the OPSConfig object used (if any).
      * Note that null can be returned if Participant is created from a Domain object
@@ -189,16 +187,56 @@ public class Participant
         }
     }
 
-    public void connectUdp(McUdpSendDataHandler udpSendDataHandler)
+    public void connectUdp(Topic t, McUdpSendDataHandler udpSendDataHandler)
     {
-        partInfoListener.connectUdp(udpSendDataHandler);
-        partInfoListener.start();
+        partInfoListener.connectUdp(t, udpSendDataHandler);
+    }
+
+    public void disconnectUdp(Topic t, McUdpSendDataHandler udpSendDataHandler)
+    {
+        partInfoListener.disconnectUdp(t, udpSendDataHandler);
+    }
+
+    public void connectTcp(String topicName, TcpReceiveDataHandler rdh)
+    {
+        partInfoListener.connectTcp(topicName, rdh);
+    }
+
+    public void disconnectTcp(String topicName, TcpReceiveDataHandler rdh)
+    {
+        partInfoListener.disconnectTcp(topicName, rdh);
     }
 
     //
     public boolean hasPublisherOn(String topicName)
     {
-        return true;    ///TODO
+        synchronized (partInfoData)
+        {
+            for (int i = 0; i < partInfoData.publishTopics.size(); i++)
+            {
+                if (partInfoData.publishTopics.elementAt(i).name.equals(topicName))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    //
+    public boolean hasSubscriberOn(String topicName)
+    {
+        synchronized (partInfoData)
+        {
+            for (int i = 0; i < partInfoData.subscribeTopics.size(); i++)
+            {
+                if (partInfoData.subscribeTopics.elementAt(i).name.equals(topicName))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -318,19 +356,21 @@ public class Participant
     synchronized SendDataHandler getSendDataHandler(Topic t) throws CommException
     {
         SendDataHandler sdh = sendDataHandlerFactory.getSendDataHandler(t, this);
-        if (sdh != null)
-        {
-            synchronized (partInfoData)
-            {
-                partInfoData.publishTopics.add(new TopicInfoData(t));
-            }
-        }
+        // We can't update Participant Info here, delayed until updatePubPartInfo()
         return sdh;
+    }
+
+    void updatePubPartInfo(Topic t)
+    {
+        synchronized (partInfoData)
+        {
+            partInfoData.publishTopics.add(new TopicInfoData(t));
+        }
     }
 
     synchronized void releaseSendDataHandler(Topic topic)
     {
-        ///TODO sendDataHandlerFactory.ReleaseSendDataHandler(topic, this);
+        sendDataHandlerFactory.releaseSendDataHandler(topic, this);
 
         synchronized (partInfoData)
         {
@@ -405,7 +445,6 @@ public class Participant
     {
         keepRunning = false;
         inProcessTransport.stopTransport();
-        partInfoListener.stop();
     }
 
 }

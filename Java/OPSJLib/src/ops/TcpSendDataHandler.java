@@ -23,6 +23,25 @@ public class TcpSendDataHandler extends SendDataHandlerBase
         sinkIP = InetAddress.getByName(t.getDomainAddress());
     }
 
+    @Override
+    public void cleanUp()
+    {
+        ((TcpServerSender)sender).stopThread();
+    }
+
+    @Override
+    public void updateTransportInfo(Topic t)
+    {
+        int port = sender.getLocalPort();
+
+        if (!NetworkSupport.IsValidNodeAddress(t.getDomainAddress()))
+        {
+            t.setDomainAddress(NetworkSupport.DoSubnetTranslation(t.getLocalInterface()));
+        }
+
+        t.setPort(port);
+    }
+
     public synchronized boolean sendData(byte[] bytes, int size, Topic t)
     {
         return sendData(bytes, size, sinkIP, t.getPort());

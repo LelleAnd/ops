@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2020 Lennart Andersson.
+* Copyright (C) 2020-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -38,6 +38,10 @@ class ReceiveDataHandlerFactory
         if (top.getTransport().equals(Topic.TRANSPORT_UDP) && (!NetworkSupport.IsMyNodeAddress(top.getDomainAddress())))
         {
             return top.getTransport();
+        }
+        else if (top.getTransport().equals(Topic.TRANSPORT_TCP) && (top.getPort() == 0))
+        {
+            return top.getTransport() + "::" + top.getChannelID() + "::" + top.getDomainAddress() + "::" + top.getPort();
         }
         else
         {
@@ -77,22 +81,20 @@ class ReceiveDataHandlerFactory
             return rdh;
         }
 
-        String localIf = NetworkSupport.DoSubnetTranslation(top.getLocalInterface());
-
-        if(top.getTransport().equals(Topic.TRANSPORT_MC) || top.getTransport().equals(Topic.TRANSPORT_TCP))
+        if (top.getTransport().equals(Topic.TRANSPORT_MC))
         {
-            receiveDataHandlers.put(key, new ReceiveDataHandler(top, participant, ReceiverFactory.createReceiver(top, localIf)));
+            receiveDataHandlers.put(key, new McReceiveDataHandler(top, participant));
+            return receiveDataHandlers.get(key);
+        }
+        else if (top.getTransport().equals(Topic.TRANSPORT_TCP))
+        {
+            receiveDataHandlers.put(key, new TcpReceiveDataHandler(top, participant));
             return receiveDataHandlers.get(key);
         }
         else if (top.getTransport().equals(Topic.TRANSPORT_UDP))
         {
-            Receiver rec = ReceiverFactory.createReceiver(top, localIf);
-            receiveDataHandlers.put(key, new ReceiveDataHandler(top, participant, rec));
-
-            if (key.equals(Topic.TRANSPORT_UDP)) {
-                participant.setUdpTransportInfo(((UDPReceiver)rec).getIP(), ((UDPReceiver)rec).getPort());
-            }
-
+            boolean commonReceiver = key.equals(Topic.TRANSPORT_UDP);
+            receiveDataHandlers.put(key, new UdpReceiveDataHandler(top, participant, commonReceiver));
             return receiveDataHandlers.get(key);
         }
         return null;
@@ -111,11 +113,7 @@ class ReceiveDataHandlerFactory
             if (rdh.getNrOfSubscribers() == 0)
             {
                 receiveDataHandlers.remove(key);
-
-                if (rdh.getTransport().equals(Topic.TRANSPORT_UDP))
-                {
-                    participant.setUdpTransportInfo("", 0);
-                }
+                rdh.cleanup();
             }
         }
     }

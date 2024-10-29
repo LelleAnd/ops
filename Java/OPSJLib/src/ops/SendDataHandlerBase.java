@@ -18,7 +18,11 @@ public abstract class SendDataHandlerBase implements SendDataHandler
 {
     protected Sender sender;
     private Vector<Publisher> publishers = new Vector<Publisher>();
-    
+
+    public void cleanUp()
+    {
+    }
+
     public synchronized void addPublisher(Publisher pub)
     {
         publishers.add(pub);
@@ -45,6 +49,10 @@ public abstract class SendDataHandlerBase implements SendDataHandler
         }
 
         return result;
+    }
+
+    public void updateTransportInfo(Topic top)
+    {
     }
 
     protected boolean sendData(byte[] bytes, int size, InetAddress sinkIP, int port)

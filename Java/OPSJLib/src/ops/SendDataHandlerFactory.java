@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2020 Lennart Andersson.
+* Copyright (C) 2020-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -30,10 +30,18 @@ class SendDataHandlerFactory
 
     private String makeKey(Topic top, String localIf)
     {
-        // In the case that we use the same port for several topics, we need to find the sender for the transport::address::port used
+        // We need to store SendDataHandlers with more than just the name as key.
+        // Since topics can use the same port, we need to return the same SendDataHandler.
+        // Make a key with the transport info that uniquely defines the sender.
         String key = top.getTransport() + "::";
         if (top.getTransport().equals(Topic.TRANSPORT_UDP)) {
             key += localIf + "::";
+        }
+        if ((top.getTransport().equals(Topic.TRANSPORT_TCP)) && (top.getPort() == 0))
+        {
+            // We add the channel name so different channels get different TCP Servers
+            key += top.getChannelID();
+            key += "::";
         }
         key += top.getDomainAddress();
         if (!top.getTransport().equals(Topic.TRANSPORT_UDP)) {
@@ -50,7 +58,7 @@ class SendDataHandlerFactory
             // Setup a listener on the participant info data published by participants on our domain.
             // We use the information for topics with UDP as transport, to know the destination for UDP sends
             // ie. we extract ip and port from the information and add it to our McUdpSendDataHandler
-            participant.connectUdp(sdh);
+            participant.connectUdp(t, sdh);
         }
     }
 
@@ -101,4 +109,23 @@ class SendDataHandlerFactory
         }
     }
 
+    void releaseSendDataHandler(Topic t, Participant participant)
+    {
+        String localIf = NetworkSupport.DoSubnetTranslation(t.getLocalInterface());
+        String key = makeKey(t, localIf);
+
+        if (sendDataHandlers.containsKey(key))
+        {
+            SendDataHandler sdh = sendDataHandlers.get(key);
+            if (t.getTransport().equals(Topic.TRANSPORT_UDP))
+            {
+                if (!NetworkSupport.IsValidNodeAddress(t.getDomainAddress()))
+                {
+                    participant.disconnectUdp(t, (McUdpSendDataHandler)sdh);
+                }
+            }
+            sdh.cleanUp();
+            sendDataHandlers.remove(key);
+        }
+    }
 }

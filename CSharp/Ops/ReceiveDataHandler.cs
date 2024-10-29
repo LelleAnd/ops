@@ -10,37 +10,42 @@ using System.IO;
 using System.Collections.Generic;       // Needed for the "List"
 using System.Runtime.CompilerServices;  // Needed for the "MethodImpl" synchronization attribute
 using System.Threading;
+using System.Windows.Forms;
+using System.Runtime.Remoting.Channels;
 
-namespace Ops 
+namespace Ops
 {
-    public class ReceiveDataHandler : IObserver  
+    public  class ReceiveDataHandler : IDisposable
     {
-		private readonly byte [] bytes;
-		private int bytesReceived;
-		private int expectedFragment = 0;
-		private static int FRAGMENT_HEADER_SIZE = 14;
-		private int fragmentSize;
-		private bool hasSubscribers;
-		private byte [] headerBytes;
-		private Participant participant;
-		private IReceiver receiver;
-		private List<Subscriber> subscribers = new List<Subscriber>();
-		private static int THREAD_COUNTER = 1;
-		private readonly Topic topic;
+        protected Participant participant;
+        private List<Subscriber> subscribers = new List<Subscriber>();
+        private readonly Topic topic;
+        protected List<ReceiveDataChannel> channels = new List<ReceiveDataChannel>();
 
-        public ReceiveDataHandler(Topic t, Participant part, IReceiver receiver)
+        public ReceiveDataHandler(Topic t, Participant part)
         {
             topic = t;
-            bytes = new byte[t.GetSampleMaxSize()];
-            headerBytes = new byte[FRAGMENT_HEADER_SIZE];
             participant = part;
-            fragmentSize = Globals.MAX_SEGMENT_SIZE;
-            this.receiver = receiver;
         }
 
-        ~ReceiveDataHandler()
+        // Implement IDisposable.
+        // Do not make this method virtual.
+        // A derived class should not be able to override this method.
+        public void Dispose()
         {
-            this.participant = null;
+            Dispose(disposing: true);
+        }
+
+        // Dispose(bool disposing) executes in two distinct scenarios.
+        // If disposing equals true, the method has been called directly
+        // or indirectly by a user's code. Managed and unmanaged resources
+        // can be disposed.
+        // If disposing equals false, the method has been called by the
+        // runtime from inside the finalizer and you should not reference
+        // other objects. Only unmanaged resources can be disposed.
+        protected virtual void Dispose(bool disposing)
+        {
+            participant = null;
         }
 
         public int GetSampleMaxSize()
@@ -53,189 +58,218 @@ namespace Ops
             return topic.GetTransport();
         }
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
+        // Tell derived classes which topics that are active
+        protected virtual void TopicUsage(Topic top, bool used)
+        {
+        }
+
         public int GetNrOfSubscribers()
         {
             return subscribers.Count;
         }
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public void AddSubscriber(Subscriber sub)
+        public void AddSubscriber(Subscriber sub, Topic top)
         {
-            subscribers.Add(sub);
-
-            if (!hasSubscribers)
+            lock (subscribers)
             {
-                // Reset some variables so we can start fresh 
-                bytesReceived = 0;
-                expectedFragment = 0;
-                //
-                receiver.GetNewBytesEvent().AddObserver(this);
-                receiver.Open();
-                hasSubscribers = true;
-                SetupTransportThread();
+                subscribers.Add(sub);
             }
+
+            if (subscribers.Count == 1)
+            {
+                lock (channels)
+                {
+                    foreach (ReceiveDataChannel channel in channels)
+                    {
+                        channel.Start();
+                    }
+                }
+            }
+
+            TopicUsage(top, true);
         }
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public bool RemoveSubscriber(Subscriber sub)
+        public bool RemoveSubscriber(Subscriber sub, Topic top)
         {
-            bool result = subscribers.Remove(sub);
+            TopicUsage(top, false);
+
+            bool result = false;
+            lock (subscribers)
+            {
+                result = subscribers.Remove(sub);
+            }
 
             if (subscribers.Count == 0)
             {
-                receiver.GetNewBytesEvent().DeleteObserver(this);
-                hasSubscribers = false;
-                receiver.Close();
+                lock (channels)
+                {
+                    foreach (ReceiveDataChannel channel in channels)
+                    {
+                        channel.Stop();
+                    }
+                }
             }
 
             return result;
         }
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        private void OnNewBytes(int size)
+        public void OnNewMessage(OPSMessage message)
         {
             try
             {
                 // Debug support
                 if (Globals.TRACE_RECEIVE)
                 {
-                    Logger.ExceptionLogger.LogMessage("TRACE: ReceiveDataHandler.OnNewBytes() [" + topic.GetName() + "], got " + size + " bytes");
+                    Logger.ExceptionLogger.LogMessage("TRACE: ReceiveDataHandler.OnNewBytes() [" + topic.GetName() + "], got message");
                 }
 
-                bytesReceived += size - headerBytes.Length;
-
-                ReadByteBuffer readBuf = new ReadByteBuffer(headerBytes);
-
-                if (readBuf.CheckProtocol())
+                lock (subscribers)
                 {
-                    int nrOfFragments = readBuf.ReadInt();
-                    int currentFragment = readBuf.ReadInt();
-
-                    if (currentFragment == (nrOfFragments - 1) && currentFragment == expectedFragment)
+                    //TODO: error checking
+                    foreach (Subscriber subscriber in subscribers)
                     {
-                        // We have received a full message, let's deserialize it and send 
-                        // it to subscribers.
-                        SendBytesToSubscribers(new ReadByteBuffer(bytes));
-                        expectedFragment = 0;
-                        bytesReceived = 0;
-                    }
-                    else
-                    {
-                        if (currentFragment == expectedFragment)
+                        try
                         {
-                            expectedFragment++;
+                            subscriber.NotifyNewOPSMessage(message);
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            // Not so good. Sample will be lost here.
-                            if (Globals.REPORT_DATA_FRAGMENT_LOST_ERRORS)
-                            {
-                                Logger.ExceptionLogger.LogMessage(this.GetType().Name + ", Fragment error, sample lost");
-                            }
-                            expectedFragment = 0;
-                            bytesReceived = 0;
+                            Logger.ExceptionLogger.LogMessage(this.GetType().Name + ", Exception thrown in event notification thread " + ex.ToString());
                         }
                     }
                 }
             }
             catch (System.IO.IOException)
             {
-                expectedFragment = 0;
             }
         }
 
-        private void SendBytesToSubscribers(ReadByteBuffer readBuf)
+    }
+
+    public class McReceiveDataHandler : ReceiveDataHandler
+    {
+        public McReceiveDataHandler(Topic t, Participant part) : base(t, part)
         {
-            OPSArchiverIn archiverIn = new OPSArchiverIn(readBuf, this.participant.getObjectFactory());
-            OPSMessage message = null;
+            // Get the local interface, doing a translation from subnet if necessary
+            string localIF = InetAddress.DoSubnetTranslation(t.GetLocalInterface());
 
-            // If the proper typesupport has not been added, the message may have content, but some fields may be null. How do we handle this
-            // How do we make the user realize that he needs to add typesupport?
-            message = (OPSMessage) archiverIn.Inout("message", message);
+            channels.Add(new ReceiveDataChannel(t, part, ReceiverFactory.CreateReceiver(t, localIF), this));
+        }
+    }
 
-            //Console.WriteLine("Bytes received = " + bytesReceived);
-            //Console.WriteLine("Bytes read     = " + readBuf.position());
+    public class UdpReceiveDataHandler : ReceiveDataHandler
+    {
+        private bool commonReceiver;
 
-            if (message == null)
+        public UdpReceiveDataHandler(Topic t, Participant part, bool commonReceiver) : base(t, part)
+        {
+            // Get the local interface, doing a translation from subnet if necessary
+            string localIF = InetAddress.DoSubnetTranslation(t.GetLocalInterface());
+            IReceiver rec = ReceiverFactory.CreateReceiver(t, localIF);
+
+            channels.Add(new ReceiveDataChannel(t, part, rec, this));
+
+            this.commonReceiver = commonReceiver;
+            if (commonReceiver)
             {
-                Logger.ExceptionLogger.LogMessage(this.GetType().Name + ", message was unexpectedly null");
-                return;
+                part.SetUdpTransportInfo(((UdpReceiver)rec).IP, ((UdpReceiver)rec).Port);
             }
-   
-            if (message.GetData() == null)
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && commonReceiver)
             {
-                Logger.ExceptionLogger.LogMessage(this.GetType().Name + ", message.getData() was unexpectedly null");
-                return;
+                participant?.SetUdpTransportInfo("", 0);
+                commonReceiver = false;
             }
 
-            CalculateAndSetSpareBytes(message, readBuf, FRAGMENT_HEADER_SIZE, bytesReceived);
+            // Call base class implementation
+            base.Dispose(disposing);
+        }
+    }
 
-            string IP = "";
-            int port = 0;
-            receiver.GetSource(ref IP, ref port);
-            message.SetSource(IP, port);
+    public class TcpReceiveDataHandler : ReceiveDataHandler
+    {
+        private Topic top;
+        private bool usingPartInfo = true;
+        private Dictionary<string, UInt32> topicCounts = new Dictionary<string, UInt32>();
 
-            //TODO: error checking
-            foreach (Subscriber subscriber in subscribers)
+        public TcpReceiveDataHandler(Topic t, Participant part) : base(t, part)
+        {
+            // Make a local copy to be used when adding channels dynamically
+            top = (Topic)t.Clone();
+
+            if (t.GetPort() != 0)
             {
-                try
+                channels.Add(new ReceiveDataChannel(t, part, ReceiverFactory.CreateReceiver(t, ""), this));
+                usingPartInfo = false;
+            }
+        }
+
+        public void AddReceiveChannel(string topicName, string ip, int port)
+        {
+            if (port == 0) { return; }
+
+            string key = ip + "::" + port;
+
+            // Look for it in channels, if not there, create one
+            lock (channels)
+            {
+                foreach (ReceiveDataChannel chnl in channels)
                 {
-                    subscriber.NotifyNewOPSMessage(message);
-                } catch (Exception ex)
+                    if (chnl.Key == key)
+                    {
+                        return;
+                    }
+                }
+
+                top.SetDomainAddress(ip);
+                top.SetPort(port);
+
+                ReceiveDataChannel channel = new ReceiveDataChannel(top, participant, ReceiverFactory.CreateReceiver(top, ""), this);
+                channel.Key = key;
+                channels.Add(channel);
+
+                if (GetNrOfSubscribers() > 0)
                 {
-                    Logger.ExceptionLogger.LogMessage(this.GetType().Name + ", Exception thrown in event notification thread " + ex.ToString());
+                    channel.Start();
                 }
             }
         }
-
-        private void CalculateAndSetSpareBytes(OPSMessage message, ReadByteBuffer readBuf, int segmentPaddingSize, int bytesReceived)
+        
+        protected override void TopicUsage(Topic top, bool used)
         {
-            //NOT needed since 'bytesReceived' already is compensated for all headers and 'readBuf' is all data except header data
-            //// We must calculate how many unserialized segment headers we have and substract 
-            //// that total header size from the size of spareBytes.
-            //int nrOfSerializedBytes = readBuf.Position();
-            //int totalNrOfSegments = (int) (bytesReceived /fragmentSize);
-            //int nrOfSerializedSegements = (int) (nrOfSerializedBytes /fragmentSize);
-            //int nrOfUnserializedSegments = totalNrOfSegments - nrOfSerializedSegements;
-
-            int nrOfSpareBytes = bytesReceived - readBuf.Position(); ///See comment above: -(nrOfUnserializedSegments * segmentPaddingSize);
-
-            if (nrOfSpareBytes > 0)
+            if (usingPartInfo)
             {
-                message.GetData().spareBytes = new byte[nrOfSpareBytes];
-                // This will read the rest of the bytes as raw bytes and put 
-                // them into spareBytes field of data.
-                readBuf.ReadBytes(message.GetData().spareBytes);  
+                // We should only register unique topics
+                UInt32 count = 0;
+                if (topicCounts.ContainsKey(top.GetName()))
+                {
+                    count = topicCounts[top.GetName()];
+                }
+                // Register topic with participant info data handler/listener to get callbacks to handler above
+                if (used)
+                {
+                    ++count;
+                    if (count == 1)
+                    {
+                        participant.partInfoListener.ConnectTcp(top.GetName(), this);
+                    }
+                }
+                else
+                {
+                    --count;
+                    if (count == 0)
+                    {
+                        participant.partInfoListener.DisconnectTcp(top.GetName(), this);
+                    }
+                }
+                topicCounts[top.GetName()] = count;
             }
         }
 
-        public void Run()
-        {
-            while (hasSubscribers)
-            {
-                // Here we will wait until new data arrives or the thread is terminated.
-                // This thread is a background thread and will automatically be terminated
-                // when all foreground threads has been terminated.
-                receiver.Receive(headerBytes, bytes, expectedFragment * (fragmentSize - FRAGMENT_HEADER_SIZE));
-            }
-            //Console.WriteLine("Leaving transport thread...");
-        }
-
-        private void SetupTransportThread()
-        {
-            Thread thread = new Thread(new ThreadStart(Run));
-            thread.IsBackground = true;
-            thread.Name = "TransportThread_" + topic.GetTransport() + "_" + THREAD_COUNTER;
-            THREAD_COUNTER++;
-            thread.Start();
-        }
-
-        public void Update(IObservable o, object arg)
-        {
-            OnNewBytes((int)arg);
-        }
-
-	}
+    }
 
 }
+

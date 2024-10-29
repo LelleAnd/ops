@@ -28,6 +28,7 @@ namespace Ops
         ///The data type factory used in this Participant. 
         private OPSObjectFactory objectFactory = new OPSObjectFactory();
 
+        public ParticipantInfoDataListener partInfoListener = null;
         private ParticipantInfoData partInfoData = new ParticipantInfoData();
         private Publisher partInfoPub = null;
 
@@ -91,13 +92,15 @@ namespace Ops
             Interlocked.Increment(ref safeInstanceCount);  ///TEST
             this.domainID = domainID;
             this.participantID = participantID;
+            partInfoListener = new ParticipantInfoDataListener(this);
             try
             {
                 if (string.IsNullOrEmpty(configFile))
                 {
                     this.config = OPSConfig.GetConfig();
                     this.domain = this.config.GetDomain(domainID);
-                } else
+                } 
+                else
                 {
                     this.config = OPSConfig.GetConfig(configFile);
                     this.domain = this.config.GetDomain(domainID);
@@ -130,7 +133,8 @@ namespace Ops
             Interlocked.Increment(ref safeInstanceCount);  ///TEST
             this.domainID = domain.GetDomainID();
             this.participantID = participantID;
-            
+            partInfoListener = new ParticipantInfoDataListener(this);
+
             this.domain = domain;
 
             this.inProcessTransport.Start();
@@ -146,14 +150,13 @@ namespace Ops
         /// Method used to Stop the participant and remove it from the participant factory.
         /// The participant object will be deleted when no one have references to it.
         /// </summary>
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public void StopAndReleaseResources()
         {
             // Stop the cyclic thread
             if (this.doRun)
             {
                 this.doRun = false;
-                this.thread.Join(3000); // Timeout just for safety
+                this.thread.Join();
             }
             // Remove us from the singleton factory
             participantFactory.RemoveParticipant(this.domainID, this.participantID);
@@ -188,7 +191,32 @@ namespace Ops
         // 
         public bool HasPublisherOn(string topicName)
         {
-            return true;    ///TODO
+            lock (partInfoData)
+            {
+                for (int i = 0; i < partInfoData.publishTopics.Count; i++)
+                {
+                    if (partInfoData.publishTopics[i].name.Equals(topicName))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        public bool HasSubscriberOn(string topicName)
+        {
+            lock (partInfoData)
+            {
+                for (int i = 0; i < partInfoData.subscribeTopics.Count; i++)
+                {
+                    if (partInfoData.subscribeTopics[i].name.Equals(topicName))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         /**
@@ -278,20 +306,22 @@ namespace Ops
         public ISendDataHandler GetSendDataHandler(Topic topic) 
         {
             ISendDataHandler sdh = this.sendDataHandlerFactory.GetSendDataHandler(topic, this);
-            if (sdh != null)
-            {
-                lock (partInfoData)
-                {
-                    partInfoData.publishTopics.Add(new TopicInfoData(topic));
-                }
-            }
+            // We can't update Participant Info here, delayed until UpdatePubPartInfo()
             return sdh;
+        }
+
+        public void UpdatePubPartInfo(Topic topic)
+        {
+            lock (partInfoData)
+            {
+                partInfoData.publishTopics.Add(new TopicInfoData(topic));
+            }
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void ReleaseSendDataHandler(Topic topic)
         {
-            ///TODO this.sendDataHandlerFactory.ReleaseSendDataHandler(topic, this);
+            this.sendDataHandlerFactory.ReleaseSendDataHandler(topic, this);
 
             lock (partInfoData)
             {

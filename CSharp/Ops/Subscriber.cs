@@ -116,7 +116,7 @@ namespace Ops
                 SetDeadlineQoS(deadlineTimeout / 10000);
 
                 receiveDataHandler = participant.GetReceiveDataHandler(topic);
-                receiveDataHandler.AddSubscriber(this);
+                receiveDataHandler.AddSubscriber(this, topic);
                 inProcessTransport.AddSubscriber(this);
                 this.active = true;
             }
@@ -137,7 +137,7 @@ namespace Ops
                 this.active = false;
                 deadlineNotifier.Remove(this);
                 inProcessTransport.RemoveSubscriber(this);
-                retVal = receiveDataHandler.RemoveSubscriber(this);
+                retVal = receiveDataHandler.RemoveSubscriber(this, topic);
                 receiveDataHandler = null;
                 participant.ReleaseReceiveDataHandler(topic);
             }

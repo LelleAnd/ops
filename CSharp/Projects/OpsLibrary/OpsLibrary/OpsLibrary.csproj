@@ -202,6 +202,9 @@
     <Compile Include="..\..\..\ops\ReadByteBuffer.cs">
       <Link>ops\ReadByteBuffer.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\Ops\ReceiveDataChannel.cs">
+      <Link>ops\ReceiveDataChannel.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\ops\ReceiveDataHandler.cs">
       <Link>ops\ReceiveDataHandler.cs</Link>
     </Compile>

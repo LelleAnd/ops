@@ -52,6 +52,7 @@ set(OPS_CS_SOURCE
   QualityOfService.cs
   QualityOfServicePolicy.cs
   ReadByteBuffer.cs
+  ReceiveDataChannel.cs
   ReceiveDataHandler.cs
   ReceiveDataHandlerFactory.cs
   Receiver.cs

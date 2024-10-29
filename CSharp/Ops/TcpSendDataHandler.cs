@@ -16,6 +16,19 @@ namespace Ops
             sinkIP = t.GetDomainAddress();
         }
 
+        public override void UpdateTransportInfo(Topic top)
+        {
+            string ip = "";
+            int port = 0;
+            GetLocalEndpoint(ref ip, ref port);
+
+            if (!Ops.InetAddress.IsValidNodeAddress(top.GetDomainAddress()))
+            {
+                top.SetDomainAddress(Ops.InetAddress.DoSubnetTranslation(top.GetLocalInterface()));
+            }
+            top.SetPort(port);
+        }
+
         [MethodImpl(MethodImplOptions.Synchronized)]
         public override bool SendData(byte[] bytes, int size, Topic t)
         {

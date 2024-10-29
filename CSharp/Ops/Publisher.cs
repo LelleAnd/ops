@@ -10,7 +10,7 @@ using System.IO;
 
 namespace Ops 
 {
-	public class Publisher 
+	public class Publisher : IDisposable
     {
 		private byte [] bytes;
 		private long currentPublicationID = 0;
@@ -36,12 +36,31 @@ namespace Ops
             Init();
         }
 
-        ~Publisher()
+        // Implement IDisposable.
+        // Do not make this method virtual.
+        // A derived class should not be able to override this method.
+        public void Dispose()
         {
-            // Must tell the sendDataHandler that we don't need it anymore
-            Stop();
-            this.sendDataHandler = null;
-            this.participant = null;
+            Dispose(disposing: true);
+        }
+
+        // Dispose(bool disposing) executes in two distinct scenarios.
+        // If disposing equals true, the method has been called directly
+        // or indirectly by a user's code. Managed and unmanaged resources
+        // can be disposed.
+        // If disposing equals false, the method has been called by the
+        // runtime from inside the finalizer and you should not reference
+        // other objects. Only unmanaged resources can be disposed.
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing && (participant != null))
+            {
+                // Must tell the sendDataHandler that we don't need it anymore
+                Stop();
+                sendDataHandler = null;
+                participant = null;
+                topic = null;
+            }
         }
 
         private void Init()
@@ -50,7 +69,7 @@ namespace Ops
         }
 
         /// <summary>
-        /// Start the publisher (necessary when using TCP as transport and it has been stopped)
+        /// Start the publisher (necessary if it has been stopped)
         /// </summary>
         public void Start()
         {
@@ -59,9 +78,16 @@ namespace Ops
                 try
                 {
                     // Tell the sendDataHandler that we need it
-                    this.sendDataHandler = this.participant.GetSendDataHandler(topic);
-                    this.sendDataHandler.AddPublisher(this);
+                    sendDataHandler = participant.GetSendDataHandler(topic);
+                    sendDataHandler.AddPublisher(this);
                     started = true;
+
+                    // We need our own copy since we need to update the topic
+                    Topic top = (Topic)topic.Clone();
+
+                    // Update with actual port used
+                    sendDataHandler.UpdateTransportInfo(top);
+                    participant.UpdatePubPartInfo(top);
                 }
                 catch (Exception ex)
                 {
@@ -78,8 +104,8 @@ namespace Ops
             if (started)
             {
                 // Tell the sendDataHandler that we don't need it anymore
-                this.sendDataHandler.RemovePublisher(this);
-                this.participant.ReleaseSendDataHandler(topic);
+                sendDataHandler.RemovePublisher(this);
+                participant.ReleaseSendDataHandler(topic);
                 started = false;
             }
         }
@@ -91,7 +117,7 @@ namespace Ops
         /// <param name="port"></param>
         public void GetLocalEndpoint(ref string IP, ref int port)
         {
-            this.sendDataHandler.GetLocalEndpoint(ref IP, ref port);
+            sendDataHandler.GetLocalEndpoint(ref IP, ref port);
         }
 
         public void CheckTypeString(string typeString)
@@ -137,7 +163,7 @@ namespace Ops
 
                 archiverOut.Inout("message", message);
 
-                // If o has spare bytes, write them to the end of the buf
+                // If object has spare bytes, write them to the end of the buf
                 if (opsObject.spareBytes.Length > 0)
                 {
                     buf.Write(opsObject.spareBytes, 0, opsObject.spareBytes.Length);

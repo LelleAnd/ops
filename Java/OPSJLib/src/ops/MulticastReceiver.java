@@ -45,6 +45,8 @@ public class MulticastReceiver implements Receiver
     int receiveBufferSize;
     private Event newBytesEvent = new Event();
     boolean opened = false;
+    String remoteSenderIp = "";
+    int remoteSenderPort = 0;
 
     byte[] tempBytes = new byte[StaticManager.MAX_SIZE];
     /** Creates a new instance of MulticastReceiver */
@@ -61,7 +63,7 @@ public class MulticastReceiver implements Receiver
     {
         this(ip, port, "0.0.0.0", 0);
     }
-    
+
     public final void Open() throws IOException
     {
         if (!opened) {
@@ -105,6 +107,16 @@ public class MulticastReceiver implements Receiver
         opened = false;
     }
 
+    public String getRemoteIp()
+    {
+        return remoteSenderIp;
+    }
+
+    public int getRemotePort()
+    {
+        return remoteSenderPort;
+    }
+
 //    public boolean receive(byte[] b, int offset)
 //    {
 //        DatagramPacket p = new DatagramPacket(b, offset, StaticManager.MAX_SIZE);
@@ -128,25 +140,26 @@ public class MulticastReceiver implements Receiver
 //    {
 //        return receive(b, 0);
 //    }
+
     public boolean receive(byte[] headerBytes, byte[] bytes, int offset)
     {
-
-        
         DatagramPacket p = new DatagramPacket(tempBytes, 0, StaticManager.MAX_SIZE);
         try
         {
-
             multicastSocket.receive(p);
             if(p.getSocketAddress().equals(multicastSocket.getLocalSocketAddress()))
             {
                 System.out.println("Ingnoring packaege from my self");
                 return false;
             }
-            
+
             ByteBuffer nioBuf = ByteBuffer.wrap(tempBytes);
             nioBuf.get(headerBytes, 0, headerBytes.length);
             nioBuf.get(bytes, offset, p.getLength() - headerBytes.length);
-            
+
+            remoteSenderIp = p.getAddress().getHostAddress();
+            remoteSenderPort = p.getPort();
+
             newBytesEvent.fireEvent(new Integer(p.getLength()));
             return true;
         }
@@ -158,15 +171,11 @@ public class MulticastReceiver implements Receiver
         {
             return false;
         }
-
-
     }
-    
+
     public Event getNewBytesEvent()
     {
         return newBytesEvent;
     }
 
-
-    
 }

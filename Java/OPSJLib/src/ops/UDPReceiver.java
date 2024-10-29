@@ -1,6 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -48,9 +49,11 @@ public class UDPReceiver implements Receiver
 
     private int actualPort;
     private String actualIP;
+    private String remoteSenderIp = "";
+    private int remoteSenderPort = 0;
 
     byte[] tempBytes = new byte[StaticManager.MAX_SIZE];
-    
+
     /** Creates a new instance of MulticastReceiver */
     public UDPReceiver(int port, String localInterface, int receiveBufferSize) throws IOException
     {
@@ -131,6 +134,16 @@ public class UDPReceiver implements Receiver
         opened = false;
     }
 
+    public String getRemoteIp()
+    {
+        return remoteSenderIp;
+    }
+
+    public int getRemotePort()
+    {
+        return remoteSenderPort;
+    }
+
     public String getIP()
     {
         return actualIP;
@@ -140,18 +153,21 @@ public class UDPReceiver implements Receiver
     {
         return actualPort;
     }
-    
+
     public boolean receive(byte[] headerBytes, byte[] bytes, int offset)
     {
         DatagramPacket p = new DatagramPacket(tempBytes, 0, StaticManager.MAX_SIZE);
         try
         {
             udpSocket.receive(p);
-            
+
             ByteBuffer nioBuf = ByteBuffer.wrap(tempBytes);
             nioBuf.get(headerBytes, 0, headerBytes.length);
             nioBuf.get(bytes, offset, p.getLength() - headerBytes.length);
-            
+
+            remoteSenderIp = p.getAddress().getHostAddress();
+            remoteSenderPort = p.getPort();
+
             newBytesEvent.fireEvent(new Integer(p.getLength()));
             return true;
         }
@@ -164,10 +180,10 @@ public class UDPReceiver implements Receiver
             return false;
         }
     }
-    
+
     public Event getNewBytesEvent()
     {
         return newBytesEvent;
     }
-    
+
 }

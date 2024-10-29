@@ -144,7 +144,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\include;$(SolutionDir)..\..\..\Common\idl\Generated\Cpp;C:\Program Files (x86)\boost\boost_1_60;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\include;$(SolutionDir)..\..\..\Common\idl\Generated\Cpp;C:\Program Files (x86)\boost\boost_1_71;D:\Git-Clones\tinyxml2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0501;WIN32;_DEBUG;_LIB;_SCL_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -166,7 +166,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\include;$(SolutionDir)..\..\..\Common\idl\Generated\Cpp;C:\Program Files (x86)\boost\boost_1_60;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\include;$(SolutionDir)..\..\..\Common\idl\Generated\Cpp;C:\Program Files (x86)\boost\boost_1_71;D:\Git-Clones\tinyxml2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0501;WIN32;_DEBUG;_LIB;_SCL_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -188,7 +188,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\include;$(SolutionDir)..\..\..\Common\idl\Generated\Cpp;C:\Program Files (x86)\boost\boost_1_60;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\include;$(SolutionDir)..\..\..\Common\idl\Generated\Cpp;C:\Program Files (x86)\boost\boost_1_71;D:\Git-Clones\tinyxml2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0501;WIN32;NDEBUG;_LIB;_SCL_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -217,7 +217,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\include;$(SolutionDir)..\..\..\Common\idl\Generated\Cpp;C:\Program Files (x86)\boost\boost_1_60;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\include;$(SolutionDir)..\..\..\Common\idl\Generated\Cpp;C:\Program Files (x86)\boost\boost_1_71;D:\Git-Clones\tinyxml2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0501;WIN32;NDEBUG;_LIB;_SCL_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -238,7 +238,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\include;$(SolutionDir)..\..\..\Common\idl\Generated\Cpp;C:\Program Files (x86)\boost\boost_1_60;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\include;$(SolutionDir)..\..\..\Common\idl\Generated\Cpp;C:\Program Files (x86)\boost\boost_1_71;D:\Git-Clones\tinyxml2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0501;WIN32;_DEBUG;_LIB;_SCL_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -260,7 +260,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\include;$(SolutionDir)..\..\..\Common\idl\Generated\Cpp;C:\Program Files (x86)\boost\boost_1_60;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\include;$(SolutionDir)..\..\..\Common\idl\Generated\Cpp;C:\Program Files (x86)\boost\boost_1_71;D:\Git-Clones\tinyxml2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0501;WIN32;_DEBUG;_LIB;_SCL_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -282,7 +282,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\include;$(SolutionDir)..\..\..\Common\idl\Generated\Cpp;C:\Program Files (x86)\boost\boost_1_60;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\include;$(SolutionDir)..\..\..\Common\idl\Generated\Cpp;C:\Program Files (x86)\boost\boost_1_71;D:\Git-Clones\tinyxml2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0501;WIN32;NDEBUG;_LIB;_SCL_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -311,7 +311,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\include;$(SolutionDir)..\..\..\Common\idl\Generated\Cpp;C:\Program Files (x86)\boost\boost_1_60;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\include;$(SolutionDir)..\..\..\Common\idl\Generated\Cpp;C:\Program Files (x86)\boost\boost_1_71;D:\Git-Clones\tinyxml2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0501;WIN32;NDEBUG;_LIB;_SCL_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -362,7 +362,6 @@
     <ClInclude Include="..\..\..\include\ByteBuffer.h" />
     <ClInclude Include="..\..\..\include\BytesSizePair.h" />
     <ClInclude Include="..\..\..\include\CommException.h" />
-    <ClInclude Include="..\..\..\include\Compatibility.h" />
     <ClInclude Include="..\..\..\include\ConfigException.h" />
     <ClInclude Include="..\..\..\include\DataListener.h" />
     <ClInclude Include="..\..\..\include\DataNotifier.h" />
@@ -412,7 +411,6 @@
     <ClInclude Include="..\..\..\include\TopicInfoData.h" />
     <ClInclude Include="..\..\..\include\XMLArchiverIn.h" />
     <ClInclude Include="..\..\..\include\XMLArchiverOut.h" />
-    <ClInclude Include="..\..\..\include\xml\xmlParser.h" />
     <ClInclude Include="..\..\..\include\ops\Reply.h" />
     <ClInclude Include="..\..\..\include\ops\Request.h" />
   </ItemGroup>
@@ -420,7 +418,6 @@
     <ClCompile Include="..\..\..\source\ArchiverInOut.cpp" />
     <ClCompile Include="..\..\..\source\ByteBuffer.cpp" />
     <ClCompile Include="..\..\..\source\Channel.cpp" />
-    <ClCompile Include="..\..\..\source\Compatibility.cpp" />
     <ClCompile Include="..\..\..\source\DataNotifier.cpp" />
     <ClCompile Include="..\..\..\source\DeadlineTimer.cpp" />
     <ClCompile Include="..\..\..\source\DebugHandler.cpp" />
@@ -460,7 +457,6 @@
     <ClCompile Include="..\..\..\source\UDPSender.cpp" />
     <ClCompile Include="..\..\..\source\XMLArchiverIn.cpp" />
     <ClCompile Include="..\..\..\source\XMLArchiverOut.cpp" />
-    <ClCompile Include="..\..\..\source\xml\xmlParser.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

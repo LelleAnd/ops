@@ -7,10 +7,11 @@
 
 using System.Collections.Generic;
 
-namespace Ops 
+namespace Ops
 {
-	public class Domain : OPSObject 
+    public class Domain : OPSObject 
     {
+        public const byte Domain_idlVersion = 0;
         private byte _Domain_version = Domain_idlVersion;
         public byte Domain_version
         {
@@ -25,7 +26,6 @@ namespace Ops
             }
         }
 
-        public const byte Domain_idlVersion = 0;
         private string domainAddress = "";
 		private string domainID = "";
 		private string localInterface = "0.0.0.0";
@@ -250,6 +250,33 @@ namespace Ops
             return optNonVirt;
         }
 
-	}
+        public override object Clone()
+        {
+            Domain cloneResult = new Domain();
+            FillClone(cloneResult);
+            return cloneResult;
+        }
+
+        public override void FillClone(OPSObject cloneO)
+        {
+            base.FillClone(cloneO);
+            Domain cloneResult = (Domain)cloneO;
+            cloneResult.Domain_version = Domain_version;
+            cloneResult.domainAddress = domainAddress;
+            cloneResult.domainID = domainID;
+            cloneResult.localInterface = localInterface;
+            cloneResult.topics = new List<Topic>(topics.Count);
+            topics.ForEach((item) => { cloneResult.topics.Add((Topic)item.Clone()); });
+            cloneResult.timeToLive = timeToLive;
+            cloneResult.inSocketBufferSize = inSocketBufferSize;
+            cloneResult.outSocketBufferSize = outSocketBufferSize;
+            cloneResult.metaDataMcPort = metaDataMcPort;
+            cloneResult.optNonVirt = optNonVirt;
+            cloneResult.channels = new List<Channel>(channels.Count);
+            channels.ForEach((item) => { cloneResult.channels.Add((Channel)item.Clone()); });
+            cloneResult.transports = new List<Transport>(transports.Count);
+            transports.ForEach((item) => { cloneResult.transports.Add((Transport)item.Clone()); });
+        }
+    }
 
 }

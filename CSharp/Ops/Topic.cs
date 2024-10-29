@@ -9,6 +9,7 @@ namespace Ops
 {
 	public class Topic : OPSObject 
     {
+        public const byte Topic_idlVersion = 0;
         private byte _Topic_version = Topic_idlVersion;
         public byte Topic_version
         {
@@ -23,7 +24,13 @@ namespace Ops
             }
         }
 
-        public const byte Topic_idlVersion = 0;
+        private string _ChannelID = "";
+        public string ChannelID
+        {
+            get { return _ChannelID; }
+            set { _ChannelID = value; }
+        }
+
         private string domainAddress = "";
 		private string domainID;
 		private long inSocketBufferSize = -1;
@@ -247,6 +254,34 @@ namespace Ops
             this.optNonVirt = optNonVirt;
         }
 
+        public override object Clone()
+        {
+            Topic cloneResult = new Topic();
+            FillClone(cloneResult);
+            return cloneResult;
+        }
+
+        public override void FillClone(OPSObject cloneO)
+        {
+            base.FillClone(cloneO);
+            Topic cloneResult = (Topic)cloneO;
+            cloneResult.Topic_version = Topic_version;
+            cloneResult.ChannelID = ChannelID;
+            cloneResult.domainAddress = domainAddress;
+            cloneResult.domainID = domainID;
+            cloneResult.inSocketBufferSize = inSocketBufferSize;
+            cloneResult.localInterface = localInterface;
+            cloneResult.name = name;
+            cloneResult.outSocketBufferSize = outSocketBufferSize;
+            cloneResult.participantID = participantID;
+            cloneResult.port = port;
+            cloneResult.replyPort = replyPort;
+            cloneResult.sampleMaxSize = sampleMaxSize;
+            cloneResult.timeToLive = timeToLive;
+            cloneResult.optNonVirt = optNonVirt;
+            cloneResult.transport = transport;
+            cloneResult.typeID = typeID;
+        }
     }
 
 }

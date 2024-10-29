@@ -5,10 +5,11 @@
 //  Author:
 ///////////////////////////////////////////////////////////
 
-namespace Ops 
+namespace Ops
 {
-	public class Channel : OPSObject 
+    public class Channel : OPSObject 
     {
+        public const byte Channel_idlVersion = 0;
         private byte _Channel_version = Channel_idlVersion;
         public byte Channel_version
         {
@@ -23,7 +24,6 @@ namespace Ops
             }
         }
 
-        public const byte Channel_idlVersion = 0;
         public string channelID = "";
         public string linktype = "";
         public string localInterface = "";     // If multicast, this specifies interface to use
@@ -108,7 +108,29 @@ namespace Ops
             top.SetOutSocketBufferSize((int)outSocketBufferSize);
             top.SetInSocketBufferSize((int)inSocketBufferSize);
             top.SetTimeToLive(timeToLive);
+            top.ChannelID = channelID;
         }
 
-	}
+        public override object Clone()
+        {
+            Channel cloneResult = new Channel();
+            FillClone(cloneResult);
+            return cloneResult;
+        }
+
+        public override void FillClone(OPSObject cloneO)
+        {
+            base.FillClone(cloneO);
+            Channel cloneResult = (Channel)cloneO;
+            cloneResult.Channel_version = Channel_version;
+            cloneResult.channelID = channelID;
+            cloneResult.linktype = linktype;
+            cloneResult.localInterface = localInterface;
+            cloneResult.domainAddress = domainAddress;
+            cloneResult.timeToLive = timeToLive;
+            cloneResult.port = port;
+            cloneResult.outSocketBufferSize = outSocketBufferSize;
+            cloneResult.inSocketBufferSize = inSocketBufferSize;
+        }
+    }
 }

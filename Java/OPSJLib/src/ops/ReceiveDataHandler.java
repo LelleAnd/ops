@@ -1,6 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
+ * Copyright (C) 2024 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -19,15 +20,9 @@
  */
 package ops;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.util.HashMap;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import ops.archiver.OPSArchiverIn;
 import ops.protocol.OPSMessage;
 
 /**
@@ -37,37 +32,19 @@ import ops.protocol.OPSMessage;
 public class ReceiveDataHandler
 {
 
-    private boolean hasSubscribers;
-    //private boolean hasPublishers;
-    //private HashMap<String, MessageBuffer> messageBuffers = new HashMap<String, MessageBuffer>();
-    //private Topic topic;
-    private Receiver receiver;
     private Vector<Subscriber> subscribers = new Vector<Subscriber>();
-    private ObserverImpl bytesListener = new ObserverImpl();
-    private Participant participant;
-    private int expectedFragment = 0;
-    private int fragmentSize;
-    private final byte[] bytes;
-    private byte[] headerBytes;
-    private int bytesReceived;
-    //private byte[] trimmedBytes;
-    //private int byteOffset = 0;
-    private static int FRAGMENT_HEADER_SIZE = 14;
+    protected Participant participant;
     private final Topic topic;
-    private static int THREAD_COUNTER = 1;
+    protected Vector<ReceiveDataChannel> channels = new Vector<ReceiveDataChannel>();
 
-    public ReceiveDataHandler(Topic t, Participant part, Receiver receiver)
+    public ReceiveDataHandler(Topic t, Participant part)
     {
         topic = t;
-        bytes = new byte[t.getSampleMaxSize()];
-        headerBytes = new byte[FRAGMENT_HEADER_SIZE];
-        //trimmedBytes = new byte[t.getSampleMaxSize()];
         participant = part;
-        //topic = t;
-        //MulticastDomain domain = (MulticastDomain) participant.getConfig().getDomain(topic.getDomainID());
-        fragmentSize = StaticManager.MAX_SIZE;
-        this.receiver = receiver; //new MulticastReceiver(t.getDomainAddress(), t.getPort(), domain.getLocalInterface(), t.getInSocketBufferSize());
+    }
 
+    public void cleanup()
+    {
 
     }
 
@@ -81,180 +58,75 @@ public class ReceiveDataHandler
         return topic.getTransport();
     }
 
-    public synchronized int getNrOfSubscribers()
+    // Tell derived classes which topics that are active
+    protected void topicUsage(Topic top, boolean used)
+    {
+    }
+
+    public int getNrOfSubscribers()
     {
         return subscribers.size();
     }
 
-    public synchronized void addSubscriber(Subscriber sub)
+    public void addSubscriber(Subscriber sub, Topic top)
     {
-        subscribers.add(sub);
-
-        if (!hasSubscribers)
+        synchronized (subscribers)
         {
-            // Reset some variables so we can start fresh
-            expectedFragment = 0;
-            bytesReceived = 0;
-            addNewBytesEventListener();
-            try {
-                receiver.Open();
-            } catch (IOException ex) {
-                Logger.getLogger(ReceiveDataHandler.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            hasSubscribers = true;
-            setupTransportThread();
+            subscribers.add(sub);
         }
+
+        if (subscribers.size() == 1)
+        {
+            synchronized (channels)
+            {
+                for (ReceiveDataChannel channel : channels) {
+                    channel.start();
+                }
+            }
+        }
+
+        topicUsage(top, true);
     }
 
-    public synchronized boolean removeSubscriber(Subscriber sub)
+    public boolean removeSubscriber(Subscriber sub, Topic top)
     {
-        boolean result = subscribers.remove(sub);
+        topicUsage(top, false);
+
+        boolean result = false;
+        synchronized (subscribers)
+        {
+            result = subscribers.remove(sub);
+        }
 
         if (subscribers.size() == 0)
         {
-            receiver.getNewBytesEvent().deleteObserver(bytesListener);
-            receiver.Close();
-            hasSubscribers = false;
+            synchronized (channels)
+            {
+                for (ReceiveDataChannel channel : channels) {
+                    channel.stop();
+                }
+            }
         }
 
         return result;
     }
 
-    private synchronized void onNewBytes(Integer size)
+    public void onNewMessage(OPSMessage message)
     {
-        try
+        synchronized (subscribers)
         {
-            bytesReceived += size - headerBytes.length;
-
-            //System.arraycopy(bytes, expectedFragment*fragmentSize, by, 0, p.getLength());
-//            ReadByteBuffer readBuf = new ReadByteBuffer(bytes, expectedFragment*fragmentSize, fragmentSize);
-            ReadByteBuffer readBuf = new ReadByteBuffer(headerBytes, 0, FRAGMENT_HEADER_SIZE);
-
-            if (readBuf.checkProtocol())
+            //TODO: error checking
+            for (Subscriber subscriber : subscribers)
             {
-                int nrOfFragments = readBuf.readint();
-                int currentFragment = readBuf.readint();
-
-                if (currentFragment == (nrOfFragments - 1) && currentFragment == expectedFragment)
+                try
                 {
-                    //We have received a full message, let's deserialize it and send it to subscribers.
-                    sendBytesToSubscribers(new ReadByteBuffer(bytes));
-                    expectedFragment = 0;
-                    bytesReceived = 0;
-
-                } else
+                    subscriber.notifyNewOPSMessage(message);
+                } catch (Throwable t)
                 {
-                    if (currentFragment == expectedFragment)
-                    {
-                        expectedFragment++;
-                    } else
-                    {
-                        //Sample will be lost here, add error handling
-                        System.out.println("___________________Fragment error, sample lost__________________");
-                        expectedFragment = 0;
-                        bytesReceived = 0;
-                    }
+                    Logger.getLogger(ReceiveDataHandler.class.getName()).log(Level.WARNING, "Exception thrown in event notification thread" + t.getMessage());
                 }
             }
-
-        } catch (IOException ex)
-        {
-            expectedFragment = 0;
-            bytesReceived = 0;
         }
     }
 
-    private void addNewBytesEventListener()
-    {
-        receiver.getNewBytesEvent().addObserver(bytesListener);
-    }
-
-    private void sendBytesToSubscribers(ReadByteBuffer readBuf) throws IOException
-    {
-        OPSArchiverIn archiverIn = new OPSArchiverIn(readBuf);
-        OPSMessage message = null;
-
-        // If the proper typesupport has not been added, the message may have content, but some fields may be null. How do we handle this
-        // How do we make the user realize that he needs to add typesupport?
-        message = (OPSMessage) archiverIn.inout("message", message);
-
-        //readBuf.inBuffer.asCharBuffer().
-        //System.out.println("Bytes received = " + bytesReceived);
-        //System.out.println("Bytes read     = " + readBuf.position());
-
-        if (message == null)
-        {
-            Logger.getLogger(ReceiveDataHandler.class.getName()).log(Level.SEVERE, "message was unexpectadly null");
-            return;
-        }
-        if (message.getData() == null)
-        {
-            Logger.getLogger(ReceiveDataHandler.class.getName()).log(Level.SEVERE, "message.getData() was unexpectadly null");
-            return;
-        }
-
-        calculateAndSetSpareBytes(message, readBuf, FRAGMENT_HEADER_SIZE, bytesReceived);
-
-
-        //TODO: error checking
-        for (Subscriber subscriber : subscribers)
-        {
-            try
-            {
-                subscriber.notifyNewOPSMessage(message);
-            } catch (Throwable t)
-            {
-                Logger.getLogger(ReceiveDataHandler.class.getName()).log(Level.WARNING, "Exception thrown in event notification thread" + t.getMessage());
-            }
-        }
-    }
-
-    private void calculateAndSetSpareBytes(OPSMessage message, ReadByteBuffer readBuf, int segmentPaddingSize, int bytesReceived)
-    {
-        //We must calculate how many unserialized segment headers we have and substract that total header size from the size of spareBytes.
-        int nrOfSerializedBytes = readBuf.position();
-        int totalNrOfSegments = (int) (bytesReceived /fragmentSize);
-        int nrOfSerializedSegements = (int) (nrOfSerializedBytes /fragmentSize);
-        int nrOfUnserializedSegments = totalNrOfSegments - nrOfSerializedSegements;
-
-        int nrOfSpareBytes = bytesReceived - readBuf.position() - (nrOfUnserializedSegments * segmentPaddingSize);
-
-        if (nrOfSpareBytes > 0)
-        {
-            message.getData().spareBytes = new byte[nrOfSpareBytes];
-            //This will read the rest of the bytes as raw bytes and put them into sparBytes field of data.
-            readBuf.readBytes(message.getData().spareBytes);  
-        }
-    }
-
-    private void setupTransportThread()
-    {
-
-        Thread thread = new Thread(new Runnable()
-        {
-
-            public void run()
-            {
-                while (hasSubscribers)
-                {
-                    boolean recOK = receiver.receive(headerBytes, bytes, expectedFragment * (fragmentSize - FRAGMENT_HEADER_SIZE));
-                }
-                System.out.println("Leaving transport thread...");
-
-            }
-        });
-
-        thread.setName("TransportThread_" + topic.getTransport()+"_" +THREAD_COUNTER);
-        THREAD_COUNTER++;
-        thread.start();
-    }
-
-    private class ObserverImpl implements Observer
-    {
-
-        public void update(Observable o, Object arg)
-        {
-            onNewBytes((Integer) arg);
-        }
-    }
 }

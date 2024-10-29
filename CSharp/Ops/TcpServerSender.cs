@@ -16,6 +16,7 @@ namespace Ops
         private TcpListener tcpListener;
 		private readonly string serverIp;
 		private readonly int serverPort;
+        private int actualPort = 0;
         private readonly int sendBufferSize;
 		private TcpSenderList tcpSenderList;
         private bool listening = false;
@@ -27,10 +28,14 @@ namespace Ops
             this.serverPort = serverPort;
             this.sendBufferSize = sendBufferSize;
 
-            IPAddress serverAddr = IPAddress.Parse(serverIp);
-            this.tcpListener = new TcpListener(serverAddr, serverPort);
+            if (!Ops.InetAddress.IsValidNodeAddress(this.serverIp))
+            {
+                this.serverIp = "0.0.0.0";
+            }
+            IPAddress serverAddr = IPAddress.Parse(this.serverIp);
+            tcpListener = new TcpListener(serverAddr, serverPort);
             tcpSenderList = new TcpSenderList();
-            this.Start();
+            Start();
             Open();
         }
 
@@ -38,6 +43,12 @@ namespace Ops
         {
             if (!listening)
             {
+                tcpListener.Start();
+
+                // Get actual local port used in case we let OS decide
+                IPEndPoint ep = (IPEndPoint)tcpListener.LocalEndpoint;
+                actualPort = ep.Port;
+
                 listening = true;       // Set flag before we signal the thread
                 signal.Set();           // Set event so the thread is released
             }
@@ -52,10 +63,10 @@ namespace Ops
 
                 // Stop listening. The AcceptTcpClient() call in Run() will exit
                 // and the thread will wait on the event again
-                this.tcpListener.Stop();
+                tcpListener.Stop();
 
                 // Clear all connections (sockets) to subscribers
-                this.tcpSenderList.EmptyList();
+                tcpSenderList.EmptyList();
             }
         }
 
@@ -67,7 +78,7 @@ namespace Ops
         public void GetLocalEndpoint(ref string IP, ref int port)
         {
             IP = this.serverIp;
-            port = this.serverPort;
+            port = this.actualPort;
         }
 
         public bool SendTo(byte[] bytes, string ip, int port)
@@ -100,8 +111,6 @@ namespace Ops
                 {
                     /// Wait for event to be set
                     this.signal.WaitOne();
-
-                    this.tcpListener.Start();
 
                     while (listening)
                     {

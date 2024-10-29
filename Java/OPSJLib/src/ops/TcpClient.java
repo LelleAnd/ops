@@ -1,6 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2010 Anton Gravestam.
+* Copyright (C) 2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -50,7 +51,7 @@ public class TcpClient implements Receiver
         this.serverIp = serverIP;
         this.receiveBufferSize = receiveBufferSize;
         setupSocket(serverIP, serverPort, receiveBufferSize);
-        
+
         sizePackBuffer = ByteBuffer.wrap(sizePackBytes).order(ByteOrder.LITTLE_ENDIAN);
     }
 
@@ -61,7 +62,16 @@ public class TcpClient implements Receiver
 
     public void Close()
     {
-    
+    }
+
+    public String getRemoteIp()
+    {
+        return "";
+    }
+
+    public int getRemotePort()
+    {
+        return 0;
     }
 
     public boolean receive(byte[] headerBytes, byte[] bytes, int offset)
@@ -81,7 +91,7 @@ public class TcpClient implements Receiver
             }
 
             //max_length = *((int*)(data + 18));
-            
+
             //TODO: header and error check.
             int dataSize =  sizePackBuffer.getInt(18) - headerBytes.length;
 
@@ -96,12 +106,9 @@ public class TcpClient implements Receiver
             {
                 accumulatedSize += inputStream.read(bytes, accumulatedSize + offset, dataSize - accumulatedSize);
             }
-            
+
             newBytesEvent.fireEvent(new Integer(dataSize + headerBytes.length));
             return true;
-
-
-
 
         } catch (IOException ex)
         {

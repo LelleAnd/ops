@@ -73,7 +73,7 @@ public class COpsHelper implements IOpsHelper
                 sub.addObserver(new Observer() {
                     public void update(Observable o, Object arg)
                     {
-                        if (client != null) client.OnData(sub.getTopic().getName(), sub.getMessage().getData());
+                        if (client != null) client.OnData(sub.getTopic().getName(), sub.getMessage(), sub.getMessage().getData());
                     }
                 });
                 sub.deadlineEvent.addObserver(new Observer() {

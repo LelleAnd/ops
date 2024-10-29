@@ -52,6 +52,7 @@ public class Topic<T> extends OPSObject
     private String localInterface = "";
     private int timeToLive = -1;
     private boolean optNonVirt = false;
+    private String channelID = "";
 
     /** Creates a new instance of Topic */
     public Topic(String name, int port, String typeID, String domainAddress)
@@ -259,6 +260,46 @@ public class Topic<T> extends OPSObject
     public void setTimeToLive(int timeToLive)
     {
         this.timeToLive = timeToLive;
+    }
+
+    public String getChannelID()
+    {
+        return channelID;
+    }
+
+    public void setchannelID(String channelID)
+    {
+        this.channelID = channelID;
+    }
+
+    public Object clone()
+    {
+        Topic cloneResult = new Topic();
+        fillClone(cloneResult);
+        return cloneResult;
+    }
+
+    @Override
+    public void fillClone(OPSObject cloneO)
+    {
+        super.fillClone(cloneO);
+        Topic cloneResult = (Topic)cloneO;
+        cloneResult.Topic_version = this.Topic_version;
+        cloneResult.name = this.name;
+        cloneResult.port = this.port;
+        cloneResult.replyPort = this.replyPort;
+        cloneResult.typeID = this.typeID;
+        cloneResult.domainAddress = this.domainAddress;
+        cloneResult.sampleMaxSize = this.sampleMaxSize;
+        cloneResult.participantID = this.participantID;
+        cloneResult.domainID = this.domainID;
+        cloneResult.outSocketBufferSize = this.outSocketBufferSize;
+        cloneResult.inSocketBufferSize = this.inSocketBufferSize;
+        cloneResult.transport = this.transport;
+        cloneResult.localInterface = this.localInterface;
+        cloneResult.timeToLive = this.timeToLive;
+        cloneResult.optNonVirt = this.optNonVirt;
+        cloneResult.channelID = this.channelID;
     }
 
 }

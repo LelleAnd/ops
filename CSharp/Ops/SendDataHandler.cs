@@ -15,6 +15,8 @@ namespace Ops
         void AddPublisher(Publisher pub);
         bool RemovePublisher(Publisher pub);
 
+        void UpdateTransportInfo(Topic top);
+
         /// <summary>
         /// Get IP and port used as endpoint when sending a message
         /// </summary>
@@ -69,6 +71,10 @@ namespace Ops
         public void GetLocalEndpoint(ref string IP, ref int port)
         {
             sender.GetLocalEndpoint(ref IP, ref port);
+        }
+
+        public virtual void UpdateTransportInfo(Topic top)
+        {
         }
 
         public abstract bool SendData(byte[] bytes, int size, Topic t);

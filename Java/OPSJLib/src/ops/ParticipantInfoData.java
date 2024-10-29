@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2013, 2020 Lennart Andersson.
+* Copyright (C) 2013, 2020-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -83,4 +83,32 @@ public class ParticipantInfoData extends OPSObject
         knownTypes = (java.util.Vector<String>) archive.inoutStringList("knownTypes", knownTypes);
     }
 
+    @Override
+    public Object clone()
+    {
+        ParticipantInfoData cloneResult = new ParticipantInfoData();
+        fillClone(cloneResult);
+        return cloneResult;
+    }
+
+    @Override
+    public void fillClone(OPSObject cloneO)
+    {
+        super.fillClone(cloneO);
+        ParticipantInfoData cloneResult = (ParticipantInfoData)cloneO;
+        cloneResult.ParticipantInfoData_version = this.ParticipantInfoData_version;
+        cloneResult.name = this.name;
+        cloneResult.id = this.id;
+        cloneResult.domain = this.domain;
+        cloneResult.ip = this.ip;
+        cloneResult.languageImplementation = this.languageImplementation;
+        cloneResult.opsVersion = this.opsVersion;
+        cloneResult.mc_udp_port = this.mc_udp_port;
+        cloneResult.mc_tcp_port = this.mc_tcp_port;
+        cloneResult.subscribeTopics = new java.util.Vector<TopicInfoData>();
+        this.subscribeTopics.forEach((item) -> cloneResult.subscribeTopics.add((TopicInfoData)item.clone()));
+        cloneResult.publishTopics = new java.util.Vector<TopicInfoData>();
+        this.publishTopics.forEach((item) -> cloneResult.publishTopics.add((TopicInfoData)item.clone()));
+        cloneResult.knownTypes = (java.util.Vector)this.knownTypes.clone();
+    }
 }

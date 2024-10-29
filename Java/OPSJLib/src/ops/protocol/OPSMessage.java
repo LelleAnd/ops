@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2020 Lennart Andersson.
+* Copyright (C) 2020-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -40,6 +40,8 @@ public class OPSMessage extends OPSObject
     private int port;
     private long qosMask;
     private long publicationID;
+    private int sourcePort = 0;
+    private String sourceIP = "";
     private String publisherName = "";
     private String topicName = "";
     private String topLevelKey = "";
@@ -71,6 +73,22 @@ public class OPSMessage extends OPSObject
     public void setData(OPSObject data)
     {
         this.data = data;
+    }
+
+    public void setSource(String ip, int port)
+    {
+        this.sourceIP = ip;
+        this.sourcePort = port;
+    }
+
+    public String getSourceIP()
+    {
+        return sourceIP;
+    }
+
+    public int getSourcePort()
+    {
+        return sourcePort;
     }
 
     public byte getEndianness()

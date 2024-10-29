@@ -7,10 +7,11 @@
 
 using System.Collections.Generic;
 
-namespace Ops 
+namespace Ops
 {
-	public class Transport : OPSObject 
+    public class Transport : OPSObject 
     {
+        public const byte Transport_idlVersion = 0;
         private byte _Transport_version = Transport_idlVersion;
         public byte Transport_version
         {
@@ -25,7 +26,6 @@ namespace Ops
             }
         }
 
-        public const byte Transport_idlVersion = 0;
         public string channelID = "";
         public List<string> topics = new List<string>();
 
@@ -56,5 +56,21 @@ namespace Ops
             //archiver->inout(std::string("topics"), topics);
             topics = (List<string>)archive.InoutStringList("topics", topics);
         }
-	}
+
+        public override object Clone()
+        {
+            Transport cloneResult = new Transport();
+            FillClone(cloneResult);
+            return cloneResult;
+        }
+
+        public override void FillClone(OPSObject cloneO)
+        {
+            base.FillClone(cloneO);
+            Transport cloneResult = (Transport)cloneO;
+            cloneResult.Transport_version = Transport_version;
+            cloneResult.channelID = channelID;
+            cloneResult.topics = new List<string>(topics);
+        }
+    }
 }

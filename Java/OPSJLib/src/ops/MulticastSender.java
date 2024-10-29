@@ -64,7 +64,12 @@ class MulticastSender implements Sender
             opened = false;
         }
     }
-    
+
+    public int getLocalPort()
+    {
+        return this.port;
+    }
+
     public boolean sendTo(byte[] bytes, int offset, int size, String ip, int port)
     {
         try

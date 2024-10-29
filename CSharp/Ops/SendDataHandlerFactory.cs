@@ -8,6 +8,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Ops 
 {
@@ -15,30 +16,28 @@ namespace Ops
     {
         private Dictionary<string, ISendDataHandler> SendDataHandlers = new Dictionary<string, ISendDataHandler>();
 
-        private ParticipantInfoDataListener partInfoListener = null;
-        private Subscriber partInfoSub = null;
-
-        ~SendDataHandlerFactory()
-        {
-            if (partInfoSub != null) partInfoSub.Stop();
-            partInfoSub = null;
-            partInfoListener = null;
-        }
-
         private string MakeKey(Topic top, string localIf)
         {
-            // In the case that we use the same port for several topics, we need to find the sender for the transport::address::port used
+            // We need to store SendDataHandlers with more than just the name as key.
+            // Since topics can use the same port, we need to return the same SendDataHandler.
+            // Make a key with the transport info that uniquely defines the sender.
             string key = top.GetTransport() + "::";
             if (top.GetTransport().Equals(Topic.TRANSPORT_UDP))
             {
                 key += localIf + "::";
+            }
+            if ((top.GetTransport() == Topic.TRANSPORT_TCP) && (top.GetPort() == 0))
+            {
+                // We add the channel name so different channels get different TCP Servers
+                key += top.ChannelID;
+                key += "::";
             }
             key += top.GetDomainAddress();
             if (!top.GetTransport().Equals(Topic.TRANSPORT_UDP))
             {
                 key += "::" + top.GetPort();
             }
-            return key;   // t.GetTransport() + "::" + t.GetDomainAddress() + "::" + t.GetPort();
+            return key;
         }
 
         private void PostSetup(Topic t, Participant participant, McUdpSendDataHandler sdh)
@@ -50,17 +49,10 @@ namespace Ops
             }
             else
             {
-                if (partInfoListener == null)
-                {
-                    // Setup a listener on the participant info data published by participants on our domain.
-                    // We use the information for topics with UDP as transport, to know the destination for UDP sends
-                    // ie. we extract ip and port from the information and add it to our McUdpSendDataHandler
-                    partInfoListener = new ParticipantInfoDataListener(participant, sdh);
-
-                    partInfoSub = new Subscriber(participant.CreateParticipantInfoTopic());
-                    partInfoSub.newDataDefault += new NewDataDefaultEventHandler(partInfoListener.SubscriberNewData);
-                    partInfoSub.Start();
-                }
+                // Setup a listener on the participant info data published by participants on our domain.
+                // We use the information for topics with UDP as transport, to know the destination for UDP sends
+                // ie. we extract ip and port from the information and add it to our McUdpSendDataHandler
+                participant.partInfoListener.ConnectUdp(t, sdh);
             }
         }
 
@@ -112,6 +104,26 @@ namespace Ops
             }
         }
 
-	}
+        public void ReleaseSendDataHandler(Topic t, Participant participant)
+        {
+            if (t.GetTransport() == Topic.TRANSPORT_UDP)
+            {
+                if (!Ops.InetAddress.IsValidNodeAddress(t.GetDomainAddress()))
+                {
+                    // Get the local interface, doing a translation from subnet if necessary
+                    string localIF = InetAddress.DoSubnetTranslation(t.GetLocalInterface());
+                    string key = MakeKey(t, localIF);
+
+                    if (SendDataHandlers.ContainsKey(key))
+                    {
+                        McUdpSendDataHandler sender = (McUdpSendDataHandler)SendDataHandlers[key];
+                        participant.partInfoListener.DisconnectUdp(t, sender);
+                    }
+                }
+            }
+
+        }
+
+    }
 
 }

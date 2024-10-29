@@ -8,12 +8,12 @@ The following table lists OPS Transport features and the support in different pr
 | Multicast ACK       | -   | X   | -  | -      | -      | -    |
 | UDP Many2Many       | X   | X   | X  | X      | X      | X    |
 | UDP Many2One        | X   | X   | X  | X      | X      | X    |
+| TCP Many2Many       | X   | X   | X  | X      | X      | X    |
+| TCP One2Many        | X   | X   | X  | X      | X      | X    |
 | TCP V1              | X   | X   | X  | X      | X      | X    |
 | TCP V2              | X   | X   | -  | -      | -      | -    |
 | TCP V2, HB          | X   | X   | -  | -      | -      | -    |
 | TCP Connect Status  | X   | (X) | -  | -      | -      | -    |
-| TCP Many2Many       | X   | X   | -  | X      | X      | -    |
-| TCP One2Many        | X   | X   | X  | X      | X      | X    |
 
 The following table lists IDL Compile directives that only is supported by a subset of programming languages:
 

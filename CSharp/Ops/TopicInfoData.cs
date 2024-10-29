@@ -14,6 +14,7 @@ namespace Ops
     // NOTE. Must be kept in sync with C++
 	public class TopicInfoData : OPSObject
 	{
+        public const byte TopicInfoData_idlVersion = 0;
         private byte _TopicInfoData_version = TopicInfoData_idlVersion;
         public byte TopicInfoData_version
         {
@@ -28,7 +29,6 @@ namespace Ops
             }
         }
 
-        public const byte TopicInfoData_idlVersion = 0;
         public string name { get; set; }
         public string type { get; set; }
         public string transport { get; set; }
@@ -78,7 +78,26 @@ namespace Ops
             port = archive.Inout("port", port);
             _keys = (List<string>)archive.InoutStringList("keys", _keys);
 		}
-		
-	};
+
+        public override object Clone()
+        {
+            TopicInfoData cloneResult = new TopicInfoData();
+            FillClone(cloneResult);
+            return cloneResult;
+        }
+
+        public override void FillClone(OPSObject cloneO)
+        {
+            base.FillClone(cloneO);
+            TopicInfoData cloneResult = (TopicInfoData)cloneO;
+            cloneResult.TopicInfoData_version = TopicInfoData_version;
+            cloneResult.name = name;
+            cloneResult.type = type;
+            cloneResult.transport = transport;
+            cloneResult.address = address;
+            cloneResult.port = port;
+            cloneResult.keys = new List<string>(keys);
+        }
+    };
 
 }

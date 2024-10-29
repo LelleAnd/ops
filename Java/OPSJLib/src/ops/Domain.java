@@ -249,4 +249,34 @@ public class Domain extends OPSObject
         return optNonVirt;
     }
 
+    @Override
+    public Object clone()
+    {
+        Domain cloneResult = new Domain();
+        fillClone(cloneResult);
+        return cloneResult;
+    }
+
+    @Override
+    public void fillClone(OPSObject cloneO)
+    {
+        super.fillClone(cloneO);
+        Domain cloneResult = (Domain)cloneO;
+        cloneResult.Domain_version = this.Domain_version;
+        cloneResult.domainAddress = this.domainAddress;
+        cloneResult.domainID = this.domainID;
+        cloneResult.localInterface = this.localInterface;
+        cloneResult.topics = new java.util.Vector<Topic>();
+        this.topics.forEach((item) -> cloneResult.topics.add((Topic)item.clone()));
+        cloneResult.timeToLive = this.timeToLive;
+        cloneResult.inSocketBufferSize = this.inSocketBufferSize;
+        cloneResult.outSocketBufferSize = this.outSocketBufferSize;
+        cloneResult.metaDataMcPort = this.metaDataMcPort;
+        cloneResult.channels = new java.util.Vector<Channel>();
+        this.channels.forEach((item) -> cloneResult.channels.add((Channel)item.clone()));
+        cloneResult.transports = new java.util.Vector<Transport>();
+        this.transports.forEach((item) -> cloneResult.transports.add((Transport)item.clone()));
+        cloneResult.optNonVirt = this.optNonVirt;
+    }
+
 }

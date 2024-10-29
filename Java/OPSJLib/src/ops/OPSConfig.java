@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2020 Lennart Andersson.
+* Copyright (C) 2020-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -108,6 +108,24 @@ public class OPSConfig extends OPSObject
     public Vector<Domain> getDomains()
     {
         return domains;
+    }
+
+    @Override
+    public Object clone()
+    {
+        OPSConfig cloneResult = new OPSConfig();
+        fillClone(cloneResult);
+        return cloneResult;
+    }
+
+    @Override
+    public void fillClone(OPSObject cloneO)
+    {
+        super.fillClone(cloneO);
+        OPSConfig cloneResult = (OPSConfig)cloneO;
+        cloneResult.OPSConfig_version = this.OPSConfig_version;
+        cloneResult.domains = new java.util.Vector<Domain>();
+        this.domains.forEach((item) -> cloneResult.domains.add((Domain)item.clone()));
     }
 
 }

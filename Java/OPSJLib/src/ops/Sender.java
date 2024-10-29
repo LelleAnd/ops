@@ -15,6 +15,7 @@ public interface Sender
 {
     void open() throws IOException;
     void close();
+    int getLocalPort();
     boolean sendTo(byte[] bytes, String ip, int port);
     boolean sendTo(byte[] bytes, int offset, int size, String ip, int port);
 

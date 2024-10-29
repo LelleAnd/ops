@@ -13,6 +13,7 @@ namespace Ops
 {
 	public class OPSConfig : OPSObject 
     {
+        public const byte OPSConfig_idlVersion = 0;
         private byte _OPSConfig_version = OPSConfig_idlVersion;
         public byte OPSConfig_version
         {
@@ -27,7 +28,6 @@ namespace Ops
             }
         }
 
-        public const byte OPSConfig_idlVersion = 0;
         private protected List<Domain> domains = new List<Domain>();
 
         public static OPSConfig GetConfig() 
@@ -103,6 +103,21 @@ namespace Ops
             return domains;
         }
 
-	}
+        public override object Clone()
+        {
+            OPSConfig cloneResult = new OPSConfig();
+            FillClone(cloneResult);
+            return cloneResult;
+        }
+
+        public override void FillClone(OPSObject cloneO)
+        {
+            base.FillClone(cloneO);
+            OPSConfig cloneResult = (OPSConfig)cloneO;
+            cloneResult.OPSConfig_version = OPSConfig_version;
+            cloneResult.domains = new List<Domain>(domains.Count);
+            domains.ForEach((item) => { cloneResult.domains.Add((Domain)item.Clone()); });
+        }
+    }
 
 }

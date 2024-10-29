@@ -34,6 +34,7 @@ import PizzaProject.PizzaProjectTypeFactory;
 import ops.ConfigurationException;
 import ops.Listener;
 import ops.OPSObject;
+import ops.protocol.OPSMessage;
 import ops.DeadlineNotifier;
 
 public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> {
@@ -164,15 +165,16 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
       OnLog("###!!! " + arg.getErrorMessage());
   }
 
-  public void OnData(final String topName, final pizza.PizzaData Data) {
-      OnLog("[ " + topName + " ] New PizzaData(v" + Data.PizzaData_version + "): " + Data.cheese + "\n");
+  public void OnData(final String topName, final OPSMessage msg, final pizza.PizzaData Data) {
+      OnLog("[ " + topName + " ] (From " + msg.getSourceIP() + ":" + msg.getSourcePort() + ") New PizzaData(v" + Data.PizzaData_version + "): " +
+            Data.cheese + ", spareBytes.length: " + Data.spareBytes.length + "\n");
   }
 
-  public void OnData(final String topName, final pizza.VessuvioData Data) {
+  public void OnData(final String topName, final OPSMessage msg, final pizza.VessuvioData Data) {
       OnLog("[ " + topName + " ] New VessuvioData: " + Data.cheese + ", Ham length: " + Data.ham.length() + "\n");
   }
 
-  public void OnData(final String topName, final pizza.special.ExtraAllt Data) {
+  public void OnData(final String topName, final OPSMessage msg, final pizza.special.ExtraAllt Data) {
       String str = "";
 
       if (Data.shs.size() > 1) str = ", shs[1]: " + Data.shs.elementAt(1);
@@ -182,13 +184,13 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
             ", Num strings: " + Data.strings.size() + "\n");
   }
 
-  public void OnData(final String topName, final OPSObject Data) {
+  public void OnData(final String topName, final OPSMessage msg, final OPSObject Data) {
       if (Data instanceof ExtraAllt) {
-          OnData(topName, (ExtraAllt)Data);
+          OnData(topName, msg, (ExtraAllt)Data);
       } else if (Data instanceof VessuvioData) {
-          OnData(topName, (VessuvioData)Data);
+          OnData(topName, msg, (VessuvioData)Data);
       } else if (Data instanceof PizzaData) {
-          OnData(topName, (PizzaData)Data);
+          OnData(topName, msg, (PizzaData)Data);
       }
   }
 

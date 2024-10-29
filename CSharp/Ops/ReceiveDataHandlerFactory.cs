@@ -24,6 +24,10 @@ namespace Ops
             {
                 return top.GetTransport();
             }
+            else if ((top.GetTransport() == Topic.TRANSPORT_TCP) && (top.GetPort() == 0))
+            {
+                return top.GetTransport() + "::" + top.ChannelID + "::" + top.GetDomainAddress() + "::" + top.GetPort();
+            }
             else
             {
                 return top.GetTransport() + "::" + top.GetDomainAddress() + "::" + top.GetPort();
@@ -56,26 +60,21 @@ namespace Ops
                 return rdh;
             }
 
-            // Get the local interface, doing a translation from subnet if necessary
-            string localIF = InetAddress.DoSubnetTranslation(top.GetLocalInterface());
-
             // Didn't exist, create one if transport is known
-            if ( (top.GetTransport().Equals(Topic.TRANSPORT_MC)) || (top.GetTransport().Equals(Topic.TRANSPORT_TCP)) )
+            if ( top.GetTransport().Equals(Topic.TRANSPORT_MC) )
             {
-                ReceiveDataHandlers.Add(key, 
-                    new ReceiveDataHandler(top, participant, ReceiverFactory.CreateReceiver(top, localIF)));
+                ReceiveDataHandlers.Add(key, new McReceiveDataHandler(top, participant));
+                return ReceiveDataHandlers[key];
+            }
+            else if ( top.GetTransport().Equals(Topic.TRANSPORT_TCP) )
+            {
+                ReceiveDataHandlers.Add(key, new TcpReceiveDataHandler(top, participant));
                 return ReceiveDataHandlers[key];
             }
             else if (top.GetTransport().Equals(Topic.TRANSPORT_UDP))
             {
-                IReceiver rec = ReceiverFactory.CreateReceiver(top, localIF);
-                ReceiveDataHandlers.Add(key, new ReceiveDataHandler(top, participant, rec));
-
-                if (key.Equals(Topic.TRANSPORT_UDP))
-                {
-                    participant.SetUdpTransportInfo(((UdpReceiver)rec).IP, ((UdpReceiver)rec).Port);
-                }
-
+                bool commonReceiver = (key == Topic.TRANSPORT_UDP);
+                ReceiveDataHandlers.Add(key, new UdpReceiveDataHandler(top, participant, commonReceiver));
                 return ReceiveDataHandlers[key];
             }
             return null;
@@ -94,11 +93,7 @@ namespace Ops
                 if (rdh.GetNrOfSubscribers() == 0)
                 {
                     ReceiveDataHandlers.Remove(key);
-
-                    if (rdh.GetTransport().Equals(Topic.TRANSPORT_UDP))
-                    {
-                        participant.SetUdpTransportInfo("", 0);
-                    }
+                    rdh.Dispose();
                 }
 
             }        

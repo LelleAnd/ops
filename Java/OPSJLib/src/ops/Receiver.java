@@ -1,6 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -33,6 +34,9 @@ public interface Receiver
 
     void Close();
 
+    String getRemoteIp();
+    int getRemotePort();
+
     //public boolean receive(byte[] bytes, int offset);
     public boolean receive(byte[] headerBytes, byte[] bytes, int offset);
     //void setReceiveTimeout(int millis) throws CommException;
@@ -41,5 +45,5 @@ public interface Receiver
     //void send(byte[] b);
 
     Event getNewBytesEvent();
-    
+
 }

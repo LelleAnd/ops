@@ -1,6 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2010 Anton Gravestam.
+* Copyright (C) 2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -37,19 +38,26 @@ public class TcpServerSender implements Sender, Runnable
 {
     private final String serverIp;
     private final int serverPort;
+    private int actualPort = 0;
     private final int sendBufferSize;
     private ServerSocket server = null;
     private TcpSenderList tcpSenderList;
     private volatile boolean listening = false;
     private Semaphore sem = new Semaphore(0);
+    private boolean keepRunning = false;
 
     public TcpServerSender(String serverIp, int serverPort, int sendBufferSize) throws IOException
     {
-        this.serverIp = serverIp;
+        if (NetworkSupport.IsValidNodeAddress(serverIp)) {
+            this.serverIp = serverIp;
+        } else {
+            this.serverIp = "0.0.0.0";
+        }
         this.serverPort = serverPort;
         this.sendBufferSize = sendBufferSize;
-//moved below        server = new ServerSocket(serverPort, 0, InetAddress.getByName(serverIp));
+
         tcpSenderList = new TcpSenderList();
+        keepRunning = true;
         new Thread(this).start();
         open();
     }
@@ -58,8 +66,15 @@ public class TcpServerSender implements Sender, Runnable
     {
         if (!listening)
         {
+          try {
+            server = new ServerSocket(this.serverPort, 0, InetAddress.getByName(this.serverIp));
+            actualPort = server.getLocalPort();
+
             listening = true;       // Set flag before we signal the thread
             sem.release();          // Signal semaphore so the thread is released
+          } catch (IOException ex) {
+              Logger.getLogger(TcpServerSender.class.getName()).log(Level.SEVERE, null, ex);
+          }
         }
     }
 
@@ -81,6 +96,11 @@ public class TcpServerSender implements Sender, Runnable
             // Clear all connections (sockets) to subscribers
             tcpSenderList.emptyList();
         }
+    }
+
+    public int getLocalPort()
+    {
+        return this.actualPort;
     }
 
     public boolean sendTo(byte[] bytes, String ip, int port)
@@ -107,16 +127,13 @@ public class TcpServerSender implements Sender, Runnable
 
     public void run()
     {
-        while(true)
+        while(keepRunning)
         {
             try {
                 /// Wait for semaphore to be set
                 sem.acquire();
-                
-                // this.tcpListener.Start();
-                server = new ServerSocket(this.serverPort, 0, InetAddress.getByName(this.serverIp));
-                
-                while (listening) {
+
+                while (keepRunning && listening) {
                     try {
                         Socket socket = server.accept();
                         if (sendBufferSize > 0) socket.setSendBufferSize(sendBufferSize);
@@ -125,13 +142,16 @@ public class TcpServerSender implements Sender, Runnable
                         if (listening) Logger.getLogger(TcpServerSender.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
-                server.close();
-            } catch (IOException ex) {
-                Logger.getLogger(TcpServerSender.class.getName()).log(Level.SEVERE, null, ex);
             } catch (InterruptedException ex) {
                 Logger.getLogger(TcpServerSender.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+    }
+
+    public void stopThread()
+    {
+        keepRunning = false;
+        sem.release();          // Signal semaphore so the thread is released
     }
 
 }

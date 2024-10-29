@@ -1,6 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
+ * Copyright (C) 2024 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -104,7 +105,7 @@ public class Subscriber extends Observable
         timeLastDataForTimeBase = System.currentTimeMillis();
         setDeadlineQoS(deadlineTimeout);
         receiveDataHandler = participant.getReceiveDataHandler(topic);
-        receiveDataHandler.addSubscriber(this);
+        receiveDataHandler.addSubscriber(this, topic);
         inProcessTransport.addSubscriber(this);
     }
 
@@ -117,7 +118,7 @@ public class Subscriber extends Observable
     {
         deadlineNotifier.remove(this);
         inProcessTransport.removeSubscriber(this);
-        boolean retVal = receiveDataHandler.removeSubscriber(this);
+        boolean retVal = receiveDataHandler.removeSubscriber(this, topic);
         receiveDataHandler = null;
         participant.releaseReceiveDataHandler(topic);
         return retVal;
@@ -190,7 +191,7 @@ public class Subscriber extends Observable
         {
             return fakeRate;
         }
-         
+
     }
 
     public OPSObject waitForNextData(long millis)
@@ -291,5 +292,5 @@ public class Subscriber extends Observable
         return topic;
     }
 
-    
+
 }

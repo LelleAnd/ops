@@ -992,9 +992,9 @@ namespace OPSTest
         {
             if (myPub != null)
             {
-                // The Stop() call is necessary when we use TCP as transport. 
+                // The Dispose() or atleast Stop() call is necessary when we use TCP as transport. 
                 // Otherwise the listening socket and all connections will remain available to others.
-                myPub.Stop();
+                myPub.Dispose();
                 myPub = null;
             }
             else

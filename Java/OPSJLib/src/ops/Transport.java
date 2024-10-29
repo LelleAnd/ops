@@ -1,6 +1,6 @@
 /**
  *
- * Copyright (C) 2016-2020 Lennart Andersson.
+ * Copyright (C) 2016-2024 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -59,4 +59,23 @@ public class Transport extends OPSObject
         //archiver->inout(std::string("topics"), topics);
 				topics = (java.util.Vector<String>) archive.inoutStringList("topics", topics);
     }
+
+    @Override
+    public Object clone()
+    {
+        Transport cloneResult = new Transport();
+        fillClone(cloneResult);
+        return cloneResult;
+    }
+
+    @Override
+    public void fillClone(OPSObject cloneO)
+    {
+        super.fillClone(cloneO);
+        Transport cloneResult = (Transport)cloneO;
+        cloneResult.Transport_version = this.Transport_version;
+        cloneResult.channelID = this.channelID;
+        cloneResult.topics = (java.util.Vector)this.topics.clone();
+    }
+
 }

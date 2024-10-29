@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2013, 2020 Lennart Andersson.
+* Copyright (C) 2013, 2020-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -82,6 +82,28 @@ public class TopicInfoData extends OPSObject
         address = archive.inout("address", address);
         port = archive.inout("port", port);
         keys = (java.util.Vector<String>) archive.inoutStringList("keys", keys);
+    }
+
+    @Override
+    public Object clone()
+    {
+        TopicInfoData cloneResult = new TopicInfoData();
+        fillClone(cloneResult);
+        return cloneResult;
+    }
+
+    @Override
+    public void fillClone(OPSObject cloneO)
+    {
+        super.fillClone(cloneO);
+        TopicInfoData cloneResult = (TopicInfoData)cloneO;
+        cloneResult.TopicInfoData_version = this.TopicInfoData_version;
+        cloneResult.name = this.name;
+        cloneResult.type = this.type;
+        cloneResult.transport = this.transport;
+        cloneResult.address = this.address;
+        cloneResult.port = this.port;
+        cloneResult.keys = (java.util.Vector)this.keys.clone();
     }
 
 }

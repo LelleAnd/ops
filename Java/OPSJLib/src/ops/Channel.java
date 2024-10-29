@@ -116,4 +116,27 @@ public class Channel extends OPSObject
         top.setTimeToLive(timeToLive);
     }
 
+    @Override
+    public Object clone()
+    {
+        Channel cloneResult = new Channel();
+        fillClone(cloneResult);
+        return cloneResult;
+    }
+
+    @Override
+    public void fillClone(OPSObject cloneO)
+    {
+        super.fillClone(cloneO);
+        Channel cloneResult = (Channel)cloneO;
+        cloneResult.Channel_version = this.Channel_version;
+        cloneResult.channelID = this.channelID;
+        cloneResult.linktype = this.linktype;
+        cloneResult.localInterface = this.localInterface;
+        cloneResult.domainAddress = this.domainAddress;
+        cloneResult.timeToLive = this.timeToLive;
+        cloneResult.port = this.port;
+        cloneResult.outSocketBufferSize = this.outSocketBufferSize;
+        cloneResult.inSocketBufferSize = this.inSocketBufferSize;
+    }
 }

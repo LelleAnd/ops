@@ -192,6 +192,56 @@ end;
 //    ai_next: Paddrinfo;    // Next structure in linked list
 //  end;
 
+//  PaddrinfoW = ^addrinfoW;
+//  addrinfoW = record
+//    ai_flags: Integer;     // AI_PASSIVE, AI_CANONNAME, AI_NUMERICHOST
+//    ai_family: Integer;    // PF_xxx
+//    ai_socktype: Integer;  // SOCK_xxx
+//    ai_protocol: Integer;  // 0 or IPPROTO_xxx for IPv4 and IPv6
+//    ai_addrlen: SIZE_T;    // Length of ai_addr
+//    ai_canonname: LPWSTR;  // Canonical name for nodename
+//    ai_addr: PSockAddr;    // Binary address
+//    ai_next: Paddrinfo;    // Next structure in linked list
+//  end;
+//  {$EXTERNALSYM addrinfoW}
+//  TAddrInfoW = addrinfoW;
+
+//function GetAddrInfoW(hostname, servname: LPCWSTR; const [Ref] hints: addrinfoW; out res: PaddrinfoW): Integer; stdcall;
+//procedure FreeAddrInfoW(var ai: addrinfoW); stdcall;
+
+//  sockaddr = record
+//    sa_family: u_short;                 // address family
+//    sa_data: array [0..13] of a_char; // up to 14 bytes of direct address
+//  end;
+//  TSockAddr = sockaddr;
+//  PSockAddr = ^sockaddr;
+//  LPSOCKADDR = ^sockaddr;
+
+//  sockaddr_in = record
+//    sin_family: Smallint;
+//    sin_port: u_short;
+//    sin_addr: in_addr;
+//    sin_zero: array [0..7] of a_char;
+//  end;
+//  TSockAddrIn = sockaddr_in;
+//  PSockAddrIn = ^sockaddr_in;
+
+//  in_addr = record
+//    case Integer of
+//      0: (S_un_b: SunB);
+//      1: (S_un_c: SunC);
+//      2: (S_un_w: SunW);
+//      3: (S_addr: u_long);
+//    // #define s_addr  S_un.S_addr // can be used for most tcp & ip code
+//    // #define s_host  S_un.S_un_b.s_b2 // host on imp
+//    // #define s_net   S_un.S_un_b.s_b1  // netword
+//    // #define s_imp   S_un.S_un_w.s_w2 // imp
+//    // #define s_impno S_un.S_un_b.s_b4 // imp #
+//    // #define s_lh    S_un.S_un_b.s_b3 // logical host
+//  end;
+//  TInAddr = in_addr;
+//  PInAddr = ^in_addr;
+
 procedure GetHostAddresses(name : AnsiString; List : TStrings);
 var
   HostName : array[0..100] of AnsiChar;
@@ -199,6 +249,7 @@ var
   hints : addrinfo;
   Res, Ptr : Paddrinfo;
   Addr : PAnsiChar;
+  IpNum : NativeInt;
 begin
   AnsiStrings.StrPLCopy(HostName, name, 100);
   FillChar(hints, SizeOf(hints), 0);
@@ -213,7 +264,8 @@ begin
         if Ptr.ai_family = AF_INET then begin
           Addr := inet_ntoa(TSockAddrIn(Ptr.ai_addr^).sin_addr);
           // Save IP both as string and as number
-          List.AddObject(string(addr), TObject(TSockAddrIn(Ptr.ai_addr^).sin_addr));
+          IpNum := TSockAddrIn(Ptr.ai_addr^).sin_addr.S_addr;
+          List.AddObject(string(addr), TObject(IpNum));
         end;
         Ptr := Ptr.ai_next;
       end;

@@ -786,10 +786,12 @@ void menu()
 		std::string xferInfo = ii->topic.getChannelId().c_str();
 		if (xferInfo == "") {
 			xferInfo = ii->topic.getTransport().c_str();
-			xferInfo += "::";
-			xferInfo += ii->topic.getDomainAddress().c_str();
-			xferInfo += "::";
-			xferInfo += ops::NumberToString<int>(ii->topic.getPort()).c_str();
+			if (xferInfo != "inprocess") {
+				xferInfo += "::";
+				xferInfo += ii->topic.getDomainAddress().c_str();
+				xferInfo += "::";
+				xferInfo += ops::NumberToString<int>(ii->topic.getPort()).c_str();
+			}
 		}
 
 		std::cout << "\t " << std::setw(2) << i <<

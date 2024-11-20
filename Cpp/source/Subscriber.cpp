@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2021 Lennart Andersson.
+ * Copyright (C) 2018-2024 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -34,7 +34,7 @@
 namespace ops
 {
 
-    SubscriberBase::SubscriberBase(Topic const t) :
+    SubscriberBase::SubscriberBase(const Topic& t) :
         topic(t)
     {
         participant = Participant::getInstance(topic.getDomainID(), topic.getParticipantID());
@@ -165,7 +165,7 @@ namespace ops
 
     /// =======================================================================================
 
-    Subscriber::Subscriber(Topic const t) :
+    Subscriber::Subscriber(const Topic& t) :
         SubscriberBase(t)
 	{
         timeLastData = ops_clock::now();
@@ -199,11 +199,8 @@ namespace ops
             _ackFilter->send(opsidls::SendAckPatternData::MType::UNREGISTER);
             _ackFilter.reset();
         }
-        
-        while (messageBuffer.size() > 0) {
-			messageBuffer.back()->unreserve();
-			messageBuffer.pop_back();
-		}
+
+        clearHistory();
 	}
 
     // One way for us to know which publishers to expect
@@ -278,7 +275,7 @@ namespace ops
     // Note that the receiveDataHandler messageLock is held while executing this method
     void Subscriber::onNewEvent(Notifier<OPSMessage*>* , OPSMessage* const message)
     {
-        //Perform a number of checks on incomming data to be sure we want to deliver it to the application layer
+        //Perform a number of checks on incoming data to be sure we want to deliver it to the application layer
         //Check that this message is delivered on the same topic as this Subscriber use
         if (message->getTopicName() != topic.getName())
         {
@@ -354,14 +351,18 @@ namespace ops
     {
         mess->reserve();
         messageBuffer.push_front(mess);
-        while (messageBuffer.size() > messageBufferMaxSize)
-        {
+        clearHistory(messageBufferMaxSize);
+    }
+
+    void Subscriber::clearHistory(size_t keep)
+    {
+        while (messageBuffer.size() > keep) {
             messageBuffer.back()->unreserve();
             messageBuffer.pop_back();
         }
     }
 
-    void Subscriber::setHistoryMaxSize(int const s) noexcept
+    void Subscriber::setHistoryMaxSize(size_t s) noexcept
     {
         messageBufferMaxSize = s;
     }

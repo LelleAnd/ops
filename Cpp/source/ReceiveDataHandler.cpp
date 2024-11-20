@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2021 Lennart Andersson.
+ * Copyright (C) 2018-2024 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -32,7 +32,7 @@
 
 namespace ops
 {
-    ReceiveDataHandler::ReceiveDataHandler(Participant& part, ReceiveDataChannel* const rdc_) :
+    ReceiveDataHandler::ReceiveDataHandler(Participant& part, ReceiveDataChannelBase* const rdc_) :
 		participant(part)
     {
 		if (rdc_ != nullptr) {
@@ -77,7 +77,7 @@ namespace ops
 	}
 
 	///Called whenever the receiver has new data.
-	void ReceiveDataHandler::onMessage(ReceiveDataChannel&, OPSMessage* const mess)
+	void ReceiveDataHandler::onMessage(ReceiveDataChannelBase&, OPSMessage* const mess)
 	{
 		const SafeLock lock(messageLock);
 

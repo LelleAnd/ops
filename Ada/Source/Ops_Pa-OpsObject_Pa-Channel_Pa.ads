@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2020 Lennart Andersson.
+-- Copyright (C) 2016-2024 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -48,9 +48,10 @@ package Ops_Pa.OpsObject_Pa.Channel_Pa is
   type Channel_Class_At_Arr is array(Integer range <>) of Channel_Class_At;
   type Channel_Class_At_Arr_At is access all Channel_Class_At_Arr;
 
-  LINKTYPE_MC  : constant String := "multicast";
-  LINKTYPE_TCP : constant String := "tcp";
-  LINKTYPE_UDP : constant String := "udp";
+  LINKTYPE_INPROC : constant String := "inprocess";
+  LINKTYPE_MC     : constant String := "multicast";
+  LINKTYPE_TCP    : constant String := "tcp";
+  LINKTYPE_UDP    : constant String := "udp";
 
   -- Constructors
   function Create return Channel_Class_At;

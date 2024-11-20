@@ -41,6 +41,7 @@
 #include "NetworkSupport.h"
 #include "ThreadSupport.h"
 #include "TimeHelper.h"
+#include "InProcDistributor.h"
 
 namespace ops
 {
@@ -185,6 +186,7 @@ namespace ops
 		errorService = std::unique_ptr<ErrorService>(new ErrorService());
 		receiveDataHandlerFactory = std::unique_ptr<ReceiveDataHandlerFactory>(new ReceiveDataHandlerFactory());
 		sendDataHandlerFactory = std::unique_ptr<SendDataHandlerFactory>(new SendDataHandlerFactory());
+		inProcDistributor = std::make_shared<InProcDistributor>();
 		//--------------------------------------------
 
 		//------------Create timer for periodic events-

@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2020 Lennart Andersson.
+ * Copyright (C) 2018-2024 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -25,7 +25,7 @@
 
 namespace ops
 {
-    UDPReceiveDataHandler::UDPReceiveDataHandler(Topic top, Participant& part, bool const commonReceiver) :
+    UDPReceiveDataHandler::UDPReceiveDataHandler(const Topic& top, Participant& part, bool const commonReceiver) :
 		ReceiveDataHandler(part,
 			new ReceiveDataChannel(top, part))
     {

@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2021 Lennart Andersson.
+* Copyright (C) 2018-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -44,8 +44,14 @@ namespace ops
         public std::enable_shared_from_this<ReceiveDataHandler>
 	{
 		friend class ReceiveDataHandlerFactory;
+		using Notifier<OPSMessage*>::addListener;
+		using Notifier<OPSMessage*>::removeListener;
+
 	public:
-		ReceiveDataHandler(Participant& part, ReceiveDataChannel* rdc_ = nullptr);
+		using Notifier<ConnectStatus>::addListener;
+		using Notifier<ConnectStatus>::removeListener;
+
+		ReceiveDataHandler(Participant& part, ReceiveDataChannelBase* rdc_ = nullptr);
 		virtual ~ReceiveDataHandler();
 
 		bool aquireMessageLock();
@@ -91,19 +97,19 @@ namespace ops
 
 		//The receiver channel(s) used for this transport channel. 
 		//Currently only TCP transport may have more than one rdc
-		std::vector<ReceiveDataChannel*> rdc;
+		std::vector<ReceiveDataChannelBase*> rdc;
 
 		//The Participant to which this ReceiveDataHandler belongs.
 		Participant& participant;
 
 		// Tell derived classes which topics that are active
-		virtual void topicUsage(Topic& top, bool used) 
+		virtual void topicUsage(const Topic& top, bool used) 
 		{
 			UNUSED(top); UNUSED(used);
 		}
 
-		virtual void onMessage(ReceiveDataChannel& rdc_, OPSMessage* mess) override;
-		virtual void onStatusChange(ReceiveDataChannel& rdc_, ConnectStatus& status) override
+		virtual void onMessage(ReceiveDataChannelBase& rdc_, OPSMessage* mess) override;
+		virtual void onStatusChange(ReceiveDataChannelBase& rdc_, ConnectStatus& status) override
 		{
 			UNUSED(rdc_);
 			Notifier<ConnectStatus>::notifyNewEvent(status);

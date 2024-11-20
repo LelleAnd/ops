@@ -73,7 +73,7 @@ Optional elements of _Topic_:
   * **sampleMaxSize**, defines the maximum size of the data type when used in this topic. The value is used for reserving memory to be able to buffer data during reception. The value is also used for a buffer in each publisher for a serialized version of the data type during sending. If this tag is omitted a value of 60000-14 bytes is used. If a value < 60000-14 is specified, 60000 is still used for reception. If a value > 60000-14 is specified, this topic MUST use its own port, see also [Sending Large Messages](LargeMessages.md).
   * **inSocketBufferSize**, changes the underlying sockets buffer size if possible. If this tag is omitted, the _Domain_ value is used.
   * **outSocketBufferSize**, changes the underlying sockets buffer size if possible. If this tag is omitted, the _Domain_ value is used.
-  * **transport**, configures which transport mechanism to be used for this topic. Supported values are *multicast*, *udp* and *tcp*. If tag is omitted, *multicast* is used.
+  * **transport**, configures which transport mechanism to be used for this topic. Supported values are *inprocess*, *multicast*, *udp* and *tcp*. If tag is omitted, *multicast* is used.
   * **address**, usage depends on the used transport mechanism, see description of *Transport Mechanisms* below. Please note that if specified for an UDP transport, it must be on the same subnet as the specified localInterface for the _Domain_.
   * **useAck**, false/true, default false. If set to true the Topic will use a Send-Acknowledge communication pattern. See _Domain_ and _Channel_ for resend parameter settings.
 
@@ -84,7 +84,7 @@ A _Channel_ element defines the transport mechanism, a _Transport_ element defin
 
 Elements of _Channel_ contains:
   * **name**, name of the channel as a string, must be unique within the domain.
-  * **linktype**, configures which transport mechanism to be used for this channel. Supported values are *multicast*, *udp* and *tcp*. If tag is omitted, *multicast* is used.
+  * **linktype**, configures which transport mechanism to be used for this channel. Supported values are *inprocess*, *multicast*, *udp* and *tcp*. If tag is omitted, *multicast* is used.
   * **address**, usage depends on the used transport mechanism, see description of *Transport Mechanisms* below. Please note that if specified for an UDP transport, it must be on the same subnet as the specified localInterface for the _Channel_.
   * **port**, usage depends on the used transport mechanism, see description of *Transport Mechanisms* below.
   * **localInterface**, see _Domain_ above for a description.
@@ -113,6 +113,8 @@ Note that if a topic specify _sampleMaxSize_ > 60000-14, it MUST have its own _C
   * *tcp*: Without specified **address** and **port** tags, OPS uses the metadata sent by participants to connect publishers and subscribers using dynamic ports. This requires metadata to be enabled to work and it is a _many-to-many_ transport mechanism.
   With specified **address** and **port** tags, the metadata is not used and address and port specify the publishers tcp server address and port to which subscribers connect. In this case it is a _one-to-many_ transport mechanism.
   For an example see [tcp example](TcpTransport.md). A specified **address** can be a node name or a numeric IP address.
+
+  * *inprocess*: Is a _many-to-many_ transport mechanism limited to within the current process. One use case is in test code (unit/behaviour tests) to drive input to subscribers resp. catch output from publishers. This transport is currently only available for C++.
 
 ## Tools ##
 There is a tool, _VerifyOPSConfig_, that can be used to check the configuration files when they have been edited. For description see [VerifyOPSConfig](VerifyOPSConfig.md).

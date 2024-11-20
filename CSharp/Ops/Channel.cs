@@ -33,6 +33,7 @@ namespace Ops
         public long outSocketBufferSize = -1;
         public long inSocketBufferSize = -1;
 
+        public static readonly string LINKTYPE_INPROC = "inprocess";
         public static readonly string LINKTYPE_MC = "multicast";
         public static readonly string LINKTYPE_TCP = "tcp";
         public static readonly string LINKTYPE_UDP = "udp";
@@ -86,6 +87,9 @@ namespace Ops
                 {
                     domainAddress = InetAddress.GetByName(domainAddress);
                 }
+            }
+            else if (linktype == LINKTYPE_INPROC)
+            {
             }
             else
             {

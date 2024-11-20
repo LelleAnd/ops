@@ -37,6 +37,7 @@ public class Topic<T> extends OPSObject
     public static final String TRANSPORT_MC = "multicast";
     public static final String TRANSPORT_TCP = "tcp";
     public static final String TRANSPORT_UDP = "udp";
+    public static final String TRANSPORT_INPROC = "inprocess";
 
     private String name = "";
     private int port = -1;

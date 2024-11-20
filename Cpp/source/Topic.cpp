@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2019-2021 Lennart Andersson.
+ * Copyright (C) 2019-2024 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -276,7 +276,7 @@ namespace ops
 		{
 			transport = TRANSPORT_MC;
 		}
-		else if (transport != TRANSPORT_MC && transport != TRANSPORT_TCP && transport != TRANSPORT_UDP)
+		else if (transport != TRANSPORT_MC && transport != TRANSPORT_TCP && transport != TRANSPORT_UDP && transport != TRANSPORT_INPROC)
 		{
 			ExceptionMessage_T msg("Illegal transport: '");
 			msg += transport;
@@ -294,5 +294,6 @@ namespace ops
 	Transport_T Topic::TRANSPORT_MC = "multicast";
 	Transport_T Topic::TRANSPORT_TCP = "tcp";
 	Transport_T Topic::TRANSPORT_UDP = "udp";
+	Transport_T Topic::TRANSPORT_INPROC = "inprocess";
 
 }

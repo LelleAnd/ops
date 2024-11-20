@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2021 Lennart Andersson.
+ * Copyright (C) 2018-2024 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -63,15 +63,14 @@ namespace ops
 		};
 
 	public:
-        TCPSendDataHandler(IOService* ioService, Topic& topic) :
+        TCPSendDataHandler(IOService* ioService, const Topic& topic) :
 			_ioService(ioService), _heartbeatPeriod(topic.getHeartbeatPeriod()), _heartbeatTimeout(topic.getHeartbeatTimeout())
         {
 			sender = Sender::createTCPServer(this, ioService, topic.getDomainAddress(), topic.getPort(), topic.getOutSocketBufferSize());
         }
 
-        bool sendData(char* buf, int bufSize, Topic& topic) override
+        bool sendData(char* buf, int bufSize, const Topic&) override
         {
-            UNUSED(topic);
             SafeLock lock(mutex);
             //We dont "sendTo" but rather lets the server (sender) send to all connected clients.
             const bool result = sender->sendTo(buf, bufSize, "", 0);
@@ -90,7 +89,7 @@ namespace ops
 		}
 
 		// Tell derived classes which topics that are active
-		void topicUsage(Topic& top, bool used) override
+		void topicUsage(const Topic& top, bool used) override
 		{
 			bool needSend = false;
 			// Keep a list of all used topics, with count

@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2021 Lennart Andersson.
+ * Copyright (C) 2018-2024 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -65,7 +65,7 @@ namespace ops
         // Other methods should not be used from the callback.
         //
 
-        SubscriberBase(Topic t);
+        SubscriberBase(const Topic& t);
         virtual ~SubscriberBase();
 
         ///Starts subscription (starts listening to data)
@@ -110,6 +110,9 @@ namespace ops
 
         void setupDeadlineTimer();
 
+        using Listener<OPSMessage*>::onNewEvent;
+        using Listener<int>::onNewEvent;
+
         // Called from ReceiveDataHandler (TCPClient)
         virtual void onNewEvent(Notifier<ConnectStatus>*, ConnectStatus arg) override
         {
@@ -135,7 +138,7 @@ namespace ops
         // Other methods should not be used from the callback.
         //
 
-        Subscriber(Topic t);
+        Subscriber(const Topic& t);
         virtual ~Subscriber();
 
         ObjectName_T getName() const noexcept;                                       // (CB)
@@ -196,7 +199,7 @@ namespace ops
         ///Returns a reference to the latest received data object.
         ///Clears the "new data" flag.
         ///NOTE: MessageLock should be held while working with the data object, to prevent a
-        ///new incomming message to delete the current one while in use. 
+        ///new incoming message to delete the current one while in use. 
         virtual OPSObject* getDataReference() noexcept                               // (CB)
         {
             hasUnreadData = false;
@@ -206,11 +209,24 @@ namespace ops
         ///Returns a reference to the latest received OPSMessage (including the latest data object).
         ///Clears the "new data" flag.
         ///NOTE: MessageLock should be held while working with the message, to prevent a
-        ///new incomming message to delete the current one while in use.
+        ///new incoming message to delete the current one while in use.
         OPSMessage* getMessage() noexcept;                                           // (CB)
 
-        void setHistoryMaxSize(int s) noexcept;
+        void setHistoryMaxSize(size_t s) noexcept;
+
+        ///Returns the latest received messages (upto the set maximum number).
+        ///Messages MUST NOT be deleted, they are still in the Subscriber history.
+        ///Use clearHistory() method below to delete messages
+        ///NOTE: MessageLock should be held while working with the history, to prevent 
+        ///new incoming messages to delete the ones in the history buffer while in use.
         std::deque<OPSMessage*> getHistory();
+
+        ///Delete all or part of the history
+        ///NOTE: MessageLock should be held while clearing the history, to prevent 
+        ///new incoming messages to be deleted.
+        void clearHistory(size_t keep = 0);
+
+        using Listener<ConnectStatus>::onNewEvent;
 
         //Message listener callback
         void onNewEvent(Notifier<OPSMessage*>* sender, OPSMessage* message) override;
@@ -257,7 +273,7 @@ namespace ops
         std::list<FilterQoSPolicy*> filterQoSPolicies;
 
         std::deque<OPSMessage*> messageBuffer;
-        unsigned int messageBufferMaxSize{ 1 };
+        size_t messageBufferMaxSize{ 1 };
         void addToBuffer(OPSMessage* mess);
 
         Lockable filterQoSPolicyMutex;

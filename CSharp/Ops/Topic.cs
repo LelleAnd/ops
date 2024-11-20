@@ -44,10 +44,11 @@ namespace Ops
         private int timeToLive = -1;
         private bool optNonVirt = false;
         private string transport;
-		public static readonly string TRANSPORT_MC = "multicast";
+        public static readonly string TRANSPORT_INPROC = "inprocess";
+        public static readonly string TRANSPORT_MC = "multicast";
 		public static readonly string TRANSPORT_TCP = "tcp";
 		public static readonly string TRANSPORT_UDP = "udp";
-		private string typeID = "";
+        private string typeID = "";
 
 
         // Creates a new instance of Topic

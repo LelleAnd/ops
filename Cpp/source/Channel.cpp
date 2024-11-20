@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016-2021 Lennart Andersson.
+* Copyright (C) 2016-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -79,7 +79,7 @@ namespace ops
         {
             linktype = LINKTYPE_MC;
         }
-        else if (linktype != LINKTYPE_MC && linktype != LINKTYPE_TCP && linktype != LINKTYPE_UDP)
+        else if (linktype != LINKTYPE_MC && linktype != LINKTYPE_TCP && linktype != LINKTYPE_UDP && linktype != LINKTYPE_INPROC)
         {
 			ExceptionMessage_T msg("Illegal linktype: '");
 			msg += linktype;
@@ -124,4 +124,5 @@ namespace ops
 	Transport_T Channel::LINKTYPE_MC = "multicast";
 	Transport_T Channel::LINKTYPE_TCP = "tcp";
 	Transport_T Channel::LINKTYPE_UDP = "udp";
+    Transport_T Channel::LINKTYPE_INPROC = "inprocess";
 }

@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2020-2021 Lennart Andersson.
+* Copyright (C) 2020-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -28,6 +28,7 @@
 #include "McSendDataHandler.h"
 #include "McUdpSendDataHandler.h"
 #include "TCPSendDataHandler.h"
+#include "InProcSendDataHandler.h"
 #include "Domain.h"
 #include "NetworkSupport.h"
 
@@ -60,9 +61,10 @@ namespace ops
 	{
 		// We need to store SendDataHandlers with more than just the name as key.
 		// Since topics can use the same port, we need to return the same SendDataHandler.
-		// Make a key with the transport info that uniquely defines the receiver.
+		// Make a key with the transport info that uniquely defines the sender.
 		InternalKey_T key = top.getTransport();
-		key += "::";
+        if (top.getTransport() == Topic::TRANSPORT_INPROC) { return key; }
+        key += "::";
         if (top.getTransport() == Topic::TRANSPORT_UDP) {
             key += localIf;
             key += "::";
@@ -99,7 +101,7 @@ namespace ops
         }
     }
 
-    std::shared_ptr<SendDataHandler> SendDataHandlerFactory::getSendDataHandler(Topic& top, Participant& participant)
+    std::shared_ptr<SendDataHandler> SendDataHandlerFactory::getSendDataHandler(const Topic& top, Participant& participant)
 	{
         Address_T localIf = doSubnetTranslation(top.getLocalInterface(), participant.getIOService());
         const InternalKey_T key = getKey(top, localIf);
@@ -132,8 +134,12 @@ namespace ops
 		else if (top.getTransport() == Topic::TRANSPORT_TCP)
 		{
 			sdh = std::make_shared<TCPSendDataHandler>(participant.getIOService(), top);
-		}
-        else 
+        }
+        else if (top.getTransport() == Topic::TRANSPORT_INPROC)
+        {
+            sdh = std::make_shared<InProcSendDataHandler>(participant.inProcDistributor);
+        }
+        else
         {
             // See if an installed factory exist
             if (backupfact != nullptr) {

@@ -100,6 +100,9 @@ set(LIB_OPS_CORE_SRCS
   ${OPS_SRC_PATH}/DefaultOPSConfigImpl.h
   ${OPS_SRC_PATH}/Domain.cpp
   ${OPS_SRC_PATH}/ErrorService.cpp
+  ${OPS_SRC_PATH}/InProcDistributor.h
+  ${OPS_SRC_PATH}/InProcReceiveDataHandler.h
+  ${OPS_SRC_PATH}/InProcSendDataHandler.h
   ${OPS_SRC_PATH}/KeyFilterQoSPolicy.cpp
   ${OPS_SRC_PATH}/Lockable.cpp
   ${OPS_SRC_PATH}/MCReceiveDataHandler.h

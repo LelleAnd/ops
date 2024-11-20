@@ -31,6 +31,7 @@ type
   public
     const
       Topic_idlVersion : Byte = 0;
+      TRANSPORT_INPROC = 'inprocess';
       TRANSPORT_MC = 'multicast';
       TRANSPORT_TCP = 'tcp';
       TRANSPORT_UDP = 'udp';
@@ -168,6 +169,8 @@ begin
     if Length(FDomainAddress) > 0 then begin
       FDomainAddress := GetHostAddress(FDomainAddress);
     end;
+
+  end else if (FTransport = TRANSPORT_INPROC) then begin
 
   end else begin
     raise EConfigException('Illegal transport: "' + FTransport +

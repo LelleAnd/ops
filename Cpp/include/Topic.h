@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2021 Lennart Andersson.
+* Copyright (C) 2019-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -113,6 +113,7 @@ namespace ops
 		static Transport_T TRANSPORT_MC;
 		static Transport_T TRANSPORT_TCP;
 		static Transport_T TRANSPORT_UDP;
+		static Transport_T TRANSPORT_INPROC;
 
 	private:
         ObjectName_T name;					// Serialized

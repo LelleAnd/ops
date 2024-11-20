@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2021 Lennart Andersson.
+-- Copyright (C) 2016-2024 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -35,9 +35,10 @@ package Ops_Pa.OpsObject_Pa.Topic_Pa is
   type Topic_Class_At_Arr is array(Integer range <>) of Topic_Class_At;
   type Topic_Class_At_Arr_At is access all Topic_Class_At_Arr;
 
-  TRANSPORT_MC  : constant String := "multicast";
-  TRANSPORT_TCP : constant String := "tcp";
-  TRANSPORT_UDP : constant String := "udp";
+  TRANSPORT_INPROC : constant String := "inprocess";
+  TRANSPORT_MC     : constant String := "multicast";
+  TRANSPORT_TCP    : constant String := "tcp";
+  TRANSPORT_UDP    : constant String := "udp";
 
   -- Constructors
   function Create(namee : String; portt : Int32; typeIDd : String; domainAddresss : String) return Topic_Class_At;

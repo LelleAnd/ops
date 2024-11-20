@@ -249,6 +249,9 @@ package body Ops_Pa.OpsObject_Pa.Topic_Pa is
         Replace(Self.DomainAddress, Ops_Pa.Socket_Pa.GetHostAddress(Self.DomainAddress.all));
       end if;
 
+    elsif (Self.Transport.all = TRANSPORT_INPROC) then
+      null;
+
     else
       StaticErrorService.
         Report( "Domain", "CheckTransport",

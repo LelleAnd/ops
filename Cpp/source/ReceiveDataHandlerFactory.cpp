@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2021 Lennart Andersson.
+* Copyright (C) 2018-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -26,6 +26,7 @@
 #include "MCReceiveDataHandler.h"
 #include "UDPReceiveDataHandler.h"
 #include "TCPReceiveDataHandler.h"
+#include "InProcReceiveDataHandler.h"
 #include "Participant.h"
 #include "BasicError.h"
 #include "NetworkSupport.h"
@@ -52,6 +53,7 @@ namespace ops
 		// we need to return the same ReceiveDataHandler in these cases.
 		// Make a key with the transport info that uniquely defines the receiver.
 		InternalKey_T key(top.getTransport());
+        if (top.getTransport() == Topic::TRANSPORT_INPROC) { return key; }
 		if (top.getTransport() == Topic::TRANSPORT_UDP) {
 			if (!isMyNodeAddress(top.getDomainAddress(), ioServ)) {
 				return key;
@@ -69,7 +71,7 @@ namespace ops
 		return key;
 	}
 
-    std::shared_ptr<ReceiveDataHandler> ReceiveDataHandlerFactory::getReceiveDataHandler(Topic& top, Participant& participant)
+    std::shared_ptr<ReceiveDataHandler> ReceiveDataHandlerFactory::getReceiveDataHandler(const Topic& top, Participant& participant)
     {
 		// Make a key with the transport info that uniquely defines the receiver.
 		const InternalKey_T key = makeKey(top, participant.getIOService());
@@ -127,6 +129,11 @@ namespace ops
 			receiveDataHandlerInstances[key] = rdh;
             return rdh;
 
+        } else if (top.getTransport() == Topic::TRANSPORT_INPROC) {
+            std::shared_ptr<ReceiveDataHandler> rdh = std::make_shared<InProcReceiveDataHandler>(top, participant, participant.inProcDistributor);
+            receiveDataHandlerInstances[key] = rdh;
+            return rdh;
+
         } else {
             // See if an installed factory exist
             if (backupfact != nullptr) {
@@ -145,7 +152,7 @@ namespace ops
         }
     }
 
-    void ReceiveDataHandlerFactory::releaseReceiveDataHandler(Topic& top, Participant& participant)
+    void ReceiveDataHandlerFactory::releaseReceiveDataHandler(const Topic& top, Participant& participant)
     {
 		// Make a key with the transport info that uniquely defines the receiver.
 		const InternalKey_T key = makeKey(top, participant.getIOService());

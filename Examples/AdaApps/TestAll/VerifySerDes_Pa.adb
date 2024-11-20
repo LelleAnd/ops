@@ -1221,6 +1221,7 @@ package body VerifySerDes_Pa is
               end;
               checkObjects(cd3, cd1);
               Log("Data check done");
+
             end if;
             if Ops_Pa.GetTimeInMs >= pubTime then
               pubTime := Ops_Pa.GetTimeInMs + 5000;
@@ -1267,8 +1268,8 @@ package body VerifySerDes_Pa is
       Log("  VERFIFY == OK ");
     end if;
     Log("");
-    Log("Sleeping for 5 seconds...");
-    delay 5.0;
+    Log("Sleeping for 10 seconds...");
+    delay 10.0;
     GNAT.Ctrl_C.Uninstall_Handler;
   exception
     when others =>

@@ -12,11 +12,12 @@
 
 #include "Configuration.h"
 
-const std::string sVersion = "Version 2024-04-20";
+const std::string sVersion = "Version 2024-11-19";
 
 
 bool gErrorGiven = false;
 bool gWarningGiven = false;
+bool gDoNameCheck = true;
 
 #define LOG_ERROR(message) { std::cout << message; gErrorGiven = true; } 
 #define LOG_WARN(message) { std::cout << message; gWarningGiven = true; } 
@@ -156,16 +157,16 @@ public:
 
 				LOG_INFO("Used MC, Node addresses and Local Interfaces:\n");
 				std::unique_ptr<ops::IOService> ioServ(ops::IOService::create());
-				for (const auto x : vMCAddresses) {
+				for (const auto& x : vMCAddresses) {
 					std::cout << "  MC: " << x << "\n";
 				}
-				for (const auto x : vNodeAddresses) {
+				for (const auto& x : vNodeAddresses) {
                     std::string addr{ops::GetAddrFromName(x, ioServ.get()).c_str()};
                     std::cout << "  Node: " << x;
                     if (x != addr) { std::cout << " --> " << addr; }
                     std::cout << "\n";
                 }
-                for (const auto x : vLocalInterfaces) {
+                for (const auto& x : vLocalInterfaces) {
                     std::string addr{ops::GetAddrFromName(x, ioServ.get()).c_str()};
                     std::cout << "  Local IF: " << x;
                     if (x != addr) { std::cout << " --> " << addr; }
@@ -265,12 +266,15 @@ public:
 		else if ((linkType == "udp") || (linkType == "tcp")) {
 			// subscriber address or tcp server address
 	        CheckDuplicate(address, vNodeAddresses);
-			try {
-				if (!ops::isValidNodeAddress(address)) {
-					LOG_ERROR(">>> Invalid Node address '" << address << "' detected " << msg << std::endl);
+			if (gDoNameCheck) {
+				try {
+					if (!ops::isValidNodeAddress(address)) {
+						LOG_ERROR(">>> Invalid Node address '" << address << "' detected " << msg << std::endl);
+					}
 				}
-			} catch (...) {
-				LOG_WARN(">>> Non-numeric Node address '" << address << "' detected " << msg << std::endl);
+				catch (...) {
+					LOG_WARN(">>> Non-numeric Node address '" << address << "' detected " << msg << std::endl);
+				}
 			}
 		}
 	}
@@ -282,16 +286,18 @@ public:
         try {
             ops::Address_T const subnetIf = ops::doSubnetTranslation(localIf, ioServ.get());
             LOG_INFO(msg + ": localInterface " << localIf << " --> " << subnetIf << std::endl);
-            try {
-                if (!ops::isValidNodeAddress(subnetIf)) {
-                    LOG_ERROR(">>> Invalid Node address '" << subnetIf << "' extracted from localInterface '" << localIf << "'"
-                                                           << std::endl);
-                }
-            }
-            catch (...) {
-                LOG_WARN(">>> Non-numeric Node address '" << subnetIf << "' extracted from localInterface '" << localIf << "'"
-                                                          << std::endl);
-            }
+			if (gDoNameCheck) {
+				try {
+					if (!ops::isValidNodeAddress(subnetIf)) {
+						LOG_ERROR(">>> Invalid Node address '" << subnetIf << "' extracted from localInterface '" << localIf << "'"
+							<< std::endl);
+					}
+				}
+				catch (...) {
+					LOG_WARN(">>> Non-numeric Node address '" << subnetIf << "' extracted from localInterface '" << localIf << "'"
+						<< std::endl);
+				}
+			}
         }
         catch (...)
 		{
@@ -553,7 +559,7 @@ public:
 
 		// address & port
 		if (port == "") {
-			if ((linkType != "udp") && (linkType != "tcp")) {
+			if ((linkType != "udp") && (linkType != "tcp") && (linkType != "inprocess")) {
 				LOG_WARN(">>> Missing <port> for channel '" << channelName << "' in domain '" << domainName << "'" << std::endl);
 			}
 		} else {
@@ -753,7 +759,7 @@ public:
 
 			// address & port
 			if (port == "") {
-				if ((linkType != "udp") && (linkType != "tcp")) {
+				if ((linkType != "udp") && (linkType != "tcp") && (linkType != "inprocess")) {
 					LOG_WARN(">>> Missing <port> for topic '" << topicName << "' in domain '" << domainName << "'" << std::endl);
 				}
 			} else {
@@ -835,10 +841,15 @@ void Usage()
 {
 	std::cout << std::endl;
 	std::cout << "  Usage:" << std::endl;
-	std::cout << "    VerifyOPSConfig [-?] [-debug] filename " << std::endl;
+	std::cout << "    VerifyOPSConfig [-?] [-debug] [-noNameCheck] <filename> " << std::endl;
+	std::cout << "    VerifyOPSConfig [-?] [-debug] -host " << std::endl;
+	std::cout << "    VerifyOPSConfig [-?] [-debug] -list [<name>] " << std::endl;
+	std::cout << "    VerifyOPSConfig [-?] [-debug] -resolve <name> " << std::endl;
 	std::cout << std::endl;
 	std::cout << "    -?                Help" << std::endl;
 	std::cout << "    -debug            Print some debug info during work" << std::endl;
+	std::cout << "    -noNameCheck      Skip hostname translation check" << std::endl;
+	std::cout << std::endl;
 	std::cout << "    -host             Show host name" << std::endl;
 	std::cout << "    -list [<name>]    List known interfaces for host or given name" << std::endl;
 	std::cout << "    -resolve <name>   Try to find IP address" << std::endl;
@@ -884,6 +895,9 @@ int main(const int argc, const char* argv[])
 			if (i < argc) {
 				resName = argv[i];
 			}
+
+		} else if (arg == "-noNameCheck") {
+			gDoNameCheck = false;
 
 		} else {
 			infile = arg;

@@ -31,6 +31,7 @@ type
   public
     const
       Channel_idlVersion : Byte = 0;
+      LINKTYPE_INPROC = 'inprocess';
       LINKTYPE_MC = 'multicast';
       LINKTYPE_TCP = 'tcp';
       LINKTYPE_UDP = 'udp';
@@ -106,6 +107,8 @@ begin
     if Length(domainAddress) > 0 then begin
       domainAddress := GetHostAddress(domainAddress);
     end;
+
+  end else if (linktype = LINKTYPE_INPROC) then begin
 
   end else begin
     raise EConfigException.Create(

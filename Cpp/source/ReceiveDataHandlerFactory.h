@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2020 Lennart Andersson.
+* Copyright (C) 2018-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -51,9 +51,9 @@ namespace ops
 
     public:
         explicit ReceiveDataHandlerFactory();
-        std::shared_ptr<ReceiveDataHandler> getReceiveDataHandler(Topic& top, Participant& participant);
+        std::shared_ptr<ReceiveDataHandler> getReceiveDataHandler(const Topic& top, Participant& participant);
         void cleanUpReceiveDataHandlers();
-        void releaseReceiveDataHandler(Topic& top, Participant& participant);
+        void releaseReceiveDataHandler(const Topic& top, Participant& participant);
 		bool cleanUpDone();
         bool dataAvailable();
         ~ReceiveDataHandlerFactory();

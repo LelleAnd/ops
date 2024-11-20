@@ -10,7 +10,7 @@ namespace pizza {
 
 class PizzaDataPublisher : public ops::Publisher
 {
-
+    using ops::Publisher::write;    // Hide base
 public:
     PizzaDataPublisher(ops::Topic t)
         : ops::Publisher(t)

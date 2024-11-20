@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2020 Lennart Andersson.
+* Copyright (C) 2020-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -40,7 +40,7 @@ namespace ops
 		// Make sure all SendDataHandlers are released before freeing the instance 
  	    ~SendDataHandlerFactory();
 
-        std::shared_ptr<SendDataHandler> getSendDataHandler(Topic& top, Participant& participant);
+        std::shared_ptr<SendDataHandler> getSendDataHandler(const Topic& top, Participant& participant);
         void releaseSendDataHandler(const Topic& top, Participant& participant);
 
         // If set, will be called for all unknown transports

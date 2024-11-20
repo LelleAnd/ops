@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2020 Lennart Andersson.
+* Copyright (C) 2020-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -160,7 +160,7 @@ struct MocSendDataHandler : public ops::SendDataHandler
         sender = std::unique_ptr<ops::Sender>(new MocSender(*this));
     }
 
-    bool sendData(char* buf, int bufSize, ops::Topic& ) override
+    bool sendData(char* buf, int bufSize, const ops::Topic& ) override
     {
         //std::cout << "MocSendDataHandler::sendData()\n";
         ++send_cnt;

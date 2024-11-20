@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2022 Lennart Andersson.
+ * Copyright (C) 2018-2024 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -87,7 +87,7 @@ namespace ops
 		}
 	}
 
-	void TCPReceiveDataHandler::topicUsage(Topic& top, bool const used)
+	void TCPReceiveDataHandler::topicUsage(const Topic& top, bool const used)
 	{
         if (usingPartInfo) {
             const SafeLock lock(topicsLock);

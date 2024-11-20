@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2021 Lennart Andersson.
+* Copyright (C) 2018-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -69,7 +69,7 @@ namespace ops
 		return key;
 	}
 
-    std::shared_ptr<ReceiveDataHandler> ReceiveDataHandlerFactory::getReceiveDataHandler(Topic& top, Participant& participant)
+    std::shared_ptr<ReceiveDataHandler> ReceiveDataHandlerFactory::getReceiveDataHandler(const Topic& top, Participant& participant)
     {
 		// Make a key with the transport info that uniquely defines the receiver.
 		const InternalKey_T key = makeKey(top, participant.getIOService());
@@ -145,7 +145,7 @@ namespace ops
         }
     }
 
-    void ReceiveDataHandlerFactory::releaseReceiveDataHandler(Topic& top, Participant& participant)
+    void ReceiveDataHandlerFactory::releaseReceiveDataHandler(const Topic& top, Participant& participant)
     {
 		// Make a key with the transport info that uniquely defines the receiver.
 		const InternalKey_T key = makeKey(top, participant.getIOService());

@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2021 Lennart Andersson.
+* Copyright (C) 2018-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -52,7 +52,7 @@ namespace ops
 		public Listener<ConnectStatus>
 	{
 	public:
-		ReceiveDataChannel(Topic top, Participant& part, std::unique_ptr<Receiver> recv = nullptr);
+		ReceiveDataChannel(const Topic& top, Participant& part, std::unique_ptr<Receiver> recv = nullptr);
 		virtual ~ReceiveDataChannel() = default;
 
 		void connect(ReceiveDataChannelCallbacks* client) noexcept {
@@ -64,7 +64,7 @@ namespace ops
 		void start();
 		void stop();
 
-		static int calcSampleMaxSize(Topic& top)
+		static int calcSampleMaxSize(const Topic& top)
 		{
 			return top.getSampleMaxSize() > opsidls::OPSConstants::USABLE_SEGMENT_SIZE ?
 					top.getSampleMaxSize() :
@@ -96,7 +96,7 @@ namespace ops
 			return receiver->getLocalAddress();
 		}
 
-		virtual void topicUsage(Topic& top, bool used)
+		virtual void topicUsage(const Topic& top, bool used)
 		{
 			UNUSED(top); UNUSED(used);
 		}

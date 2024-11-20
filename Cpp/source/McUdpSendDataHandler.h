@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2020-2021 Lennart Andersson.
+ * Copyright (C) 2020-2024 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -43,7 +43,7 @@ namespace ops
             sender = Sender::createUDPSender(ioService, localInterface, 1, outSocketBufferSize);
         }
 
-        bool sendData(char* buf, int bufSize, Topic& topic) override
+        bool sendData(char* buf, int bufSize, const Topic& topic) override
         {
             bool result = true;
             std::stack<InternalKey_T> sinksToDelete;

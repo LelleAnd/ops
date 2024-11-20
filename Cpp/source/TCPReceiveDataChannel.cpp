@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2021 Lennart Andersson.
+ * Copyright (C) 2018-2024 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -43,7 +43,7 @@ namespace ops
 	///      Store info in map so that subscribers can ask if any publisher
 	///      @ disconnect, clear publishers
 
-    TCPReceiveDataChannel::TCPReceiveDataChannel(Topic top, Participant& part) :
+    TCPReceiveDataChannel::TCPReceiveDataChannel(const Topic& top, Participant& part) :
 		ReceiveDataChannel(top, part, 
 			Receiver::createTCPClient(
 				this, top.getDomainAddress(), top.getPort(), 
@@ -58,7 +58,7 @@ namespace ops
     }
 
 	// Tell derived classes which topics that are active
-	void TCPReceiveDataChannel::topicUsage(Topic& , bool )
+	void TCPReceiveDataChannel::topicUsage(const Topic& , bool )
 	{
 		///TODO Keep a list of all used topics, with count
 		/// If a new topic is added or an old one deleted, send updates if connected

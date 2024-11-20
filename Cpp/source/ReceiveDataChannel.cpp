@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2021 Lennart Andersson.
+ * Copyright (C) 2018-2024 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -33,7 +33,7 @@ namespace ops
 {
     using namespace opsidls;
 
-	ReceiveDataChannel::ReceiveDataChannel(Topic top, Participant& part, std::unique_ptr<Receiver> recv) :
+	ReceiveDataChannel::ReceiveDataChannel(const Topic& top, Participant& part, std::unique_ptr<Receiver> recv) :
         sampleMaxSize(calcSampleMaxSize(top)),
         memMap(1 + ((sampleMaxSize - 1) / OPSConstants::USABLE_SEGMENT_SIZE), OPSConstants::PACKET_MAX_SIZE, &DataSegmentAllocator::Instance()),
         participant(part),

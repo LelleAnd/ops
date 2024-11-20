@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2021 Lennart Andersson.
+ * Copyright (C) 2021-2024 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -33,12 +33,12 @@ namespace ops
     {
     public:
 
-        McSendDataHandler(IOService* ioService, Topic& topic, Address_T localInterface, int ttl)
+        McSendDataHandler(IOService* ioService, const Topic& topic, Address_T localInterface, int ttl)
         {
             sender = Sender::create(ioService, localInterface, ttl, topic.getOutSocketBufferSize());
         }
 
-        bool sendData(char* buf, int bufSize, Topic& topic) override
+        bool sendData(char* buf, int bufSize, const Topic& topic) override
         {
             return sender->sendTo(buf, bufSize, topic.getDomainAddress(), (uint16_t)topic.getPort());
         }

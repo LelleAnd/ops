@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2021 Lennart Andersson.
+* Copyright (C) 2018-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -32,7 +32,7 @@ namespace ops
 	class TCPReceiveDataChannel : public ReceiveDataChannel, TCPClientCallbacks
 	{
 	public:
-		TCPReceiveDataChannel(Topic top, Participant& part);
+		TCPReceiveDataChannel(const Topic& top, Participant& part);
 		virtual ~TCPReceiveDataChannel();
 
 	protected:
@@ -46,7 +46,7 @@ namespace ops
 		void onDisconnect(TCPConnection& conn, ConnectStatus status) override;
 
 		// Tell derived classes which topics that are active
-		void topicUsage(Topic& top, bool used) override;
+		void topicUsage(const Topic& top, bool used) override;
 
     private:
         int _heartbeatPeriod = 0;

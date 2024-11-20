@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2021 Lennart Andersson.
+* Copyright (C) 2018-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -38,7 +38,7 @@ namespace ops
 	public:
 		virtual ~SendDataHandler() = default;
 
-		virtual bool sendData(char* buf, int bufSize, Topic& topic) = 0;
+		virtual bool sendData(char* buf, int bufSize, const Topic& topic) = 0;
 
 		virtual void addPublisher(void* client, Topic& top)
 		{
@@ -102,7 +102,7 @@ namespace ops
 		}
 
 		// Tell derived classes which topics that are active
-		virtual void topicUsage(Topic& top, bool used)
+		virtual void topicUsage(const Topic& top, bool used)
 		{
 			UNUSED(top); UNUSED(used);
 		}

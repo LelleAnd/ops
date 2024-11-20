@@ -10,6 +10,8 @@ procedure Verify(Log : TLogger);
 implementation
 
 uses SysUtils, Windows,
+     System.Classes,
+     System.Generics.Collections,
      uOps.OPSObject,
      uOps.Participant,
      uOps.MemoryMap,
@@ -524,6 +526,7 @@ end;
 
 procedure Verify(Log : TLogger);
 var
+  pubs : TDictionary<string, Uint32>;
   OpsLogger : TStdOutLogger;
   cd1 : TestAll.ChildData.ChildData;
   cd2 : TestAll.ChildData.ChildData;
@@ -542,8 +545,38 @@ var
   chkcalc : TCalculator_8bit_xor;
   cwd : string;
   idx : Integer;
+  pubName : string;
+  spareSize : NativeInt;
+  msgCount : Uint32;
+
+  procedure LogPubs;
+  var
+    pubnames : TStringList;
+  begin
+    pubnames := TStringList.Create;
+    try
+      Log('');
+      Log('-----------------------------');
+
+      for var Enum in pubs do begin
+        pubnames.Add(Enum.Key);
+      end;
+      pubnames.Sort;
+
+      for var str in pubnames do begin
+	  	  Log( IntToStr(pubs.items[str]) + ' messages from ' + str );
+      end;
+
+      Log('-----------------------------');
+    finally
+      FreeAndNil(pubnames);
+    end;
+  end;
+
 begin
   DetectedError := False;
+
+  pubs := TDictionary<string, Uint32>.Create;
 
   OpsLogger := TStdOutLogger.Create;
   Logger := Log;
@@ -678,14 +711,22 @@ begin
   while True do begin
     if (sub.waitForNewData(100)) then begin
       sub.aquireMessageLock;
-      Log('Received new data from ' + string(sub.getMessage().PublisherName) + '. Checking...');
+      pubName := string(sub.getMessage().PublisherName);
+      spareSize := Length(sub.getMessage.spareBytes);
       sub.releaseMessageLock;
       sub.getData(cd3);
-      sub.aquireMessageLock;
-      AssertEQ(Length(sub.getMessage.spareBytes), 0, 'spareBytes');
-      sub.releaseMessageLock;
+
+      Log('Received new data from ' + pubName + '. Checking...');
+      AssertEQ(spareSize, 0, 'spareBytes');
       checkObjects(cd3, cd1);
       Log('Data check done');
+
+      if pubs.TryGetValue(pubName, msgCount) then begin
+        Inc(msgCount);
+      end else begin
+        msgCount := 1;
+      end;
+      pubs.AddOrSetValue(pubName, msgCount);
     end;
     if PubTime < GetTickCount then begin
       PubTime := GetTickCount + 5000;
@@ -693,6 +734,8 @@ begin
     end;
     if Limit < GetTickCount then Break;
   end;
+
+  Logpubs;
 
   Log('');
   if DetectedError then begin
@@ -702,8 +745,8 @@ begin
   end;
   Log('');
 
-  Log('Sleeping for 5 seconds...');
-  Sleep(5000);
+  Log('Sleeping for 10 seconds...');
+  Sleep(10000);
 
   FreeAndNil(pub);
   FreeAndNil(sub);
@@ -718,6 +761,7 @@ begin
   FreeAndNil(cd1);
 
   FreeAndNil(OpsLogger);
+  FreeAndNil(pubs);
 end;
 
 end.

@@ -469,6 +469,8 @@ TestAll::ChildData f(TestAll::ChildData o)
 
 int main(const int argc, const char* args[])
 {
+	std::map<ops::ObjectName_T, uint32_t> pubs;
+
 #if defined(DEBUG_OPSOBJECT_COUNTER)
 	std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
 #endif
@@ -487,7 +489,7 @@ int main(const int argc, const char* args[])
 		_CrtMemState s1, s2, sd;
 		_CrtMemCheckpoint(&s1);
 
-		ops::OPSObject od0;
+		static ops::OPSObject od0;
 
 		_CrtMemCheckpoint(&s2);
 		_CrtMemDifference(&sd, &s1, &s2);
@@ -497,9 +499,9 @@ int main(const int argc, const char* args[])
 
 		UNUSED(argc);
 		UNUSED(args);
-		TestAll::ChildData cd1;
-		TestAll::ChildData cd2, cd2a;
-		TestAll::ChildData cd3;
+		static TestAll::ChildData cd1;
+		static TestAll::ChildData cd2, cd2a;
+		static TestAll::ChildData cd3;
 
 #if defined(DEBUG_OPSOBJECT_COUNTER)
 		std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
@@ -535,12 +537,12 @@ int main(const int argc, const char* args[])
 
 		{
 			std::cout << "Test move constructor..." << std::endl;
-			TestAll::ChildData obj4 = f(cd1);	// Makes a copy of cd1 which is given to f(), which is moved from
+			static TestAll::ChildData obj4 = f(cd1);	// Makes a copy of cd1 which is given to f(), which is moved from
 			checkObjects(cd1, obj4);
 			std::cout << "Finished " << std::endl;
 
 			std::cout << "Test move assignment..." << std::endl;
-			TestAll::ChildData obj5;
+			static TestAll::ChildData obj5;
 			obj5 = std::move(obj4);
 			checkObjects(cd1, obj5);
 			std::cout << "Finished " << std::endl;
@@ -655,6 +657,7 @@ int main(const int argc, const char* args[])
 		}
 		std::cout << "Dump of configuration Finished " << std::endl;
 
+
 		// Add an errorwriter instance to the participant to catch ev. internal OPS errors
 		// We can easily write our own if we want to log data in another way.
 		ops::ErrorWriter* const errorWriter = new ops::ErrorWriter(std::cout);
@@ -708,14 +711,17 @@ int main(const int argc, const char* args[])
 			while ((!gTerminate) && (Limit >= ops::ops_clock::now())) {
 				if (sub.waitForNewData(std::chrono::milliseconds(100))) {
 					sub.aquireMessageLock();
-					std::cout << "Received new data from " << sub.getMessage()->getPublisherName() << ". Checking..." << std::endl;
+					ops::ObjectName_T pubName = sub.getMessage()->getPublisherName();
+					size_t spareSize = sub.getMessage()->spareBytes.size();
 					sub.releaseMessageLock();
 					sub.getData(cd3);
-					sub.aquireMessageLock();
-					AssertEQ<size_t>(sub.getMessage()->spareBytes.size(), 0, "spareBytes");
-					sub.releaseMessageLock();
+
+					std::cout << "Received new data from " << pubName << ". Checking..." << std::endl;
+					AssertEQ<size_t>(spareSize, 0, "spareBytes");
 					checkObjects(cd3, cd1);
 					std::cout << "Data check done" << std::endl;
+
+					++pubs[pubName];
 				}
 				if (PubTime < ops::ops_clock::now()) {
 					PubTime = ops::ops_clock::now() + std::chrono::milliseconds(5000);
@@ -740,14 +746,20 @@ int main(const int argc, const char* args[])
 	std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
 #endif
 
+	std::cout << std::endl << "-------------------------------" << std::endl;
+	for (const auto& n : pubs) {
+		std::cout << n.second << " messages from '" << n.first << "'\n";
+	}
+	std::cout << "-------------------------------" << std::endl;
+
 	if (gTestFailed) {
 		std::cout << std::endl << "T e s t   F a i l e d" << std::endl;
 	} else {
 		std::cout << std::endl << "T e s t   O k" << std::endl;
 	}
 
-	std::cout << std::endl << "Sleeping for 5 seconds..." << std::endl;
-	std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+	std::cout << std::endl << "Sleeping for 10 seconds..." << std::endl;
+	std::this_thread::sleep_for(std::chrono::milliseconds(10000));
 
 	return 0;
 }

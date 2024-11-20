@@ -26,6 +26,7 @@
 #include "MCReceiveDataHandler.h"
 #include "UDPReceiveDataHandler.h"
 #include "TCPReceiveDataHandler.h"
+#include "InProcReceiveDataHandler.h"
 #include "Participant.h"
 #include "BasicError.h"
 #include "NetworkSupport.h"
@@ -52,6 +53,7 @@ namespace ops
 		// we need to return the same ReceiveDataHandler in these cases.
 		// Make a key with the transport info that uniquely defines the receiver.
 		InternalKey_T key(top.getTransport());
+        if (top.getTransport() == Topic::TRANSPORT_INPROC) { return key; }
 		if (top.getTransport() == Topic::TRANSPORT_UDP) {
 			if (!isMyNodeAddress(top.getDomainAddress(), ioServ)) {
 				return key;
@@ -125,6 +127,11 @@ namespace ops
             bool commonReceiver = (key == Topic::TRANSPORT_UDP);
             std::shared_ptr<ReceiveDataHandler> rdh = std::make_shared<UDPReceiveDataHandler>(top, participant, commonReceiver);
 			receiveDataHandlerInstances[key] = rdh;
+            return rdh;
+
+        } else if (top.getTransport() == Topic::TRANSPORT_INPROC) {
+            std::shared_ptr<ReceiveDataHandler> rdh = std::make_shared<InProcReceiveDataHandler>(top, participant, participant.inProcDistributor);
+            receiveDataHandlerInstances[key] = rdh;
             return rdh;
 
         } else {

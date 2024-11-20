@@ -38,16 +38,56 @@ namespace ops
 	//Forward declaration
 	class Participant;
 	
-	class ReceiveDataChannel;
+	class ReceiveDataChannelBase;
 
 	struct ReceiveDataChannelCallbacks
 	{
-		virtual void onMessage(ReceiveDataChannel& rdc, OPSMessage* mess) = 0;
-		virtual void onStatusChange(ReceiveDataChannel& rdc, ConnectStatus& status) = 0;
+		virtual void onMessage(ReceiveDataChannelBase& rdc, OPSMessage* mess) = 0;
+		virtual void onStatusChange(ReceiveDataChannelBase& rdc, ConnectStatus& status) = 0;
 		virtual ~ReceiveDataChannelCallbacks() = default;
 	};
 
-	class ReceiveDataChannel : 
+	class ReceiveDataChannelBase
+	{
+	public:
+		ReceiveDataChannelBase(const Topic& top) :
+			sampleMaxSize(calcSampleMaxSize(top))
+		{
+		}
+		virtual ~ReceiveDataChannelBase() = default;
+
+		void connect(ReceiveDataChannelCallbacks* client) noexcept {
+			_client = client;
+		}
+		virtual void clear() { }
+
+		virtual void start() { }
+		virtual void stop() { }
+
+		int getSampleMaxSize() const noexcept { return sampleMaxSize; }
+
+		static int calcSampleMaxSize(const Topic& top)
+		{
+			return top.getSampleMaxSize() > opsidls::OPSConstants::USABLE_SEGMENT_SIZE ?
+				top.getSampleMaxSize() :
+				opsidls::OPSConstants::USABLE_SEGMENT_SIZE;
+		}
+
+		virtual bool asyncFinished() { return true; }
+		virtual size_t bytesAvailable() { return 0; }
+
+		virtual uint16_t getLocalPort() { return 0; }
+		virtual Address_T getLocalAddress() { return "0.0.0.0"; }
+
+		// Key used to identify channel when several channels are keept in a container
+		InternalKey_T key;
+
+	protected:
+		ReceiveDataChannelCallbacks* _client{ nullptr };
+		int sampleMaxSize{ 0 };
+	};
+
+	class ReceiveDataChannel : public ReceiveDataChannelBase,
 		protected Listener<BytesSizePair>, 
 		public Listener<ConnectStatus>
 	{
@@ -55,43 +95,27 @@ namespace ops
 		ReceiveDataChannel(const Topic& top, Participant& part, std::unique_ptr<Receiver> recv = nullptr);
 		virtual ~ReceiveDataChannel() = default;
 
-		void connect(ReceiveDataChannelCallbacks* client) noexcept {
-			_client = client;
-		}
+		virtual void clear() override;
 
-		void clear();
+		virtual void start() override;
+		virtual void stop() override;
 
-		void start();
-		void stop();
-
-		static int calcSampleMaxSize(const Topic& top)
-		{
-			return top.getSampleMaxSize() > opsidls::OPSConstants::USABLE_SEGMENT_SIZE ?
-					top.getSampleMaxSize() :
-					opsidls::OPSConstants::USABLE_SEGMENT_SIZE;
-		}
-
-		int getSampleMaxSize() const noexcept
-        {
-            return sampleMaxSize;
-        }
-
-		bool asyncFinished()
+		virtual bool asyncFinished() override
 		{
 			return receiver->asyncFinished();
 		}
 
-		size_t bytesAvailable()
+		virtual size_t bytesAvailable() override
 		{
 			return receiver->bytesAvailable();
 		}
 
-		uint16_t getLocalPort()
+		virtual uint16_t getLocalPort() override
 		{
 			return receiver->getLocalPort();
 		}
 
-		Address_T getLocalAddress()
+		virtual Address_T getLocalAddress() override
 		{
 			return receiver->getLocalAddress();
 		}
@@ -101,9 +125,6 @@ namespace ops
 			UNUSED(top); UNUSED(used);
 		}
 
-		// Key used to identify channel when several channels are keept in a container
-		InternalKey_T key;
-
 	protected:
 		///Override from Listener
 		///Called whenever the receiver has new data.
@@ -111,8 +132,6 @@ namespace ops
 		bool calculateAndSetSpareBytes(ByteBuffer &buf, OPSObject* obj, int segmentPaddingSize);
 
         void onNewEvent(Notifier<ConnectStatus>*, ConnectStatus arg) override;
-
-		int sampleMaxSize{ 0 };
 
         ///Preallocated MemoryMap for receiving data
         MemoryMap memMap;
@@ -125,8 +144,6 @@ namespace ops
 		std::unique_ptr<Receiver> receiver;
 
 	private:
-		ReceiveDataChannelCallbacks* _client{ nullptr };
-
 		///The accumulated size in bytes of the current message
 		int currentMessageSize{ 0 };
 

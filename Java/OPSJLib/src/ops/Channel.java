@@ -40,6 +40,7 @@ public class Channel extends OPSObject
     public static final String LINKTYPE_MC = "multicast";
     public static final String LINKTYPE_TCP = "tcp";
     public static final String LINKTYPE_UDP = "udp";
+    public static final String LINKTYPE_INPROC = "inprocess";
 
     public Channel()
     {
@@ -92,6 +93,9 @@ public class Channel extends OPSObject
             {
                 domainAddress = NetworkSupport.GetHostAddress(domainAddress);
             }
+        }
+        else if (linktype.equals(LINKTYPE_INPROC))
+        {
         }
         else
         {

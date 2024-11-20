@@ -34,12 +34,12 @@ namespace ops
     using namespace opsidls;
 
 	ReceiveDataChannel::ReceiveDataChannel(const Topic& top, Participant& part, std::unique_ptr<Receiver> recv) :
-        sampleMaxSize(calcSampleMaxSize(top)),
+        ReceiveDataChannelBase(top),
         memMap(1 + ((sampleMaxSize - 1) / OPSConstants::USABLE_SEGMENT_SIZE), OPSConstants::PACKET_MAX_SIZE, &DataSegmentAllocator::Instance()),
         participant(part),
         receiver(std::move(recv))
     {
-		if (receiver.get() == nullptr) { receiver = ReceiverFactory::getReceiver(top, participant); }
+        if (receiver.get() == nullptr) { receiver = ReceiverFactory::getReceiver(top, participant); }
 
         if (receiver.get() == nullptr) {
             throw exceptions::CommException("Could not create receiver");

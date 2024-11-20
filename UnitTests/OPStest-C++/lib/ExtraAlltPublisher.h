@@ -10,7 +10,7 @@ namespace pizza { namespace special {
 
 class ExtraAlltPublisher : public ops::Publisher
 {
-
+    using ops::Publisher::write;    // Hide base
 public:
     ExtraAlltPublisher(ops::Topic t)
         : ops::Publisher(t)

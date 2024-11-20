@@ -44,8 +44,14 @@ namespace ops
         public std::enable_shared_from_this<ReceiveDataHandler>
 	{
 		friend class ReceiveDataHandlerFactory;
+		using Notifier<OPSMessage*>::addListener;
+		using Notifier<OPSMessage*>::removeListener;
+
 	public:
-		ReceiveDataHandler(Participant& part, ReceiveDataChannel* rdc_ = nullptr);
+		using Notifier<ConnectStatus>::addListener;
+		using Notifier<ConnectStatus>::removeListener;
+
+		ReceiveDataHandler(Participant& part, ReceiveDataChannelBase* rdc_ = nullptr);
 		virtual ~ReceiveDataHandler();
 
 		bool aquireMessageLock();
@@ -91,7 +97,7 @@ namespace ops
 
 		//The receiver channel(s) used for this transport channel. 
 		//Currently only TCP transport may have more than one rdc
-		std::vector<ReceiveDataChannel*> rdc;
+		std::vector<ReceiveDataChannelBase*> rdc;
 
 		//The Participant to which this ReceiveDataHandler belongs.
 		Participant& participant;
@@ -102,8 +108,8 @@ namespace ops
 			UNUSED(top); UNUSED(used);
 		}
 
-		virtual void onMessage(ReceiveDataChannel& rdc_, OPSMessage* mess) override;
-		virtual void onStatusChange(ReceiveDataChannel& rdc_, ConnectStatus& status) override
+		virtual void onMessage(ReceiveDataChannelBase& rdc_, OPSMessage* mess) override;
+		virtual void onStatusChange(ReceiveDataChannelBase& rdc_, ConnectStatus& status) override
 		{
 			UNUSED(rdc_);
 			Notifier<ConnectStatus>::notifyNewEvent(status);

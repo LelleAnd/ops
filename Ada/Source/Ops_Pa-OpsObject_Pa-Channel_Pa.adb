@@ -67,6 +67,10 @@ package body Ops_Pa.OpsObject_Pa.Channel_Pa is
         Replace(Self.DomainAddress, Ops_Pa.Socket_Pa.GetHostAddress(Self.DomainAddress.all));
       end if;
 
+    elsif (Self.Linktype.all = LINKTYPE_INPROC)
+    then
+      null;
+
     else
       StaticErrorService.
         Report( "Domain", "CheckTransport",

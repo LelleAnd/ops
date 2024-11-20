@@ -23,6 +23,7 @@
 
 #include <memory>
 
+#include "OPSMessage.h"
 #include "Topic.h"
 #include "Sender.h"
 #include "Notifier.h"
@@ -39,6 +40,9 @@ namespace ops
 		virtual ~SendDataHandler() = default;
 
 		virtual bool sendData(char* buf, int bufSize, const Topic& topic) = 0;
+
+		// Used for inprocess transport
+		virtual bool sendMessage(const Topic&, const OPSMessage&) { return false; }
 
 		virtual void addPublisher(void* client, Topic& top)
 		{

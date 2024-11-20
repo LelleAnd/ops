@@ -10,7 +10,7 @@ namespace pizza {
 
 class VessuvioDataPublisher : public ops::Publisher
 {
-
+    using ops::Publisher::write;    // Hide base
 public:
     VessuvioDataPublisher(ops::Topic t)
         : ops::Publisher(t)

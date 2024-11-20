@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2021 Lennart Andersson.
+ * Copyright (C) 2018-2024 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -35,6 +35,8 @@ namespace ops
     // A subscriber for ACK messages
     struct Publisher::AckSubscriber : public ops::SubscriberBase
     {
+        using ops::SubscriberBase::onNewEvent;
+
         explicit AckSubscriber(const ops::Topic& top) :
             SubscriberBase(top)
         {
@@ -157,7 +159,9 @@ namespace ops
 		sendDataHandler->updateTransportInfo(topic);
 		participant->updateSendPartInfo(topic);
 
-        if (topic.getUseAck()) {
+        useInProc = (topic.getTransport() == Topic::TRANSPORT_INPROC);
+
+        if (topic.getUseAck() && (!useInProc)) {
             // Enable ACK's
             // Check that SampleMaxSize is <= 60000-14
             if (topic.getSampleMaxSize() > OPSConstants::USABLE_SEGMENT_SIZE) {
@@ -285,28 +289,33 @@ namespace ops
         const SafeLock lck(_pubLock);
         _resendsLeft = topic.getNumResends();
 
-        // Serialize message
-        buf.Reset();
-
         message.setData(data);
         message.setPublicationID(currentPublicationID);
         currentPublicationID++;
 
-        buf.writeNewSegment();
+        if (useInProc) {
+            return sendDataHandler->sendMessage(topic, message);
 
-        OPSArchiverOut archive(buf, topic.getOptNonVirt());
+        } else {
+            // Serialize message
+            buf.Reset();
 
-        archive.inout("message", &message);
+            buf.writeNewSegment();
 
-        //If data has spare bytes, write them to the end of the buf
-        if (message.getData()->spareBytes.size() > 0) {
-            buf.WriteChars(&(message.getData()->spareBytes[0]), (int)message.getData()->spareBytes.size());
+            OPSArchiverOut archive(buf, topic.getOptNonVirt());
+
+            archive.inout("message", &message);
+
+            //If data has spare bytes, write them to the end of the buf
+            if (message.getData()->spareBytes.size() > 0) {
+                buf.WriteChars(&(message.getData()->spareBytes[0]), (int)message.getData()->spareBytes.size());
+            }
+
+            buf.finish();
+
+            // Send serialized message
+            return writeSerializedBuffer();
         }
-
-        buf.finish();
-
-        // Send serialized message
-        return writeSerializedBuffer();
     }
 
     bool Publisher::writeSerializedBuffer()

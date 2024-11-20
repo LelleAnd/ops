@@ -406,6 +406,9 @@
     <ClInclude Include="..\..\..\source\BoostIOServiceImpl.h" />
     <ClInclude Include="..\..\..\source\DataSegmentPool.h" />
     <ClInclude Include="..\..\..\source\DefaultOPSConfigImpl.h" />
+    <ClInclude Include="..\..\..\source\InProcDistributor.h" />
+    <ClInclude Include="..\..\..\source\InProcReceiveDataHandler.h" />
+    <ClInclude Include="..\..\..\source\InProcSendDataHandler.h" />
     <ClInclude Include="..\..\..\source\MCReceiveDataHandler.h" />
     <ClInclude Include="..\..\..\source\McSendDataHandler.h" />
     <ClInclude Include="..\..\..\source\McUdpSendDataHandler.h" />

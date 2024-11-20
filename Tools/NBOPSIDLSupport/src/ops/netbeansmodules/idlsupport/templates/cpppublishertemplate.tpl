@@ -10,7 +10,7 @@ __packageDeclaration
 
 class __classNamePublisher : public ops::Publisher
 {
-
+    using ops::Publisher::write;    // Hide base
 public:
     explicit __classNamePublisher(ops::Topic t)
         : ops::Publisher(t)

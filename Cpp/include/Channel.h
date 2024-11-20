@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016-2021 Lennart Andersson.
+* Copyright (C) 2016-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -66,6 +66,7 @@ namespace ops
         static Transport_T LINKTYPE_MC;
         static Transport_T LINKTYPE_TCP;
         static Transport_T LINKTYPE_UDP;
+        static Transport_T LINKTYPE_INPROC;
     };
 }
 #endif

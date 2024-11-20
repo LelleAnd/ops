@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2022 Lennart Andersson.
+* Copyright (C) 2018-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -115,6 +115,7 @@ private:
     ObjectKey_T m_key;
 
     bool started{ false };
+    bool useInProc{ false };
 
 #ifdef OPS_ENABLE_DEBUG_HANDLER
     volatile int64_t _dbgSkip{ 0 };

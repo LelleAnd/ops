@@ -28,6 +28,7 @@
 #include "McSendDataHandler.h"
 #include "McUdpSendDataHandler.h"
 #include "TCPSendDataHandler.h"
+#include "InProcSendDataHandler.h"
 #include "Domain.h"
 #include "NetworkSupport.h"
 
@@ -60,9 +61,10 @@ namespace ops
 	{
 		// We need to store SendDataHandlers with more than just the name as key.
 		// Since topics can use the same port, we need to return the same SendDataHandler.
-		// Make a key with the transport info that uniquely defines the receiver.
+		// Make a key with the transport info that uniquely defines the sender.
 		InternalKey_T key = top.getTransport();
-		key += "::";
+        if (top.getTransport() == Topic::TRANSPORT_INPROC) { return key; }
+        key += "::";
         if (top.getTransport() == Topic::TRANSPORT_UDP) {
             key += localIf;
             key += "::";
@@ -132,8 +134,12 @@ namespace ops
 		else if (top.getTransport() == Topic::TRANSPORT_TCP)
 		{
 			sdh = std::make_shared<TCPSendDataHandler>(participant.getIOService(), top);
-		}
-        else 
+        }
+        else if (top.getTransport() == Topic::TRANSPORT_INPROC)
+        {
+            sdh = std::make_shared<InProcSendDataHandler>(participant.inProcDistributor);
+        }
+        else
         {
             // See if an installed factory exist
             if (backupfact != nullptr) {

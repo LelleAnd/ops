@@ -52,6 +52,7 @@ namespace ops
 	class SendDataHandlerFactory;
 	class Domain;
     class Publisher;
+	class InProcDistributor;
 
 	namespace execution_policy {
 		enum Enum {
@@ -203,6 +204,7 @@ namespace ops
 		///The IOService used for this participant, it handles communication and timers for all receivers, subscribers and member timers of this Participant.
 		std::unique_ptr<IOService> ioService;
 		std::shared_ptr<OPSConfig> config;
+		std::shared_ptr<InProcDistributor> inProcDistributor;
 
 		///The ErrorService
         std::unique_ptr<ErrorService> errorService;

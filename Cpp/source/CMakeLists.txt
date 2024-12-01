@@ -92,6 +92,8 @@ if(NOT OPS_BOOTSTRAP_BUILD)
     target_link_libraries(${LIB_NAME} ws2_32 mswsock)
   endif()
 
+  add_library(${OPS_NAMESPACE}${LIB_NAME} ALIAS ${LIB_NAME})
+
   # ----------------------------------------------------------------------------
   # build it again but statically this time
   # generate the library target
@@ -133,6 +135,8 @@ if(NOT OPS_BOOTSTRAP_BUILD)
   target_compile_definitions(${LIB_STATIC} PUBLIC OPS_LIBRARY_STATIC)
 
   target_link_libraries(${LIB_STATIC} ${Boost_LIBRARIES} tinyxml2::tinyxml2)
+
+  add_library(${OPS_NAMESPACE}${LIB_STATIC} ALIAS ${LIB_STATIC})
 
   # ----------------------------------------------------------------------------
   # library installation

@@ -98,6 +98,14 @@
 	#endif
 #endif
 
+#if __cplusplus >= 202002L		// Value according to standard for full C++20 conformity
+#define OPS_C20_DETECTED
+#elif defined(_MSC_VER) && (_MSC_VER >= 1916)
+	#if _MSVC_LANG >= 202002L
+		#define OPS_C20_DETECTED
+	#endif
+#endif
+
 
 //#define OPS_REMOVE_ASSERT			// Define to skip assert() calls in OPS code.
 									// (can also be done by defining NDEBUG)

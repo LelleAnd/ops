@@ -215,3 +215,5 @@ else()
 
   install(FILES ${OPS_TARGET} DESTINATION bin)
 endif()
+
+add_library(${OPS_NAMESPACE}${OPS_LIB_NAME} ALIAS ${OPS_LIB_NAME})

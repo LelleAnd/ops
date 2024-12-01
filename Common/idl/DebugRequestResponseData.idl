@@ -3,6 +3,11 @@ package opsidls;
 class DebugRequestResponseData
 {
     /* Type of entity to talk to: Debug = 0, Participant = 1, Publisher = 2, Subscriber = 3, ... */
+    const int ent_Debug = 0;
+    const int ent_Part = 1;
+    const int ent_Pub = 2;
+    const int ent_Sub = 3;
+
     int    Entity;
 
     /* Name of entity */
@@ -36,6 +41,22 @@ class DebugRequestResponseData
        4 = Skip, Skip Param1 number of received messages
        Future: Be able to change port dynamically to enable injection of a custom filter
     */
+    const int cmd_Response = 0;
+    const int cmd_ReqStatus = 1;
+
+    const int cmd_Dbg_List = 2;
+    const int cmd_Dbg_Generic = 50;
+
+    const int cmd_Pub_Enable = 2;
+    const int cmd_Pub_PubId = 3;
+    const int cmd_Pub_Skip = 4;
+    const int cmd_Pub_SendDirect = 5;
+    const int cmd_Pub_SendReplace = 6;
+
+    const int cmd_Sub_Enable = 2;
+    const int cmd_Sub_Filter = 3;
+    const int cmd_Sub_Skip = 4;
+
     int      Command;
     long     Param1;
     string[] Param3;

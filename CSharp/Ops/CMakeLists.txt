@@ -98,9 +98,8 @@ set(OPS_CS_SOURCE
   Utilities/WindowLogger.cs
 )
 
+message(">>>>> CMAKE_VERSION= " ${CMAKE_VERSION})
 if(WIN32)
-  if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.8.0")
-    ##message(">>>>> CMAKE_VERSION= " ${CMAKE_VERSION})
     enable_language(CSharp)
 
     # Define the DLL target, including all relevant project files.
@@ -135,65 +134,6 @@ if(WIN32)
       DESTINATION bin
     )
 
-  else()
-
-    if(CMAKE_BUILD_TYPE MATCHES "Debug")
-      set(OPS_TARGET ${CMAKE_BINARY_DIR}/bin/${OPS_LIB_NAME}-${OPS_VERSION}-dbg.dll)
-      set(OPS_CSHARP_FLAGS /debug)
-    else()
-      set(OPS_TARGET ${CMAKE_BINARY_DIR}/bin/${OPS_LIB_NAME}-${OPS_VERSION}-opt.dll)
-      set(OPS_CSHARP_FLAGS /optimize)
-    endif()
-
-    get_filename_component(CSCOMPILER_PATH ${CSCOMPILER} DIRECTORY)
-    get_filename_component(CXXCOMPILER_PATH ${CMAKE_CXX_COMPILER} DIRECTORY)
-    get_filename_component(CXXCOMPILER_PATH ${CXXCOMPILER_PATH} DIRECTORY)
-    if(CMAKE_CL_64)
-      get_filename_component(CXXCOMPILER_PATH ${CXXCOMPILER_PATH} DIRECTORY)
-    endif()
-
-    # Locate path where the CSharp runtime and support assemblies are
-    find_path(CSREFERENCE_PATH System.Data.dll HINTS ${CSCOMPILER_PATH} )
-    file(TO_NATIVE_PATH ${CSREFERENCE_PATH} CSREFERENCE_NATIVEPATH)
-
-    # Locate vsvars.bat script, it is required for cmd-line building
-    find_file(VCVARSALL vcvarsall.bat HINTS ${CXXCOMPILER_PATH} )
-    file(TO_NATIVE_PATH ${VCVARSALL} VCVARSALL_NATIVEPATH)
-    if(NOT VCVARSALL)
-      message("Failed to find vcvarsall.bat -- please locate it yourself")
-      return()
-    endif()
-
-    if(CMAKE_CL_64)
-      set(VSVARSALL_ARCHITECTURE x64)
-    else()
-      set(VSVARSALL_ARCHITECTURE x86)
-    endif()
-
-    # convert files to native file paths, i.e. with '\'
-    foreach(csfile ${OPS_CS_SOURCE})
-      file(TO_NATIVE_PATH ${csfile} CSNATIVEFILE)
-      list(APPEND OPS_CS_SOURCE_LIST ${CSNATIVEFILE})
-    endforeach()
-
-    add_custom_command(OUTPUT ${OPS_TARGET}
-      #COMMAND "${VS80COMNTOOLS}vsvars32.bat x86"
-      COMMAND "${VCVARSALL}" ${VSVARSALL_ARCHITECTURE}
-      COMMAND ${CSCOMPILER} /noconfig ${OPS_CSHARP_FLAGS} -langversion:7.3 /nowarn:1701,1702 /warn:4 /define:TRACE /lib:${CSREFERENCE_NATIVEPATH} /reference:System.dll,System.Drawing.dll,System.Windows.Forms.dll,System.Xml.dll,System.Linq.dll,System.Web.dll,System.Web.Services.dll /target:library /out:${OPS_TARGET} ${OPS_CS_SOURCE_LIST}
-      DEPENDS ${OPS_CS_SOURCE}
-      COMMENT "Building C# sources using ${CSCOMPILER}"
-      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-      VERBATIM
-    )
-    add_custom_target(${OPS_LIB_NAME} ALL DEPENDS ${OPS_TARGET})
-
-    install(FILES ${OPS_TARGET}
-      EXPORT csharp-targets
-      DESTINATION lib/mono
-    )
-
-  endif()
-
 else()
 
   if(CMAKE_BUILD_TYPE MATCHES "Debug")
@@ -216,4 +156,4 @@ else()
   install(FILES ${OPS_TARGET} DESTINATION bin)
 endif()
 
-add_library(${OPS_NAMESPACE}${OPS_LIB_NAME} ALIAS ${OPS_LIB_NAME})
+##add_library(${OPS_NAMESPACE}${OPS_LIB_NAME} ALIAS ${OPS_LIB_NAME})

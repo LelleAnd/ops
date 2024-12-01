@@ -1,6 +1,5 @@
 
-# We need install_jar_exports() and VERSION_GREATER_EQUAL which came in 3.7.
-cmake_minimum_required(VERSION 3.7.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.10.0 FATAL_ERROR)
 
 # Adopt some policies for newer CMake's
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.15.0")
@@ -140,6 +139,10 @@ endif()
 
 ## ----------------------------------------------------------------------------
 if (OPS_BUILD_CPP)
+  if(POLICY CMP0167)
+    # Keep using the module FindBoost.cmake for now (to support boost versions before 1.71)
+    cmake_policy(SET CMP0167 OLD)
+  endif()
   message(STATUS "ENV: BOOST_HOME: " $ENV{BOOST_HOME})
   message(STATUS "BOOST_ARCH: " ${BOOST_ARCH})
   message(STATUS "ENV: BOOST_LIBRARY_DIR: " $ENV{BOOST_LIBRARY_DIR})

@@ -12,7 +12,7 @@ if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.15.0")
 endif()
 
 # The main project name
-project(OPS VERSION 4.2.0)
+project(OPS VERSION 4.3.0)
 
 ################################################################################
 #
@@ -74,6 +74,8 @@ message(STATUS ">>> OPS_BUILD_CSHARP:    " ${OPS_BUILD_CSHARP})
 message(STATUS ">>> OPS_BUILD_PYTHON:    " ${OPS_BUILD_PYTHON})
 message(STATUS ">>> OPS_BUILD_UNITTESTS: " ${OPS_BUILD_UNITTESTS})
 message(STATUS ">>> OPS_BUILD_EXAMPLES:  " ${OPS_BUILD_EXAMPLES})
+
+set(OPS_NAMESPACE ${PROJECT_NAME}::)
 
 if(CMAKE_BUILD_TYPE MATCHES "Bootstrap")
   set(OPS_BOOTSTRAP_BUILD TRUE)
@@ -458,8 +460,6 @@ endif()
 
 ################################################################################
 # Create cmake-files for use from other projects
-
-set(OPS_NAMESPACE ${PROJECT_NAME}::)
 
 if((OPS_BOOTSTRAP_BUILD) OR (DEFINED OPS_NO_SEPARATE_BOOTSTRAP))
   install_jar_exports(

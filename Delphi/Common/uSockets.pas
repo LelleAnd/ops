@@ -127,6 +127,7 @@ type
   public
     // ------------------------------------------------------
     // Winsock API Helpers
+    function Close : Boolean; override;
     function Connect : Boolean;
     function Disconnect : Boolean;
 
@@ -635,6 +636,12 @@ end;
 // ----------------------------------------------------------------------------
 
 { TTcpClientSocket }
+
+function TTcpClientSocket.Close : Boolean;
+begin
+  FConnected := False;
+  Result := inherited Close;
+end;
 
 function TTcpClientSocket.Connect : Boolean;
 var

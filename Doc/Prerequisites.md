@@ -39,9 +39,9 @@ TinyXML-2 can be downloaded from https://github.com/leethomason/tinyxml2.
 OPS has been used with TinyXML-2 version 9.0.0.
 
 ## CMake ##
-Version 3.7.0 or later is required to build OPS with CMake. Make sure the cmake command is in your path. CMake can be downloaded at https://cmake.org/.
+Version 3.10.0 or later is required to build OPS with CMake. Make sure the cmake command is in your path. CMake can be downloaded at https://cmake.org/.
 
-OPS has been used with CMake version 3.7.0 and later. To use CMake to build C# libraries and examples, you need CMake later than version 3.8.0.
+OPS has been used with CMake version 3.10.0 and later (upto 3.31.1).
 
 ## Visual Studio (Windows) ##
 OPS for C++ requires a C++11 compiler and has therefore only support for VS2015, VS2017, VS2019 and VS2022. Support for earlier VS versions has been dropped.

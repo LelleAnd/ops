@@ -128,14 +128,9 @@ else()
 endif()
 
 # On Windows the install_jar() is broken if a VERSION is given in add_jar()
-# (at least upto CMake 3.18) so we conditionally set the version on install_jar()
-if(WIN32)
-  set(JAR_APPEND_VERSION "")
-  set(JAR_APPEND_VER "")
-else()
-  set(JAR_APPEND_VERSION ${PROJECT_VERSION})
-  set(JAR_APPEND_VER "-${PROJECT_VERSION}")
-endif()
+# (at least upto CMake 3.31) so we do explicit install of files on windows
+set(JAR_ADD_VERSION "${PROJECT_VERSION}")
+set(JAR_APPEND_VER "-${PROJECT_VERSION}")
 
 ## ----------------------------------------------------------------------------
 if (OPS_BUILD_CPP)

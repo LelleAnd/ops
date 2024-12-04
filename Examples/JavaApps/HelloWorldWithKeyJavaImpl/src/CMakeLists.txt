@@ -10,7 +10,7 @@ add_jar(MainPublishWithKey ${APP_SRC}
   INCLUDE_JARS ${PROJECT_BINARY_DIR}/bin/HelloWorld.jar ${OPSJLIB_JAR} ${CONFIGURATIONLIB_JAR}
   ENTRY_POINT helloworldjavaimpl/MainPublish
   MANIFEST ${CMAKE_CURRENT_BINARY_DIR}/MANIFEST.MF
-  VERSION ${JAR_APPEND_VERSION}
+  VERSION ${JAR_ADD_VERSION}
   OUTPUT_DIR ${PROJECT_BINARY_DIR}/bin
 )
 add_dependencies(MainPublishWithKey HelloWorld)
@@ -23,7 +23,7 @@ add_jar(MainSubscribeWithKey ${APP_SRC}
   INCLUDE_JARS ${PROJECT_BINARY_DIR}/bin/HelloWorld.jar ${OPSJLIB_JAR} ${CONFIGURATIONLIB_JAR}
   ENTRY_POINT helloworldjavaimpl/MainSubscribe
   MANIFEST ${CMAKE_CURRENT_BINARY_DIR}/MANIFEST.MF
-  VERSION ${JAR_APPEND_VERSION}
+  VERSION ${JAR_ADD_VERSION}
   OUTPUT_DIR ${PROJECT_BINARY_DIR}/bin
 )
 add_dependencies(MainSubscribeWithKey HelloWorld)

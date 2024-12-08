@@ -10,3 +10,7 @@ add_subdirectory(HelloWorldWithKeyCppImpl)
 add_subdirectory(PizzaTest)
 
 add_subdirectory(TestAllC++Test/TestAllC++Test)
+
+if(GTEST_FOUND)
+  add_subdirectory(UnitTestExample)
+endif()

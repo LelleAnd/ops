@@ -22,7 +22,7 @@ unit uOps.NetworkSupport;
 
 interface
 
-uses Classes;
+uses Classes, Winapi.Windows, Winapi.Winsock2;
 
   function doSubnetTranslation(addr : AnsiString) : AnsiString;
 
@@ -33,14 +33,36 @@ uses Classes;
   function GetHostAddress(name : AnsiString) : AnsiString;
   function GetHostAddressEx(localInterface : AnsiString) : AnsiString;
 
+
+{$IF CompilerVersion < 35}
+{$DEFINE DELPHI_10x_AND_BELOW}
+{$ENDIF}
+
+{$IF DEFINED(DELPHI_10x_AND_BELOW)}
+  // Support on Delphi 10.x and older
+type
+  Paddrinfo = ^addrinfo;
+  addrinfo = record
+    ai_flags: Integer;     // AI_PASSIVE, AI_CANONNAME, AI_NUMERICHOST
+    ai_family: Integer;    // PF_xxx
+    ai_socktype: Integer;  // SOCK_xxx
+    ai_protocol: Integer;  // 0 or IPPROTO_xxx for IPv4 and IPv6
+    ai_addrlen: SIZE_T;    // Length of ai_addr
+    ai_canonname: MarshaledAString; // Canonical name for nodename
+    ai_addr: PSockAddr;    // Binary address
+    ai_next: Paddrinfo;    // Next structure in linked list
+  end;
+
+  function getaddrinfo(hostname, servname: MarshaledAString; const [Ref] hints: addrinfo; out res: Paddrinfo): Integer; stdcall;
+  procedure freeaddrinfo(var ai: addrinfo); stdcall;
+{$ENDIF}
+
 implementation
 
 uses SysUtils,
      AnsiStrings,
-     Winapi.Windows,
      Winapi.IpHlpApi,
-     Winapi.IpRtrMib,
-     Winapi.Winsock2;
+     Winapi.IpRtrMib;
 
 /// ------------------------------------------
 /// Helper to get all IP interfaces
@@ -256,7 +278,11 @@ begin
   Res := nil;
 
   //function getaddrinfo(hostname, servname: MarshaledAString; const [Ref] hints: addrinfo; out res: Paddrinfo): Integer; stdcall;
+{$IF DEFINED(DELPHI_10x_AND_BELOW)}
+  Err := getaddrinfo(HostName, nil, hints, Res);
+{$ELSE}
   Err := Winapi.Winsock2.getaddrinfo(HostName, nil, hints, Res);
+{$ENDIF}
   try
     if (Err = 0) and Assigned(Res) then begin
       Ptr := Res;
@@ -272,7 +298,11 @@ begin
     end;
   finally
     //procedure freeaddrinfo(var ai: addrinfo); stdcall;
+{$IF DEFINED(DELPHI_10x_AND_BELOW)}
+    freeaddrinfo(Res^);
+{$ELSE}
     Winapi.Winsock2.freeaddrinfo(Res^);
+{$ENDIF}
   end;
 end;
 
@@ -291,7 +321,11 @@ begin
   Res := nil;
 
   //function getaddrinfo(hostname, servname: MarshaledAString; const [Ref] hints: addrinfo; out res: Paddrinfo): Integer; stdcall;
+{$IF DEFINED(DELPHI_10x_AND_BELOW)}
+  Err := getaddrinfo(HostName, nil, hints, Res);
+{$ELSE}
   Err := Winapi.Winsock2.getaddrinfo(HostName, nil, hints, Res);
+{$ENDIF}
   try
     if (Err = 0) and Assigned(Res) then begin
       Ptr := Res;
@@ -306,7 +340,11 @@ begin
     end;
   finally
     //procedure freeaddrinfo(var ai: addrinfo); stdcall;
+{$IF DEFINED(DELPHI_10x_AND_BELOW)}
+    freeaddrinfo(Res^);
+{$ELSE}
     Winapi.Winsock2.freeaddrinfo(Res^);
+{$ENDIF}
   end;
 end;
 
@@ -333,6 +371,14 @@ begin
     Result := Result + '/' + mask;
   end;
 end;
+
+{$IF DEFINED(DELPHI_10x_AND_BELOW)}
+const
+  ws2_32 = 'ws2_32.dll';
+
+function getaddrinfo; external ws2_32 name 'getaddrinfo';
+procedure freeaddrinfo; external ws2_32 name 'freeaddrinfo';
+{$ENDIF}
 
 end.
 

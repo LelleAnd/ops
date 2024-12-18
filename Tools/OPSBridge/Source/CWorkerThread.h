@@ -3,7 +3,7 @@
 * Copyright (C) 2010-2012 Saab Dynamics AB
 *   author Lennart Andersson <nnnn@saabgroup.com>
 *
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -27,6 +27,7 @@
 
 #pragma once
 
+#include <string>
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
@@ -151,8 +152,8 @@ private:
 class CWorkerErrorLogger 
 {
 public:
-	virtual void onError(std::string errorString, unsigned int errorId) = 0;
-    virtual void onInformation(std::string infoString, unsigned int infoNumber) { UNUSED(infoString); UNUSED(infoNumber); };
+	virtual void onError(const std::string errorString, unsigned int errorId) = 0;
+    virtual void onInformation(const std::string infoString, unsigned int infoNumber) { UNUSED(infoString); UNUSED(infoNumber); };
 };
 
 // ------------------------------------------------------------------------

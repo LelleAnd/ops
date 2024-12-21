@@ -1,6 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2024 Lennart Andersson
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -160,7 +161,7 @@ public class MulticastReceiver implements Receiver
             remoteSenderIp = p.getAddress().getHostAddress();
             remoteSenderPort = p.getPort();
 
-            newBytesEvent.fireEvent(new Integer(p.getLength()));
+            newBytesEvent.fireEvent(Integer.valueOf(p.getLength()));
             return true;
         }
         catch (SocketTimeoutException ex)

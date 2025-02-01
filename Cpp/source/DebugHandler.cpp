@@ -263,9 +263,7 @@ namespace ops {
 	{
 	}
 	
-	DebugHandler::~DebugHandler()
-	{
-	}
+	DebugHandler::~DebugHandler() {}
 
 	void DebugHandler::Start()
 	{

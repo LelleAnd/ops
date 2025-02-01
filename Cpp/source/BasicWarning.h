@@ -9,9 +9,9 @@ namespace ops
 	{
 	public:
 		static constexpr int ERROR_CODE = 1;
-		BasicWarning(ErrorMessage_T className, ErrorMessage_T method, ErrorMessage_T mess)
+		BasicWarning(ErrorMessage_T className, ErrorMessage_T method, ErrorMessage_T mess) :
+			_message(className)
 		{
-			_message = className;
 			_message += "::";
 			_message += method;
 			_message += "(): ";
@@ -26,7 +26,7 @@ namespace ops
 		{
 			return _message;
 		}
-		virtual ~BasicWarning(){}
+		virtual ~BasicWarning() = default;
 	private:
 		ErrorMessage_T _message;
 	};

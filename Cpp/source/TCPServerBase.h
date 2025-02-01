@@ -66,9 +66,9 @@ namespace ops
     {
     public:
 		TCPServerBase(TCPServerCallbacks* client, IOService* ioServ) :
+			_timer(std::unique_ptr<DeadlineTimer>(DeadlineTimer::create(ioServ))),
 			_client(client)
 		{
-			_timer = std::unique_ptr<DeadlineTimer>(DeadlineTimer::create(ioServ));
 			_timer->addListener(this);
 			_timer->start(period);
 		}

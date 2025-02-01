@@ -72,7 +72,7 @@ namespace ops
             return result;
         }
 
-		void addSink(ObjectName_T& topic, Address_T& ip, int& port, bool staticRoute = false)
+		void addSink(const ObjectName_T& topic, const Address_T& ip, const int& port, bool staticRoute = false)
 		{
             SafeLock lock(mutex);
 
@@ -98,7 +98,7 @@ namespace ops
 				Entry_T& topicSinks = topicSinkMap[topic];
 
 				//If created as static route, we only add sinks that are static
-				if ( (!topicSinks.staticRoute) || (topicSinks.staticRoute && staticRoute)) {
+				if ( (!topicSinks.staticRoute) || (staticRoute)) {
 					//Check if sink already exist
 					if (topicSinks.portMap.find(ipPort._key) == topicSinks.portMap.end())
 					{
@@ -124,9 +124,8 @@ namespace ops
         {
         public:
             IpPortPair(Address_T ip, int port, bool alwaysAlive):
-				_ip(ip), _port(port), _alwaysAlive(alwaysAlive)
+				_ip(ip), _port(port), _alwaysAlive(alwaysAlive), _lastTimeAlive(ops_clock::now())
             {
-                _lastTimeAlive = ops_clock::now();
                 _key = _ip.c_str();
                 _key += ':';
                 _key += NumberToString(_port);

@@ -50,9 +50,9 @@ namespace ops
     {
     public:
         TCPClientBase(TCPClientCallbacks* client, IOService* ioServ, std::shared_ptr<TCPConnection> connection) :
-			_connection(connection), _client(client), _cs(false, 0), _started(false)
+			_connection(connection), _client(client), _cs(false, 0), _started(false),
+			_timer(std::unique_ptr<DeadlineTimer>(DeadlineTimer::create(ioServ)))
         {
-			_timer = std::unique_ptr<DeadlineTimer>(DeadlineTimer::create(ioServ));
 			_timer->addListener(this);
 			_timer->start(period);
 		}

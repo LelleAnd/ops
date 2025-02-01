@@ -89,8 +89,8 @@ namespace ops
             if (isValidNodeAddress(top.getDomainAddress())) {
                 ObjectName_T topName = top.getName();
                 Address_T destAddress = top.getDomainAddress();
-                int destPort = top.getPort();
-                ((McUdpSendDataHandler*)sdh.get())->addSink(topName, destAddress, destPort, true);
+                const int destPort = top.getPort();
+                dynamic_cast<McUdpSendDataHandler*>(sdh.get())->addSink(topName, destAddress, destPort, true);
             } else {
                 // Setup a listener on the participant info data published by participants on our domain.
                 // We use the information for topics with UDP as transport, to know the destination for UDP sends

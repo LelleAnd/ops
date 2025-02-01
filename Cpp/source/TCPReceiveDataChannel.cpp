@@ -89,10 +89,8 @@ namespace ops
 			dbgId += "::";
 			dbgId += NumberToString(status.port);
 			prot->setDebugId(dbgId);
-		}
 
-		// Trig sending of "ops protocol probe" to see if server know new features.
-		if (prot != nullptr) {
+			// Trig sending of "ops protocol probe" to see if server know new features.
 			prot->sendProbe();
 		}
 

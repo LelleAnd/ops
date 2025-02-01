@@ -43,7 +43,7 @@ namespace ops
         };
 
     public:
-        InProcSendDataHandler(std::shared_ptr<InProcDistributor> dist) : distributor(dist)
+        explicit InProcSendDataHandler(std::shared_ptr<InProcDistributor> dist) : distributor(dist)
         {
             sender = std::unique_ptr<Sender>(new DummySender());
         }

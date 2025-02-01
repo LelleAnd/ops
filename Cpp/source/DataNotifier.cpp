@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2020 Lennart Andersson.
+* Copyright (C) 2018-2024 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -24,7 +24,7 @@
 namespace ops
 {
     
-    DataNotifier::~DataNotifier() {}
+    DataNotifier::~DataNotifier() = default;
     
     void DataNotifier::notifyNewData()
     {

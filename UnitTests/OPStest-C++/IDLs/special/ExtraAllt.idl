@@ -7,7 +7,6 @@ class ExtraAllt extends LHCData
     //The above comment is not up to dte and should be removed...
     boolean extraCheese;
 
-    /*@limits(0,INFINITY)*/
     byte nrOfMushRooms;
     int meetQuality;
     long timestamp;

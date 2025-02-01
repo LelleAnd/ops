@@ -163,11 +163,11 @@ directive += tName;
 directiveEvent.fireEvent(directive);
   }
 
-  final public String directive_value() throws ParseException {String value = ""; Long val = 0L; Long val2 = 0L; boolean range = false;
+  final public String directive_value() throws ParseException {String value = ""; Long val = 0L; Long val2 = 0L; Double dval = 0.0; Double dval2 = 0.0; boolean range = false;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case ID:{
       value = jj_consume_token(ID).image;
-{if ("" != null) return value;}
+{if ("" != null) return "ID: " + value;}
       break;
       }
     case OCTALINT:
@@ -185,18 +185,36 @@ range=true;
         jj_la1[7] = jj_gen;
         ;
       }
-if (!range) { {if ("" != null) return Long.toString(val);} }
-        {if ("" != null) return Long.toString(val) + ".." + Long.toString(val2);}
+if (!range) { {if ("" != null) return "int: " + Long.toString(val);} }
+        {if ("" != null) return "int: " + Long.toString(val) + ".." + Long.toString(val2);}
+      break;
+      }
+    case FLOATONE:
+    case FLOATTWO:{
+      dval = floating_pt_literal();
+      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case 11:{
+        jj_consume_token(11);
+        dval2 = floating_pt_literal();
+range=true;
+        break;
+        }
+      default:
+        jj_la1[8] = jj_gen;
+        ;
+      }
+if (!range) { {if ("" != null) return "float: " + Double.toString(dval);} }
+        {if ("" != null) return "float: " + Double.toString(dval) + ".." + Double.toString(dval2);}
       break;
       }
     case 33:
     case 34:{
       value = boolean_literal();
-{if ("" != null) return value;}
+{if ("" != null) return "bool: " + value;}
       break;
       }
     default:
-      jj_la1[8] = jj_gen;
+      jj_la1[9] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -216,7 +234,7 @@ packName += tName;
         break;
         }
       default:
-        jj_la1[9] = jj_gen;
+        jj_la1[10] = jj_gen;
         break label_4;
       }
       jj_consume_token(12);
@@ -264,7 +282,7 @@ enumElementEvent.fireEvent(tName);
         break;
         }
       default:
-        jj_la1[10] = jj_gen;
+        jj_la1[11] = jj_gen;
         break label_5;
       }
       jj_consume_token(17);
@@ -303,7 +321,7 @@ extendsEvent.fireEvent(tName);
           break;
           }
         default:
-          jj_la1[11] = jj_gen;
+          jj_la1[12] = jj_gen;
           break label_6;
         }
         member();
@@ -312,7 +330,7 @@ extendsEvent.fireEvent(tName);
       break;
       }
     default:
-      jj_la1[13] = jj_gen;
+      jj_la1[14] = jj_gen;
       if (jj_2_2(2)) {
         jj_consume_token(15);
         label_7:
@@ -336,7 +354,7 @@ extendsEvent.fireEvent(tName);
             break;
             }
           default:
-            jj_la1[12] = jj_gen;
+            jj_la1[13] = jj_gen;
             break label_7;
           }
           member();
@@ -376,14 +394,14 @@ currentIDLField = new IDLField(fieldName, "");
             break;
             }
           default:
-            jj_la1[14] = jj_gen;
+            jj_la1[15] = jj_gen;
             break label_8;
           }
         }
         break;
         }
       default:
-        jj_la1[15] = jj_gen;
+        jj_la1[16] = jj_gen;
         ;
       }
       typeName = type_spec();
@@ -422,7 +440,7 @@ commentEvent.fireEvent(comment);
       break;
       }
     default:
-      jj_la1[16] = jj_gen;
+      jj_la1[17] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -441,7 +459,7 @@ currentIDLEnumType.getEnumNames().add(eName);
         break;
         }
       default:
-        jj_la1[17] = jj_gen;
+        jj_la1[18] = jj_gen;
         break label_9;
       }
       jj_consume_token(17);
@@ -523,7 +541,7 @@ currentIDLField.setName(fieldName);
       break;
       }
     default:
-      jj_la1[18] = jj_gen;
+      jj_la1[19] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -550,7 +568,7 @@ currentIDLField.setName(fieldName);
         break;
         }
       default:
-        jj_la1[19] = jj_gen;
+        jj_la1[20] = jj_gen;
         ;
       }
       jj_consume_token(21);
@@ -567,7 +585,7 @@ if (currentToken != null) size = currentToken.image;
       break;
       }
     default:
-      jj_la1[20] = jj_gen;
+      jj_la1[21] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -606,7 +624,7 @@ String declarator() throws ParseException {String ret = "";
     case 23:
     case 24:{
       typeName = floating_pt_type();
-{if ("" != null) return typeName;}
+currentIDLField.setFloatType(true); {if ("" != null) return typeName;}
       break;
       }
     case 25:
@@ -614,7 +632,7 @@ String declarator() throws ParseException {String ret = "";
     case 27:
     case 28:{
       typeName = integer_type();
-{if ("" != null) return typeName;}
+currentIDLField.setIntType(true); {if ("" != null) return typeName;}
       break;
       }
     case 29:{
@@ -645,7 +663,7 @@ currentIDLField.setIdlType(true);
       break;
       }
     default:
-      jj_la1[21] = jj_gen;
+      jj_la1[22] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -663,7 +681,7 @@ className += tName;
         break;
         }
       default:
-        jj_la1[22] = jj_gen;
+        jj_la1[23] = jj_gen;
         break label_10;
       }
       jj_consume_token(12);
@@ -687,7 +705,7 @@ className += tName;
         break;
         }
       default:
-        jj_la1[23] = jj_gen;
+        jj_la1[24] = jj_gen;
         break label_11;
       }
       jj_consume_token(12);
@@ -748,7 +766,7 @@ String floating_pt_type() throws ParseException {
       break;
       }
     default:
-      jj_la1[24] = jj_gen;
+      jj_la1[25] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -780,7 +798,7 @@ String integer_type() throws ParseException {
       break;
       }
     default:
-      jj_la1[25] = jj_gen;
+      jj_la1[26] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -805,7 +823,7 @@ String boolean_type() throws ParseException {
       break;
       }
     default:
-      jj_la1[26] = jj_gen;
+      jj_la1[27] = jj_gen;
       ;
     }
 if (currentToken != null) size = currentToken.image;
@@ -843,7 +861,7 @@ if (currentToken != null) value = currentToken.image;
       break;
       }
     default:
-      jj_la1[27] = jj_gen;
+      jj_la1[28] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -875,7 +893,7 @@ if (currentToken != null) value = currentToken.image;
       break;
       }
     default:
-      jj_la1[28] = jj_gen;
+      jj_la1[29] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -895,7 +913,7 @@ if (currentToken != null) value = currentToken.image;
       break;
       }
     default:
-      jj_la1[29] = jj_gen;
+      jj_la1[30] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -916,30 +934,6 @@ if (currentToken != null) value = currentToken.image;
     try { return !jj_3_2(); }
     catch(LookaheadSuccess ls) { return true; }
     finally { jj_save(1, xla); }
-  }
-
-  private boolean jj_3R_32()
- {
-    if (jj_3R_38()) return true;
-    return false;
-  }
-
-  private boolean jj_3_2()
- {
-    if (jj_scan_token(15)) return true;
-    Token xsp;
-    while (true) {
-      xsp = jj_scanpos;
-      if (jj_3R_14()) { jj_scanpos = xsp; break; }
-    }
-    if (jj_scan_token(16)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_44()
- {
-    if (jj_scan_token(28)) return true;
-    return false;
   }
 
   private boolean jj_3R_43()
@@ -1071,13 +1065,6 @@ if (currentToken != null) value = currentToken.image;
     return false;
   }
 
-  private boolean jj_3R_15()
- {
-    if (jj_scan_token(9)) return true;
-    if (jj_3R_16()) return true;
-    return false;
-  }
-
   private boolean jj_3R_38()
  {
     if (jj_scan_token(22)) return true;
@@ -1090,15 +1077,22 @@ if (currentToken != null) value = currentToken.image;
     return false;
   }
 
+  private boolean jj_3R_15()
+ {
+    if (jj_scan_token(9)) return true;
+    if (jj_3R_16()) return true;
+    return false;
+  }
+
   private boolean jj_3R_24()
  {
     if (jj_3R_15()) return true;
     return false;
   }
 
-  private boolean jj_3R_12()
+  private boolean jj_3R_25()
  {
-    if (jj_3R_15()) return true;
+    if (jj_3R_26()) return true;
     return false;
   }
 
@@ -1113,12 +1107,6 @@ if (currentToken != null) value = currentToken.image;
     return false;
   }
 
-  private boolean jj_3R_25()
- {
-    if (jj_3R_26()) return true;
-    return false;
-  }
-
   private boolean jj_3R_37()
  {
     if (jj_3R_16()) return true;
@@ -1128,17 +1116,6 @@ if (currentToken != null) value = currentToken.image;
   private boolean jj_3R_36()
  {
     if (jj_scan_token(30)) return true;
-    return false;
-  }
-
-  private boolean jj_3_1()
- {
-    Token xsp;
-    while (true) {
-      xsp = jj_scanpos;
-      if (jj_3R_12()) { jj_scanpos = xsp; break; }
-    }
-    if (jj_3R_13()) return true;
     return false;
   }
 
@@ -1181,6 +1158,12 @@ if (currentToken != null) value = currentToken.image;
     return false;
   }
 
+  private boolean jj_3R_12()
+ {
+    if (jj_3R_15()) return true;
+    return false;
+  }
+
   private boolean jj_3R_23()
  {
     if (jj_3R_25()) return true;
@@ -1190,6 +1173,41 @@ if (currentToken != null) value = currentToken.image;
   private boolean jj_3R_35()
  {
     if (jj_scan_token(29)) return true;
+    return false;
+  }
+
+  private boolean jj_3_1()
+ {
+    Token xsp;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_12()) { jj_scanpos = xsp; break; }
+    }
+    if (jj_3R_13()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_32()
+ {
+    if (jj_3R_38()) return true;
+    return false;
+  }
+
+  private boolean jj_3_2()
+ {
+    if (jj_scan_token(15)) return true;
+    Token xsp;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_14()) { jj_scanpos = xsp; break; }
+    }
+    if (jj_scan_token(16)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_44()
+ {
+    if (jj_scan_token(28)) return true;
     return false;
   }
 
@@ -1204,7 +1222,7 @@ if (currentToken != null) value = currentToken.image;
   private Token jj_scanpos, jj_lastpos;
   private int jj_la;
   private int jj_gen;
-  final private int[] jj_la1 = new int[30];
+  final private int[] jj_la1 = new int[31];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static {
@@ -1212,10 +1230,10 @@ if (currentToken != null) value = currentToken.image;
       jj_la1_init_1();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x0,0x80,0x6200,0x6200,0x200,0x4000,0x400,0x800,0x0,0x1000,0x20000,0x7fc84200,0x7fc84200,0x40000,0x200,0x200,0x7fc84200,0x20000,0x7f800000,0x0,0x100000,0x7fc00000,0x1000,0x1000,0x1800000,0x1e000000,0x80000000,0x0,0x0,0x0,};
+      jj_la1_0 = new int[] {0x0,0x80,0x6200,0x6200,0x200,0x4000,0x400,0x800,0x800,0x0,0x1000,0x20000,0x7fc84200,0x7fc84200,0x40000,0x200,0x200,0x7fc84200,0x20000,0x7f800000,0x0,0x100000,0x7fc00000,0x1000,0x1000,0x1800000,0x1e000000,0x80000000,0x0,0x0,0x0,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0x800,0x800,0x800,0x800,0x0,0x0,0x0,0x0,0x7e,0x0,0x0,0x808,0x808,0x0,0x0,0x0,0x808,0x0,0x0,0x20,0x8,0x8,0x0,0x0,0x0,0x0,0x0,0x70,0x180,0x6,};
+      jj_la1_1 = new int[] {0x800,0x800,0x800,0x800,0x0,0x0,0x0,0x0,0x0,0x1fe,0x0,0x0,0x808,0x808,0x0,0x0,0x0,0x808,0x0,0x0,0x20,0x8,0x8,0x0,0x0,0x0,0x0,0x0,0x70,0x180,0x6,};
    }
   final private JJCalls[] jj_2_rtns = new JJCalls[2];
   private boolean jj_rescan = false;
@@ -1232,7 +1250,7 @@ if (currentToken != null) value = currentToken.image;
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 30; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 31; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1247,7 +1265,7 @@ if (currentToken != null) value = currentToken.image;
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 30; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 31; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1258,7 +1276,7 @@ if (currentToken != null) value = currentToken.image;
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 30; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 31; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1269,7 +1287,7 @@ if (currentToken != null) value = currentToken.image;
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 30; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 31; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1279,7 +1297,7 @@ if (currentToken != null) value = currentToken.image;
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 30; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 31; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1289,7 +1307,7 @@ if (currentToken != null) value = currentToken.image;
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 30; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 31; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1407,7 +1425,7 @@ if (currentToken != null) value = currentToken.image;
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 30; i++) {
+    for (int i = 0; i < 31; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {

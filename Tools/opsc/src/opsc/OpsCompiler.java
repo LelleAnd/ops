@@ -663,6 +663,7 @@ public class OpsCompiler
               field.setIdlType(false);
               field.setEnumType(true);
               field.setValue(et.getEnumNames().get(0));
+              field.setRange("0", Integer.toString(et.getEnumNames().size()-1));
               if (pName.equals("")) {
                 field.setFullyQualifiedType(idlClass.getPackageName() + "." + field.getType());
               }
@@ -699,6 +700,7 @@ public class OpsCompiler
             for (IDLEnumType et : idlClass.getEnumTypes()) {
               if (et.getName().equals(field.getType().replace("[]",""))) {
                 field.setValue(et.getEnumNames().get(0));
+                field.setRange("0", Integer.toString(et.getEnumNames().size()-1));
                 field.setFullyQualifiedType(idlClass.getPackageName() + "." + idlClass.getClassName() + "." + field.getType());
                 break;
               }
@@ -715,6 +717,8 @@ public class OpsCompiler
           // Check if any field specified the version directive and if so save the highest version found
           int v = CompilerSupport.highestVersion(idlClass.getClassName() + "." + field.getName(), field.getDirective());
           if (version < v) { version = v; }
+          // Populate the field 'range specification' if 'range' directive given
+          CompilerSupport.rangeDirective("", field);
         }
         idlClass.setVersion(version);
       }
@@ -769,9 +773,12 @@ public class OpsCompiler
             System.out.println("    field.getFullyQualifiedType() : " + field.getFullyQualifiedType());
             System.out.println("    field.getComment()            : " + field.getComment());
             System.out.println("    field.getDirective()          : " + field.getDirective());
+            System.out.println("    field.getRange()              : " + field.getRangeLo() + ".." + field.getRangeHi());
             System.out.println("    field.getValue()              : " + field.getValue());
             System.out.println("    field.isIdlType()             : " + field.isIdlType());
             System.out.println("    field.isEnumType()            : " + field.isEnumType());
+            System.out.println("    field.isIntType()             : " + field.isIntType());
+            System.out.println("    field.isFloatType()           : " + field.isFloatType());
             System.out.println("    field.isArray()               : " + field.isArray());
             System.out.println("    field.isStatic()              : " + field.isStatic());
             System.out.println("    field.isAbstract()            : " + field.isAbstract());

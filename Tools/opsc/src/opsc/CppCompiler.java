@@ -53,6 +53,7 @@ public class CppCompiler extends opsc.Compiler
     private static String MEMORYPOOL_DECL_REGX = "__memoryPoolDecl";
     private static String MOVE_CONSTRUCTOR_REGEX = "__moveconstructor";
     private static String MOVE_ASSIGNMENT_REGEX = "__moveassignment";
+    private static String VALIDATION_REGEX = "__validation";
 
     //private String projectDirectory;
     String createdFiles = "";
@@ -154,6 +155,7 @@ public class CppCompiler extends opsc.Compiler
         templateText = templateText.replace(MEMORYPOOL_DECL_REGX, getMemoryPoolDeclaration(idlClass));
         templateText = templateText.replace(MOVE_CONSTRUCTOR_REGEX, getMoveConstructor(idlClass));
         templateText = templateText.replace(MOVE_ASSIGNMENT_REGEX, getMoveAssignment(idlClass));
+        templateText = templateText.replace(VALIDATION_REGEX, getValidation(idlClass));
 
         //Save the modified text to the output file.
         saveOutputText(templateText);
@@ -679,6 +681,78 @@ public class CppCompiler extends opsc.Compiler
           ret += elementType(field);
           if (field.isAbstract()) ret += "*";
           ret += " " + fieldName + "[" + field.getArraySize() + "];" + endl();
+        }
+        return ret;
+    }
+
+    protected String getValidation(IDLClass idlClass)
+    {
+        String ret = "";
+
+        if (isOnlyDefinition(idlClass)) {
+            return ret;
+        }
+
+        String versionName = getClassName(idlClass) + "_version";
+
+        for (IDLField field : idlClass.getFields()) {
+            String fieldName = getFieldName(field);
+            String fieldGuard = getFieldGuard(versionName, field);
+            String preStr = "";
+            String postStr = "";
+            String idxStr = "";
+            int t = 2;
+            if (fieldGuard.length() > 0) {
+                preStr  += tab(t) + "if (" + fieldGuard + ") {" + endl();
+                postStr += tab(t) + "}" + endl();
+                t += 1;
+            }
+            if (field.isArray()) {
+                String upper = "this->" + fieldName + ".size()";
+                if (field.getArraySize() > 0) {
+                    upper = "" + field.getArraySize();
+                }
+                preStr  += tab(t) + "for (size_t __i = 0; __i < " + upper + "; __i++) {" + endl();
+                postStr += tab(t) + "}" + endl();
+                idxStr = "[__i]";
+                t += 1;
+            }
+            if (field.isEnumType()) {
+                String lo = field.getRangeLo();
+                String hi = field.getRangeHi();
+                ret += preStr;
+                ret += tab(t) + "//validate range: " + lo + ".." + hi + endl();
+                ret += tab(t) + "valid = valid && (static_cast<int16_t>(this->" + fieldName + idxStr + ") >= " + lo +
+                                ") && (static_cast<int16_t>(this->" + fieldName + idxStr + ") <= " + hi + ");" + endl();
+                ret += postStr;
+
+            } else {
+                if (field.isIdlType()) {
+                    ret += preStr;
+                    ret += tab(t) + "valid = valid && this->" + fieldName + idxStr;
+                    if (field.isAbstract()) {
+                        ret += "->isValid();" + endl();
+                    } else {
+                        ret += ".isValid();" + endl();
+                    }
+                    ret += postStr;
+
+                } else {
+                    String lo = field.getRangeLo();
+                    String hi = field.getRangeHi();
+                    if (!(lo.equals("") || hi.equals(""))) {
+                        if (field.isIntType() || field.isFloatType()) {
+                            String pf = "";
+                            if (languageType(field).equals("float")) pf = "f";
+                            ret += preStr;
+                            ret += tab(t) + "//validate range: " + lo + ".." + hi + endl();
+                            ret += tab(t) + "valid = valid && (this->" + fieldName + idxStr + " >= " + lo + pf +
+                                            ") && (this->" + fieldName + idxStr + " <= " + hi + pf + ");" + endl();
+                            ret += postStr;
+                        }
+                    }
+                }
+            }
         }
         return ret;
     }

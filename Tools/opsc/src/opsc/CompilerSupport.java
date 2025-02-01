@@ -282,7 +282,7 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
             int idx = directiveStr.indexOf("version = ");
             if (idx == -1) break;
             int idx2 = directiveStr.indexOf(",", idx);
-            idx += 10;
+            idx += 10;  // Skip 'version = '
             String sub, sub2;
             if (idx2 == -1) {
                 sub = directiveStr.substring(idx);
@@ -291,6 +291,13 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
                 sub = directiveStr.substring(idx, idx2);
                 directiveStr = directiveStr.substring(idx2+1);
             }
+            // Make sure value type is 'int: '
+            if (sub.indexOf("int: ") != 0) {
+                System.out.println("Error: " + msg + ". //@version range invalid (not integer): '" + sub + "'");
+                System.exit(99);
+            }
+            // Skip 'int: '
+            sub = sub.substring(5);
             //System.out.println("Info: version, '" + sub + "', for field: " + msg);
             if (vec == null) { vec = new Vector<VersionEntry>(); }
             VersionEntry ent = new VersionEntry();
@@ -363,6 +370,41 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
             }
         }
         return version;
+    }
+
+    public static void rangeDirective(String msg, IDLField field)
+    {
+        String directiveStr = field.getDirective();
+        int idx = directiveStr.indexOf("range = ");
+        if (idx == -1) return;
+        int idx2 = directiveStr.indexOf(",", idx);
+        idx += 8;  // Skip 'range = '
+        String sub;
+        if (idx2 == -1) {
+            sub = directiveStr.substring(idx);
+        } else {
+            sub = directiveStr.substring(idx, idx2);
+        }
+        // Make sure value type is 'int: ' or 'real: '
+        String sublo = "";
+        if (sub.indexOf("int: ") == 0) {
+            sublo = sub.substring(5);
+        } else if (sub.indexOf("float: ") == 0) {
+            sublo = sub.substring(7);
+        } else {
+            System.out.println("Error: " + msg + ". Field " + field.getName() + ". //@range specification invalid (not integer/floating point): '" + sub + "'");
+            System.exit(99);
+        }
+        String subhi;
+        int idx3 = sublo.indexOf("..");
+        if (idx3 != -1) {
+            subhi = sublo.substring(idx3+2);
+            sublo = sublo.substring(0, idx3);
+            field.setRange(sublo, subhi);
+        } else {
+            System.out.println("Error: " + msg + ". Field " + field.getName() + ". //@range specification invalid (missing ..): '" + sub + "'");
+            System.exit(99);
+        }
     }
 
 }

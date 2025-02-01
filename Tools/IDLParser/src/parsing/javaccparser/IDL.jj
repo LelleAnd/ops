@@ -113,17 +113,23 @@ void directive_declare():
 }
 
 String directive_value():
-{ String value = ""; Long val = 0L; Long val2 = 0L; boolean range = false;}
+{ String value = ""; Long val = 0L; Long val2 = 0L; Double dval = 0.0; Double dval2 = 0.0; boolean range = false;}
 {
-    value = <ID>.image {return value;}
+    value = <ID>.image {return "ID: " + value;}
 |
     val = integer_literal() [ ".." val2 = integer_literal() {range=true;}]
     {
-        if (!range) { return Long.toString(val); }
-        return Long.toString(val) + ".." + Long.toString(val2);
+        if (!range) { return "int: " + Long.toString(val); }
+        return "int: " + Long.toString(val) + ".." + Long.toString(val2);
     }
 |
-    value = boolean_literal() {return value;}
+    dval = floating_pt_literal() [ ".." dval2 = floating_pt_literal() {range=true;}]
+    {
+        if (!range) { return "float: " + Double.toString(dval); }
+        return "float: " + Double.toString(dval) + ".." + Double.toString(dval2);
+    }
+|
+    value = boolean_literal() {return "bool: " + value;}
 }
 
 /* Production 3 */
@@ -347,10 +353,10 @@ String base_type_spec() :
 {String typeName = "";}
 {
   typeName = floating_pt_type()
-  {return typeName;}
+  {currentIDLField.setFloatType(true); return typeName;}
 |
   typeName = integer_type()
-  {return typeName;}
+  {currentIDLField.setIntType(true); return typeName;}
 |
   typeName = boolean_type()
   {return typeName;}

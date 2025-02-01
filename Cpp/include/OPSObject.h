@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2021 Lennart Andersson.
+* Copyright (C) 2019-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -103,6 +103,8 @@ namespace ops
                 throw exceptions::ArchiverException(m);
             }
         }
+
+        virtual bool isValid() const noexcept;
 
     public:
         OPSObject();

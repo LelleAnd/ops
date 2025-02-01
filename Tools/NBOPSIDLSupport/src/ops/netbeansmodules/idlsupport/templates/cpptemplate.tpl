@@ -83,6 +83,16 @@ __clone
 __fillClone
     }
 
+	///Validation routine for all fields marked with a 'range' directive
+	virtual bool isValid() const noexcept override
+    {
+		bool valid = true;
+		valid = valid && __baseClassName::isValid();
+		valid = valid && (__className_version >= 0) && (__className_version <= __className_idlVersion);
+__validation
+		return valid;
+    }
+
     ///Destructor: Note that all aggregated data and vectors are completely deleted.
     virtual ~__className(void)
     {

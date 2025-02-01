@@ -22,12 +22,16 @@ public class IDLField
     private String value;
     private boolean idlType;
     private boolean enumType;
+    private boolean intType;
+    private boolean floatType;
     private boolean _static;
     private boolean array;
     private boolean _abstract;
     private int arraySize = 0;
     private int stringSize = 0;
     private String fullyQualifiedType;
+    private String rangeLo = "";
+    private String rangeHi = "";
 
     /** Creates a new instance of IDLField */
     public IDLField(String name, String type, String comment, String value)
@@ -124,6 +128,20 @@ public class IDLField
         this.value = value;
     }
 
+    public String getRangeLo()
+    {
+        return rangeLo;
+    }
+    public String getRangeHi()
+    {
+        return rangeHi;
+    }
+    public void setRange(String lo, String hi)
+    {
+        this.rangeLo = lo;
+        this.rangeHi = hi;
+    }
+
     public boolean isIdlType()
     {
         return idlType;
@@ -140,6 +158,24 @@ public class IDLField
     public void setEnumType(boolean enumType)
     {
         this.enumType = enumType;
+    }
+
+    public boolean isIntType()
+    {
+        return intType;
+    }
+    public void setIntType(boolean intType)
+    {
+        this.intType = intType;
+    }
+
+    public boolean isFloatType()
+    {
+        return floatType;
+    }
+    public void setFloatType(boolean floatType)
+    {
+        this.floatType = floatType;
     }
 
     public boolean isArray()

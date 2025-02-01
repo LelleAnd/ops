@@ -7,7 +7,11 @@ class PizzaData extends sds.MessageHeaderData
 
     /* hej hopp */
     //@version = 1 .. 5 //@version = 10
+    //@range = 0 .. 1023
     int Kalle;
 
     pizza.extra.Secret sec;
+
+    enum ResWord {if, begin, None};
+    ResWord enum_var;
 }

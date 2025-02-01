@@ -6,6 +6,8 @@ include_directories(${PIZZAPROJECT_GENERATED_PATH}/Cpp)
 
 set(APP_SRCS
   PizzaTest.cpp
+  ValidationTest.cpp
+  ValidationTest.h
   SdsSystemTime.cpp
   SdsSystemTime.h
   ../ConfigFileHelper.cpp

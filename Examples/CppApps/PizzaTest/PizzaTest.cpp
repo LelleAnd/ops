@@ -35,6 +35,7 @@
 #include "PrintArchiverOut.h"
 #include "ChecksumArchiver.h"
 #include "NetworkSupport.h"
+#include "ValidationTest.h"
 
 ///----- Configuration -----
 #define USE_LAMDAS
@@ -136,6 +137,7 @@ public:
 	virtual void StopSubscriber() = 0;
 	virtual void SetDeadlineQos(int64_t timeoutMs) = 0;
     virtual void Activate() = 0;
+    virtual void CheckValid() = 0;
 	virtual ~IHelper() {};
 	IHelper() = default;
 	IHelper(IHelper const&) = delete;
@@ -150,6 +152,7 @@ int64_t sendPeriod = 1000;
 int PD_version = (int)pizza::PizzaData::PizzaData_idlVersion;
 unsigned int numBurst = 1;
 ops::ObjectKey_T gKey;
+int PD_Kalle = 0;	// Used for validation tests
 
 void WriteUpdate(pizza::PizzaData& data, const std::string& message)
 {
@@ -161,6 +164,7 @@ void WriteUpdate(pizza::PizzaData& data, const std::string& message)
     }
     data.cheese = "Pizza from C++: " + message;
     data.tomatoSauce = "Tomato";
+    data.Kalle = PD_Kalle;
 #ifdef USE_MESSAGE_HEADER
     data.systemTime = sds::sdsSystemTime();
 #endif
@@ -222,6 +226,21 @@ public:
 	CHelper(CHelper&&) = delete;
 	CHelper& operator =(CHelper&&) = delete;
 	CHelper& operator =(CHelper const&) = delete;
+
+	virtual void CheckValid() override
+    {
+        WriteUpdate(data, "");	// Ensure data object updated for validation
+        bool valid = data.isValid();
+        ops::ObjectName_T topName = "";
+		if (pub != nullptr) {
+            topName = pub->getTopic().getName();
+        }
+        if (valid) {
+            std::cout << "Data for topic '" << topName << "' is valid" << std::endl;
+        } else {
+            std::cout << "Data for topic '" << topName << "' is NOT valid" << std::endl;
+        }
+    }
 
 	virtual bool HasPublisher() override { return pub != nullptr; }
 	virtual bool HasSubscriber() override { return sub != nullptr; }
@@ -818,6 +837,7 @@ void menu()
 	std::cout << "\t L num   Set num Vessuvio Bytes [" << NumVessuvioBytes << "]" << std::endl;
 	std::cout << "\t T ms    Set deadline timeout [ms]" << std::endl;
 	std::cout << "\t V ms    Set send period [ms] [" << sendPeriod << "]" << std::endl;
+    std::cout << "\t Cx      Validation (x=? isValid()|i set invalid|v set valid|n none|e exception|c[stp] callback" << std::endl;
 	std::cout << "\t A       Start/Stop periodical Write with set period" << std::endl;
 	std::cout << "\t K       Set key [" << gKey << "]" << std::endl;
 	std::cout << "\t M ver   Set Pizzadata version [" << PD_version << "]" << std::endl;
@@ -1099,13 +1119,22 @@ int main(const int argc, const char* argv[])
 
 			case 'c':
 			case 'C':
-				for (unsigned int i = 0; i < ItemInfoList.size(); i++) {
+                if (func == TFunction::NONE) {
+                    if (line.size() == 0) { break; }
+					if (line[0] != '?') {
+                        ValidationTest(line, *participant, PD_Kalle);
+                        break;
+                    }
+                }
+                for (unsigned int i = 0; i < ItemInfoList.size(); i++) {
 					ItemInfo* const info = ItemInfoList[i];
 					if (!info->selected) { continue; }
 					if (func == TFunction::PUB) {
 						info->helper->CreatePublisher(info->part, info->TopicName);
 					} else if (func == TFunction::SUB) {
 						info->helper->CreateSubscriber(info->part, info->TopicName);
+                    } else {
+                        info->helper->CheckValid();	// Command "c?"
 					}
 				}
 				break;

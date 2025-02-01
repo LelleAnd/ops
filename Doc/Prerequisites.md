@@ -30,7 +30,7 @@ Make sure you have boost installed, otherwise download pre-built binaries for bo
     * Boost System
     * Boost Thread
 
-OPS has been used with Boost versions 1.60, 1.64, 1.66, 1.67, 1.71, 1.72, 1.74, 1.82 and 1.84.
+OPS has been used with Boost versions 1.60, 1.64, 1.66, 1.67, 1.71, 1.72, 1.74, 1.82, 1.83 and 1.84.
 Versions older than 1.71 hasn't been used/tested for quite a while. It is recommended to use a more modern version.
 
 ## TinyXML-2 (required for OPS C++ Core) ##
@@ -51,7 +51,7 @@ OPS for C# requires language version 7.3 or later (due to generics and constrain
 ## gcc (Linux) ##
 OPS for C++ requires a C++11 compiler and has therefore only support for gcc 4.8.1 an later.
 
-OPS has been used with 5.3.0, 5.4.0, 6.2.1, 6.4.1, 7.3.1, 9.2.0, 9.3.0 and 11.3.0.
+OPS has been used with 5.3.0, 5.4.0, 6.2.1, 6.4.1, 7.3.1, 9.2.0, 9.3.0, 11.3.0 and 13.3.
 
 ## .NET ##
 To use C# on Linux, install .NET 5 or later as decribed on

@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2024 Lennart Andersson.
+* Copyright (C) 2018-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -36,6 +36,7 @@
 #include "ConnectStatus.h"
 #include "Lockable.h"
 #include "TimeHelper.h"
+#include "Validation.h"
 
 namespace ops
 {
@@ -86,7 +87,10 @@ public:
     // Note that the value is the ID to be used in the next message (ie. the number of sent messages, excluding ev. resends).
     int64_t getPublicationID() const noexcept { return currentPublicationID; }
 
-protected:
+	// Validation
+    void defineValidation(ValidationStrategy strat, ValidationPubCallback cb = {});
+
+  protected:
     int64_t currentPublicationID{ 0 };
     std::shared_ptr<SendDataHandler> sendDataHandler{ nullptr };
 
@@ -116,6 +120,9 @@ private:
 
     bool started{ false };
     bool useInProc{ false };
+
+    ValidationStrategy valStrat{ValidationStrategy::None};
+    ValidationPubCallback valCall{};
 
 #ifdef OPS_ENABLE_DEBUG_HANDLER
     volatile int64_t _dbgSkip{ 0 };

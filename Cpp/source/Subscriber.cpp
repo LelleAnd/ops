@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2024 Lennart Andersson.
+ * Copyright (C) 2018-2025 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -38,12 +38,26 @@ namespace ops
         topic(t)
     {
         participant = Participant::getInstance(topic.getDomainID(), topic.getParticipantID());
+        valStrat = participant->valSubStrat;
+        valCall = participant->valSubCall;
     }
 
     SubscriberBase::~SubscriberBase()
     {
         // Make sure subscriber is stopped and no more notifications can call us
         stop();
+    }
+
+    // Validation
+    void SubscriberBase::defineValidation(ValidationStrategy strat, ValidationSubCallback cb)
+    {
+        if (strat == ValidationStrategy::Default) {
+            valStrat = participant->valSubStrat;
+            valCall = participant->valSubCall;
+        } else {
+            valStrat = strat;
+            valCall = cb;
+        }
     }
 
     void SubscriberBase::setupDeadlineTimer()
@@ -283,7 +297,7 @@ namespace ops
             return;
         }
         //Check that the type of the delivered data can be interpreted as the type we expect in this Subscriber
-        else if (message->getData()->getTypeString().find(topic.getTypeID()) == TypeId_T::npos)
+        if (message->getData()->getTypeString().find(topic.getTypeID()) == TypeId_T::npos)
         {
 			ErrorMessage_T msg("Received message with wrong data type for Topic: ");
 			msg += topic.getName();
@@ -295,6 +309,26 @@ namespace ops
             participant->reportError(&err);
             return;
         }
+
+        if (valStrat != ValidationStrategy::None) {
+            if (!message->getData()->isValid()) {
+                ValidationAction act = ValidationAction::Pass;
+                if (valStrat == ValidationStrategy::Callback) {
+                    act = valCall(this, message, message->getData());
+                    if (act == ValidationAction::Throw) {
+                        act = ValidationAction::Skip;
+                    }
+                }
+                if ((valStrat == ValidationStrategy::Exception) || (act == ValidationAction::Skip)) {
+                    ErrorMessage_T msg("Received INVALID message for Topic: ");
+                    msg += topic.getName();
+                    BasicError err("Subscriber", "onNewEvent", msg);
+                    participant->reportError(&err);
+                    return;
+                }
+            }
+        }
+
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 		{
 			const SafeLock lck(_dbgLock);

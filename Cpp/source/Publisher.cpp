@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2024 Lennart Andersson.
+ * Copyright (C) 2018-2025 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -146,6 +146,9 @@ namespace ops
         _ackTimeoutInc(t.getResendTimeMs() < 0 ? 0 : t.getResendTimeMs())
     {
         participant = Participant::getInstance(topic.getDomainID(), topic.getParticipantID());
+        valStrat = participant->valPubStrat;
+        valCall = participant->valPubCall;
+
         sendDataHandler = participant->getSendDataHandler(topic);
 
 		message.setKey("");
@@ -195,7 +198,19 @@ namespace ops
 		OPS_DES_TRACE("Pub: Destructor() finished\n");
 	}
 
-	void Publisher::start()
+	// Validation
+    void Publisher::defineValidation(ValidationStrategy strat, ValidationPubCallback cb)
+    {
+        if (strat == ValidationStrategy::Default) {
+            valStrat = participant->valPubStrat;
+            valCall = participant->valPubCall;
+        } else {
+            valStrat = strat;
+            valCall = cb;
+        }
+    }
+
+    void Publisher::start()
 	{
         if (!started) {
             sendDataHandler->addListener(this);
@@ -268,6 +283,18 @@ namespace ops
 #endif
         if (m_key != "") {
             data->setKey(m_key);
+        }
+        if (valStrat != ValidationStrategy::None) {
+            if (!data->isValid()) {
+                ValidationAction act = ValidationAction::Pass;
+                if (valStrat == ValidationStrategy::Callback) {
+                    act = valCall(this, data);
+                    if (act == ValidationAction::Skip) { return false; }
+                }
+                if ((valStrat == ValidationStrategy::Exception) || (act == ValidationAction::Throw)) {
+                    throw ValidationFailed("Message validation failed");
+                }
+            }
         }
 
         if (_ackSub != nullptr) {

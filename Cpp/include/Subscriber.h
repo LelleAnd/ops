@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2024 Lennart Andersson.
+ * Copyright (C) 2018-2025 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -43,6 +43,7 @@
 #include "DebugHandler.h"
 #include "OPSEvent.h"
 #include "TimeHelper.h"
+#include "Validation.h"
 
 namespace ops
 {
@@ -94,7 +95,10 @@ namespace ops
             return receiveDataHandler->numReservedMessages();
         }
 
-    protected:
+	    // Validation
+        void defineValidation(ValidationStrategy strat, ValidationSubCallback cb = {});
+
+      protected:
         ///The Topic this Subscriber subscribes to.
         Topic topic;
 
@@ -120,7 +124,10 @@ namespace ops
             notifyNewEvent(arg);
         }
 
-    private:
+        ValidationStrategy valStrat{ValidationStrategy::None};
+        ValidationSubCallback valCall{};
+
+      private:
         bool m_started{ false };
     };
 
@@ -255,7 +262,7 @@ namespace ops
 		//User data field that the owner of the subscriber can use for any purpose. Not used by OPS.
         void* userPtr{ nullptr };
 
-	protected:
+      protected:
         void checkAndNotifyDeadlineMissed();
 
         OPSMessage* m_message{ nullptr };
@@ -269,7 +276,7 @@ namespace ops
         ///Name of this subscriber
 		ObjectName_T m_name;
 
-        ///Receiver side filters that will be applied to data from receiveDataHandler before delivery to application layer.
+        /// Receiver side filters that will be applied to data from receiveDataHandler before delivery to application layer.
         std::list<FilterQoSPolicy*> filterQoSPolicies;
 
         std::deque<OPSMessage*> messageBuffer;

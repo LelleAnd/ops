@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2020-2021 Lennart Andersson.
+* Copyright (C) 2020-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -42,6 +42,7 @@
 #include "ParticipantInfoDataListener.h"
 #include "SendDataHandler.h"
 #include "DebugHandler.h"
+#include "Validation.h"
 
 namespace ops
 {
@@ -187,11 +188,37 @@ namespace ops
         // Check under laying transports if there is any data not processed
         bool dataAvailable();
 
+		// Validation
+        void definePublisherValidation(ValidationStrategy strat, ValidationPubCallback cb = {})
+		{
+            if (strat == ValidationStrategy::Default) {
+                valPubStrat = ValidationStrategy::None;
+                valPubCall = {};
+            } else {
+                valPubStrat = strat;
+                valPubCall = cb;
+            }
+		}
+        void defineSubscriberValidation(ValidationStrategy strat, ValidationSubCallback cb = {})
+        {
+            if (strat == ValidationStrategy::Default) {
+                valSubStrat = ValidationStrategy::None;
+                valSubCall = {};
+            } else {
+                valSubStrat = strat;
+                valSubCall = cb;
+            }
+        }
+
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 		DebugHandler debugHandler;
 #endif
 	private:
 		execution_policy::Enum _policy;
+		ValidationStrategy valPubStrat{ValidationStrategy::None};
+        ValidationPubCallback valPubCall{};
+        ValidationStrategy valSubStrat{ValidationStrategy::None};
+        ValidationSubCallback valSubCall{};
 
 		static Participant* getInstanceInternal(ObjectName_T domainID, ObjectName_T participantID, FileName_T configFile, execution_policy::Enum policy);
 

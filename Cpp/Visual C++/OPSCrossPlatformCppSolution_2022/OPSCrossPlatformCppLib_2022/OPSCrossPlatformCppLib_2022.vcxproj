@@ -400,6 +400,7 @@
     <ClInclude Include="..\..\..\include\Trace.h" />
     <ClInclude Include="..\..\..\include\TraceStream.h" />
     <ClInclude Include="..\..\..\include\Transport.h" />
+    <ClInclude Include="..\..\..\include\Validation.h" />
     <ClInclude Include="..\..\..\source\BasicError.h" />
     <ClInclude Include="..\..\..\source\BasicWarning.h" />
     <ClInclude Include="..\..\..\source\BoostDeadlineTimerImpl.h" />

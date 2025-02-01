@@ -81,6 +81,7 @@ set(LIB_OPS_PUBLIC_HEADERS
   ${OPS_HEADER_PATH}/Trace.h
   ${OPS_HEADER_PATH}/TraceStream.h
   ${OPS_HEADER_PATH}/Transport.h
+  ${OPS_HEADER_PATH}/Validation.h
   ${OPS_HEADER_PATH}/XMLArchiverIn.h
   ${OPS_HEADER_PATH}/XMLArchiverOut.h
 )

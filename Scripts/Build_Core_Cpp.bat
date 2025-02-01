@@ -1,5 +1,5 @@
 @SETLOCAL
-@pushd "%~dp0\..\Cpp\Visual C++\OPSCrossPlatformCppSolution_2019"
+@pushd "%~dp0\..\Cpp\Visual C++\OPSCrossPlatformCppSolution_2022"
 
 @set target=
 @if %1.==. goto :noarg

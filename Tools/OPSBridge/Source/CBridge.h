@@ -55,7 +55,7 @@ namespace opsbridge {
 		std::string getName() {return m_myName;}
 
 		// Start a subscriber for the given topic
-		void setupSubscriber(ops::Topic& recTopic, BridgeConfig::TTopicConfig& tc);
+		void setupSubscriber(const ops::Topic& recTopic, BridgeConfig::TTopicConfig& tc);
 
 		void removeAllSubscribers();
 

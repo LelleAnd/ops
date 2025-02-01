@@ -74,7 +74,7 @@ CBridge::~CBridge()
 }
 
 // =================================================================================
-void CBridge::setupSubscriber(ops::Topic& recTopic, BridgeConfig::TTopicConfig& tc)
+void CBridge::setupSubscriber(const ops::Topic& recTopic, BridgeConfig::TTopicConfig& tc)
 {
 	ops::Subscriber* const sub = new ops::Subscriber(recTopic);
 	sub->addDataListener(this);

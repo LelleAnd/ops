@@ -30,6 +30,8 @@ namespace ops
 	Serializable* SerializableInheritingTypeFactory::create(const TypeId_T& typeString)
 	{
 		TypeId_T::size_type i = typeString.find_first_not_of(' ');  // Skip any leeding spaces
+		if (i == TypeId_T::npos) return nullptr;
+
 		TypeId_T::size_type j = typeString.find(' ', i);
 
 		while (j != TypeId_T::npos) {

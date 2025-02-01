@@ -168,7 +168,7 @@ public class UDPReceiver implements Receiver
             remoteSenderIp = p.getAddress().getHostAddress();
             remoteSenderPort = p.getPort();
 
-            newBytesEvent.fireEvent(new Integer(p.getLength()));
+            newBytesEvent.fireEvent(Integer.valueOf(p.getLength()));
             return true;
         }
         catch (SocketTimeoutException ex)

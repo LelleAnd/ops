@@ -8,6 +8,9 @@
 	mkdir dist
 )
 
+@rem @javac -Xlint:unchecked @"src/files.txt" -d "build/classes"
+@rem @javac -Xlint:deprecation @"src/files.txt" -d "build/classes"
+@rem @javac -Xlint @"src/files.txt" -d "build/classes"
 @javac @"src/files.txt" -d "build/classes"
 @IF ERRORLEVEL 1 goto :BUILD_FAILED
 

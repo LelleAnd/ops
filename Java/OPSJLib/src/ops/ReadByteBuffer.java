@@ -1,6 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2024 Lennart Andersson
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -104,7 +105,7 @@ public class ReadByteBuffer
         Vector<Boolean> ret = new Vector<Boolean>(size);
         for (int i = 0; i < size ; i++)
         {
-            ret.add(new Boolean(readboolean()));
+            ret.add(Boolean.valueOf(readboolean()));
         }
         return ret;
     }
@@ -119,7 +120,7 @@ public class ReadByteBuffer
 
         for (int i = 0; i < size ; i++)
         {
-            ret.add(new Byte(readbyte()));
+            ret.add(Byte.valueOf(readbyte()));
         }
         return ret;
     }
@@ -134,7 +135,7 @@ public class ReadByteBuffer
         Vector<Short> ret = new Vector<Short>(size);
         for (int i = 0; i < size ; i++)
         {
-            ret.add(new Short(readshort()));
+            ret.add(Short.valueOf(readshort()));
         }
         return ret;
     }
@@ -153,7 +154,7 @@ public class ReadByteBuffer
         Vector<Integer> ret = new Vector<Integer>(size);
         for (int i = 0; i < size ; i++)
         {
-            ret.add(new Integer(readint()));
+            ret.add(Integer.valueOf(readint()));
         }
         return ret;
     }
@@ -167,7 +168,7 @@ public class ReadByteBuffer
         Vector<Long> ret = new Vector<Long>(size);
         for (int i = 0; i < size ; i++)
         {
-            ret.add(new Long(readlong()));
+            ret.add(Long.valueOf(readlong()));
         }
         return ret;
     }
@@ -181,7 +182,7 @@ public class ReadByteBuffer
         Vector<Float> ret = new Vector<Float>(size);
         for (int i = 0; i < size ; i++)
         {
-            ret.add(new Float(readfloat()));
+            ret.add(Float.valueOf(readfloat()));
         }
         return ret;
     }
@@ -195,7 +196,7 @@ public class ReadByteBuffer
         Vector<Double> ret = new Vector<Double>(size);
         for (int i = 0; i < size ; i++)
         {
-            ret.add(new Double(readdouble()));
+            ret.add(Double.valueOf(readdouble()));
         }
         return ret;
     }

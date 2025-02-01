@@ -107,7 +107,7 @@ public class TcpClient implements Receiver
                 accumulatedSize += inputStream.read(bytes, accumulatedSize + offset, dataSize - accumulatedSize);
             }
 
-            newBytesEvent.fireEvent(new Integer(dataSize + headerBytes.length));
+            newBytesEvent.fireEvent(Integer.valueOf(dataSize + headerBytes.length));
             return true;
 
         } catch (IOException ex)

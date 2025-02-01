@@ -156,7 +156,7 @@ public class TcpClientReceiver implements Receiver
 
                 if (!failureDetected)
                 {
-                    newBytesEvent.fireEvent(new Integer(dataSize + headerBytes.length));
+                    newBytesEvent.fireEvent(Integer.valueOf(dataSize + headerBytes.length));
                     return true;
                 }
             }

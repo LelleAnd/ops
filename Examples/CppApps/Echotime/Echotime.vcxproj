@@ -100,7 +100,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>D:\OPS\ops4\Cpp\lib-vc143-x86;C:\Program Files %28x86%29\boost\boost_1_71\lib;D:\Git-Clones\tinyxml2\deploy32.release\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\OPS\ops4\Cpp\lib-vc143-x86;C:\Program Files %28x86%29\boost\boost_1_82\lib;D:\Git-Clones\tinyxml2\deploy32.release\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>OPSCppLib_vc143_MD.lib;winmm.lib;tinyxml2.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

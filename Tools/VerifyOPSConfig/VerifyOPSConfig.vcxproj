@@ -69,7 +69,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>OPSCppLib_vc143_MTd.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\Cpp\lib-vc143-x86;C:\Program Files %28x86%29\Boost\boost_1_71\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\Cpp\lib-vc143-x86;C:\Program Files %28x86%29\Boost\boost_1_82\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>..\..\..\..\Temp\intermediates\VerifyOPSConfig\$(Configuration)\$(TargetName).pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>

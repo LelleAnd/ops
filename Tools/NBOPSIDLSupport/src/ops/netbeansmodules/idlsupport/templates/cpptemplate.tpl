@@ -83,7 +83,7 @@ __clone
 __fillClone
     }
 
-	///Validation routine for all fields marked with a 'range' directive
+	///Validation routine for fields
 	virtual bool isValid() const noexcept override
     {
 		bool valid = true;

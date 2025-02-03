@@ -362,7 +362,7 @@ String base_type_spec() :
   {return typeName;}
 |
   typeName = string_type()
-  {return typeName;}
+  {currentIDLField.setStringType(true); return typeName;}
 |
   typeName = idl_type()
   {

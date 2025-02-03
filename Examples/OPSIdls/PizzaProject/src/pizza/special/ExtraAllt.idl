@@ -18,6 +18,7 @@ class ExtraAllt extends LHCData
 
     short sh;
 
+    //@maxarrlen = 17
     boolean[] bools;
     byte[] bytes;
     short[] shs;
@@ -25,6 +26,7 @@ class ExtraAllt extends LHCData
     long[] longs;
     float[] floats;
     double[] doubles;
+    //@maxarrlen = 42 //@maxstrlen=64
     string[] strings;
 
     pizza.special.Cheese[] cheeses;

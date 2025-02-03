@@ -642,7 +642,7 @@ currentIDLField.setIntType(true); {if ("" != null) return typeName;}
       }
     case 30:{
       typeName = string_type();
-{if ("" != null) return typeName;}
+currentIDLField.setStringType(true); {if ("" != null) return typeName;}
       break;
       }
     case ID:{

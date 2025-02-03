@@ -701,6 +701,7 @@ public class CppCompiler extends opsc.Compiler
             String preStr = "";
             String postStr = "";
             String idxStr = "";
+            String forceStr = "";
             int t = 2;
             if (fieldGuard.length() > 0) {
                 preStr  += tab(t) + "if (" + fieldGuard + ") {" + endl();
@@ -709,6 +710,13 @@ public class CppCompiler extends opsc.Compiler
             }
             if (field.isArray()) {
                 String upper = "this->" + fieldName + ".size()";
+                if ((field.getArraySize() == 0) && (field.getArrayMaxSize() > 0)) {
+                    ret += preStr;
+                    ret += tab(t) + "valid = valid && (" + upper + " <= " + field.getArrayMaxSize() + ");" + endl();
+                    forceStr = postStr;
+                    preStr = "";
+                    postStr = "";
+                }
                 if (field.getArraySize() > 0) {
                     upper = "" + field.getArraySize();
                 }
@@ -738,21 +746,29 @@ public class CppCompiler extends opsc.Compiler
                     ret += postStr;
 
                 } else {
-                    String lo = field.getRangeLo();
-                    String hi = field.getRangeHi();
-                    if (!(lo.equals("") || hi.equals(""))) {
-                        if (field.isIntType() || field.isFloatType()) {
-                            String pf = "";
-                            if (languageType(field).equals("float")) pf = "f";
-                            ret += preStr;
-                            ret += tab(t) + "//validate range: " + lo + ".." + hi + endl();
-                            ret += tab(t) + "valid = valid && (this->" + fieldName + idxStr + " >= " + lo + pf +
-                                            ") && (this->" + fieldName + idxStr + " <= " + hi + pf + ");" + endl();
-                            ret += postStr;
+                    if (field.isStringType() && (field.getStringSize() == 0) && (field.getStringMaxSize() > 0)) {
+                        ret += preStr;
+                        ret += tab(t) + "valid = valid && (this->" + fieldName + idxStr + ".size() <= " + field.getStringMaxSize() + ");" + endl();
+                        ret += postStr;
+
+                    } else {
+                        String lo = field.getRangeLo();
+                        String hi = field.getRangeHi();
+                        if (!(lo.equals("") || hi.equals(""))) {
+                            if (field.isIntType() || field.isFloatType()) {
+                                String pf = "";
+                                if (languageType(field).equals("float")) pf = "f";
+                                ret += preStr;
+                                ret += tab(t) + "//validate range: " + lo + ".." + hi + endl();
+                                ret += tab(t) + "valid = valid && (this->" + fieldName + idxStr + " >= " + lo + pf +
+                                                ") && (this->" + fieldName + idxStr + " <= " + hi + pf + ");" + endl();
+                                ret += postStr;
+                            }
                         }
                     }
                 }
             }
+            ret += forceStr;
         }
         return ret;
     }

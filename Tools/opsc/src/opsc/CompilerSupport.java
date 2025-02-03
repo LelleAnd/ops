@@ -407,4 +407,36 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
         }
     }
 
+    // usage int xx = intDirective("", "maxarrlen = ", field)
+    private static int intDirective(String msg, String lookfor, IDLField field)
+    {
+        String directiveStr = field.getDirective();
+        int idx = directiveStr.indexOf(lookfor);
+        if (idx == -1) return 0;
+        int idx2 = directiveStr.indexOf(",", idx);
+        idx += lookfor.length();  // Skip '..... = '
+        String sub;
+        if (idx2 == -1) {
+            sub = directiveStr.substring(idx);
+        } else {
+            sub = directiveStr.substring(idx, idx2);
+        }
+        // Make sure value type is 'int: '
+        String sublo = "";
+        if (sub.indexOf("int: ") == 0) {
+            sublo = sub.substring(5);
+        } else {
+            System.out.println("Error: " + msg + ". Field " + field.getName() + ". //@" + lookfor + " specification invalid (not integer): '" + sub + "'");
+            System.exit(99);
+        }
+        return Integer.parseInt(sublo);
+    }
+
+    public static void maxDirective(String msg, IDLField field)
+    {
+        int arrlen = intDirective(msg, "maxarrlen = ", field);
+        field.setArrayMaxSize(arrlen);
+        int strlen = intDirective(msg, "maxstrlen = ", field);
+        field.setStringMaxSize(strlen);
+    }
 }

@@ -717,8 +717,10 @@ public class OpsCompiler
           // Check if any field specified the version directive and if so save the highest version found
           int v = CompilerSupport.highestVersion(idlClass.getClassName() + "." + field.getName(), field.getDirective());
           if (version < v) { version = v; }
-          // Populate the field 'range specification' if 'range' directive given
+
+          // Populate the field with values from directives, if any
           CompilerSupport.rangeDirective("", field);
+          CompilerSupport.maxDirective("", field);
         }
         idlClass.setVersion(version);
       }
@@ -768,7 +770,9 @@ public class OpsCompiler
           for (IDLField field : idlClass.getFields()) {
             System.out.println("  field.getName()        : " + field.getName());
             System.out.println("    field.getArraySize()          : " + field.getArraySize());
+            System.out.println("    field.getArrayMaxSize()       : " + field.getArrayMaxSize());
             System.out.println("    field.getStringSize()         : " + field.getStringSize());
+            System.out.println("    field.getStringMaxSize()      : " + field.getStringMaxSize());
             System.out.println("    field.getType()               : " + field.getType());
             System.out.println("    field.getFullyQualifiedType() : " + field.getFullyQualifiedType());
             System.out.println("    field.getComment()            : " + field.getComment());
@@ -779,6 +783,7 @@ public class OpsCompiler
             System.out.println("    field.isEnumType()            : " + field.isEnumType());
             System.out.println("    field.isIntType()             : " + field.isIntType());
             System.out.println("    field.isFloatType()           : " + field.isFloatType());
+            System.out.println("    field.isStringType()          : " + field.isStringType());
             System.out.println("    field.isArray()               : " + field.isArray());
             System.out.println("    field.isStatic()              : " + field.isStatic());
             System.out.println("    field.isAbstract()            : " + field.isAbstract());

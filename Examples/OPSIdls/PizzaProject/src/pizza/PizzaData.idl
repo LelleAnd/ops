@@ -3,6 +3,7 @@ package pizza;
 class PizzaData extends sds.MessageHeaderData
 {
     string cheese;
+    //@maxstrlen = 20
     string tomatoSauce;
 
     /* hej hopp */

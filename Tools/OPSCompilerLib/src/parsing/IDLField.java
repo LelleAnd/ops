@@ -24,6 +24,7 @@ public class IDLField
     private boolean enumType;
     private boolean intType;
     private boolean floatType;
+    private boolean stringType;
     private boolean _static;
     private boolean array;
     private boolean _abstract;
@@ -32,6 +33,8 @@ public class IDLField
     private String fullyQualifiedType;
     private String rangeLo = "";
     private String rangeHi = "";
+    private int arrayMaxSize = 0;
+    private int stringMaxSize = 0;
 
     /** Creates a new instance of IDLField */
     public IDLField(String name, String type, String comment, String value)
@@ -72,6 +75,15 @@ public class IDLField
         this.arraySize = arraySize;
     }
 
+    public int getArrayMaxSize()
+    {
+        return arrayMaxSize;
+    }
+    public void setArrayMaxSize(int arrayMaxSize)
+    {
+        this.arrayMaxSize = arrayMaxSize;
+    }
+
     public int getStringSize()
     {
         return stringSize;
@@ -79,6 +91,15 @@ public class IDLField
     public void setStringSize(int stringSize)
     {
         this.stringSize = stringSize;
+    }
+
+    public int getStringMaxSize()
+    {
+        return stringMaxSize;
+    }
+    public void setStringMaxSize(int stringMaxSize)
+    {
+        this.stringMaxSize = stringMaxSize;
     }
 
     public String getType()
@@ -176,6 +197,15 @@ public class IDLField
     public void setFloatType(boolean floatType)
     {
         this.floatType = floatType;
+    }
+
+    public boolean isStringType()
+    {
+        return stringType;
+    }
+    public void setStringType(boolean stringType)
+    {
+        this.stringType = stringType;
     }
 
     public boolean isArray()

@@ -59,20 +59,6 @@ public class Publisher
 
         this.participant = Participant.getInstance(topic.getDomainID(), topic.getParticipantID());
         inProcessTransport = participant.getInProcessTransport();
-        init();
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-        // Must tell the sendDataHandler that we don't need it anymore
-        // in case user hasn't called stop()
-        stop();
-        sendDataHandler = null;
-    }
-
-    private void init()
-    {
         start();
     }
 
@@ -99,7 +85,7 @@ public class Publisher
             }
             catch (CommException ex)
             {
-                participant.report(this.getClass().getName(), "init", ex.getMessage());
+                participant.report(this.getClass().getName(), "start", ex.getMessage());
             }
         }
     }
@@ -114,6 +100,7 @@ public class Publisher
             // Tell the sendDataHandler that we don't need it anymore
             sendDataHandler.removePublisher(this);
             participant.releaseSendDataHandler(topic);
+            sendDataHandler = null;
             started = false;
         }
     }
@@ -122,16 +109,10 @@ public class Publisher
     {
         if (sendDataHandler == null)
         {
-            init();
-        }
-
-        if (sendDataHandler == null)
-        {
             return;
         }
         sampleTime2 = sampleTime1;
         sampleTime1 = System.currentTimeMillis();
-
 
         OPSMessage message = new OPSMessage();
         o.setKey(key);
@@ -145,12 +126,6 @@ public class Publisher
         WriteByteBuffer buf = new WriteByteBuffer(buffer, StaticManager.MAX_SIZE);
         try
         {
-
-            //buf.writeProtocol();
-            //buf.write("");
-            //buf.write(1);
-            //buf.write(0);
-
             buffer.position(0);
             OPSArchiverOut archiverOut = new OPSArchiverOut(buf, topic.getOptNonVirt());
 
@@ -178,11 +153,7 @@ public class Publisher
             ex.printStackTrace();
         }
         incCurrentPublicationID();
-
-
     }
-
-
 
     public void writeAsOPSObject(OPSObject o)
     {
@@ -250,9 +221,6 @@ public class Publisher
             return fakeRate;
         }
     }
-
-
-
 
     public void setReliableWriteTimeout(int reliableWriteTimeout)
     {

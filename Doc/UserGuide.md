@@ -40,4 +40,5 @@
     * [Binary Protocol](Protocol.md)
     * [Threading and Event Callbacks](Threading.md)
     * [Data class slicing and spareBytes](DataSlicing.md)
-  * [Remaining Issues](OutstandingIssues.md)
+  * [Remaining Issues](RemainingIssues.md)
+  * [Release Notes](ReleaseNotes.md)

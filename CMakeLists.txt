@@ -111,6 +111,8 @@ endif()
 
 ## ----------------------------------------------------------------------------
 # We need Java 1.8 (JDK 8) or later since Java code uses lambda expressions
+message(STATUS "ENV: JAVA_HOME: " $ENV{JAVA_HOME})
+message(STATUS "JAVA_HOME: " ${JAVA_HOME})
 find_package(Java 1.8 COMPONENTS Runtime Development)
 
 if(Java_Runtime_FOUND)
@@ -122,6 +124,7 @@ if(Java_JAVAC_EXECUTABLE)
   # set JAVA_HOME if we haven't already
   if(NOT DEFINED JAVA_HOME)
     get_filename_component (JAVA_HOME "${Java_JAVAC_EXECUTABLE}" DIRECTORY)
+    message(STATUS "JAVA_HOME: " ${JAVA_HOME})
   endif()
 else()
   message(WARNING "Could not find a Java compiler")

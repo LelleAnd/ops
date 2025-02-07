@@ -430,7 +430,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>OPSCppLib_vc142_x64_MTd.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>OPSCppLib_vc143_x64_MTd.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName)64.exe</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\Cpp\lib-vc143-x64;C:\Program Files (x86)\boost\boost_1_82\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -457,7 +457,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>OPSCppLib_vc142_x64_MTd.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>OPSCppLib_vc143_x64_MTd.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName)64.exe</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\Cpp\lib-vc143-x64;C:\Program Files (x86)\boost\boost_1_82\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -615,7 +615,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>OPSCppLib_vc142_x64_MT.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>OPSCppLib_vc143_x64_MT.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName)64.exe</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\Cpp\lib-vc143-x64;C:\Program Files (x86)\boost\boost_1_82\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>

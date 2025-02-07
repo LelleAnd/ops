@@ -76,17 +76,19 @@ void PollingSubscriberExample(const ops::Topic& topic)
 	// Finally start the subscriber (tell it to start listening for data)
 	sub.start();
 
-	while (true) {
 #ifndef zzz
-        if (sub.waitForNewData(std::chrono::milliseconds(100))) {
+	while (true) {
+		if (sub.waitForNewData(std::chrono::milliseconds(100))) {
 			// Need to lock message while using it's data via the reference
-            const ops::MessageLock lck(sub);
+			const ops::MessageLock lck(sub);
 			ChildData* const data = sub.getTypedDataReference();
 			std::cout << "New data found: Received ChildTopic with " << data->l << std::endl;
-        } else {
-            std::cout << "." << std::flush;
-        }
+		} else {
+			std::cout << "." << std::flush;
+		}
+	}
 #else
+	while (true) {
 		if (sub.newDataExist()) {
 			ChildData data;
 			// Message lock is handled internaly in subscriber
@@ -94,8 +96,8 @@ void PollingSubscriberExample(const ops::Topic& topic)
 			std::cout << "New data found: Received ChildTopic with " << data.l << std::endl;
 		}
 		ops::TimeHelper::sleep(std::chrono::milliseconds(10));
-#endif
 	}
+#endif
 }
 
 /// =======================================================================

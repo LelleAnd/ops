@@ -19,6 +19,7 @@ import pizza.special.ExtraAllt;
 import pizza.special.LHCData;
 import ops.Participant;
 import ops.ConfigurationException;
+import ops.DeadlineNotifier;
 
 /**
  *
@@ -94,6 +95,11 @@ public class Main
             }
             sleep(1000);
         }
+        pub.stop();
+        sub2.stop();
+        sub.stop();
+        participant.stopThread();
+        DeadlineNotifier.getInstance().stopRunning();
       } catch (ConfigurationException e)
       {
           System.out.println("Exception: " + e.getMessage());

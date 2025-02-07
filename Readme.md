@@ -5,7 +5,7 @@
 
 ---
 
-See [Build Instructions](Doc/BuildInstructions.md) or [User Guide](Doc/UserGuide.md) to get started! and [Release Notes](ReleaseNotes.md) for a development overview.
+See [Build Instructions](Doc/BuildInstructions.md) or [User Guide](Doc/UserGuide.md) to get started! and [Release Notes](Doc/ReleaseNotes.md) for a development overview.
 
 
 ---

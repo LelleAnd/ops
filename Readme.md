@@ -1,5 +1,5 @@
-![C/C++ CI development](https://github.com/LelleAnd/ops/actions/workflows/C/C++%20CI/badge.svg?branch=development)
-![C/C++ CI xmltest](https://github.com/LelleAnd/ops/actions/workflows/C/C++%20CI/badge.svg?branch=xmltest)
+![C/C++ development](https://github.com/LelleAnd/ops/actions/workflows/c-cpp.yml/badge.svg?branch=development)
+![C/C++ xmltest](https://github.com/LelleAnd/ops/actions/workflows/c-cpp.yml/badge.svg?branch=xmltest)
 # Welcome to OPS - Open Publish-Subscribe #
 
 

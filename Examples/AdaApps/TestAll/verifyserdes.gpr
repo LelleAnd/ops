@@ -5,15 +5,16 @@ project VerifySerDes is
 
    type Os_Type is
       ("Windows_NT", "LINUX");
-   OS : Os_Type := external ("OS");
+   Os : Os_Type := external ("OS");
    type Build_Kind is
       ("static", "relocatable", "static-pic");
-   XMLADA_BUILD : Build_Kind := external ("XMLADA_BUILD");
-
+   Xmlada_Build : Build_Kind := external ("XMLADA_BUILD");
    for Object_Dir use ".obj";
    for Exec_Dir use ".";
    for Main use ("VerifySerDes_Main.adb");
-   for Source_Files use ("VerifySerDes_Main.adb", "VerifySerDes_Pa.adb", "VerifySerDes_Pa.ads");
+  for Source_Files use ("VerifySerDes_Main.adb", "VerifySerDes_Pa.adb", "VerifySerDes_Pa.ads",
+                        "AssertHelpers_Pa.adb", "AssertHelpers_Pa.ads",
+                        "AssertGenerics_Pa.adb", "AssertGenerics_Pa.ads");
 
    package Naming is
       for Casing use "mixedcase";
@@ -21,7 +22,6 @@ project VerifySerDes is
 
    package Builder is
       for Global_Compilation_Switches ("ada") use ("-g");
-
    end Builder;
 
    package Compiler is
@@ -30,4 +30,24 @@ project VerifySerDes is
    package Linker is
    end Linker;
 
+   case Xmlada_Build is
+
+      when "static" =>
+
+         case Os is
+
+            when "Windows_NT" =>
+               for Source_Dirs use (".", "../common");
+
+            when "LINUX" =>
+
+         end case;
+
+      when "relocatable" =>
+
+      when "static-pic" =>
+
+   end case;
+
 end VerifySerDes;
+

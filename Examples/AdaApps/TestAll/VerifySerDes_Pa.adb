@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2017-2020 Lennart Andersson.
+-- Copyright (C) 2017-2025 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -73,6 +73,9 @@ with Ops_Pa.Error_Pa;
 with Ops_Pa.Participant_Pa;
 with Ops_Pa.SerializableFactory_Pa.CompFactory_Pa.OpsObjectFactory_Pa;
 
+with AssertHelpers_Pa; use AssertHelpers_Pa;
+with AssertGenerics_Pa; use AssertGenerics_Pa;
+
 package body VerifySerDes_Pa is
 
   -- Access to operations on types
@@ -109,159 +112,16 @@ package body VerifySerDes_Pa is
 
   -- ---------------------
 
-  gErrorCount : Integer := 0;
-
-  procedure ErrorLog(str : String) is
-  begin
-    Log("### Failed: " & str);
-    gErrorCount := gErrorCount + 1;
-  end;
-
-  function AssertEQ(val, exp : Boolean; str : string := "") return Boolean is
-  begin
-    if val /= exp then
-      ErrorLog(str & ", value= " & Boolean'Image(val) & ", expected= " & Boolean'Image(exp));
-    end if;
-    return val;
-  end;
-
-  procedure AssertEQ(val, exp : Boolean; str : string := "") is
-  begin
-    if val /= exp then
-      ErrorLog(str & ", value= " & Boolean'Image(val) & ", expected= " & Boolean'Image(exp));
-    end if;
-  end;
-
-  procedure AssertEQ(val, exp : String_At; str : string := "") is
-  begin
-    -- NOTE that we consider null be the same as "", since we can't distinguish this when received
-    if val /= exp then
-      if val = null then
-        if exp.all /= "" then
-          ErrorLog(str & ", value= (null)" & ", expected= " & exp.all);
-        end if;
-      elsif exp = null then
-        if val.all /= "" then
-          ErrorLog(str & ", value= " & val.all & ", expected= (null)");
-        end if;
-      elsif val.all /= exp.all then
-        ErrorLog(str & ", value= " & val.all & ", expected= " & exp.all);
-      end if;
-    end if;
-  end;
-
-  -- ---------------------
-
-  generic
-    type Item is (<>);
-  procedure AssertIntEQ(val, exp : Item; str : string := "");
-
-  procedure AssertIntEQ(val, exp : Item; str : string := "") is
-  begin
-    if val /= exp then
-      ErrorLog(str & ", value= " & Item'Image(val) & ", expected= " & Item'Image(exp));
-    end if;
-  end;
-
-  procedure AssertEQ is new AssertIntEQ(Byte);
-  procedure AssertEQ is new AssertIntEQ(Int8);
-  procedure AssertEQ is new AssertIntEQ(Int16);
-  procedure AssertEQ is new AssertIntEQ(Int32);
-  procedure AssertEQ is new AssertIntEQ(Int64);
-
   procedure AssertEQ is new AssertIntEQ(Ops_Pa.OpsObject_Pa.TestAll_Fruit.enum);
   procedure AssertEQ is new AssertIntEQ(Ops_Pa.OpsObject_Pa.TestAll_ChildData.Order);
   procedure AssertEQ is new AssertIntEQ(Ops_Pa.OpsObject_Pa.TestAll_Definitions.Command);
 
   -- ---------------------
 
-  generic
-    type Item is digits <>;
-  procedure AssertFloatEQ(val, exp : Item; str : string := "");
-
-  procedure AssertFloatEQ(val, exp : Item; str : string := "") is
-  begin
-    if val /= exp then
-      ErrorLog(str & ", value= " & Item'Image(val) & ", expected= " & Item'Image(exp));
-    end if;
-  end;
-
-  procedure AssertEQ is new AssertFloatEQ(Float32);
-  procedure AssertEQ is new AssertFloatEQ(Float64);
-
-  -- ---------------------
-
-  generic
-    type Item is private;
-    type Item_Arr is array(Integer range <>) of Item;
-    type Item_Arr_At is access all Item_Arr;
-  procedure AssertAccessEQ0(val, exp : Item_Arr_At; str : string := "");
-
-  procedure AssertAccessEQ0(val, exp : Item_Arr_At; str : string := "") is
-  begin
-    if val /= exp then
-      ErrorLog(str & ", Pointers are different");
-    end if;
-  end;
-
-  procedure AssertPtrEQ is new AssertAccessEQ0(Boolean, Boolean_Arr, Boolean_Arr_At);
-  procedure AssertPtrEQ is new AssertAccessEQ0(Int16, Int16_Arr, Int16_Arr_At);
-  procedure AssertPtrEQ is new AssertAccessEQ0(Int32, Int32_Arr, Int32_Arr_At);
-  procedure AssertPtrEQ is new AssertAccessEQ0(Int64, Int64_Arr, Int64_Arr_At);
-  procedure AssertPtrEQ is new AssertAccessEQ0(Float32, Float32_Arr, Float32_Arr_At);
-  procedure AssertPtrEQ is new AssertAccessEQ0(Float64, Float64_Arr, Float64_Arr_At);
-  procedure AssertPtrEQ is new AssertAccessEQ0(String_At, String_Arr, String_Arr_At);
-
   procedure AssertPtrEQ is new AssertAccessEQ0(Ops_Pa.OpsObject_Pa.TestAll_ChildData.Order,
                                                Ops_Pa.OpsObject_Pa.TestAll_ChildData.Order_Arr,
                                                Ops_Pa.OpsObject_Pa.TestAll_ChildData.Order_Arr_At);
 
-  generic
-    type Item is private;
-    type Item_Arr is array(Byte_Arr_Index_T range <>) of Item;
-    type Item_Arr_At is access all Item_Arr;
-  procedure AssertAccessEQ10(val, exp : Item_Arr_At; str : string := "");
-
-  procedure AssertAccessEQ10(val, exp : Item_Arr_At; str : string := "") is
-  begin
-    if val /= exp then
-      ErrorLog(str & ", Pointers are different");
-    end if;
-  end;
-
-  procedure AssertPtrEQ is new AssertAccessEQ10(Byte,  Byte_Arr,  Byte_Arr_At);
-
-  generic
-    type Item is private;
-    type Item_Arr is array(Integer range <>) of Item;
-    type Item_Arr_At is access all Item_Arr;
-    with procedure AssertItem(val, exp : Item; str : string);
-  procedure AssertArrayEQ0(val, exp : Item_Arr_At; str : string := "");
-
-  procedure AssertArrayEQ0(val, exp : Item_Arr_At; str : string := "") is
-  begin
-    if val /= null or exp /= null then
-      if val = null or exp = null then
-        ErrorLog(str & ", A Pointer is null");
-      else
-        if val'length /= exp'length then
-          ErrorLog(str & ", Arrays have different sizes");
-        else
-          for i in val'range loop
-            AssertItem(val(i), exp(i), str);
-          end loop;
-        end if;
-      end if;
-    end if;
-  end;
-
-  procedure AssertArrEQ is new AssertArrayEQ0(Boolean, Boolean_Arr, Boolean_Arr_At, AssertEQ);
-  procedure AssertArrEQ is new AssertArrayEQ0(Int16, Int16_Arr, Int16_Arr_At, AssertEQ);
-  procedure AssertArrEQ is new AssertArrayEQ0(Int32, Int32_Arr, Int32_Arr_At, AssertEQ);
-  procedure AssertArrEQ is new AssertArrayEQ0(Int64, Int64_Arr, Int64_Arr_At, AssertEQ);
-  procedure AssertArrEQ is new AssertArrayEQ0(Float32, Float32_Arr, Float32_Arr_At, AssertEQ);
-  procedure AssertArrEQ is new AssertArrayEQ0(Float64, Float64_Arr, Float64_Arr_At, AssertEQ);
-  procedure AssertArrEQ is new AssertArrayEQ0(String_At, String_Arr, String_Arr_At, AssertEQ);
 
   procedure AssertArrEQ is new AssertArrayEQ0(Ops_Pa.OpsObject_Pa.TestAll_ChildData.Order,
                                               Ops_Pa.OpsObject_Pa.TestAll_ChildData.Order_Arr,
@@ -272,156 +132,20 @@ package body VerifySerDes_Pa is
                                               Ops_Pa.OpsObject_Pa.TestAll_Definitions.Command_Arr_At,
                                               AssertEQ);
 
-  generic
-    type Item is private;
-    type Item_Arr is array(Byte_Arr_Index_T range <>) of Item;
-    type Item_Arr_At is access all Item_Arr;
-    with procedure AssertItem(val, exp : Item; str : string);
-  procedure AssertArrayEQ10(val, exp : Item_Arr_At; str : string := "");
-
-  procedure AssertArrayEQ10(val, exp : Item_Arr_At; str : string := "") is
-  begin
-    if val /= null or exp /= null then
-      if val = null or exp = null then
-        ErrorLog(str & ", A Pointer is null");
-      else
-        if val'length /= exp'length then
-          ErrorLog(str & ", Arrays have different sizes");
-        else
-          for i in val'range loop
-            AssertItem(val(i), exp(i), str);
-          end loop;
-        end if;
-      end if;
-    end if;
-  end;
-
-  procedure AssertArrEQ is new AssertArrayEQ10(Byte,  Byte_Arr,  Byte_Arr_At, AssertEQ);
-
   -- ---------------------
-
-  generic
-    type Item is tagged limited private;
-    type Item_At is access all Item'Class;
-  procedure AssertAccessEQ(val, exp : Item_At; str : string := "");
-
-  procedure AssertAccessEQ(val, exp : Item_At; str : string := "") is
-  begin
-    if val /= exp then
-      ErrorLog(str & ", Pointers are different");
-    end if;
-  end;
 
   procedure AssertPtrEQ is new AssertAccessEQ(TestData_Class, TestData_Class_At);
   procedure AssertPtrEQ is new AssertAccessEQ(Fruit_Class, Fruit_Class_At);
 
-  generic
-    type Item is tagged limited private;
-    type Item_At is access all Item'Class;
-  function AssertAccessNEQ(val, exp : Item_At; str : string := "") return Boolean;
-
-  function AssertAccessNEQ(val, exp : Item_At; str : string := "") return Boolean is
-  begin
-    if val = exp and val /= null then
-      ErrorLog(str & ", Pointers are equal");
-      return False;
-    end if;
-    return True;
-  end;
-
   function AssertPtrNEQ is new AssertAccessNEQ(TestData_Class, TestData_Class_At);
   function AssertPtrNEQ is new AssertAccessNEQ(Fruit_Class, Fruit_Class_At);
-
-  generic
-    type Item is tagged limited private;
-    type Item_At is access all Item'Class;
-    type Item_At_Arr is array(Integer range <>) of Item_At;
-    type Item_At_Arr_At is access all Item_At_Arr;
-  procedure AssertAccessEQ3(val, exp : Item_At_Arr_At; str : string := "");
-
-  procedure AssertAccessEQ3(val, exp : Item_At_Arr_At; str : string := "") is
-  begin
-    if val /= exp then
-      ErrorLog(str & ", Pointers are different");
-    end if;
-  end;
 
   procedure AssertPtrEQ is new AssertAccessEQ3(TestData_Class, TestData_Class_At, TestData_Class_At_Arr, TestData_Class_At_Arr_At);
   procedure AssertPtrEQ is new AssertAccessEQ3(Fruit_Class, Fruit_Class_At, Fruit_Class_At_Arr, Fruit_Class_At_Arr_At);
 
-  generic
-    type Item is tagged limited private;
-    type Item_At is access all Item'Class;
-    type Item_At_Arr is array(Integer range <>) of Item_At;
-    type Item_At_Arr_At is access all Item_At_Arr;
-    with procedure AssertItem(val, exp : Item_At; str : string);
-  procedure AssertArrayEQ3(val, exp : Item_At_Arr_At; str : string := "");
-
-  procedure AssertArrayEQ3(val, exp : Item_At_Arr_At; str : string := "") is
-  begin
-    if val /= null or exp /= null then
-      if val = null or exp = null then
-        ErrorLog(str & ", A Pointer is null");
-      else
-        if val.all'length /= exp.all'length then
-          ErrorLog(str & ", Arrays have different sizes");
-        else
-          for i in val.all'range loop
-            AssertItem(val.all(i), exp.all(i), str & "(" & Integer'Image(i) & ")");
-          end loop;
-        end if;
-      end if;
-    end if;
-  end;
-
-  generic
-    type Item is tagged limited private;
-    type Item_Arr is array(Integer range <>) of Item;
-    type Item_Arr_At is access all Item_Arr;
-  procedure AssertAccessEQ4(val, exp : Item_Arr_At; str : string := "");
-
-  procedure AssertAccessEQ4(val, exp : Item_Arr_At; str : string := "") is
-  begin
-    if val /= exp then
-      ErrorLog(str & ", Pointers are different");
-    end if;
-  end;
-
   procedure AssertPtrEQ is new AssertAccessEQ4(TestData_Class, TestData_Class_Arr, TestData_Class_Arr_At);
   procedure AssertPtrEQ is new AssertAccessEQ4(Fruit_Class, Fruit_Class_Arr, Fruit_Class_Arr_At);
 
-  generic
-    type Item is tagged limited private;
-    type Item_Arr is array(Integer range <>) of Item;
-    type Item_Arr_At is access all Item_Arr;
-    with procedure AssertItem(val, exp : Item; str : string);
-  procedure AssertArrayEQ4(val, exp : Item_Arr_At; str : string := "");
-
-  procedure AssertArrayEQ4(val, exp : Item_Arr_At; str : string := "") is
-  begin
-    if val /= null or exp /= null then
-      if val = null or exp = null then
-        ErrorLog(str & ", A Pointer is null");
-      else
-        if val'length /= exp'length then
-          ErrorLog(str & ", Arrays have different sizes");
-        else
-          for i in val'range loop
-            AssertItem(val(i), exp(i), str);
-          end loop;
-        end if;
-      end if;
-    end if;
-  end;
-
-  -- ---------------------
-
-  procedure AssertEQ(val : Boolean; str : string := "") is
-  begin
-    if not val then
-      ErrorLog(str);
-    end if;
-  end;
 
   -- /////////////////////////////////////////////////////////////////////////
 

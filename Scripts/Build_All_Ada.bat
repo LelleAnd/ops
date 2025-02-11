@@ -3,6 +3,9 @@
 
 @set XMLADA_BUILD=static
 
+@call :build Ada ops4.gpr
+@if errorlevel 1 goto :error
+
 @call :build Examples\AdaApps\Example1 example1.gpr
 @if errorlevel 1 goto :error
 @call :build Examples\AdaApps\GenSub gensub.gpr
@@ -10,6 +13,8 @@
 @call :build Examples\AdaApps\PizzaTest pizzatest.gpr
 @if errorlevel 1 goto :error
 @call :build Examples\AdaApps\TestAll verifyserdes.gpr
+@if errorlevel 1 goto :error
+@call :build Examples\AdaApps\UnitTestExample UnitTestExample.gpr
 @if errorlevel 1 goto :error
 @call :build Ada\Project opsadatest.gpr
 @if errorlevel 1 goto :error

@@ -1,0 +1,33 @@
+with "../../../Ada/ops4.gpr";
+with "../../OPSIdls/TestAll/Generated/Ada/TestAll.gpr";
+
+project UnitTestExample is
+
+   for Object_Dir use ".obj";
+   for Exec_Dir use ".";
+
+   for Source_Dirs use ("./**", "../common/**");
+   for Main use ("UnitTestExample.adb");
+
+   package Naming is
+      for Casing use "mixedcase";
+   end Naming;
+
+   package Builder is
+
+     for Global_Compilation_switches ("ada") use ("-g"
+                                                  , "-gnatE"
+                                                  , "-gnat12"
+                                                 );
+
+   end Builder;
+
+   package Compiler is
+
+   end Compiler;
+
+   package Linker is
+
+   end Linker;
+
+end UnitTestExample;

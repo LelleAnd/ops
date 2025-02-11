@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2021 Lennart Andersson.
+-- Copyright (C) 2016-2025 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -22,6 +22,7 @@ with Ops_Pa.Mutex_Pa;
 
 with Ops_Pa.Error_Pa;
 with Ops_Pa.Transport_Pa.SendDataHandler_Pa;
+with Ops_Pa.Transport_Pa.InProcDistributor_Pa;
 with Ops_Pa.OpsObject_Pa.Domain_Pa;
 with Ops_Pa.OpsObject_Pa.Topic_Pa;
 
@@ -54,7 +55,8 @@ package Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
   -- Constructors
   function Create(Dom : Domain_Class_At;
                   Client : OnUdpTransport_Interface_At;
-                  Reporter : ErrorService_Class_At) return SendDataHandlerFactory_Class_At;
+                  Reporter : ErrorService_Class_At;
+                  InProcDistributor : Transport_Pa.InProcDistributor_Pa.InProcDistributor_Class_At) return SendDataHandlerFactory_Class_At;
 
   function getSendDataHandler( Self : in out SendDataHandlerFactory_Class; top : Topic_Class_At) return SendDataHandler_Class_At;
   procedure releaseSendDataHandler( Self : in out SendDataHandlerFactory_Class; top : Topic_Class_At);
@@ -83,6 +85,7 @@ private
     record
       -- Borrowed reference
       ErrorService : ErrorService_Class_At := null;
+      InProcDistributor : Transport_Pa.InProcDistributor_Pa.InProcDistributor_Class_At := null;
 
       -- The Domain to which this Factory belongs (NOTE: we don't own the object)
       Domain : Domain_Class_At := null;
@@ -106,7 +109,8 @@ private
   procedure InitInstance( Self : in out SendDataHandlerFactory_Class;
                           Dom : Domain_Class_At;
                           Client : OnUdpTransport_Interface_At;
-                          Reporter : ErrorService_Class_At );
+                          Reporter : ErrorService_Class_At;
+                          InProcDistributor : Transport_Pa.InProcDistributor_Pa.InProcDistributor_Class_At );
 
   --------------------------------------------------------------------------
   --  Finalize the object

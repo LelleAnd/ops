@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2021 Lennart Andersson.
+-- Copyright (C) 2016-2025 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -90,6 +90,7 @@ private
 
       -- The SendDataHandler used by the Publisher (NOTE: we don't own the object)
       SendDataHandler : SendDataHandler_Class_At := null;
+      UseInProc : Boolean := False;
 
       -- User variables
       UserParam : UInt64 := 0;

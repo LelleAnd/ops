@@ -143,7 +143,7 @@ package body Ops_Pa.ParticipantInfoDataListener_Pa is
         end if;
       end if;
     else
-			Self.RcvDataHandlers.Insert(topicName, handler);
+      Self.RcvDataHandlers.Insert(topicName, handler);
     end if;
   end;
 

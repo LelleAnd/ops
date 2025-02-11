@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2021 Lennart Andersson.
+-- Copyright (C) 2016-2024 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -23,6 +23,9 @@ with Ops_Pa.Mutex_Pa;
 with Ops_Pa.Transport_Pa.Sender_Pa;
 use Ops_Pa.Transport_Pa.Sender_Pa;
 
+with Ops_Pa.OpsObject_Pa.OPSMessage_Pa;
+use Ops_Pa.OpsObject_Pa.OPSMessage_Pa;
+
 with Ops_Pa.OpsObject_Pa.Topic_Pa;
 use Ops_Pa.OpsObject_Pa.Topic_Pa;
 
@@ -36,6 +39,9 @@ package Ops_Pa.Transport_Pa.SendDataHandler_Pa is
   type SendDataHandler_Class_At is access all SendDataHandler_Class'Class;
 
   function sendData( Self : in out SendDataHandler_Class; buf : Byte_Arr_At; bufSize : Integer; topic : Topic_Class_At) return Boolean is abstract;
+
+  -- Used for inprocess transport
+  function sendMessage( Self : in out SendDataHandler_Class; topic : Topic_Class_At; message : OPSMessage_Class_At) return Boolean;
 
   procedure addUser( Self : in out SendDataHandler_Class; client : Ops_Class_At );
   procedure removeUser( Self : in out SendDataHandler_Class; client : Ops_Class_At );

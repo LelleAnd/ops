@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2021 Lennart Andersson.
+-- Copyright (C) 2016-2025 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -392,9 +392,11 @@ package body Ops_Pa.Participant_Pa is
     Self.PartInfoData.domain := Copy(domainID);
 
     --
-    Self.SendDataHandlerFactory := Create(Self.Domain, Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa.OnUdpTransport_Interface_At(Self.SelfAt), Self.ErrorService);
+    Self.InProcDistributor := Create;
 
-    Self.ReceiveDataHandlerFactory := Create( Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa.OnSetupTransport_Interface_At(Self.SelfAt), Self.ErrorService);
+    Self.SendDataHandlerFactory := Create(Self.Domain, Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa.OnUdpTransport_Interface_At(Self.SelfAt), Self.ErrorService, Self.InProcDistributor );
+
+    Self.ReceiveDataHandlerFactory := Create( Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa.OnSetupTransport_Interface_At(Self.SelfAt), Self.ErrorService, Self.InProcDistributor );
 
     -- Partinfo topic / Listener
     Self.PartInfoTopic := Self.createParticipantInfoTopic;
@@ -425,6 +427,10 @@ package body Ops_Pa.Participant_Pa is
 
     if Self.SendDataHandlerFactory /= null then
       Free(Self.SendDataHandlerFactory);
+    end if;
+
+    if Self.InProcDistributor /= null then
+      Free(Self.InProcDistributor);
     end if;
 
     if Self.PartInfoData /= null then

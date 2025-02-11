@@ -14,7 +14,7 @@ The following table lists OPS Transport features and the support in different pr
 | TCP V2              | X   | X   | -  | -      | -      | -    |
 | TCP V2, HB          | X   | X   | -  | -      | -      | -    |
 | TCP Connect Status  | X   | (X) | -  | -      | -      | -    |
-| In Process          | -   | X   | -  | -      | -      | -    |
+| In Process          | X   | X   | -  | -      | -      | -    |
 
 The following table lists IDL Compile directives that only is supported by a subset of programming languages:
 

@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2021 Lennart Andersson.
+-- Copyright (C) 2016-2025 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -23,6 +23,7 @@ with Ops_Pa.Transport_Pa.SendDataHandler_Pa,
      Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa,
      Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa,
      Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa,
+     Ops_Pa.Transport_Pa.InProcDistributor_Pa,
      Ops_Pa.SerializableFactory_Pa,
      Ops_Pa.SerializableFactory_Pa.CompFactory_Pa.OpsObjectFactory_Pa,
      Ops_Pa.Error_Pa,
@@ -36,6 +37,7 @@ use Ops_Pa.Transport_Pa.SendDataHandler_Pa,
     Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa,
     Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa,
     Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa,
+    Ops_Pa.Transport_Pa.InProcDistributor_Pa,
     Ops_Pa.SerializableFactory_Pa,
     Ops_Pa.SerializableFactory_Pa.CompFactory_Pa.OpsObjectFactory_Pa,
     Ops_Pa.Error_Pa,
@@ -164,6 +166,7 @@ private
        --
        ReceiveDataHandlerFactory : ReceiveDataHandlerFactory_Class_At := null;
        SendDataHandlerFactory : SendDataHandlerFactory_Class_At := null;
+       InProcDistributor : InProcDistributor_Class_At := null;
      end record;
 
   function Create( domainID : String; participantID : String; configFile : String ) return Participant_Class_At;

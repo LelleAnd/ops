@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2021 Lennart Andersson.
+-- Copyright (C) 2016-2025 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -18,7 +18,8 @@
 
 with Ops_Pa.Transport_Pa.SendDataHandler_Pa.Mc_Pa,
      Ops_Pa.Transport_Pa.SendDataHandler_Pa.McUdp_Pa,
-     Ops_Pa.Transport_Pa.SendDataHandler_Pa.TCP_Pa;
+     Ops_Pa.Transport_Pa.SendDataHandler_Pa.TCP_Pa,
+     Ops_Pa.Transport_Pa.SendDataHandler_Pa.InProc_Pa;
 
 with Ops_Pa.Socket_Pa;
 
@@ -35,11 +36,12 @@ package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
   -- Constructors
   function Create(Dom : Domain_Class_At;
                   Client : OnUdpTransport_Interface_At;
-                  Reporter : ErrorService_Class_At) return SendDataHandlerFactory_Class_At is
+                  Reporter : ErrorService_Class_At;
+                  InProcDistributor : Transport_Pa.InProcDistributor_Pa.InProcDistributor_Class_At ) return SendDataHandlerFactory_Class_At is
      Self : SendDataHandlerFactory_Class_At := null;
   begin
     Self := new SendDataHandlerFactory_Class;
-    InitInstance( Self.all, Dom, Client, Reporter );
+    InitInstance( Self.all, Dom, Client, Reporter, InProcDistributor );
     return Self;
   exception
     when others =>
@@ -60,9 +62,13 @@ package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
   -- Generate the key used in the dictionary
   function getKey(top : Topic_Class_At) return String is
   begin
-    if top.Transport = TRANSPORT_TCP and top.Port = 0 then
+    if top.Transport = TRANSPORT_INPROC then
+      return top.Transport;
+
+    elsif top.Transport = TRANSPORT_TCP and top.Port = 0 then
       -- We add the channel name so different channels get different TCP Servers
       return top.Transport & "::" & top.ChannelId & "::" & top.DomainAddress & "::" & Int32'Image(top.Port);
+
     else
       return top.Transport & "::" & top.DomainAddress & "::" & Int32'Image(top.Port);
     end if;
@@ -145,6 +151,12 @@ package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
       info.numUsers := 1;
       Self.SendDataHandlers.Insert(key, info);
 
+    elsif top.Transport = TRANSPORT_INPROC then
+      Result := SendDataHandler_Class_At(Ops_Pa.Transport_Pa.SendDataHandler_Pa.InProc_Pa.Create(top, Self.InProcDistributor));
+      info.handler := Result;
+      info.numUsers := 1;
+      Self.SendDataHandlers.Insert(key, info);
+
     end if;
     return Result;
   end;
@@ -196,10 +208,12 @@ package body Ops_Pa.Transport_Pa.SendDataHandlerFactory_Pa is
   procedure InitInstance( Self : in out SendDataHandlerFactory_Class;
                           Dom : Domain_Class_At;
                           Client : OnUdpTransport_Interface_At;
-                          Reporter : ErrorService_Class_At) is
+                          Reporter : ErrorService_Class_At;
+                          InProcDistributor : Transport_Pa.InProcDistributor_Pa.InProcDistributor_Class_At ) is
   begin
     Self.ErrorService := Reporter;
     Self.Domain := dom;
+    Self.InProcDistributor := InProcDistributor;
     Self.OnUdpConnectDisconnectClient := Client;
   end;
 

@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2021 Lennart Andersson.
+-- Copyright (C) 2016-2024 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -19,6 +19,12 @@
 package body Ops_Pa.Transport_Pa.SendDataHandler_Pa is
 
   use type Ada.Containers.Count_Type;
+
+  -- Used for inprocess transport
+  function sendMessage( Self : in out SendDataHandler_Class; topic : Topic_Class_At; message : OPSMessage_Class_At) return Boolean is
+  begin
+    return False;
+  end;
 
   procedure addUser( Self : in out SendDataHandler_Class; client : Ops_Class_At ) is
     Idx : MyVector_Pa.Extended_Index;

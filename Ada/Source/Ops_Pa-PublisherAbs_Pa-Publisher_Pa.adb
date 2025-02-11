@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2021 Lennart Andersson.
+-- Copyright (C) 2016-2025 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -121,41 +121,47 @@ package body Ops_Pa.PublisherAbs_Pa.Publisher_Pa is
       data.all.Key(Self.Key.all);
     end if;
 
-    Self.Buf.Reset;
-    Self.Buf.WriteNewSegment;
-
     Self.Message.SetData( data );
     Self.Message.SetPublicationID( Self.CurrentPublicationID );
+    Self.CurrentPublicationID := Self.CurrentPublicationID + 1;
+
     if Self.Name /= null then
       Self.Message.SetPublisherName( Self.Name.all );
     end if;
 
-    declare
-      dummy : Serializable_Class_At;
-    begin
-      dummy := Self.Archive.inout2("message", Serializable_Class_At(Self.Message));
-    end;
+    if Self.UseInProc then
+      sendOK := Self.SendDataHandler.sendMessage(Self.Topic, Self.Message);
 
-    -- If data has spare bytes, write them to the end of the buffer
-    if Self.Message.Data.SpareBytes /= null then
-      Self.Buf.WriteChars(Self.Message.Data.SpareBytes.all);
-    end if;
+    else
+      -- Setup for serialization of message
+      Self.Buf.Reset;
+      Self.Buf.WriteNewSegment;
 
-    Self.Buf.Finish;
+      declare
+        dummy : Serializable_Class_At;
+      begin
+        dummy := Self.Archive.inout2("message", Serializable_Class_At(Self.Message));
+      end;
 
-    for i in 0 .. Self.Buf.getNrOfSegments-1 loop
-      segSize := Integer(Self.Buf.getSegmentSize(i));
-      sendOK := Self.SendDataHandler.sendData(Self.Buf.getSegment(i), segSize, Self.Topic);
-      if not sendOK then
-        delay DurMs * Duration(Self.SendSleepTime);
-        sendOK := Self.SendDataHandler.sendData(Self.Buf.getSegment(i), segSize, Self.Topic);
-        exit when not sendOK; -- Exit loop. No meaning to send the rest if a packet is lost??
-      elsif (i > 0) and ((i mod UInt32(Self.sleepEverySendPacket)) = 0) then
-        delay DurMs * Duration(Self.SendSleepTime);
+      -- If data has spare bytes, write them to the end of the buffer
+      if Self.Message.Data.SpareBytes /= null then
+        Self.Buf.WriteChars(Self.Message.Data.SpareBytes.all);
       end if;
-    end loop;
 
-    Self.CurrentPublicationID := Self.CurrentPublicationID + 1;
+      Self.Buf.Finish;
+
+      for i in 0 .. Self.Buf.getNrOfSegments-1 loop
+        segSize := Integer(Self.Buf.getSegmentSize(i));
+        sendOK := Self.SendDataHandler.sendData(Self.Buf.getSegment(i), segSize, Self.Topic);
+        if not sendOK then
+          delay DurMs * Duration(Self.SendSleepTime);
+          sendOK := Self.SendDataHandler.sendData(Self.Buf.getSegment(i), segSize, Self.Topic);
+          exit when not sendOK; -- Exit loop. No meaning to send the rest if a packet is lost??
+        elsif (i > 0) and ((i mod UInt32(Self.sleepEverySendPacket)) = 0) then
+          delay DurMs * Duration(Self.SendSleepTime);
+        end if;
+      end loop;
+    end if;
   end;
 
   procedure InitInstance( Self : in out Publisher_Class; SelfAt : Publisher_Class_At; t : Topic_Class_At) is
@@ -190,6 +196,8 @@ package body Ops_Pa.PublisherAbs_Pa.Publisher_Pa is
       Self.Participant.updateSendPartInfo( top );
       Free( top );
     end;
+
+    Self.UseInProc := t.Transport = TRANSPORT_INPROC;
   end;
 
   overriding procedure Finalize( Self : in out Publisher_Class ) is

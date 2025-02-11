@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2021 Lennart Andersson.
+-- Copyright (C) 2016-2025 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -21,6 +21,7 @@ with Ada.Containers.Indefinite_Ordered_Maps;
 with Ops_Pa.OpsObject_Pa.Domain_Pa,
      Ops_Pa.OpsObject_Pa.Topic_Pa,
      Ops_Pa.Transport_Pa.ReceiveDataHandler_Pa,
+     Ops_Pa.Transport_Pa.InProcDistributor_Pa,
      Ops_Pa.SerializableFactory_Pa.CompFactory_Pa,
      Ops_Pa.Error_Pa,
      Ops_Pa.OpsObject_Pa.OPSMessage_Pa,
@@ -57,7 +58,8 @@ package Ops_Pa.Transport_Pa.ReceiveDataHandlerFactory_Pa is
   type ReceiveDataHandlerFactory_Class_At is access all ReceiveDataHandlerFactory_Class'Class;
 
   function Create( Client : OnSetupTransport_Interface_At;
-                   Reporter : Ops_Pa.Error_Pa.ErrorService_Class_At )
+                   Reporter : Ops_Pa.Error_Pa.ErrorService_Class_At;
+                   InProcDistributor : Ops_Pa.Transport_Pa.InProcDistributor_Pa.InProcDistributor_Class_At)
                   return ReceiveDataHandlerFactory_Class_At;
 
   function getReceiveDataHandler( Self : in out ReceiveDataHandlerFactory_Class;
@@ -92,6 +94,7 @@ private
       -- Borrowed references
       OnSetupTransportInfoClient : OnSetupTransport_Interface_At := null;
       ErrorService : Ops_Pa.Error_Pa.ErrorService_Class_At := null;
+      InProcDistributor : Transport_Pa.InProcDistributor_Pa.InProcDistributor_Class_At := null;
 
       -- By Singelton, one ReceiveDataHandler per 'key' on this Participant
       ReceiveDataHandlerInstances : MyMap.Map;
@@ -103,7 +106,8 @@ private
 
   procedure InitInstance( Self : in out ReceiveDataHandlerFactory_Class;
                           Client : OnSetupTransport_Interface_At;
-                          Reporter : Ops_Pa.Error_Pa.ErrorService_Class_At );
+                          Reporter : Ops_Pa.Error_Pa.ErrorService_Class_At;
+                          InProcDistributor : Ops_Pa.Transport_Pa.InProcDistributor_Pa.InProcDistributor_Class_At );
 
   --------------------------------------------------------------------------
   --  Finalize the object

@@ -63,6 +63,7 @@
       <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalDependencies>OPSCppLib_vc143_MDd.lib;tinyxml2.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -84,6 +85,7 @@
       <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalDependencies>OPSCppLib_vc143_MD.lib;%(AdditionalDependencies)</AdditionalDependencies>

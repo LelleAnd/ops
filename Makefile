@@ -10,7 +10,7 @@ BUILD_BOOTSTRAP?=$(BUILD_ROOT).bootstrap$(BUILD_SUFFIX)
 
 CC?=$(shell which gcc)
 CXX?=$(shell which g++)
-CXXSTANDARD?=11
+CXXSTANDARD?=17
 INSTALL_PREFIX?=$(CURDIR)/deploy$(DEPLOY_SUFFIX)
 
 OPS_BUILD_CPP?=ON

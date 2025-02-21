@@ -184,7 +184,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <TreatWarningAsError>true</TreatWarningAsError>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Lib>
       <OutputFile>$(TargetDir)$(TargetFileName)</OutputFile>
@@ -208,7 +208,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ConformanceMode>true</ConformanceMode>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Lib>
       <OutputFile>$(TargetDir)$(TargetFileName)</OutputFile>
@@ -232,7 +232,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <TreatWarningAsError>true</TreatWarningAsError>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
     </ClCompile>
     <ProjectReference>
@@ -264,7 +264,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ConformanceMode>true</ConformanceMode>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
@@ -289,7 +289,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <TreatWarningAsError>true</TreatWarningAsError>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Lib>
       <OutputFile>$(TargetDir)$(TargetFileName)</OutputFile>
@@ -314,7 +314,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ConformanceMode>true</ConformanceMode>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Lib>
       <OutputFile>$(TargetDir)$(TargetFileName)</OutputFile>
@@ -338,7 +338,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <TreatWarningAsError>true</TreatWarningAsError>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
@@ -369,7 +369,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ConformanceMode>true</ConformanceMode>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>

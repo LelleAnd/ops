@@ -51,7 +51,8 @@ OPS for C# requires language version 7.3 or later (due to generics and constrain
 ## gcc (Linux) ##
 OPS for C++ requires a C++11 compiler and has therefore only support for gcc 4.8.1 an later.
 
-OPS has been used with 5.3.0, 5.4.0, 6.2.1, 6.4.1, 7.3.1, 9.2.0, 9.3.0, 11.3.0 and 13.3.
+OPS has been used with 5.3.0, 5.4.0, 6.2.1, 6.4.1, 7.3.1, 9.2.0, 9.3.0, 11.3.0, 13.3 and 14.2.
+Versions older than 9.2.0 hasn't been used/tested for quite a while. It is recommended to use a more modern version.
 
 ## .NET ##
 To use C# on Linux, install .NET 5 or later as decribed on
@@ -70,7 +71,8 @@ OPS uses JavaCC version 6.0.
 Support exist for Python 2.7 and Python 3.
 
 ## Delphi ##
-OPS has been used with Delphi XE2, Delphi 10.1, 10.2, 10.3, 10.4 and 11.3.
+OPS has been used with Delphi XE2, Delphi 10.1, 10.2, 10.3, 10.4, 11.3 and 12.1.
+Versions older than 10.1 hasn't been used/tested for quite a while. It is recommended to use a more modern version.
 
 ## Ada ##
 The Ada implementation requires Ada 2012 support.

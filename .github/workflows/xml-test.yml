@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4.1.1
       #- name: list environment
       #  run: env
       #- name: cmake version
@@ -44,10 +44,10 @@ jobs:
       #- name: Set BOOST_HOME
       #  run: echo "BOOST_HOME=$BOOST_ROOT_1_72_0" >> $GITHUB_ENV
       - name: Build
-        run: make BOOST_ARCH=-x64 CXXSTANDARD=14 TINYXML2_INSTALL_DIR=$HOME/tinyxml2/deploy
+        run: make BOOST_ARCH=-x64 CXXSTANDARD=17 TINYXML2_INSTALL_DIR=$HOME/tinyxml2/deploy
         env:
           MAKEFLAGS: "-j2"
       - name: Run C++ Tests
-        run: make CXXSTANDARD=14 unittest-c++
+        run: make CXXSTANDARD=17 unittest-c++
       - name: CppCheck Analysis
         run: cppcheck --enable=all Cpp/source Cpp/include > /dev/null

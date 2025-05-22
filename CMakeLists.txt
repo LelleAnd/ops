@@ -409,6 +409,7 @@ add_subdirectory(Tools)
 
 if(NOT OPS_BOOTSTRAP_BUILD)
   if(OPS_BUILD_CSHARP)
+    set(OPS_DOT_NET_Framework_version "v4.8")
     add_subdirectory(CSharp)
   endif()
 

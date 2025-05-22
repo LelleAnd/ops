@@ -43,8 +43,8 @@ if(WIN32)
     add_dependencies(${CONSOLE_NAME} TestAll)
 
     # Set the .NET Framework version for the target.
-    set_property(TARGET ${PROG_NAME} PROPERTY VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.6.1")
-    set_property(TARGET ${CONSOLE_NAME} PROPERTY VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.6.1")
+    set_property(TARGET ${PROG_NAME} PROPERTY VS_DOTNET_TARGET_FRAMEWORK_VERSION ${OPS_DOT_NET_Framework_version})
+    set_property(TARGET ${CONSOLE_NAME} PROPERTY VS_DOTNET_TARGET_FRAMEWORK_VERSION ${OPS_DOT_NET_Framework_version})
 
     # Set the C# language version (defaults to 3.0 if not set).
     set(CMAKE_CSharp_FLAGS "/langversion:7.3")

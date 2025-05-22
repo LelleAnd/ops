@@ -36,7 +36,7 @@ if(WIN32)
     add_dependencies(${PROG_NAME} PizzaProject)
 
     # Set the .NET Framework version for the target.
-    set_property(TARGET ${PROG_NAME} PROPERTY VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.6.1")
+    set_property(TARGET ${PROG_NAME} PROPERTY VS_DOTNET_TARGET_FRAMEWORK_VERSION ${OPS_DOT_NET_Framework_version})
     set_property(TARGET ${PROG_NAME} PROPERTY WIN32_EXECUTABLE FALSE)
     set_property(TARGET ${PROG_NAME} PROPERTY VS_CONFIGURATION_TYPE ClassLibrary)
     # Set the C# language version (defaults to 3.0 if not set).

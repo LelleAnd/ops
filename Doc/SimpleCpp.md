@@ -2,7 +2,7 @@
 
 # Basic C++ Example #
 
-Given the following type defined in [OPS IDL](IDLCompilerTutorial.md):
+Given the following type defined in [OPS IDL](IDLLanguage.md):
 
 ```
 package foo;
@@ -40,3 +40,5 @@ FooDataPublisher pub(topic);
 
 ...
 ```
+---
+See also [Example1.cpp](../Examples/CppApps/Example1/Example1.cpp) in the Examples folder.

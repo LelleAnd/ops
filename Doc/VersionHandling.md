@@ -27,7 +27,7 @@ This is the prefered way providing full backward compatibility but it is not alw
 
 ## Version tagging of separate fields in existing IDL classes ##
 
-A third alternative is to use version tagging of fields, see description of directives in [IDL language](IDLLanguage.md), which makes it possible to add, change or remove fields from beeing [de]serialized for different versions of the IDL.
+A third alternative is to use version tagging of fields, see description of directives in [IDL language](IDLLanguage.md#compile-directives), which makes it possible to add, change or remove fields from beeing [de]serialized for different versions of the IDL.
 
 If a field in an IDL is version tagged, each class in the complete inheritance hierarchy is extended with an implicit version field that is [de]serialized. To indicate to the receiver that this implicit version field exists, the sent *data type* is tagged with a leading "0 ", see also the [binary protocol](Protocol.md) description. This tagging of the *data type* gives us only some backward compatibility. New binaries aware of version tagging can send and receive both version tagged and non version tagged data, but old binaries will fail to receive data if it is version tagged.
 

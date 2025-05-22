@@ -52,7 +52,7 @@ data type             string        4 + n    n = length of 'data type', see note
 
 The data type field is a concatenation of all data types (IDL class names) in the inheritance hierarchy for the message sent (datatypes are separated by space characters). If element _optNonVirt_ is set to true in the _Domain_ section of the [OPS configuration file](OpsConfig.md), the string for the data type is sent as an empty string for non-virtual fields, see also the [IDL language](IDLLanguage.md) description.
 
-If an IDL class uses version directives for fields (*//@*), see the [IDL language](IDLLanguage.md) description, the data type (possibly empty string) is prefixed with a tag ("0 ") to indicate that there is implicit version fields for each IDL class in the inheritance hierarchy. These implicit version fields are in this case sent first for each IDL class. The tag is removed by the OPS core during receiving. See also [version handling](VersionHandling.md) of OPS IDLs.
+If an IDL class uses version directives for fields (*//@*), see the [IDL language](IDLLanguage.md#compile-directives) description, the data type (possibly empty string) is prefixed with a tag ("0 ") to indicate that there is implicit version fields for each IDL class in the inheritance hierarchy. These implicit version fields are in this case sent first for each IDL class. The tag is removed by the OPS core during receiving. See also [version handling](VersionHandling.md) of OPS IDLs.
 
 ** Note: 'key'**
 

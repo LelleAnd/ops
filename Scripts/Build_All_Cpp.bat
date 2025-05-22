@@ -8,6 +8,8 @@
 
 @call :build Examples\CppApps\Example1 Example1.vcxproj
 @if errorlevel 1 goto :error
+@call :build Examples\CppApps\Echotime Echotime.vcxproj
+@if errorlevel 1 goto :error
 @call :build Examples\CppApps\HelloRequesterCppImpl RequestHelloTopic_example.sln
 @if errorlevel 1 goto :error
 @call :build Examples\CppApps\HelloWorldCppImpl HelloTopic_example.sln

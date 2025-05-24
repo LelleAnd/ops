@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -17,6 +17,8 @@
 * You should have received a copy of the GNU Lesser General Public License
 * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 */
+
+#include <cstdint>
 
 #include "gtest/gtest.h"
 
@@ -83,7 +85,27 @@ TEST(Test_fixed_string, TestConstructors) {
 	EXPECT_STREQ(b1.c_str(), "hej hopp") << "Content error";
 	EXPECT_STREQ(b1.data(), "hej hopp") << "Content error";
 
-	fixed_string<20> b2("Det var en gång", 3);		// const char*, length
+	fixed_string<20> bcc("hej", " hopp"); // const char*, const char*
+
+	EXPECT_EQ(bcc.size(), (size_t)8) << "Wrong size";
+	EXPECT_EQ(bcc.length(), (size_t)8) << "Wrong length";
+	EXPECT_EQ(bcc.max_size(), (size_t)20) << "Wrong max_size";
+	EXPECT_FALSE(bcc.empty()) << "Empty";
+	EXPECT_STREQ(bcc.c_str(), "hej hopp") << "Content error";
+	EXPECT_STREQ(bcc.data(), "hej hopp") << "Content error";
+
+	char bcc1_source[] = "Hello ";
+	char bcc2_source[] = "World";
+	fixed_string<20> bcc1(bcc1_source, bcc2_source); // char*, char*
+
+	EXPECT_EQ(bcc1.size(), (size_t)11) << "Wrong size";
+	EXPECT_EQ(bcc1.length(), (size_t)11) << "Wrong length";
+	EXPECT_EQ(bcc1.max_size(), (size_t)20) << "Wrong max_size";
+	EXPECT_FALSE(bcc1.empty()) << "Empty";
+	EXPECT_STREQ(bcc1.c_str(), "Hello World") << "Content error";
+	EXPECT_STREQ(bcc1.data(), "Hello World") << "Content error";
+
+	fixed_string<20> b2("Det var en gång", 3); // const char*, length
 
 	EXPECT_EQ(b2.size(), (size_t)3) << "Wrong size";
 	EXPECT_EQ(b2.length(), (size_t)3) << "Wrong length";
@@ -109,6 +131,18 @@ TEST(Test_fixed_string, TestConstructors) {
 	EXPECT_EQ(e.max_size(), (size_t)15) << "Wrong max_size";
 	EXPECT_FALSE(e.empty()) << "Empty";
 	EXPECT_STREQ(e.c_str(), kalle.c_str()) << "Content error";
+
+#ifdef FIXED_C17_DETECTED
+	//                         0----56789----
+	std::string anotherstring("Another string");
+	std::string_view sv(&anotherstring[5], 5);
+	fixed_string<10> svf(sv);
+	EXPECT_EQ(svf.size(), (size_t)5) << "Wrong size";
+	EXPECT_EQ(svf.length(), (size_t)5) << "Wrong length";
+	EXPECT_EQ(svf.max_size(), (size_t)10) << "Wrong max_size";
+	EXPECT_FALSE(svf.empty()) << "Empty";
+	EXPECT_STREQ(svf.c_str(), "er st") << "Content error";
+#endif
 #endif
 
 	fixed_string<80> c2(b);		// template constructor fixed_string<M>
@@ -144,6 +178,44 @@ TEST(Test_fixed_string, TestConstructors) {
 	EXPECT_EQ(d.max_size(), (size_t)20) << "Wrong max_size";
 	EXPECT_FALSE(d.empty()) << "Empty";
 	EXPECT_STREQ(d.c_str(), "hej hopp") << "Content error";
+
+#ifdef FIXED_C17_DETECTED
+	// Compile time constexpr strings
+	constexpr static ops::strings::fixed_string<20, ops::strings::overrun_policy_t::truncate_string> fs{ "Hello" };
+	static_assert(fs.max_size() == 20);
+	static_assert(fs.size() == 5);
+	static_assert(std::string_view(fs.c_str()) == "Hello");
+
+	constexpr static ops::strings::fixed_string_trunc<30> fs2{ fs.data() };
+	static_assert(fs2.max_size() == 30);
+	static_assert(fs2.size() == 5);
+	static_assert(std::string_view(fs2.c_str()) == "Hello");
+
+	constexpr auto fs3 = fs + fs2;
+	static_assert(fs3.max_size() == 50);
+	static_assert(fs3.size() == 10);
+	static_assert(std::string_view(fs3.c_str()) == "HelloHello");
+
+	constexpr static ops::strings::fixed_string_trunc<40> fs4{ fs.data(), " World" };
+	static_assert(fs4.max_size() == 40);
+	static_assert(fs4.size() == 11);
+	static_assert(std::string_view(fs4.c_str()) == "Hello World");
+
+	constexpr std::string_view aaa(fs4.c_str(), 5);
+
+	constexpr static ops::strings::fixed_string_trunc<50> fs5(aaa);
+	static_assert(fs5.max_size() == 50);
+	static_assert(fs5.size() == 5);
+	static_assert(std::string_view(fs5.c_str()) == "Hello");
+
+	constexpr static std::string_view bbb(fs4);
+
+	constexpr auto fs6 = ops::strings::make_fixed_string("Hej Hopp");
+	static_assert(fs6.max_size() == 8);
+	static_assert(fs6.size() == 8);
+	static_assert(std::string_view(fs6.c_str()) == "Hej Hopp");
+	static_assert(sizeof(fs6) == 10);
+#endif
 }
 
 TEST(Test_fixed_string, TestModifiers) {
@@ -338,6 +410,11 @@ TEST(Test_fixed_string, TestImplicitConversion) {
 	fixed_string<100> a("kalle hej hopp i lingonskogen");
 	std::string st = a;
 	EXPECT_STREQ(st.c_str(), "kalle hej hopp i lingonskogen") << "Content error";
+
+#ifdef FIXED_C17_DETECTED
+	std::string_view sv = a;
+	EXPECT_STREQ(sv.data(), "kalle hej hopp i lingonskogen") << "Content error";
+#endif
 }
 
 TEST(Test_fixed_string, TestRelationalOperators) {

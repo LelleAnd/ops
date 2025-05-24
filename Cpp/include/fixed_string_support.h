@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2017-2020 Lennart Andersson.
+* Copyright (C) 2017-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -27,7 +27,8 @@
 namespace ops { namespace strings {
 
 	// Stream operator
-	inline std::ostream& operator<< (std::ostream& os, const basic_fixed_string& str)
+	template<size_t N, overrun_policy_t POLICY>
+	inline std::ostream& operator<<(std::ostream& os, const fixed_string<N, POLICY>& str)
 	{
 		os << str.c_str();
 		return os;

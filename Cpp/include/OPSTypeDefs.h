@@ -106,6 +106,14 @@
 	#endif
 #endif
 
+#if __cplusplus >= 202302L		// Value according to standard for full C++23 conformity
+	#define OPS_C23_DETECTED
+#elif defined(_MSC_VER) && (_MSC_VER >= 1916)
+	#if _MSVC_LANG >= 202302L
+		#define OPS_C23_DETECTED
+	#endif
+#endif
+
 
 //#define OPS_REMOVE_ASSERT			// Define to skip assert() calls in OPS code.
 									// (can also be done by defining NDEBUG)
@@ -166,9 +174,9 @@ namespace ops {
 	typedef strings::fixed_string<FIXED_ADDRESS_SIZE>         Address_T;
 	typedef strings::fixed_string<FIXED_TRANSPORT_SIZE>       Transport_T;
 	typedef strings::fixed_string<FIXED_INTERNAL_STRING_SIZE> InternalString_T;
-	typedef strings::fixed_string<FIXED_EXCEPTION_MSG_SIZE, strings::truncate_string> ExceptionMessage_T;
+	typedef strings::fixed_string<FIXED_EXCEPTION_MSG_SIZE, strings::overrun_policy_t::truncate_string> ExceptionMessage_T;
 	typedef strings::fixed_string<FIXED_INTERNAL_KEY_SIZE>    InternalKey_T;
-	typedef strings::fixed_string<FIXED_ERROR_MSG_SIZE, strings::truncate_string>     ErrorMessage_T;
+	typedef strings::fixed_string<FIXED_ERROR_MSG_SIZE, strings::overrun_policy_t::truncate_string>     ErrorMessage_T;
 	typedef const char*                                       InoutName_T;
 
 	// Simple constant to be able to check that include file and compiled library has the same configurable constants

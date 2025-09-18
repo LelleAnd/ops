@@ -49,13 +49,13 @@ __constructorBody
     }
 
     ///Move-constructor taking other's resources
-    __className(__className&& other) : __baseClassName(std::move(other))
+    __className(__className&& other) noexcept : __baseClassName(std::move(other))
     {
 __moveconstructor
     }
 
     // Move assignment operator taking other's resources
-    __className& operator= (__className&& other)
+    __className& operator= (__className&& other) noexcept
     {
         if (this != &other) {
             __baseClassName::operator=(std::move(other));
@@ -86,11 +86,11 @@ __fillClone
 	///Validation routine for fields
 	virtual bool isValid() const noexcept override
     {
-		bool valid = true;
-		valid = valid && __baseClassName::isValid();
-		valid = valid && (__className_version >= 0) && (__className_version <= __className_idlVersion);
+		bool _valid = true;
+		_valid = _valid && __baseClassName::isValid();
+		_valid = _valid && (__className_version >= 0) && (__className_version <= __className_idlVersion);
 __validation
-		return valid;
+		return _valid;
     }
 
     ///Destructor: Note that all aggregated data and vectors are completely deleted.

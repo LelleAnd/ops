@@ -379,8 +379,8 @@ public class CppCompiler extends opsc.Compiler
                     // isArray()
                     if (!field.isAbstract()) {
                         if (field.getArraySize() > 0) {
-                            ret += tab(2) + "for(unsigned int __i = 0; __i < " + field.getArraySize() + "; __i++) {" + endl();
-                            ret += tab(3) +   "obj->" + fieldName + "[__i] = " + fieldName + "[__i];" + endl();
+                            ret += tab(2) + "for(unsigned int _i = 0; _i < " + field.getArraySize() + "; _i++) {" + endl();
+                            ret += tab(3) +   "obj->" + fieldName + "[_i] = " + fieldName + "[_i];" + endl();
                             ret += tab(2) + "}" + endl();
                         } else {
                             ret += tab(2) + "obj->" + fieldName + " = " + fieldName + ";" + endl();
@@ -402,8 +402,8 @@ public class CppCompiler extends opsc.Compiler
                         if (!field.getType().equals("string[]")) {
                             ret += tab(2) + "memcpy(&obj->" + fieldName + "[0], &" + fieldName + "[0], sizeof(" + fieldName + "));" + endl();
                         } else {
-                            ret += tab(2) + "for(unsigned int __i = 0; __i < " + field.getArraySize() + "; __i++) {" + endl();
-                            ret += tab(3) +   "obj->" + fieldName + "[__i] = " + fieldName + "[__i];" + endl();
+                            ret += tab(2) + "for(unsigned int _i = 0; _i < " + field.getArraySize() + "; _i++) {" + endl();
+                            ret += tab(3) +   "obj->" + fieldName + "[_i] = " + fieldName + "[_i];" + endl();
                             ret += tab(2) + "}" + endl();
                         }
                     } else {
@@ -433,10 +433,10 @@ public class CppCompiler extends opsc.Compiler
                 } else {
                     // isArray()
                     if (field.getArraySize() > 0) {
-                        ret += tab(2) + "for(unsigned int __i = 0; __i < " + field.getArraySize() + "; __i++) {" + endl();
-                        ret += tab(3) +   fieldName + "[__i] = std::move(other." + fieldName + "[__i]);" + endl();
+                        ret += tab(2) + "for(unsigned int _i = 0; _i < " + field.getArraySize() + "; _i++) {" + endl();
+                        ret += tab(3) +   fieldName + "[_i] = std::move(other." + fieldName + "[_i]);" + endl();
                         if (field.isAbstract()) {
-                            ret += tab(3) + "other." + fieldName + "[__i] = nullptr;" + endl();
+                            ret += tab(3) + "other." + fieldName + "[_i] = nullptr;" + endl();
                         }
                         ret += tab(2) + "}" + endl();
                     } else {
@@ -450,8 +450,8 @@ public class CppCompiler extends opsc.Compiler
                         if (!field.getType().equals("string[]")) {
                             ret += tab(2) + "memcpy(&" + fieldName + "[0], &other." + fieldName + "[0], sizeof(" + fieldName + "));" + endl();
                         } else {
-                            ret += tab(2) + "for(unsigned int __i = 0; __i < " + field.getArraySize() + "; __i++) {" + endl();
-                            ret += tab(3) +   fieldName + "[__i] = std::move(other." + fieldName + "[__i]);" + endl();
+                            ret += tab(2) + "for(unsigned int _i = 0; _i < " + field.getArraySize() + "; _i++) {" + endl();
+                            ret += tab(3) +   fieldName + "[_i] = std::move(other." + fieldName + "[_i]);" + endl();
                             ret += tab(2) + "}" + endl();
                         }
                     } else {
@@ -483,11 +483,11 @@ public class CppCompiler extends opsc.Compiler
                 } else {
                     // isArray()
                     if (field.getArraySize() > 0) {
-                        ret += tab(pos) + "for(unsigned int __i = 0; __i < " + field.getArraySize() + "; __i++) {" + endl();
+                        ret += tab(pos) + "for(unsigned int _i = 0; _i < " + field.getArraySize() + "; _i++) {" + endl();
                         if (field.isAbstract()) {
-                            ret += tab(pos+1) + "std::swap(" + fieldName + "[__i], other." + fieldName + "[__i]);" + endl();
+                            ret += tab(pos+1) + "std::swap(" + fieldName + "[_i], other." + fieldName + "[_i]);" + endl();
                         } else {
-                            ret += tab(pos+1) + fieldName + "[__i] = std::move(other." + fieldName + "[__i]);" + endl();
+                            ret += tab(pos+1) + fieldName + "[_i] = std::move(other." + fieldName + "[_i]);" + endl();
                         }
                         ret += tab(pos) + "}" + endl();
                     } else {
@@ -499,8 +499,8 @@ public class CppCompiler extends opsc.Compiler
                 if (field.isArray()) {
                     if (field.getArraySize() > 0) {
                         if (field.getType().equals("string[]")) {
-                            ret += tab(pos) + "for(unsigned int __i = 0; __i < " + field.getArraySize() + "; __i++) {" + endl();
-                            ret += tab(pos+1) +   fieldName + "[__i] = std::move(other." + fieldName + "[__i]);" + endl();
+                            ret += tab(pos) + "for(unsigned int _i = 0; _i < " + field.getArraySize() + "; _i++) {" + endl();
+                            ret += tab(pos+1) +   fieldName + "[_i] = std::move(other." + fieldName + "[_i]);" + endl();
                             ret += tab(pos) + "}" + endl();
                         } else {
                             ret += tab(pos) + "memcpy(&" + fieldName + "[0], &other." + fieldName + "[0], sizeof(" + fieldName + "));" + endl();
@@ -534,14 +534,14 @@ public class CppCompiler extends opsc.Compiler
             if (field.isArray() && (field.getArraySize() > 0)) {
                 if (field.isIdlType()) {
                     if (field.isAbstract()) {
-                        ret += tab(2) + "for(unsigned int __i = 0; __i < " + field.getArraySize() + "; __i++) {" + endl();
-                        ret += tab(3) +   fieldName + "[__i] = new " + languageType(field).replace("*", "()") + ";" + endl();
+                        ret += tab(2) + "for(unsigned int _i = 0; _i < " + field.getArraySize() + "; _i++) {" + endl();
+                        ret += tab(3) +   fieldName + "[_i] = new " + languageType(field).replace("*", "()") + ";" + endl();
                         ret += tab(2) + "}" + endl();
                     }
                 } else if (field.isEnumType()) {
                     if (field.getValue().length() > 0) {
-                      ret += tab(2) + "for(unsigned int __i = 0; __i < " + field.getArraySize() + "; __i++) {" + endl();
-                      ret += tab(3) +   fieldName + "[__i] = " + languageType(field) + "::" + nonReservedName(field.getValue()) + ";" + endl();
+                      ret += tab(2) + "for(unsigned int _i = 0; _i < " + field.getArraySize() + "; _i++) {" + endl();
+                      ret += tab(3) +   fieldName + "[_i] = " + languageType(field) + "::" + nonReservedName(field.getValue()) + ";" + endl();
                       ret += tab(2) + "}" + endl();
                     }
                 } else {
@@ -712,7 +712,7 @@ public class CppCompiler extends opsc.Compiler
                 String upper = "this->" + fieldName + ".size()";
                 if ((field.getArraySize() == 0) && (field.getArrayMaxSize() > 0)) {
                     ret += preStr;
-                    ret += tab(t) + "valid = valid && (" + upper + " <= " + field.getArrayMaxSize() + ");" + endl();
+                    ret += tab(t) + "_valid = _valid && (" + upper + " <= " + field.getArrayMaxSize() + ");" + endl();
                     forceStr = postStr;
                     preStr = "";
                     postStr = "";
@@ -720,9 +720,9 @@ public class CppCompiler extends opsc.Compiler
                 if (field.getArraySize() > 0) {
                     upper = "" + field.getArraySize();
                 }
-                preStr  += tab(t) + "for (size_t __i = 0; __i < " + upper + "; __i++) {" + endl();
+                preStr  += tab(t) + "for (size_t _i = 0; _i < " + upper + "; _i++) {" + endl();
                 postStr += tab(t) + "}" + endl();
-                idxStr = "[__i]";
+                idxStr = "[_i]";
                 t += 1;
             }
             if (field.isEnumType()) {
@@ -730,14 +730,14 @@ public class CppCompiler extends opsc.Compiler
                 String hi = field.getRangeHi();
                 ret += preStr;
                 ret += tab(t) + "//validate range: " + lo + ".." + hi + endl();
-                ret += tab(t) + "valid = valid && (static_cast<int16_t>(this->" + fieldName + idxStr + ") >= " + lo +
+                ret += tab(t) + "_valid = _valid && (static_cast<int16_t>(this->" + fieldName + idxStr + ") >= " + lo +
                                 ") && (static_cast<int16_t>(this->" + fieldName + idxStr + ") <= " + hi + ");" + endl();
                 ret += postStr;
 
             } else {
                 if (field.isIdlType()) {
                     ret += preStr;
-                    ret += tab(t) + "valid = valid && this->" + fieldName + idxStr;
+                    ret += tab(t) + "_valid = _valid && this->" + fieldName + idxStr;
                     if (field.isAbstract()) {
                         ret += "->isValid();" + endl();
                     } else {
@@ -748,7 +748,7 @@ public class CppCompiler extends opsc.Compiler
                 } else {
                     if (field.isStringType() && (field.getStringSize() == 0) && (field.getStringMaxSize() > 0)) {
                         ret += preStr;
-                        ret += tab(t) + "valid = valid && (this->" + fieldName + idxStr + ".size() <= " + field.getStringMaxSize() + ");" + endl();
+                        ret += tab(t) + "_valid = _valid && (this->" + fieldName + idxStr + ".size() <= " + field.getStringMaxSize() + ");" + endl();
                         ret += postStr;
 
                     } else {
@@ -760,7 +760,7 @@ public class CppCompiler extends opsc.Compiler
                                 if (languageType(field).equals("float")) pf = "f";
                                 ret += preStr;
                                 ret += tab(t) + "//validate range: " + lo + ".." + hi + endl();
-                                ret += tab(t) + "valid = valid && (this->" + fieldName + idxStr + " >= " + lo + pf +
+                                ret += tab(t) + "_valid = _valid && (this->" + fieldName + idxStr + " >= " + lo + pf +
                                                 ") && (this->" + fieldName + idxStr + " <= " + hi + pf + ");" + endl();
                                 ret += postStr;
                             }
@@ -872,9 +872,9 @@ public class CppCompiler extends opsc.Compiler
                     ret += "if (" + fieldName + " != nullptr) { delete " + fieldName + "; }" + endl();
                 } else {
                     if (field.getArraySize() > 0) {
-                        ret += "for (unsigned int __i = 0; __i < ";
+                        ret += "for (unsigned int _i = 0; _i < ";
                         ret += field.getArraySize();
-                        ret += "; __i++) { if (" + fieldName + "[__i] != nullptr) { delete " + fieldName + "[__i]; } }" + endl();
+                        ret += "; _i++) { if (" + fieldName + "[_i] != nullptr) { delete " + fieldName + "[_i]; } }" + endl();
                     } else {
                         ret += "for (auto& x : " + fieldName + ") { if (x != nullptr) { delete x; } }" + endl();
                     }

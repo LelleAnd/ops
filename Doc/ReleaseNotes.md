@@ -4,6 +4,10 @@ The major changes for each release tag is noted below. For minor changes see the
 ## tags 4.3.x-y ##
 Requires the tinyxml2 library which 4.2.x-y doesn't.
 
+### 4.3.1-1 ###
+* Made C++ class *fixed_string* constexpr capable.
+* Updated naming of internal member variables in generated C++ classes.
+
 ### 4.3.1-0 ###
 * Changed default C++ standard to **C++17**. The support for some older standards still exist but will in a near future be dropped.
 

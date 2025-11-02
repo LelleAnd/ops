@@ -11,7 +11,7 @@ if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.15.0")
 endif()
 
 # The main project name
-project(OPS VERSION 4.3.0)
+project(OPS VERSION 4.3.2)
 
 ################################################################################
 #

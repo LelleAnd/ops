@@ -4,6 +4,10 @@ The major changes for each release tag is noted below. For minor changes see the
 ## tags 4.3.x-y ##
 Requires the tinyxml2 library which 4.2.x-y doesn't.
 
+### 4.3.2-0 ###
+* Changed generated C++ type for idl version from 'char' to 'uint8_t'.
+* Changed generated C++ type for idl 'byte' from 'char' to 'uint8_t'. The old behaviour can be retained by adding argument *'-retain char'* to the **opsc** command when compiling idl's. See also the [opsc description](IDLCommandlineCompiler.md). 
+
 ### 4.3.1-1 ###
 * Made C++ class *fixed_string* constexpr capable.
 * Updated naming of internal member variables in generated C++ classes.

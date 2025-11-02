@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -270,6 +270,7 @@ TEST(Test_Sockets, TestTCPdelete) {
 	static const int serverPort = 9999;
 	char rcvbuf[1024];
 
+	std::thread t2;
 	{
 		// Create TCP Server with default buffer size. Add listener for connect status
 		TCPServer snd(&ServerCB, ioServ(), "127.0.0.1", serverPort);
@@ -301,30 +302,28 @@ TEST(Test_Sockets, TestTCPdelete) {
 
 		// Start an async wait for data
 		rcv.asynchWait(&rcvbuf[0], 1000);
-	}
 
-	// Need someone to drive the io service to finish all asynch callbacks
+		// Need someone to drive the io service to finish all asynch callbacks e.g. created @ scope exit
+		t2 = std::thread(PollWTimeout, std::ref(ioServ), 500);
+	}
+	t2.join();
+
 	{
+		// Need someone to drive the io service to handle all asynch callbacks
 		std::thread t1(PollWTimeout, std::ref(ioServ), 500);
+
+		{
+			// Create TCP Server with default buffer size. Add listener for connect status
+			TCPServer snd(&ServerCB, ioServ(), "127.0.0.1", serverPort);
+			snd.open();
+			snd.close();
+			snd.open();
+			snd.open();
+			snd.open();
+			snd.close();
+			snd.open();
+		}
+
 		t1.join();
 	}
-
-	{
-		// Create TCP Server with default buffer size. Add listener for connect status
-		TCPServer snd(&ServerCB, ioServ(), "127.0.0.1", serverPort);
-		snd.open();
-		snd.close();
-		snd.open();
-		snd.open();
-		snd.open();
-		snd.close();
-		snd.open();
-	}
-
-	// Need someone to drive the io service to finish all asynch callbacks
-	{
-		std::thread t1(PollWTimeout, std::ref(ioServ), 500);
-		t1.join();
-	}
-
 }

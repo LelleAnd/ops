@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2023 Lennart Andersson.
+* Copyright (C) 2018-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -59,6 +59,7 @@ namespace ops
 			std::unique_ptr<boost::asio::ip::tcp::socket> _sock;				// The socket that handles next accept.
 			std::unique_ptr<boost::asio::ip::tcp::acceptor> _acceptor;
 			volatile bool _canceled = false;
+			volatile bool _asyncOngoing = false;
 			int _outSocketBufferSize = 0;
 
 		public:
@@ -84,6 +85,8 @@ namespace ops
 			{
 				OPS_TCP_TRACE("Server: start_accept()\n");
 				std::shared_ptr<impl> self = shared_from_this();
+				// Indicate that async call is ongoing
+				_asyncOngoing = true;
 				_acceptor->async_accept(*_sock,
 					[self](const boost::system::error_code& error) {
 						self->handleAccept(error);
@@ -96,12 +99,20 @@ namespace ops
 				OPS_TCP_TRACE("Server: cancel()\n");
 				clearCallbacks();
 				_canceled = true;
+				_acceptor->cancel();
 				_acceptor->close();
+
+				// Wait for async call to finish
+				while (_asyncOngoing) {
+					ops::TimeHelper::sleep(std::chrono::milliseconds(10));
+				}
 			}
 
 			void handleAccept(const boost::system::error_code& error)
 			{
 				OPS_TCP_TRACE("Server: handleAccept(), error: " << error << '\n');
+				// Indicate async call finished
+				_asyncOngoing = false;
 				if (!_canceled) {
 					if (!error) {
 						// By holding the mutex while in the callback, we are synchronized with clearCallbacks()

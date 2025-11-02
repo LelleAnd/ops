@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2020 Lennart Andersson.
+* Copyright (C) 2020-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -38,6 +38,7 @@ void InitObjectChecksum(SerDesObject_Core& obj)
 {
     obj.bo = true;                  // 0x01
     obj.ch = 'm';                   // 0x6D
+    obj.u8 = 0;                     // 0x00
     obj.i16 = -456;                 // 0xFE38
     obj.i32 = 3223;                 // 0x0C97
     obj.i64 = 99999;                // 0x01869F
@@ -59,8 +60,8 @@ TEST(Test_ChecksumArchiver, TestCoreTypes) {
     chk.calc.sum = 0;
     obj.serialize(&chk);
     EXPECT_EQ(chk.calc.sum, 0xD0);
-    EXPECT_EQ(chk.calc.totalbytes, (size_t)47);
-    EXPECT_EQ(chk.calc.totalfields, 11u);
+    EXPECT_EQ(chk.calc.totalbytes, (size_t)48);
+    EXPECT_EQ(chk.calc.totalfields, 12u);
 }
 
 // ===============================
@@ -70,20 +71,21 @@ void InitObjectChecksum(SerDesObject_Vectors& obj)
 {
     obj.bo = { true, false, false, true };  // 0x01000001           -> 0x00
     obj.ch = { 'm', 's' };                  // 0x6D73               -> 0x1E -> 1E
-    obj.i16 = { -456 };                     // 0xFE38               -> 0xC6 -> D8
-    obj.i32 = { 3223, -987, 123 };          // 0x00000C97           -> 0x9B -> 43
-                                            // 0xFFFFFC25           -> 0xD9 -> 9A
-                                            // 0x0000007B           -> 0x7B -> E1
-    obj.i64 = { 99999, -7777 };             // 0x000000000001869F   -> 0x18 -> F9
-                                            // 0xFFFFFFFFFFFFE19F   -> 0x7E -> 87
-    obj.f32 = { 678.98f, -4.654f };         // 0x4429BEB8           -> 0x6B -> EC
-                                            // 0xC094ED91           -> 0x28 -> C4
-    obj.d64 = { 123456789.0, -999.87654 };  // 0x419D6F3454000000   -> 0xD3 -> 17
-                                            // 0xC08F3F0327674D16   -> 0x68 -> 7F
-    obj.str = { "Test", "std" };            // 0x54657374           -> 0x36 -> 49
-                                            // 0x737464             -> 0x63 -> 2A
-    obj.fstr = { "Test", "fixed" };         // 0x54657374           -> 0x36 -> 1C
-                                            // 0x6669786564         -> 0x76 -> 6A
+    obj.u8 = { 17, 221 };                   // 0x11DD               -> 0xCC -> D2
+    obj.i16 = { -456 };                     // 0xFE38               -> 0xC6 -> 14
+    obj.i32 = { 3223, -987, 123 };          // 0x00000C97           -> 0x9B -> 8F
+                                            // 0xFFFFFC25           -> 0xD9 -> 56
+                                            // 0x0000007B           -> 0x7B -> 2D
+    obj.i64 = { 99999, -7777 };             // 0x000000000001869F   -> 0x18 -> 35
+                                            // 0xFFFFFFFFFFFFE19F   -> 0x7E -> 4B
+    obj.f32 = { 678.98f, -4.654f };         // 0x4429BEB8           -> 0x6B -> 20
+                                            // 0xC094ED91           -> 0x28 -> 08
+    obj.d64 = { 123456789.0, -999.87654 };  // 0x419D6F3454000000   -> 0xD3 -> DB
+                                            // 0xC08F3F0327674D16   -> 0x68 -> B3
+    obj.str = { "Test", "std" };            // 0x54657374           -> 0x36 -> 85
+                                            // 0x737464             -> 0x63 -> E6
+    obj.fstr = { "Test", "fixed" };         // 0x54657374           -> 0x36 -> D0
+                                            // 0x6669786564         -> 0x76 -> A6
 }
 
 TEST(Test_ChecksumArchiver, TestVectorTypes) {
@@ -95,9 +97,9 @@ TEST(Test_ChecksumArchiver, TestVectorTypes) {
 
     chk.calc.sum = 0;
     obj.serialize(&chk);
-    EXPECT_EQ(chk.calc.sum, 0x6A);
-    EXPECT_EQ(chk.calc.totalbytes, (size_t)( 4+2+2+12+16+8+16+7+9));
-    EXPECT_EQ(chk.calc.totalfields, (uint32_t)(1+4+6+2+2));  // boolean & string called for each element
+    EXPECT_EQ(chk.calc.sum, 0xA6);
+    EXPECT_EQ(chk.calc.totalbytes, (size_t)( 4+2+2+2+12+16+8+16+7+9));
+    EXPECT_EQ(chk.calc.totalfields, (uint32_t)(1+4+7+2+2));  // boolean & string called for each element
 }
 
 // ===============================
@@ -108,6 +110,8 @@ void InitObjectChecksum(SerDesObject_Fixarrays& obj)
     obj.bo[0] = true;  obj.bo[1] = false;  obj.bo[2] = false; obj.bo[3] = true;
 
     obj.ch[0] = 'm';  obj.ch[1] = 's';
+
+    obj.u8[0] = 0; obj.u8[1] = 0; obj.u8[2] = 0;
 
     obj.i16[0] = -456;
 
@@ -135,8 +139,8 @@ TEST(Test_ChecksumArchiver, TestFixedArrays) {
     chk.calc.sum = 0;
     obj.serialize(&chk);
     EXPECT_EQ(chk.calc.sum, 0x6A);
-    EXPECT_EQ(chk.calc.totalbytes, (size_t)(4 + 2 + 2 + 12 + 16 + 8 + 16 + 7 + 9));
-    EXPECT_EQ(chk.calc.totalfields, (uint32_t)(1 + 4 + 6 + 2 + 2));  // boolean & string called for each element
+    EXPECT_EQ(chk.calc.totalbytes, (size_t)(4 + 2 + 3 + 2 + 12 + 16 + 8 + 16 + 7 + 9));
+    EXPECT_EQ(chk.calc.totalfields, (uint32_t)(1 + 4 + 7 + 2 + 2));  // boolean & string called for each element
 }
 
 // ===============================
@@ -169,7 +173,7 @@ TEST(Test_ChecksumArchiver, TestNonCoreTypes) {
     // Each SerDesObject_Core gives checksum = 0xD0
     // Odd number of objects, gives the same checksum
     EXPECT_EQ(chk.calc.sum, 0xD0);
-    EXPECT_EQ(chk.calc.totalbytes, (size_t)(9*47));
-    EXPECT_EQ(chk.calc.totalfields, (uint32_t)(1+(9*11)));
+    EXPECT_EQ(chk.calc.totalbytes, (size_t)(9*48));
+    EXPECT_EQ(chk.calc.totalfields, (uint32_t)(1+(9*12)));
 }
 

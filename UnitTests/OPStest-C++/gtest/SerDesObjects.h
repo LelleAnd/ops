@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018-2020 Lennart Andersson.
+* Copyright (C) 2018-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -30,6 +30,7 @@ public:
 
     bool bo;
     char ch;
+    uint8_t u8;
     int16_t i16;
     int i32;
     int64_t i64;
@@ -44,6 +45,7 @@ public:
         ops::OPSObject::serialize(archive);
         archive->inout("bo", bo);
         archive->inout("ch", ch);
+        archive->inout("u8", u8);
         archive->inout("i16", i16);
         archive->inout("i32", i32);
         archive->inout("i64", i64);
@@ -69,6 +71,7 @@ public:
 
     std::vector<bool> bo;
     std::vector<char> ch;
+    std::vector<uint8_t> u8;
     std::vector<int16_t> i16;
     std::vector<int> i32;
     std::vector<int64_t> i64;
@@ -82,6 +85,7 @@ public:
         OPSObject::serialize(archive);
         archive->inout("bo", bo);
         archive->inout("ch", ch);
+        archive->inout("u8", u8);
         archive->inout("i16", i16);
         archive->inout("i32", i32);
         archive->inout("i64", i64);
@@ -106,6 +110,7 @@ public:
 
     bool bo[4];
     char ch[2];
+    uint8_t u8[3];
     int16_t i16[1];
     int i32[3];
     int64_t i64[2];
@@ -119,6 +124,7 @@ public:
         OPSObject::serialize(archive);
         archive->inoutfixarr("bo", bo, 4, sizeof(bo));
         archive->inoutfixarr("ch", ch, 2, sizeof(ch));
+        archive->inoutfixarr("u8", u8, 3, sizeof(u8));
         archive->inoutfixarr("i16", i16, 1, sizeof(i16));
         archive->inoutfixarr("i32", i32, 3, sizeof(i32));
         archive->inoutfixarr("i64", i64, 2, sizeof(i64));

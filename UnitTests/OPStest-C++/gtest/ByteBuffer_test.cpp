@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -23,20 +23,20 @@
 //    Big Endian tests requires compilation with define ON_BIG_ENDIAN_MACHINE and also 
 //    uses the 'preserveWrittenData' parameter.
 
-// TODO:
-// *  ReadBytes / WriteBytes over several segments not tested
-
 #include "gtest/gtest.h"
 
+#include "opsidls/OPSConstants.h"
 #include "ByteBuffer.h"
 
 using namespace ops;
+
+const int segmentHeaderSize{ opsidls::OPSConstants::SEGMENT_HEADER_SIZE };
 
 
 TEST(Test_ByteBuffer, TestFundamentals) {
 
 	{
-		MemoryMap illformed(1, 14);
+		MemoryMap illformed(1, segmentHeaderSize);
 		EXPECT_THROW(ByteBuffer buf(illformed), ByteBuffer::illformed_memmap);
 	}
 
@@ -135,6 +135,7 @@ const int TEST_INT = 456789;
 const int16_t TEST_SHORT = 234;
 const int64_t TEST_LONG = 1234567890;
 const char TEST_CHAR = 64;
+const uint8_t TEST_UINT8 = 42;
 const std::string TEST_STRING = "qwerty";
 const std::string TEST_FIXSTRING = "fixed string test";
 
@@ -188,6 +189,13 @@ TEST(Test_ByteBuffer, TestCoretypes) {
 	buf.WriteChar(c1);
 	size += 1;
 	EXPECT_EQ(c1, TEST_CHAR);
+	EXPECT_EQ(buf.GetSize(), size);
+	EXPECT_EQ(buf.GetIndex(), size);
+
+	uint8_t u1 = TEST_UINT8;
+	buf.WriteByte(u1);
+	size += 1;
+	EXPECT_EQ(u1, TEST_UINT8);
 	EXPECT_EQ(buf.GetSize(), size);
 	EXPECT_EQ(buf.GetIndex(), size);
 
@@ -262,6 +270,11 @@ TEST(Test_ByteBuffer, TestCoretypes) {
 	char c2 = buf.ReadChar();
 	size += 1;
 	EXPECT_EQ(c2, TEST_CHAR);
+	EXPECT_EQ(buf.GetIndex(), size);
+
+	uint8_t u2 = buf.ReadByte();
+	size += 1;
+	EXPECT_EQ(u2, TEST_UINT8);
 	EXPECT_EQ(buf.GetIndex(), size);
 
 	std::string str2 = buf.ReadString();
@@ -398,6 +411,7 @@ TEST(Test_ByteBuffer, TestTooLargeFixedString) {
 std::vector<float> FLOAT_VECTOR;
 std::vector<double> DOUBLE_VECTOR;
 std::vector<char> CHAR_VECTOR;
+std::vector<uint8_t> UINT8_VECTOR;
 std::vector<int16_t> SHORT_VECTOR;
 std::vector<int> INT_VECTOR;
 std::vector<int64_t> LONG_VECTOR;
@@ -422,6 +436,12 @@ void InitializeTestVectors()
 	CHAR_VECTOR.push_back(17);
 	CHAR_VECTOR.push_back(111);
 	CHAR_VECTOR.push_back(-103);
+
+	UINT8_VECTOR.clear();
+	UINT8_VECTOR.push_back(7);
+	UINT8_VECTOR.push_back(42);
+	UINT8_VECTOR.push_back(122);
+	UINT8_VECTOR.push_back(244);
 
 	SHORT_VECTOR.clear();
 	SHORT_VECTOR.push_back(4);
@@ -504,6 +524,13 @@ TEST(Test_ByteBuffer, TestVectors) {
 	EXPECT_EQ(buf.GetSize(), size);
 	EXPECT_EQ(buf.GetIndex(), size);
 
+	std::vector<uint8_t> uv(UINT8_VECTOR);
+	buf.WriteBytes(uv);
+	size += 4 + (int)uv.size();
+	VectorCompare<uint8_t>(uv, UINT8_VECTOR, "Write uint8_t vector");
+	EXPECT_EQ(buf.GetSize(), size);
+	EXPECT_EQ(buf.GetIndex(), size);
+
 	std::vector<int16_t> sv(SHORT_VECTOR);
 	buf.WriteShorts(sv);
 	size += 4 + ((int)sv.size() * 2);
@@ -566,6 +593,12 @@ TEST(Test_ByteBuffer, TestVectors) {
 	VectorCompare<char>(cv, cvv, "Read Char vector");
 	EXPECT_EQ(buf.GetIndex(), size);
 
+	std::vector<uint8_t> uvv;
+	buf.ReadBytes(uvv);
+	size += 4 + (int)uv.size();
+	VectorCompare<uint8_t>(uv, uvv, "Read uint8_t vector");
+	EXPECT_EQ(buf.GetIndex(), size);
+
 	std::vector<int16_t> svv;
 	buf.ReadShorts(svv);
 	size += 4 + ((int)sv.size() * 2);
@@ -598,9 +631,11 @@ TEST(Test_ByteBuffer, TestVectors) {
 	EXPECT_EQ(buf.GetIndex(), size);
 }
 
+// ==================================================
+
 TEST(Test_ByteBuffer, TestSegmentFundamentals) {
 
-	MemoryMap map(4, 16);
+	MemoryMap map(4, segmentHeaderSize + 2);
 	ByteBuffer buf(map);
 	int size = 0;
 
@@ -610,7 +645,7 @@ TEST(Test_ByteBuffer, TestSegmentFundamentals) {
 
 	// Start buffer with a segment header in segment 0
 	buf.writeNewSegment();
-	size += 14;
+	size += segmentHeaderSize;
 	EXPECT_EQ(buf.GetSize(), size);
 	EXPECT_EQ(buf.GetIndex(), size);
 
@@ -622,7 +657,7 @@ TEST(Test_ByteBuffer, TestSegmentFundamentals) {
 
 	// next will change to segment 1, write header & then value
 	buf.WriteShort(4);
-	size += 14 + 2;
+	size += segmentHeaderSize + 2;
 	EXPECT_EQ(buf.GetSize(), size);
 	EXPECT_EQ(buf.GetIndex(), 16);
 	EXPECT_EQ(buf.getNrOfSegments(), 2);
@@ -630,7 +665,7 @@ TEST(Test_ByteBuffer, TestSegmentFundamentals) {
 	// next will change to segment 2, write header & then first 2 bytes from value then
 	// change to segment 3, write a new header and the last 2 bytes from value
 	buf.WriteInt(6);
-	size += 14 + 2 + 14 + 2;
+	size += segmentHeaderSize + 2 + segmentHeaderSize + 2;
 	EXPECT_EQ(buf.GetSize(), size);
 	EXPECT_EQ(buf.GetIndex(), 16);
 	EXPECT_EQ(buf.GetSize(), map.getTotalSize());
@@ -704,11 +739,89 @@ TEST(Test_ByteBuffer, TestSegmentFundamentals) {
 	EXPECT_EQ(buf.getNrOfSegments(), 4);
 }
 
+TEST(Test_ByteBuffer, TestSegmentWBytes) {
+
+	MemoryMap map(8, segmentHeaderSize + 2);
+	ByteBuffer buf(map);
+	int size = 0;
+
+	EXPECT_EQ(buf.GetSize(), size);
+	EXPECT_EQ(buf.GetIndex(), size);
+	EXPECT_EQ(buf.getNrOfSegments(), 1);
+
+	// Start buffer with a segment header in segment 0
+	buf.writeNewSegment();
+	size += segmentHeaderSize;
+	EXPECT_EQ(buf.GetSize(), size);
+	EXPECT_EQ(buf.GetIndex(), size);
+
+	// This will write a length (4 byte) + 4 chars
+	const std::vector<char> charData{'a', 'b', 'c', 'd'};
+
+	buf.WriteBytes(charData);
+	size += (3 * segmentHeaderSize) + 4 + 4;
+	EXPECT_EQ(buf.GetSize(), size);
+	EXPECT_EQ(buf.GetIndex(), 16);
+	EXPECT_EQ(buf.getNrOfSegments(), 4);
+
+	// This will write a length (4 byte) + 3 uint8_t
+	const std::vector<uint8_t> uintData{ 55, 167, 251 };
+
+	buf.WriteBytes(uintData);
+	size += (4 * segmentHeaderSize) + 4 + 3;
+	EXPECT_EQ(buf.GetSize(), size);
+	EXPECT_EQ(buf.GetIndex(), 15);
+	EXPECT_EQ(buf.getNrOfSegments(), 8);
+
+	buf.finish();
+
+	EXPECT_EQ(buf.getNrOfSegments(), 8);
+	EXPECT_EQ(buf.getSegmentSize(0), 16);
+	EXPECT_EQ(buf.getSegmentSize(1), 16);
+	EXPECT_EQ(buf.getSegmentSize(2), 16);
+	EXPECT_EQ(buf.getSegmentSize(3), 16);
+	EXPECT_EQ(buf.getSegmentSize(4), 16);
+	EXPECT_EQ(buf.getSegmentSize(5), 16);
+	EXPECT_EQ(buf.getSegmentSize(6), 16);
+	EXPECT_EQ(buf.getSegmentSize(7), 15);
+	EXPECT_NE(buf.getSegment(0), nullptr);
+	EXPECT_NE(buf.getSegment(1), nullptr);
+	EXPECT_NE(buf.getSegment(2), nullptr);
+	EXPECT_NE(buf.getSegment(3), nullptr);
+	EXPECT_NE(buf.getSegment(4), nullptr);
+	EXPECT_NE(buf.getSegment(5), nullptr);
+	EXPECT_NE(buf.getSegment(6), nullptr);
+	EXPECT_NE(buf.getSegment(7), nullptr);
+
+	buf.ResetIndex();
+
+	EXPECT_TRUE(buf.checkProtocol());
+	EXPECT_EQ(buf.ReadInt(), 8);	// total 8 segments
+	EXPECT_EQ(buf.ReadInt(), 0);	// segment 0
+
+	std::vector<char> tmpCharData{ };
+	std::vector<uint8_t> tmpUintData{ };
+
+	buf.ReadBytes(tmpCharData);
+	buf.ReadBytes(tmpUintData);
+
+	EXPECT_EQ(charData.size(), tmpCharData.size());
+	for (size_t i = 0; i < charData.size(); ++i) {
+		EXPECT_EQ(charData[i], tmpCharData[i]);
+	}
+
+	EXPECT_EQ(uintData.size(), tmpUintData.size());
+	for (size_t i = 0; i < uintData.size(); ++i) {
+		EXPECT_EQ(uintData[i], tmpUintData[i]);
+	}
+
+}
+
 TEST(Test_ByteBuffer, TestSegmentsMinimal) {
 
 	// Setup a buffer that only have space for a segment header and 1 byte in each segment.
 	// This will lead to all data types (larger than 1 byte) to be split in several segments.
-	MemoryMap map(1000, 15);
+	MemoryMap map(1000, segmentHeaderSize + 1);
 	ByteBuffer buf(map);
 	int size = 0;
 
@@ -722,42 +835,42 @@ TEST(Test_ByteBuffer, TestSegmentsMinimal) {
 	// Fill buffer with values from our core types
 	float const f1 = TEST_FLOAT;
 	buf.WriteFloat(f1);
-	size += 15 * 4;
+	size += (segmentHeaderSize + 1) * 4;
 	EXPECT_EQ(buf.GetSize(), size);
 
 	double const d1 = TEST_DOUBLE;
 	buf.WriteDouble(d1);
-	size += 15 * 8;
+	size += (segmentHeaderSize + 1) * 8;
 	EXPECT_EQ(buf.GetSize(), size);
 
 	int16_t const s1 = TEST_SHORT;
 	buf.WriteShort(s1);
-	size += 15 * 2;
+	size += (segmentHeaderSize + 1) * 2;
 	EXPECT_EQ(buf.GetSize(), size);
 
 	int const i1 = TEST_INT;
 	buf.WriteInt(i1);
-	size += 15 * 4;
+	size += (segmentHeaderSize + 1) * 4;
 	EXPECT_EQ(buf.GetSize(), size);
 
 	int64_t const l1 = TEST_LONG;
 	buf.WriteLong(l1);
-	size += 15 * 8;
+	size += (segmentHeaderSize + 1) * 8;
 	EXPECT_EQ(buf.GetSize(), size);
 
 	char const c1 = TEST_CHAR;
 	buf.WriteChar(c1);
-	size += 15 * 1;
+	size += (segmentHeaderSize + 1) * 1;
 	EXPECT_EQ(buf.GetSize(), size);
 
 	const std::string str1 = TEST_STRING;
 	buf.WriteString(str1);
-	size += 15 * (4 + (int)TEST_STRING.size());
+	size += (segmentHeaderSize + 1) * (4 + (int)TEST_STRING.size());
 	EXPECT_EQ(buf.GetSize(), size);
 
 	const strings::fixed_string<100> fstr1 = TEST_FIXSTRING;
 	buf.WriteString(fstr1);
-	size += 15 * (4 + (int)TEST_FIXSTRING.size());
+	size += (segmentHeaderSize + 1) * (4 + (int)TEST_FIXSTRING.size());
 	EXPECT_EQ(buf.GetSize(), size);
 	EXPECT_EQ(buf.getNrOfSegments(), 58);
 

@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018-2022 Lennart Andersson.
+* Copyright (C) 2018-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -44,6 +44,7 @@ int InitObject(SerDesObject_Core& obj)
 	int size = 4 + (int)obj.getKey().size();     // From OPSObject()
 	obj.bo = true; size += 1;
 	obj.ch = 'm'; size += 1;
+	obj.u8 = 233; size += 1;
 	obj.i16 = -456; size += 2;
 	obj.i32 = 3223; size += 4;
 	obj.i64 = 99999; size += 8;
@@ -60,6 +61,7 @@ void ExpectObjects_EQ(SerDesObject_Core& obj1, SerDesObject_Core& obj2, const st
 {
 	EXPECT_EQ(obj1.bo, obj2.bo) << msg;
 	EXPECT_EQ(obj1.ch, obj2.ch) << msg;
+	EXPECT_EQ(obj1.u8, obj2.u8) << msg;
 	EXPECT_EQ(obj1.i16, obj2.i16) << msg;
 	EXPECT_EQ(obj1.i32, obj2.i32) << msg;
 	EXPECT_EQ(obj1.i64, obj2.i64) << msg;
@@ -112,6 +114,8 @@ TEST(Test_Serialization, TestCoreTypesXml) {
 	obj1.serialize(&arcOut);
 	arcOut.close();
 
+	//std::cout << "[>>]" << os.str() << "[<<]\n";
+
 	std::istringstream is(os.str());
 
 	XMLArchiverIn arcIn(is, "root", nullptr);		// No factory needed since we only have core types
@@ -129,6 +133,7 @@ int InitObject(SerDesObject_Vectors& obj)
 	int size = 4 + (int)obj.getKey().size();     // From OPSObject()
 	obj.bo = { true, false, false, true }; size += 4 + (4 * 1);
 	obj.ch = { 'm', 's' }; size += 4 + (2 * 1);
+	obj.u8 = { 22, 199, 111 }; size += 4 + (3 * 1);
 	obj.i16 = { -456 }; size += 4 + (1 * 2);
 	obj.i32 = { 3223, -987, 123 }; size += 4 + (3 * 4);
 	obj.i64 = { 99999, -7777 }; size += 4 + (2 * 8);
@@ -143,6 +148,7 @@ void ExpectObjects_EQ(SerDesObject_Vectors& obj1, SerDesObject_Vectors& obj2, co
 {
 	EXPECT_EQ(obj1.bo, obj2.bo) << msg;
 	EXPECT_EQ(obj1.ch, obj2.ch) << msg;
+	EXPECT_EQ(obj1.u8, obj2.u8) << msg;
 	EXPECT_EQ(obj1.i16, obj2.i16) << msg;
 	EXPECT_EQ(obj1.i32, obj2.i32) << msg;
 	EXPECT_EQ(obj1.i64, obj2.i64) << msg;
@@ -191,9 +197,11 @@ TEST(Test_Serialization, TestVectorTypesXml) {
 
 	XMLArchiverOut arcOut(os, "root");
 	EXPECT_TRUE(arcOut.isOut());
-
+	
 	obj1.serialize(&arcOut);
 	arcOut.close();
+
+	//std::cout << "[>>]" << os.str() << "[<<]\n";
 
 	std::istringstream is(os.str());
 
@@ -216,7 +224,10 @@ int InitObject(SerDesObject_Fixarrays& obj)
 	obj.ch[0] = 'm';  obj.ch[1] = 's';
 	size += 4 + (2 * 1);
 	
-	obj.i16[0] = -456; 
+	obj.u8[0] = 22;  obj.u8[1] = 190; obj.u8[2] = 45;
+	size += 4 + (3 * 1);
+
+	obj.i16[0] = -456;
 	size += 4 + (1 * 2);
 	
 	obj.i32[0] = 3223;  obj.i32[1] = -987;  obj.i32[2] = 123;
@@ -247,6 +258,9 @@ void ExpectObjects_EQ(SerDesObject_Fixarrays& obj1, SerDesObject_Fixarrays& obj2
 	}
 	for (unsigned int i = 0; i < 2; i++) {
 		EXPECT_EQ(obj1.ch[i], obj2.ch[i]) << msg;
+	}
+	for (unsigned int i = 0; i < 3; i++) {
+		EXPECT_EQ(obj1.u8[i], obj2.u8[i]) << msg;
 	}
 	for (unsigned int i = 0; i < 1; i++) {
 		EXPECT_EQ(obj1.i16[i], obj2.i16[i]) << msg;

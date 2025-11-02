@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2021 Lennart Andersson.
+* Copyright (C) 2019-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -61,9 +61,7 @@ namespace ops
 		void writeNewSegment();
 	private:
 		void readNewSegment();
-		void WriteBytes(const std::vector<char>& out, const int offset, const int length);
-		void ReadBytes(std::vector<char>& out, const int offset, const int length);
-     
+
     public:
 		struct illformed_memmap : public std::exception {
 			const char* what() const noexcept override { return "ByteBuffer(): Given MemoryMap is to small"; }
@@ -112,7 +110,9 @@ namespace ops
         void WriteDouble(double d);
         ///Writes c to the buffer and increments index by 1.
         void WriteChar(char c);
-        ///Writes s.size() followed by s to the buffer as a c-string (8-bit chars) and increments the buffer by s.size() + 4.
+		///Writes c to the buffer and increments index by 1.
+		void WriteByte(uint8_t c);
+		///Writes s.size() followed by s to the buffer as a c-string (8-bit chars) and increments the buffer by s.size() + 4.
         void WriteString(const std::string& s);
 		///Writes s.size() followed by s to the buffer as a c-string (8-bit chars) and increments the buffer by s.size() + 4.
 		template<size_t N>
@@ -140,7 +140,9 @@ namespace ops
         int64_t ReadLong();
         ///Reads 1 byte from the buffer and returns it as a char. Index is increased by 1.
         char ReadChar();
-        ///Reads an int (length) from the buffer followed by length number of chars returned as a std::string. Index is increased by length + 4.
+		///Reads 1 byte from the buffer and returns it as an uint8_t. Index is increased by 1.
+		uint8_t ReadByte();
+		///Reads an int (length) from the buffer followed by length number of chars returned as a std::string. Index is increased by length + 4.
         std::string ReadString();
 
 		void ReadString(std::string& value);
@@ -159,6 +161,7 @@ namespace ops
 		///Reads std::vector of corresponding type and increments index accordingly
 		void ReadBooleans(std::vector<bool>& out);
 		void ReadBytes(std::vector<char>& out);
+		void ReadBytes(std::vector<uint8_t>& out);
 		void ReadDoubles(std::vector<double>& out);
 		void ReadInts(std::vector<int>& out);
 		void ReadShorts(std::vector<int16_t>& out);
@@ -170,7 +173,8 @@ namespace ops
 		void WriteStrings(const std::vector<std::string>& out);
 		void WriteBooleans(const std::vector<bool>& out);
 		void WriteBytes(const std::vector<char>& out);
-		
+		void WriteBytes(const std::vector<uint8_t>& out);
+
 		void WriteDoubles(const std::vector<double>& out);
 		void WriteInts(const std::vector<int>& out);
 		void WriteShorts(const std::vector<int16_t>& out);

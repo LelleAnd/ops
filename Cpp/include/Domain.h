@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2021 Lennart Andersson.
+* Copyright (C) 2019-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -33,9 +33,9 @@ namespace ops
 {
     class Domain : public OPSObject
 	{
-        char Domain_version = Domain_idlVersion;
+		static constexpr uint8_t Domain_idlVersion = 0;
+		uint8_t Domain_version = Domain_idlVersion;
 
-        static constexpr char Domain_idlVersion = 0;
         Address_T domainAddress;
         int timeToLive{ 1 };
         Address_T localInterface{ "0.0.0.0" };

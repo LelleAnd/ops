@@ -50,6 +50,7 @@ public class OpsCompiler
     boolean _bJsonVersion = true;
     boolean _bPythonInit = false;
     boolean _bPythonPackage = false;
+    boolean _bKeepCharForByte = false;  // C++: char or uint8_t for idl byte
     String _strOps4GprPath = "";
 
     /** An instance of ProjectProperties is used to hold defaults
@@ -78,7 +79,8 @@ public class OpsCompiler
         _parser = new opsc.IDLParser();
     }
 
-    public static void usage() {
+    public static void usage()
+    {
         System.out.println("");
         System.out.println("opsc -P <IDL_proj_dir> [options] [-ref idlfiles...]");
         System.out.println("  or");
@@ -106,6 +108,7 @@ public class OpsCompiler
         System.out.println("  -pp <file>        name an ops IDL project.properties file");
         System.out.println("  -printProps       print system props");
         System.out.println("  -ref              remaining idlfiles specified are only used as reference (no code gen)");
+        System.out.println("  -retain <feature> retain old behaviour for given feature");
         System.out.println("  -s <feature>      special, generate with given feature");
         System.out.println("  -S <feature>      special, don't generate with given feature");
         System.out.println("  -t <dir>          set template directory (overrides built-in templates)");
@@ -121,6 +124,7 @@ public class OpsCompiler
         System.out.println("  for build:    ALL, csharp, java");
         System.out.println("  for special:  mempool, jsonver(*), pyinit, pypack");
         System.out.println("                (*) == Default enabled");
+        System.out.println("  for retain:   char  -> In generated C++, use 'char' for idl byte instead of 'uint8_t'");
         System.out.println("");
     }
 
@@ -384,6 +388,10 @@ public class OpsCompiler
                 if(special.equals("pypack")) _bPythonPackage = arg.equals("-s");
             } else if(arg.equals("-ref")) {
                 refIdl = true;
+            } else if(arg.equals("-retain") && (i < extraArgs.size())) {
+                i++;
+                String retain = extraArgs.elementAt(i);
+                if(retain.equals("char")) _bKeepCharForByte = true;
             } else {
                 // not a known option - regard as input file
                 tmpFiles.clear();
@@ -478,6 +486,7 @@ public class OpsCompiler
         compiler.setVerbose(_verbose);
         compiler.setGenOnlyTypeSupport(_bOnlyGenFactories);
         compiler.setGenMemoryPool(_bGenMemoryPool);
+        compiler.keepCharAsIdlByte = _bKeepCharForByte;
         Property propTemplatePath = _props.getProperty("templatePath");
         if (propTemplatePath != null) compiler.setTemplateDir(propTemplatePath.value);
         Property propOutPath = _props.getProperty("outputPath");

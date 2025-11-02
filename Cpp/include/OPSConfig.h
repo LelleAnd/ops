@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2021 Lennart Andersson.
+* Copyright (C) 2019-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -34,8 +34,8 @@ namespace ops
     class OPSConfig : public OPSObject
 	{
 	public:
-        char OPSConfig_version = OPSConfig_idlVersion;
-        static constexpr char OPSConfig_idlVersion = 0;
+		static constexpr uint8_t OPSConfig_idlVersion = 0;
+		uint8_t OPSConfig_version = OPSConfig_idlVersion;
 
         static std::shared_ptr<OPSConfig> getConfig();
 		static std::shared_ptr<OPSConfig> getConfig(FileName_T configFile);

@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2020-2022 Lennart Andersson.
+ * Copyright (C) 2020-2025 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -126,6 +126,7 @@ namespace ops
 
 		virtual void inout(InoutName_T name, bool& value) override;
 		virtual void inout(InoutName_T name, char& value) override;
+		virtual void inout(InoutName_T name, uint8_t& value) override;
 		virtual void inout(InoutName_T name, int& value) override;
 		virtual void inout(InoutName_T name, int16_t& value) override;
 		virtual void inout(InoutName_T name, int64_t& value) override;
@@ -243,6 +244,7 @@ namespace ops
 
 		virtual void inout(InoutName_T name, std::vector<bool>& value) override;
 		virtual void inout(InoutName_T name, std::vector<char>& value) override;
+		virtual void inout(InoutName_T name, std::vector<uint8_t>& value) override;
 		virtual void inout(InoutName_T name, std::vector<int>& value) override;
 		virtual void inout(InoutName_T name, std::vector<int16_t>& value) override;
 		virtual void inout(InoutName_T name, std::vector<int64_t>& value) override;
@@ -252,6 +254,7 @@ namespace ops
 
 		void inoutfixarr(InoutName_T name, bool* value, int numElements, int) override;
 		void inoutfixarr(InoutName_T name, char* value, int numElements, int) override;
+		void inoutfixarr(InoutName_T name, uint8_t* value, int numElements, int) override;
 		void inoutfixarr(InoutName_T name, int* value, int numElements, int) override;
 		void inoutfixarr(InoutName_T name, int16_t* value, int numElements, int) override;
 		void inoutfixarr(InoutName_T name, int64_t* value, int numElements, int) override;

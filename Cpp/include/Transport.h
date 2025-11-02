@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016-2021 Lennart Andersson.
+* Copyright (C) 2016-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -29,9 +29,9 @@ namespace ops
     class Transport : public OPSObject
     {
     public:
-        char Transport_version = Transport_idlVersion;
+        static constexpr uint8_t Transport_idlVersion = 0;
+        uint8_t Transport_version = Transport_idlVersion;
 
-        static constexpr char Transport_idlVersion = 0;
         ChannelId_T channelID;
         std::vector<ObjectName_T> topics;
 

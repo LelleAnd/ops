@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2021 Lennart Andersson.
+* Copyright (C) 2019-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -29,9 +29,9 @@ namespace ops
 	class Reply : public OPSObject
 	{
 	public:
-		char Reply_version = Reply_idlVersion;
+		static constexpr uint8_t Reply_idlVersion = 0;
+		uint8_t Reply_version = Reply_idlVersion;
 
-        static constexpr char Reply_idlVersion = 0;
         std::string requestId;
         bool requestAccepted{ false };
         std::string message;

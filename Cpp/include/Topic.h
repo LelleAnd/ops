@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2024 Lennart Andersson.
+* Copyright (C) 2019-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -36,9 +36,8 @@ namespace ops
 		friend class Participant;
     
 	public:
-        char Topic_version = Topic_idlVersion;
-
-        static constexpr char Topic_idlVersion = 0;
+		static constexpr uint8_t Topic_idlVersion = 0;
+		uint8_t Topic_version = Topic_idlVersion;
 
         Topic();
         Topic(const ObjectName_T namee, int portt, const TypeId_T typeIDd, const Address_T domainAddresss);

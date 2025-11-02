@@ -1,6 +1,6 @@
 /**
  *
- * Copyright (C) 2020 Lennart Andersson.
+ * Copyright (C) 2020-2025 Lennart Andersson.
  *
  * This notice apply to all source files, *.cpp, *.h, *.java, and *.cs in this directory
  * and all its subdirectories if nothing else is explicitly stated within the source file itself.
@@ -88,6 +88,10 @@ namespace ops {
         {
             calc.calc(name, &value, 1);
         }
+        void inout(InoutName_T name, uint8_t& value) override
+        {
+            calc.calc(name, &value, 1);
+        }
         void inout(InoutName_T name, int& value) override
         {
             calc.calc(name, &value, 4);
@@ -155,6 +159,10 @@ namespace ops {
         {
             calc.calc(name, value.data(), value.size());
         }
+        void inout(InoutName_T name, std::vector<uint8_t>& value) override
+        {
+            calc.calc(name, value.data(), value.size());
+        }
         void inout(InoutName_T name, std::vector<int>& value) override
         {
             calc.calc(name, value.data(), 4 * value.size());
@@ -189,6 +197,10 @@ namespace ops {
             }
         }
         void inoutfixarr(InoutName_T name, char* value, int numElements, int ) override
+        {
+            calc.calc(name, value, numElements);
+        }
+        void inoutfixarr(InoutName_T name, uint8_t* value, int numElements, int) override
         {
             calc.calc(name, value, numElements);
         }

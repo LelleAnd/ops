@@ -15,9 +15,7 @@ class __className :
 	public __baseClassName
 {
 public:
-  	static ops::TypeId_T getTypeName(){return ops::TypeId_T("__packageName.__className");}
-
-  	char __className_version = __className_idlVersion;
+  	static ops::TypeId_T getTypeName(){ return ops::TypeId_T("__packageName.__className"); }
 
 __declarations
     ///Default constructor.
@@ -88,7 +86,6 @@ __fillClone
     {
 		bool _valid = true;
 		_valid = _valid && __baseClassName::isValid();
-		_valid = _valid && (__className_version >= 0) && (__className_version <= __className_idlVersion);
 __validation
 		return _valid;
     }

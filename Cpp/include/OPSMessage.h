@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2019-2021 Lennart Andersson.
+ * Copyright (C) 2019-2025 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -37,9 +37,8 @@ namespace ops
 #endif
     {
     public:
-        char OPSMessage_version = OPSMessage_idlVersion;
-
-        static constexpr char OPSMessage_idlVersion = 0;
+        static constexpr uint8_t OPSMessage_idlVersion = 0;
+        uint8_t OPSMessage_version = OPSMessage_idlVersion;
 
         OPSMessage() :
             OPSObject()

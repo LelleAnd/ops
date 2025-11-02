@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2019-2020 Lennart Andersson.
+ * Copyright (C) 2019-2025 Lennart Andersson.
  *
  * This notice apply to all source files, *.cpp, *.h, *.java, and *.cs in this directory
  * and all its subdirectories if nothing else is explicitly stated within the source file itself.
@@ -59,6 +59,11 @@ namespace ops
         void inout(InoutName_T, char& value) override
         {
             value = buf.ReadChar();
+        }
+
+        void inout(InoutName_T, uint8_t& value) override
+        {
+            value = buf.ReadByte();
         }
 
         void inout(InoutName_T, int& value) override
@@ -166,6 +171,11 @@ namespace ops
             buf.ReadBytes(value);
         }
 
+        void inout(InoutName_T, std::vector<uint8_t>& value) override
+        {
+            buf.ReadBytes(value);
+        }
+
         void inout(InoutName_T, std::vector<int>& value) override
         {
             buf.ReadInts(value);
@@ -211,7 +221,14 @@ namespace ops
 			buf.ReadChars((char *)value, totalSize);
 		}
 
-		void inoutfixarr(InoutName_T name, int* value, int numElements, int totalSize) override
+        void inoutfixarr(InoutName_T name, uint8_t* value, int numElements, int totalSize) override
+        {
+            const int num = buf.ReadInt();
+            if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);
+            buf.ReadChars((char*)value, totalSize);
+        }
+
+        void inoutfixarr(InoutName_T name, int* value, int numElements, int totalSize) override
 		{
 			const int num = buf.ReadInt();
 			if (num != numElements) throw ops::ArchiverException("Illegal size of fix array received. name: ", name);

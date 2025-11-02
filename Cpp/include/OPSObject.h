@@ -53,7 +53,7 @@ namespace ops
         ObjectKey_T key;
         TypeId_T typesString;
 
-        char OPSObject_version = OPSObject_idlVersion;
+        uint8_t OPSObject_version = OPSObject_idlVersion;
 
         void appendType(const TypeId_T& type)
 		{
@@ -64,7 +64,7 @@ namespace ops
 		}
 
     public:
-        static constexpr char OPSObject_idlVersion = 0;
+        static constexpr uint8_t OPSObject_idlVersion = 0;
 
 		ObjectKey_T getKey() const noexcept;
 		const TypeId_T& getTypeString() const noexcept;
@@ -91,7 +91,7 @@ namespace ops
             idlVersionMask = verMask;
         }
 
-        inline void ValidateVersion(const char* msg, const char gotVer, const char maxVer) const
+        inline void ValidateVersion(const char* msg, const uint8_t gotVer, const uint8_t maxVer) const
         {
             if (gotVer > maxVer) {
                 ExceptionMessage_T m(msg);

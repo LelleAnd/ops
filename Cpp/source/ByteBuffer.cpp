@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2019-2021 Lennart Andersson.
+ * Copyright (C) 2019-2025 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -106,24 +106,6 @@ namespace ops
         }
     }
 
-    void ByteBuffer::writeNewSegment()
-    {
-        index = 0;
-        writeProtocol();
-        const int tInt = 0;
-        WriteInt(tInt); 
-        WriteInt(currentSegment);
-    }
-
-    void ByteBuffer::readNewSegment()
-    {
-        index = 0;
-        nextSegmentAt += memMap.getSegmentSize();
-        checkProtocol();
-        ReadInt();
-        ReadInt();
-    }
-
     void ByteBuffer::ReadChars(char* const chars, const int length)
     {
         int bytesLeftInSegment = memMap.getSegmentSize() - index;
@@ -142,6 +124,24 @@ namespace ops
             readNewSegment();
             ReadChars(chars + bytesLeftInSegment, length - bytesLeftInSegment);
         }
+    }
+
+    void ByteBuffer::writeNewSegment()
+    {
+        index = 0;
+        writeProtocol();
+        const int tInt = 0;
+        WriteInt(tInt);
+        WriteInt(currentSegment);
+    }
+
+    void ByteBuffer::readNewSegment()
+    {
+        index = 0;
+        nextSegmentAt += memMap.getSegmentSize();
+        checkProtocol();
+        ReadInt();
+        ReadInt();
     }
 
     int ByteBuffer::GetSize() const noexcept
@@ -229,6 +229,11 @@ namespace ops
         WriteChars((const char*)&c, 1);
     }
 
+    void ByteBuffer::WriteByte(const uint8_t c)
+    {
+        WriteChars((const char*)&c, 1);
+    }
+
     void ByteBuffer::WriteString(const std::string& s)
     {
         const int siz = (int) s.size();
@@ -295,6 +300,13 @@ namespace ops
         return ret;
     }
 
+    uint8_t ByteBuffer::ReadByte()
+    {
+        uint8_t ret = 0;
+        ReadChars((char*)&ret, 1);
+        return ret;
+    }
+
     std::string ByteBuffer::ReadString()
     {
         int length = ReadInt();
@@ -324,7 +336,6 @@ namespace ops
 	}
 
 	// -----------------------------------------------------------------
-
 
     void ByteBuffer::ReadBooleans(std::vector<bool>& out)
     {
@@ -356,30 +367,20 @@ namespace ops
         int const length = ReadInt();
         out.reserve(length);
         out.resize(length, 0);
-        ReadBytes(out, 0, length);
+        if (length > 0)
+        {
+            ReadChars((char*)&out[0], length);
+        }
     }
 
-    void ByteBuffer::ReadBytes(std::vector<char>& out, const int offset, const int length)
+    void ByteBuffer::ReadBytes(std::vector<uint8_t>& out)
     {
-        int bytesLeftInSegment = memMap.getSegmentSize() - index;
-        std::vector<char>::iterator it = out.begin();
-        it += offset;
-        if (bytesLeftInSegment >= length)
+        int const length = ReadInt();
+        out.reserve(length);
+        out.resize(length, 0);
+        if (length > 0)
         {
-            std::copy(memMap.getSegment(currentSegment) + index, memMap.getSegment(currentSegment) + index + length, it);
-            index += length;
-            totalSize += length;
-        }
-        else
-        {
-            std::copy(memMap.getSegment(currentSegment) + index, memMap.getSegment(currentSegment) + index + bytesLeftInSegment, it);
-            index += bytesLeftInSegment;
-            totalSize += bytesLeftInSegment;
-
-            currentSegment++;
-            readNewSegment();
-
-            ReadBytes(out, offset + bytesLeftInSegment, length - bytesLeftInSegment);
+            ReadChars((char*)&out[0], length);
         }
     }
 
@@ -387,31 +388,19 @@ namespace ops
     {
         int const size = (int)out.size();
         WriteInt(size);
-        WriteBytes(out, 0, size);
+        if (size > 0)
+        {
+            WriteChars((const char*)&out[0], size);
+        }
     }
 
-    void ByteBuffer::WriteBytes(const std::vector<char>& out, const int offset, const int length)
+    void ByteBuffer::WriteBytes(const std::vector<uint8_t>& out)
     {
-        const int bytesLeftInSegment = memMap.getSegmentSize() - index;
-        auto it = out.begin();
-        it += offset;
-        if (bytesLeftInSegment >= length)
+        int const size = (int)out.size();
+        WriteInt(size);
+        if (size > 0)
         {
-            std::copy(it, out.end(), memMap.getSegment(currentSegment) + index);
-            index += length;
-            totalSize += length;
-        }
-        else
-        {
-            std::copy(it, it + bytesLeftInSegment, memMap.getSegment(currentSegment) + index);
-            index += bytesLeftInSegment;
-            totalSize += bytesLeftInSegment;
-
-            nextSegmentAt += memMap.getSegmentSize();
-            currentSegment++;
-            writeNewSegment();
-
-            WriteBytes(out, offset + bytesLeftInSegment, length - bytesLeftInSegment);
+            WriteChars((const char*)&out[0], size);
         }
     }
 

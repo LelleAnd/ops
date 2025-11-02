@@ -58,6 +58,10 @@ public class CppCompiler extends opsc.Compiler
     //private String projectDirectory;
     String createdFiles = "";
 
+    // Configurations for backward compatibility 
+    public boolean keepCharAsIdlByte = false;
+
+
     public CppCompiler(String projectName) {
         super(projectName);
     }
@@ -605,14 +609,17 @@ public class CppCompiler extends opsc.Compiler
 
     protected String getDeclarations(IDLClass idlClass)
     {
-        String ret = getEnumTypeDeclarations(idlClass);
+        String ret = "";  
 
         if (!isOnlyDefinition(idlClass)) {
             int version = idlClass.getVersion();
             if (version < 0) { version = 0; }
+            ret += tab(1) + "static const " + versionType() + " " + getClassName(idlClass) + "_idlVersion = " + version + ";" + endl() + endl();
             // Need an implicit version field that should be [de]serialized
-            ret += tab(1) + "static const char " + getClassName(idlClass) + "_idlVersion = " + version + ";" + endl() + endl();
+            ret += tab(1) + versionType() + " " + getClassName(idlClass) + "_version = " + getClassName(idlClass) + "_idlVersion;" + endl() + endl();
         }
+
+        ret += getEnumTypeDeclarations(idlClass);
 
         for (IDLField field : idlClass.getFields()) {
             String fieldName = getFieldName(field);
@@ -694,6 +701,21 @@ public class CppCompiler extends opsc.Compiler
         }
 
         String versionName = getClassName(idlClass) + "_version";
+        int version = idlClass.getVersion();
+        if (version < 0) { version = 0; }
+
+        // Validate version field
+        ret += tab(2) + "_valid = _valid && ";
+        if (version == 0) {
+            // No versions used for this idl, so only the exact match is valid
+            ret += "(" + versionName + " == " + getClassName(idlClass) + "_idlVersion);" + endl();
+        } else {
+            if (keepCharAsIdlByte) {
+                // char is default signed (except on arm) so we need the lower bounds check
+                ret += "(" + versionName + " >= 0) && ";
+            }
+            ret += "(" + versionName + " <= " + getClassName(idlClass) + "_idlVersion);" + endl();
+        }
 
         for (IDLField field : idlClass.getFields()) {
             String fieldName = getFieldName(field);
@@ -778,6 +800,11 @@ public class CppCompiler extends opsc.Compiler
         return languageType(field);
     }
 
+    private String versionType()
+    {
+        return "uint8_t";
+    }
+
     protected String languageType(IDLField field)
     {
         String s = field.getType().replace("[]", "");
@@ -789,7 +816,7 @@ public class CppCompiler extends opsc.Compiler
         if (s.equals("long"))                                   return "int64_t";
         if (s.equals("double"))                                 return "double";
         if (s.equals("float"))                                  return "float";
-        if (s.equals("byte"))                                   return "char";
+        if (s.equals("byte")) { if (keepCharAsIdlByte) { return "char"; } else { return "uint8_t"; } }
         return applyLanguagePackageSeparator(s);
     }
 

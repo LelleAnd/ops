@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2021 Lennart Andersson.
+ * Copyright (C) 2021-2025 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -77,6 +77,11 @@ namespace ops
         }
 
         virtual void inout(InoutName_T name, char& value) override
+        {
+            os << tab() << name << " = " << (int)value << "\n";
+        }
+
+        virtual void inout(InoutName_T name, uint8_t& value) override
         {
             os << tab() << name << " = " << (int)value << "\n";
         }
@@ -194,6 +199,17 @@ namespace ops
 			}
         }
 
+        virtual void inout(InoutName_T name, std::vector<uint8_t>& value) override
+        {
+            if (value.size() > 0) {
+                os << tab() << name << "(size = " << value.size() << ") = [ " << (int)value[0];
+                if (value.size() > 1) {
+                    os << " ... " << (int)value[value.size() - 1];
+                }
+                os << " ]" << endl;
+            }
+        }
+
         virtual void inout(InoutName_T name, std::vector<int>& value) override
         {
 			if (value.size() > 0) {
@@ -283,7 +299,13 @@ namespace ops
 			os << tab() << name << "(size = " << numElements << ") = [ " << (int)value[0] << " ... " << (int)value[numElements - 1] << " ]" << endl;
 		}
 
-		virtual void inoutfixarr(InoutName_T name, int* value, int numElements, int totalSize) override
+        virtual void inoutfixarr(InoutName_T name, uint8_t* value, int numElements, int totalSize) override
+        {
+            UNUSED(totalSize)
+                os << tab() << name << "(size = " << numElements << ") = [ " << (int)value[0] << " ... " << (int)value[numElements - 1] << " ]" << endl;
+        }
+
+        virtual void inoutfixarr(InoutName_T name, int* value, int numElements, int totalSize) override
 		{
 			UNUSED(totalSize)
 			os << tab() << name << "(size = " << numElements << ") = [ " << value[0] << " ... " << value[numElements - 1] << " ]" << endl;

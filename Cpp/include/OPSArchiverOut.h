@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2019-2020 Lennart Andersson.
+ * Copyright (C) 2019-2025 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -59,6 +59,11 @@ namespace ops
         void inout(InoutName_T, char& value) override
         {
             buf.WriteChar(value);
+        }
+
+        void inout(InoutName_T, uint8_t& value) override
+        {
+            buf.WriteByte(value);
         }
 
         void inout(InoutName_T, int& value) override
@@ -153,6 +158,11 @@ namespace ops
             buf.WriteBytes(value);
         }
 
+        void inout(InoutName_T, std::vector<uint8_t>& value) override
+        {
+            buf.WriteBytes(value);
+        }
+
         void inout(InoutName_T, std::vector<int>& value) override
         {
             buf.WriteInts(value);
@@ -196,7 +206,13 @@ namespace ops
 			buf.WriteChars((char *)value, totalSize);
 		}
 
-		void inoutfixarr(InoutName_T, int* value, int numElements, int totalSize) override
+        void inoutfixarr(InoutName_T, uint8_t* value, int numElements, int totalSize) override
+        {
+            buf.WriteInt(numElements);
+            buf.WriteChars((char*)value, totalSize);
+        }
+
+        void inoutfixarr(InoutName_T, int* value, int numElements, int totalSize) override
 		{
 			buf.WriteInt(numElements);
 			buf.WriteChars((char *)value, totalSize);

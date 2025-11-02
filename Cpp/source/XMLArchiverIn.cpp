@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2022 Lennart Andersson.
+ * Copyright (C) 2022-2025 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -49,6 +49,14 @@ namespace ops
         int inVal{};
         ss >> inVal;
         return (char)inVal;
+    }
+    template<>
+    uint8_t ConvertValue(InoutName_T, const std::string& s)
+    {
+        std::stringstream ss(s);
+        int inVal{};
+        ss >> inVal;
+        return (uint8_t)inVal;
     }
     template<>
     bool ConvertValue(InoutName_T name, const std::string& s)
@@ -141,6 +149,11 @@ namespace ops
         ExtractValue<char>(name, value, currentNode);
     }
 
+    void XMLArchiverIn::inout(InoutName_T name, uint8_t& value)
+    {
+        ExtractValue<uint8_t>(name, value, currentNode);
+    }
+
     void XMLArchiverIn::inout(InoutName_T name, int& value)
     {
         ExtractValue<int>(name, value, currentNode);
@@ -181,6 +194,11 @@ namespace ops
         ExtractVector<char>(name, value, currentNode);
     }
 
+    void XMLArchiverIn::inout(InoutName_T name, std::vector<uint8_t>& value)
+    {
+        ExtractVector<uint8_t>(name, value, currentNode);
+    }
+
     void XMLArchiverIn::inout(InoutName_T name, std::vector<int>& value)
     {
         ExtractVector<int>(name, value, currentNode);
@@ -219,6 +237,11 @@ namespace ops
     void XMLArchiverIn::inoutfixarr(InoutName_T name, char* value, int numElements, int)
     {
         ExtractFixArr<char>(name, value, numElements, currentNode);
+    }
+
+    void XMLArchiverIn::inoutfixarr(InoutName_T name, uint8_t* value, int numElements, int)
+    {
+        ExtractFixArr<uint8_t>(name, value, numElements, currentNode);
     }
 
     void XMLArchiverIn::inoutfixarr(InoutName_T name, int* value, int numElements, int)

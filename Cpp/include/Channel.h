@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016-2024 Lennart Andersson.
+* Copyright (C) 2016-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -30,9 +30,9 @@ namespace ops
     class Channel : public OPSObject
     {
     public:
-        char Channel_version = Channel_idlVersion;
+        static constexpr uint8_t Channel_idlVersion = 0;
+        uint8_t Channel_version = Channel_idlVersion;
 
-        static constexpr char Channel_idlVersion = 0;
         ChannelId_T channelID;
         Transport_T linktype;
         Address_T localInterface;     // If multicast, this specifies interface to use

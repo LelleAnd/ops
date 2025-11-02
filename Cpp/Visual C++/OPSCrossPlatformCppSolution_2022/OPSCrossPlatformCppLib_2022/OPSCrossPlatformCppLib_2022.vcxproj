@@ -381,6 +381,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\Channel.h" />
+    <ClInclude Include="..\..\..\include\ChecksumArchiver.h" />
     <ClInclude Include="..\..\..\include\ConnectStatus.h" />
     <ClInclude Include="..\..\..\include\DebugHandler.h" />
     <ClInclude Include="..\..\..\include\Error.h" />

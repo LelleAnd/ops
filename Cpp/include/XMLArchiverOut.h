@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2021 Lennart Andersson.
+ * Copyright (C) 2021-2025 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -78,7 +78,12 @@ namespace ops
 
         virtual void inout(InoutName_T name, char& value) override
         {
-            os << tab() << "<" << name << ">" << (int) value << "</" << name << ">\n";
+            os << tab() << "<" << name << ">" << (int)value << "</" << name << ">\n";
+        }
+
+        virtual void inout(InoutName_T name, uint8_t& value) override
+        {
+            os << tab() << "<" << name << ">" << (int)value << "</" << name << ">\n";
         }
 
         virtual void inout(InoutName_T name, int& value) override
@@ -197,6 +202,18 @@ namespace ops
             os << tab() << "</" << name << ">" << std::endl;
         }
 
+        virtual void inout(InoutName_T name, std::vector<uint8_t>& value) override
+        {
+            os << tab() << "<" << name << ">" << std::endl;
+            for (unsigned int i = 0; i < value.size(); i++)
+            {
+                currentTabDepth++;
+                inout("element", value[i]);
+                currentTabDepth--;
+            }
+            os << tab() << "</" << name << ">" << std::endl;
+        }
+
         virtual void inout(InoutName_T name, std::vector<int>& value) override
         {
             os << tab() << "<" << name << ">" << std::endl;
@@ -299,7 +316,22 @@ namespace ops
 			os << tab() << "</" << name << ">" << std::endl;
 		}
 
-		void inoutfixarr(InoutName_T name, int* value, int numElements, int totalSize) override
+        void inoutfixarr(InoutName_T name, uint8_t* value, int numElements, int totalSize) override
+        {
+            UNUSED(totalSize);
+
+            os << tab() << "<" << name << ">" << std::endl;
+            for (int i = 0; i < numElements; i++)
+            {
+                currentTabDepth++;
+                uint8_t e = value[i];
+                inout("element", e);
+                currentTabDepth--;
+            }
+            os << tab() << "</" << name << ">" << std::endl;
+        }
+
+        void inoutfixarr(InoutName_T name, int* value, int numElements, int totalSize) override
 		{
 			UNUSED(totalSize);
 

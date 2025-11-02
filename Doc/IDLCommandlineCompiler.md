@@ -40,6 +40,7 @@ OPTIONS
   -pp <file>        name an ops IDL project.properties file
   -printProps       print system props
   -ref              remaining idlfiles specified are only used as reference (no code gen)
+  -retain <feature> retain old behaviour for given feature
   -s <feature>      special, generate with given feature
   -S <feature>      special, don't generate with given feature
   -t <dir>          set template directory (overrides built-in templates)
@@ -55,6 +56,7 @@ FEATURE
   for build:    ALL, csharp, java
   for special:  mempool, jsonver(*), pyinit, pypack
                 (*) == Default enabled
+  for retain:   char  -> In generated C++, use 'char' for idl byte instead of 'uint8_t'
 
 ```
 ## Language specifics ##

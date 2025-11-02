@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2019-2021 Lennart Andersson.
+ * Copyright (C) 2019-2025 Lennart Andersson.
  *
  * This notice apply to all source files, *.cpp, *.h, *.java, and *.cs in this directory
  * and all its subdirectories if nothing else is explicitly stated within the source file itself.
@@ -68,7 +68,8 @@ namespace ops
 
         virtual void inout(InoutName_T name, bool& value) = 0;
         virtual void inout(InoutName_T name, char& value) = 0;
-        virtual void inout(InoutName_T name, int& value) = 0;
+		virtual void inout(InoutName_T name, uint8_t& value) = 0;
+		virtual void inout(InoutName_T name, int& value) = 0;
         virtual void inout(InoutName_T name, int16_t& value) = 0;
         virtual void inout(InoutName_T name, int64_t& value) = 0;
         virtual void inout(InoutName_T name, float& value) = 0;
@@ -102,7 +103,8 @@ namespace ops
 
         virtual void inout(InoutName_T name, std::vector<bool>& value) = 0;
         virtual void inout(InoutName_T name, std::vector<char>& value) = 0;
-        virtual void inout(InoutName_T name, std::vector<int>& value) = 0;
+		virtual void inout(InoutName_T name, std::vector<uint8_t>& value) = 0;
+		virtual void inout(InoutName_T name, std::vector<int>& value) = 0;
         virtual void inout(InoutName_T name, std::vector<int16_t>& value) = 0;
         virtual void inout(InoutName_T name, std::vector<int64_t>& value) = 0;
         virtual void inout(InoutName_T name, std::vector<float>& value) = 0;
@@ -149,6 +151,7 @@ namespace ops
 
 		virtual void inoutfixarr(InoutName_T name, bool* value, int numElements, int totalSize) = 0;
 		virtual void inoutfixarr(InoutName_T name, char* value, int numElements, int totalSize) = 0;
+		virtual void inoutfixarr(InoutName_T name, uint8_t* value, int numElements, int totalSize) = 0;
 		virtual void inoutfixarr(InoutName_T name, int* value, int numElements, int totalSize) = 0;
 		virtual void inoutfixarr(InoutName_T name, int16_t* value, int numElements, int totalSize) = 0;
 		virtual void inoutfixarr(InoutName_T name, int64_t* value, int numElements, int totalSize) = 0;

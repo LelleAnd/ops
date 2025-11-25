@@ -2,6 +2,7 @@
 //
 
 #ifdef _WIN32
+#define NOMINMAX
 #include "stdafx.h"
 #include <windows.h>
 #include <conio.h>
@@ -12,6 +13,7 @@
 #include <stdlib.h>
 #include <sstream>
 #include <iomanip>
+#include <thread>
 
 #include <ops.h>
 #include <Trace.h>
@@ -35,14 +37,22 @@
 #include "PrintArchiverOut.h"
 #include "ChecksumArchiver.h"
 #include "NetworkSupport.h"
+
+#include "Telemetry.h"
+#include "LibraryOptions.h"
+
 #include "ValidationTest.h"
 
 ///----- Configuration -----
 #define USE_LAMDAS
 #undef USE_MEMORY_POOLS
 #undef USE_MESSAGE_HEADER
+//#define USE_SHMEM_TELEMETRY
 
 
+#ifdef USE_SHMEM_TELEMETRY
+#include "ShmemBuffer.h"
+#endif
 
 #ifdef USE_MESSAGE_HEADER
 #include "SdsSystemTime.h"
@@ -138,6 +148,7 @@ public:
 	virtual void SetDeadlineQos(int64_t timeoutMs) = 0;
     virtual void Activate() = 0;
     virtual void CheckValid() = 0;
+	virtual ops::Telemetry getTelemetry() = 0;
 	virtual ~IHelper() {};
 	IHelper() = default;
 	IHelper(IHelper const&) = delete;
@@ -148,7 +159,7 @@ public:
 
 static int NumVessuvioBytes = 0;
 static std::string FillerStr("");
-int64_t sendPeriod = 1000;
+int64_t sendPeriod = 1000000;
 int PD_version = (int)pizza::PizzaData::PizzaData_idlVersion;
 unsigned int numBurst = 1;
 ops::ObjectKey_T gKey;
@@ -524,11 +535,18 @@ public:
 	}
 #endif
 
-    virtual void Activate()
+    virtual void Activate() override
     {
         if (pub != nullptr) { pub->Activate(); }
         if (sub != nullptr) { sub->Activate(); }
     }
+
+	virtual ops::Telemetry getTelemetry() override
+	{
+		if (sub != nullptr) { return sub->getTelemetry(); }
+		if (pub != nullptr) { return pub->getTelemetry(); }
+		return ops::Telemetry();
+	}
 
 private:
 	CHelperListener<DataType>* client;
@@ -564,6 +582,10 @@ struct ItemInfo {
 std::vector<ItemInfo*> ItemInfoList;
 
 static bool beQuite = false;
+static uint64_t NumRcvPizzaData = 0;
+static uint64_t NumRcvVessuivioData = 0;
+static uint64_t NumVessuivioBytes = 0;
+static uint64_t NumRcvExtraAlltData = 0;
 
 
 class MyListener :
@@ -590,12 +612,14 @@ public:
 			return;
 		}
 
-		ops::Address_T addr = "";
-		uint16_t port = 0;
-		sub->getMessage()->getSource(addr, port);
+		NumRcvPizzaData++;
 
         if (!beQuite && (data != nullptr)) {
-            std::cout <<
+			ops::Address_T addr = "";
+			uint16_t port = 0;
+			sub->getMessage()->getSource(addr, port);
+
+			std::cout <<
                 "[Topic: " << sub->getTopic().getName() <<
                 "] (From " << addr << ":" << port <<
                 ") PizzaData(v";
@@ -635,11 +659,16 @@ public:
 			return;
 		}
 
-		ops::Address_T addr = "";
-		uint16_t port = 0;
-		sub->getMessage()->getSource(addr, port);
+		NumRcvVessuivioData++;
+		if (data != nullptr) {
+			NumVessuivioBytes += data->ham.size();
+		}
 
 		if (!beQuite && (data != nullptr)) {
+			ops::Address_T addr = "";
+			uint16_t port = 0;
+			sub->getMessage()->getSource(addr, port);
+
 			std::cout <<
 				"[Topic: " << sub->getTopic().getName() <<
 				"] (From " << addr << ":" << port <<
@@ -657,11 +686,13 @@ public:
 #endif
 	virtual void onData(ops::Subscriber* const sub, pizza::special::ExtraAllt* const data) override
 	{
-		ops::Address_T addr = "";
-		uint16_t port = 0;
-		sub->getMessage()->getSource(addr, port);
-
+		NumRcvExtraAlltData++;
+		
 		if (!beQuite) {
+			ops::Address_T addr = "";
+			uint16_t port = 0;
+			sub->getMessage()->getSource(addr, port);
+
 			std::ostringstream ss;
 			if (data->shs.size() > 1) {
 				ss << ", shs[1]: " << data->shs.at(1) << std::ends;
@@ -711,6 +742,43 @@ void ActivateAll()
         ItemInfo* const info = ItemInfoList[i];
         info->helper->Activate();
     }
+}
+
+void logTelemetry(const std::string& tail)
+{
+	for (const auto& info : ItemInfoList) {
+		if (!info->selected) { continue; }
+
+#ifdef USE_SHMEM_TELEMETRY
+		if (info->helper->HasSubscriber()) {
+			ops::SharedMemoryBuffer::ShmemTelemetry tm(info->helper->getTelemetry());
+
+			std::cout << "Left: " << tm.lefttoread << " (" << tm.max_lefttoread << ")" <<
+				", Curidx: " << tm.curindex << ", Oldest: " << tm.oldestidx;
+
+			static uint32_t prev_behind = 0;
+			static uint32_t prev_retry = 0;
+			static uint32_t prev_rdfail = 0;
+			if ((tm.num_behind != prev_behind) || (tm.num_retry != prev_retry) || (tm.num_rdfail != prev_rdfail)) {
+				std::cout << ", Behind: " << tm.num_behind << ", Retry: " << tm.num_retry <<
+					", Rdfail: " << tm.num_rdfail;
+				prev_behind = tm.num_behind;
+				prev_retry = tm.num_retry;
+				prev_rdfail = tm.num_rdfail;
+			}
+			break;
+		}
+
+		if (info->helper->HasPublisher()) {
+			ops::SharedMemoryBuffer::ShmemTelemetry tm(info->helper->getTelemetry());
+
+			std::cout << "Free: " << tm.freespace << ", minFree: " << tm.min_freespace << ", numidx: " << tm.num_indexes <<
+				", curidx: " << tm.curindex;
+			break;
+		}
+#endif
+	}
+	std::cout << tail;
 }
 
 void WriteToAllSelected(unsigned int nBurst, ops::OPSObject* const other = nullptr)
@@ -836,7 +904,7 @@ void menu()
 	std::cout << "\t B num   Set number of messages to burst [" << numBurst << "]" << std::endl;
 	std::cout << "\t L num   Set num Vessuvio Bytes [" << NumVessuvioBytes << "]" << std::endl;
 	std::cout << "\t T ms    Set deadline timeout [ms]" << std::endl;
-	std::cout << "\t V ms    Set send period [ms] [" << sendPeriod << "]" << std::endl;
+	std::cout << "\t V us    Set send period [us] [" << sendPeriod << "]" << std::endl;
     std::cout << "\t Cx      Validation (x=? isValid()|i set invalid|v set valid|n none|e exception|c[stp] callback" << std::endl;
 	std::cout << "\t A       Start/Stop periodical Write with set period" << std::endl;
 	std::cout << "\t K       Set key [" << gKey << "]" << std::endl;
@@ -845,6 +913,7 @@ void menu()
 	std::cout << "\t I name  Lookup host name" << std::endl;
 	std::cout << "\t Q       Quite (minimize program output)" << std::endl;
 	std::cout << "\t D       Toggle trace" << std::endl;
+	std::cout << "\t Z       Toggle statistics" << std::endl;
 	std::cout << "\t X       Exit program" << std::endl;
 
 #if defined(DEBUG_OPSOBJECT_COUNTER)
@@ -890,7 +959,7 @@ int main(const int argc, const char* argv[])
 	UINT     wTimerRes = TARGET_RESOLUTION;
 
 	if (timeGetDevCaps(&tc, sizeof(TIMECAPS)) == TIMERR_NOERROR) {
-		wTimerRes = min(max(tc.wPeriodMin, TARGET_RESOLUTION), tc.wPeriodMax);
+		wTimerRes = std::min(std::max(tc.wPeriodMin, TARGET_RESOLUTION), tc.wPeriodMax);
 	}
 	timeBeginPeriod(wTimerRes);
 
@@ -993,6 +1062,10 @@ int main(const int argc, const char* argv[])
 	menu();
 
 	bool doPartPolling = false;
+	bool doStatistics = false;
+
+	std::string buildOptions(ops::GetUsedBuildOptions());
+	std::cout << "OPS Build Options:\n" << buildOptions << "\n";
 
     std::cout << std::endl;
 	if (participant->GetExecutionPolicy() == ops::execution_policy::polling) {
@@ -1008,29 +1081,48 @@ int main(const int argc, const char* argv[])
 		std::cout << "'otherParticipant' is using 'threading' policy" << std::endl;
 	}
 
-	int64_t nextSendTime = (int64_t)getNow() + sendPeriod;
+	using myclock = std::chrono::steady_clock;
+	using timepoint = myclock::time_point;
+
+	timepoint nextSendTime = myclock::now() + std::chrono::microseconds(sendPeriod);
+	timepoint nextLogTime = myclock::now() + std::chrono::seconds(1);
 
 	while (!doExit) {
 		std::cout << std::endl << " (? = menu) > ";
 
         ActivateAll();
 
-		// Repeated sends
-		if (doPeriodicSend || doPartPolling) {
+		// Repeated sends / polling / statistics
+		if (doPeriodicSend || doPartPolling || doStatistics) {
 			while (!_kbhit()) {
-				int64_t const now = (int64_t)getNow();
+				timepoint const now = myclock::now();
 				if (doPeriodicSend && (now >= nextSendTime)) {
 					// write
 					WriteToAllSelected(numBurst);
 					// Calc next time to send
-					nextSendTime = now + sendPeriod;
+					nextSendTime = now + std::chrono::microseconds(sendPeriod);
 				}
 				if (participant->GetExecutionPolicy() == ops::execution_policy::polling) { participant->Poll(); }
 				if (otherParticipant->GetExecutionPolicy() == ops::execution_policy::polling) { otherParticipant->Poll(); }
                 if ((!beQuite) && participant->dataAvailable()) {
                     std::cout << "##### data is available\n";
                 }
-                ops::TimeHelper::sleep(std::chrono::milliseconds(1));
+				if (doStatistics && (now >= nextLogTime)) {
+					static constexpr uint64_t MB = 1024L * 1024L;
+					static uint64_t prevBytes = 0;
+					static uint64_t prevNum = 0;
+					std::cout << "[Stat] #Vesuivo: " << NumRcvVessuivioData 
+						<< " (" << (NumRcvVessuivioData - prevNum) << " mess/s)"
+						<< ", Bytes: " << NumVessuivioBytes 
+						<< ", " << ((NumVessuivioBytes - prevBytes) / MB) << " MBytes/s, ";
+					logTelemetry("\n");
+					prevNum = NumRcvVessuivioData;
+					prevBytes = NumVessuivioBytes;
+					nextLogTime = now + std::chrono::seconds(1);
+				}
+				//ops::TimeHelper::sleep(std::chrono::milliseconds(1));
+				//std::this_thread::sleep_for(std::chrono::microseconds(100));
+				std::this_thread::yield();
 			}
 		}
 
@@ -1243,8 +1335,9 @@ int main(const int argc, const char* argv[])
             case 'z':
             case 'Z':
                 {
-                pizza::special::ExtraAllt ext;
-                WriteToAllSelected(numBurst, &ext);
+				doStatistics = !doStatistics;
+				//pizza::special::ExtraAllt ext;
+                //WriteToAllSelected(numBurst, &ext);
                 }
                 break;
 

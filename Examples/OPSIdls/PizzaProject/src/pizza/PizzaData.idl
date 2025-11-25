@@ -15,4 +15,6 @@ class PizzaData extends sds.MessageHeaderData
 
     enum ResWord {if, begin, None};
     ResWord enum_var;
+
+    boolean valid;
 }

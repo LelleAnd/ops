@@ -10,7 +10,7 @@
         <domainID>PizzaDomain</domainID>
         <domainAddress>234.5.6.8</domainAddress>
         <localInterface>127.0.0.1</localInterface>
-        <localInterface>192.168.0.26</localInterface>
+        <!--localInterface>192.168.0.26</localInterface>-->
         <!-- <localInterface>192.168.0.0/24</localInterface>-->
         <!--optional <timeToLive>1</timeToLive>-->
         <inSocketBufferSize>16000000</inSocketBufferSize>
@@ -26,6 +26,13 @@
         <debugMcPort>9999</debugMcPort>
 
         <channels>
+          <element type = "Channel">
+            <!-- Shared Memory transport, ie. only within node (localhost) -->
+            <name>Channel-SHMEM</name>
+            <linktype>shmem</linktype>
+            <outSocketBufferSize>130000000</outSocketBufferSize>
+          </element>
+
           <element type = "Channel">
             <!-- MC transport, with other domainAddress/localInterface than default and a port definition -->
             <name>Channel-MC</name>
@@ -73,10 +80,17 @@
 
         <transports>
           <element type = "Transport">
+            <channelID>Channel-SHMEM</channelID>
+            <topics>
+              <element>VessuvioTopic2</element>
+              <element>VessuvioTopic3</element>
+            </topics>
+          </element>
+
+          <element type = "Transport">
             <channelID>Channel-MC</channelID>
             <topics>
               <element>PizzaTopic2</element>
-              <element>VessuvioTopic2</element>
             </topics>
           </element>
 

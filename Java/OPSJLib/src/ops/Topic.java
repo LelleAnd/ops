@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2019-2024 Lennart Andersson.
+ * Copyright (C) 2019-2025 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -38,6 +38,7 @@ public class Topic<T> extends OPSObject
     public static final String TRANSPORT_TCP = "tcp";
     public static final String TRANSPORT_UDP = "udp";
     public static final String TRANSPORT_INPROC = "inprocess";
+    public static final String TRANSPORT_SHMEM = "shmem";
 
     private String name = "";
     private int port = -1;

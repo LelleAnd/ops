@@ -2,7 +2,7 @@ unit uOps.Topic;
 
 (**
 *
-* Copyright (C) 2016-2024 Lennart Andersson.
+* Copyright (C) 2016-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -35,6 +35,7 @@ type
       TRANSPORT_MC = 'multicast';
       TRANSPORT_TCP = 'tcp';
       TRANSPORT_UDP = 'udp';
+      TRANSPORT_SHMEM = 'shmem';
 
   private
     FTopic_version : Byte;
@@ -170,11 +171,11 @@ begin
       FDomainAddress := GetHostAddress(FDomainAddress);
     end;
 
-  end else if (FTransport = TRANSPORT_INPROC) then begin
+  end else if (FTransport = TRANSPORT_INPROC) or (FTransport = TRANSPORT_SHMEM) then begin
 
   end else begin
     raise EConfigException('Illegal transport: "' + FTransport +
-          '". Transport for topic must be either "multicast", "tcp", "udp" or left blank( = multicast)');
+          '". Transport for topic must be either "multicast", "tcp", "udp", "inprocess", "shmem" or left blank( = multicast)');
   end;
 end;
 

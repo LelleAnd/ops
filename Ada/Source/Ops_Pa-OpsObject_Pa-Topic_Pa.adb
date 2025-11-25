@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2024 Lennart Andersson.
+-- Copyright (C) 2016-2025 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -249,14 +249,14 @@ package body Ops_Pa.OpsObject_Pa.Topic_Pa is
         Replace(Self.DomainAddress, Ops_Pa.Socket_Pa.GetHostAddress(Self.DomainAddress.all));
       end if;
 
-    elsif (Self.Transport.all = TRANSPORT_INPROC) then
+    elsif (Self.Transport.all = TRANSPORT_INPROC) or (Self.Transport.all = TRANSPORT_SHMEM) then
       null;
 
     else
       StaticErrorService.
         Report( "Domain", "CheckTransport",
                 "Illegal transport: '" & Self.Transport.all &
-                  "'. Transport for topic must be either 'multicast', 'tcp', 'udp' or left blank( = multicast)" );
+                  "'. Transport for topic must be either 'multicast', 'tcp', 'udp', 'inprocess', 'shmem' or left blank( = multicast)" );
       raise EConfigException;
     end if;
   end;

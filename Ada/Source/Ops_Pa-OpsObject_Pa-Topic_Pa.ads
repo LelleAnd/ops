@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2024 Lennart Andersson.
+-- Copyright (C) 2016-2025 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -39,6 +39,7 @@ package Ops_Pa.OpsObject_Pa.Topic_Pa is
   TRANSPORT_MC     : constant String := "multicast";
   TRANSPORT_TCP    : constant String := "tcp";
   TRANSPORT_UDP    : constant String := "udp";
+  TRANSPORT_SHMEM  : constant String := "shmem";
 
   -- Constructors
   function Create(namee : String; portt : Int32; typeIDd : String; domainAddresss : String) return Topic_Class_At;

@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2024 Lennart Andersson.
+-- Copyright (C) 2016-2025 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -67,7 +67,7 @@ package body Ops_Pa.OpsObject_Pa.Channel_Pa is
         Replace(Self.DomainAddress, Ops_Pa.Socket_Pa.GetHostAddress(Self.DomainAddress.all));
       end if;
 
-    elsif (Self.Linktype.all = LINKTYPE_INPROC)
+    elsif (Self.Linktype.all = LINKTYPE_INPROC) or (Self.Linktype.all = LINKTYPE_SHMEM)
     then
       null;
 
@@ -75,7 +75,7 @@ package body Ops_Pa.OpsObject_Pa.Channel_Pa is
       StaticErrorService.
         Report( "Domain", "CheckTransport",
                 "Illegal linktype: '" & Self.Linktype.all &
-                  "'. Linktype for Channel must be either 'multicast', 'tcp', 'udp' or left blank( = multicast)" );
+                  "'. Linktype for Channel must be either 'multicast', 'tcp', 'udp', 'inprocess', 'shmem' or left blank( = multicast)" );
       raise EConfigException;
     end if;
   end;

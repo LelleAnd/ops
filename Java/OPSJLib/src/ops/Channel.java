@@ -1,6 +1,6 @@
 /**
  *
- * Copyright (C) 2016-2024 Lennart Andersson.
+ * Copyright (C) 2016-2025 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -41,13 +41,14 @@ public class Channel extends OPSObject
     public static final String LINKTYPE_TCP = "tcp";
     public static final String LINKTYPE_UDP = "udp";
     public static final String LINKTYPE_INPROC = "inprocess";
+    public static final String LINKTYPE_SHMEM = "shmem";
 
     public Channel()
     {
         appendType("Channel");
     }
 
-		@Override
+	@Override
     public void serialize(ArchiverInOut archive) throws IOException
     {
         // NOTE. Keep this in sync with the C++ version, so it in theory is possible to send these as objects.
@@ -94,14 +95,14 @@ public class Channel extends OPSObject
                 domainAddress = NetworkSupport.GetHostAddress(domainAddress);
             }
         }
-        else if (linktype.equals(LINKTYPE_INPROC))
+        else if ((linktype.equals(LINKTYPE_INPROC)) || (linktype.equals(LINKTYPE_SHMEM)))
         {
         }
         else
         {
             throw new IOException(
                 "Illegal linktype: '" + linktype +
-                "'. Linktype for Channel must be either 'multicast', 'tcp', 'udp' or left blank( = multicast)");
+                "'. Linktype for Channel must be either 'multicast', 'tcp', 'udp', 'inprocess', 'shmem' or left blank( = multicast)");
         }
     }
 

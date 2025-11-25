@@ -67,6 +67,7 @@ namespace ops
         static Transport_T LINKTYPE_TCP;
         static Transport_T LINKTYPE_UDP;
         static Transport_T LINKTYPE_INPROC;
+        static Transport_T LINKTYPE_SHMEM;
     };
 }
 #endif

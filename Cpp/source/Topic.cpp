@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2019-2024 Lennart Andersson.
+ * Copyright (C) 2019-2025 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -275,12 +275,12 @@ namespace ops
 		if(transport == "")
 		{
 			transport = TRANSPORT_MC;
-		}
-		else if (transport != TRANSPORT_MC && transport != TRANSPORT_TCP && transport != TRANSPORT_UDP && transport != TRANSPORT_INPROC)
+		} else if (transport != TRANSPORT_MC && transport != TRANSPORT_TCP && transport != TRANSPORT_UDP &&
+                   transport != TRANSPORT_INPROC && transport != TRANSPORT_SHMEM)
 		{
 			ExceptionMessage_T msg("Illegal transport: '");
 			msg += transport;
-			msg += "'. Transport for topic must be either 'multicast', 'tcp', 'udp' or left blank( = multicast)";
+			msg += "'. Transport for topic must be either 'multicast', 'tcp', 'udp', 'inprocess', 'shmem' or left blank( = multicast)";
 			throw ops::ConfigException(msg);
 		}
 
@@ -295,5 +295,6 @@ namespace ops
 	Transport_T Topic::TRANSPORT_TCP = "tcp";
 	Transport_T Topic::TRANSPORT_UDP = "udp";
 	Transport_T Topic::TRANSPORT_INPROC = "inprocess";
+    Transport_T Topic::TRANSPORT_SHMEM = "shmem";
 
 }

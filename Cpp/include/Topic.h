@@ -113,6 +113,7 @@ namespace ops
 		static Transport_T TRANSPORT_TCP;
 		static Transport_T TRANSPORT_UDP;
 		static Transport_T TRANSPORT_INPROC;
+        static Transport_T TRANSPORT_SHMEM;
 
 	private:
         ObjectName_T name;					// Serialized

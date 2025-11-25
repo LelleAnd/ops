@@ -48,6 +48,7 @@ namespace Ops
         public static readonly string TRANSPORT_MC = "multicast";
 		public static readonly string TRANSPORT_TCP = "tcp";
 		public static readonly string TRANSPORT_UDP = "udp";
+        public static readonly string TRANSPORT_SHMEM = "shmem";
         private string typeID = "";
 
 

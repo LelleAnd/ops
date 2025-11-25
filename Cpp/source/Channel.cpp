@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016-2024 Lennart Andersson.
+* Copyright (C) 2016-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -78,12 +78,12 @@ namespace ops
         if (linktype == "")
         {
             linktype = LINKTYPE_MC;
-        }
-        else if (linktype != LINKTYPE_MC && linktype != LINKTYPE_TCP && linktype != LINKTYPE_UDP && linktype != LINKTYPE_INPROC)
+        } else if (linktype != LINKTYPE_MC && linktype != LINKTYPE_TCP && linktype != LINKTYPE_UDP &&
+                   linktype != LINKTYPE_INPROC && linktype != LINKTYPE_SHMEM)
         {
 			ExceptionMessage_T msg("Illegal linktype: '");
 			msg += linktype;
-			msg += "'. Linktype for Channel must be either 'multicast', 'tcp', 'udp' or left blank( = multicast)";
+			msg += "'. Linktype for Channel must be either 'multicast', 'tcp', 'udp', 'inprocess', 'shmem' or left blank( = multicast)";
 			throw ops::ConfigException(msg);
         }
 
@@ -125,4 +125,5 @@ namespace ops
 	Transport_T Channel::LINKTYPE_TCP = "tcp";
 	Transport_T Channel::LINKTYPE_UDP = "udp";
     Transport_T Channel::LINKTYPE_INPROC = "inprocess";
-}
+    Transport_T Channel::LINKTYPE_SHMEM = "shmem";
+} // namespace ops

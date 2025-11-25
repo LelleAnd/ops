@@ -2,7 +2,7 @@ unit uOps.Channel;
 
 (**
 *
-* Copyright (C) 2016-2024 Lennart Andersson.
+* Copyright (C) 2016-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -35,6 +35,7 @@ type
       LINKTYPE_MC = 'multicast';
       LINKTYPE_TCP = 'tcp';
       LINKTYPE_UDP = 'udp';
+      LINKTYPE_SHMEM = 'shmem';
 
   public
     Channel_version : Byte;
@@ -108,12 +109,12 @@ begin
       domainAddress := GetHostAddress(domainAddress);
     end;
 
-  end else if (linktype = LINKTYPE_INPROC) then begin
+  end else if ((linktype = LINKTYPE_INPROC) or (linktype = LINKTYPE_SHMEM)) then begin
 
   end else begin
     raise EConfigException.Create(
             'Illegal linktype: "' + string(linktype) +
-            '". Linktype for Channel must be either "multicast", "tcp", "udp" or left blank( = multicast)');
+            '". Linktype for Channel must be either "multicast", "tcp", "udp", "inprocess", "shmem" or left blank( = multicast)');
   end;
 end;
 

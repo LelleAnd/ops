@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2024 Lennart Andersson.
+-- Copyright (C) 2016-2025 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -52,6 +52,7 @@ package Ops_Pa.OpsObject_Pa.Channel_Pa is
   LINKTYPE_MC     : constant String := "multicast";
   LINKTYPE_TCP    : constant String := "tcp";
   LINKTYPE_UDP    : constant String := "udp";
+  LINKTYPE_SHMEM  : constant String := "shmem";
 
   -- Constructors
   function Create return Channel_Class_At;

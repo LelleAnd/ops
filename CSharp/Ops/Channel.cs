@@ -37,6 +37,7 @@ namespace Ops
         public static readonly string LINKTYPE_MC = "multicast";
         public static readonly string LINKTYPE_TCP = "tcp";
         public static readonly string LINKTYPE_UDP = "udp";
+        public static readonly string LINKTYPE_SHMEM = "shmem";
 
         public Channel()
         {
@@ -88,14 +89,14 @@ namespace Ops
                     domainAddress = InetAddress.GetByName(domainAddress);
                 }
             }
-            else if (linktype == LINKTYPE_INPROC)
+            else if ((linktype == LINKTYPE_INPROC) || (linktype == LINKTYPE_SHMEM))
             {
             }
             else
             {
                 throw new ConfigException(
                     "Illegal linktype: '" + linktype +
-                    "'. Linktype for Channel must be either 'multicast', 'tcp', 'udp' or left blank( = multicast)");
+                    "'. Linktype for Channel must be either 'multicast', 'tcp', 'udp', 'inprocess', 'shmem' or left blank( = multicast)");
             }
         }
 

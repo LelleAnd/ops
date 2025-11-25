@@ -284,6 +284,12 @@ namespace ops
         }
     }
 
+    // Get some collected telemetry from the reciever
+    Telemetry Subscriber::getTelemetry()
+    {
+        return receiveDataHandler->getTelemetry();
+    }
+
     /// ----------------------------------------------------------
 
     // Note that the receiveDataHandler messageLock is held while executing this method

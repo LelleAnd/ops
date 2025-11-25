@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2021 Lennart Andersson.
+* Copyright (C) 2019-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -26,6 +26,7 @@
 #include "Notifier.h"
 #include "IOService.h"
 #include "BytesSizePair.h"
+#include "Telemetry.h"
 
 namespace ops
 {
@@ -49,6 +50,12 @@ namespace ops
 
 		virtual uint16_t getLocalPort() = 0;
 		virtual Address_T getLocalAddress() = 0;
+
+		// Get some collected telemetry from the reciever (if implemented)
+		virtual Telemetry getTelemetry()
+		{
+			return Telemetry();
+		}
 
 		// Used to get the sender IP and port for a received message
 		// Only safe to call in callback, before a new asynchWait() is called.

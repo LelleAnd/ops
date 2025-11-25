@@ -90,7 +90,13 @@ public:
 	// Validation
     void defineValidation(ValidationStrategy strat, ValidationPubCallback cb = {});
 
-  protected:
+    // Get some collected telemetry from the sender
+    Telemetry getTelemetry()
+    {
+        return sendDataHandler->getTelemetry();
+    }
+
+protected:
     int64_t currentPublicationID{ 0 };
     std::shared_ptr<SendDataHandler> sendDataHandler{ nullptr };
 

@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2024 Lennart Andersson.
+* Copyright (C) 2018-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -29,6 +29,7 @@
 #include "Notifier.h"
 #include "Lockable.h"
 #include "ConnectStatus.h"
+#include "Telemetry.h"
 
 namespace ops
 {
@@ -91,6 +92,12 @@ namespace ops
         // At least one publisher must be added to us for this call to work correct
 		virtual void updateTransportInfo(Topic&)
 		{
+		}
+
+		// Get some collected telemetry from the sender
+		virtual Telemetry getTelemetry()
+		{
+			return Telemetry();
 		}
 
 	protected:

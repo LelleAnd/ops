@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2024 Lennart Andersson.
+* Copyright (C) 2018-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -91,6 +91,17 @@ namespace ops
             }
             return false;
         }
+
+		// Get some collected telemetry from the reciever
+		Telemetry getTelemetry()
+		{
+			SafeLock lock(messageLock);
+			///TODO only reports from the first RDC
+			if (rdc.size() > 0) {
+				return rdc[0]->getTelemetry();
+			}
+			return Telemetry();
+		}
 
     protected:
 		Lockable messageLock;

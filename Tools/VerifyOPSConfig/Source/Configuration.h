@@ -52,7 +52,7 @@
 			}
 		}
 
-		bool SaveToFile(std::string filename)
+		bool SaveToFile(std::string /*filename*/)
 		{
 			return false; ///TODO currentNode.writeToFile(filename.c_str()) == opsXML::eXMLErrorNone;
 		}

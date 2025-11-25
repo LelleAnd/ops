@@ -43,7 +43,7 @@
 
 #endif
 
-const char c_program_version[] = "OPSListener Version 2023-03-23";
+const char c_program_version[] = "OPSListener Version 2025-11-15";
 
 void showDescription()
 {
@@ -1505,6 +1505,7 @@ public:
             } else {
 				// Ordinary Topic
 				std::string str = "";
+				str.reserve(256);
 				if (args.logTime) {
 					str += "[" + sds::sdsSystemTimeToLocalTime(ent.time) + "] ";
 				}
@@ -1516,7 +1517,7 @@ public:
 				}
 				if (opsData != nullptr) {
 					// Dump OPSData->spareBytes content in hex
-					if (opsData->spareBytes.size() > 0) {
+					if ((args.maxDumpBytes > 0) && (opsData->spareBytes.size() > 0)) {
 						dumpHex(&opsData->spareBytes[0], opsData->spareBytes.size());
 					}
 					// Dump OPSData->spareBytes content in clear text
@@ -1603,7 +1604,7 @@ int main(const int argc, const char* argv[])
 		Main* m = new Main(args);
 
 		bool doPause = false;
-		int const numMess = 100;
+		int const numMess = 500;
 
 		while (true) {
 			if (_kbhit() != 0) {
@@ -1633,10 +1634,15 @@ int main(const int argc, const char* argv[])
 					}
 
 					if (ch == '?') {
+						std::cout << "Commands:\n";
+						std::cout << "  q|Q|x|X     Exit program\n";
+						std::cout << "  ?           Output this help\n";
+						std::cout << "  p           Pause output\n";
+						std::cout << "  s           Single step output\n";
 					}
 				}
 			}
-			ops::TimeHelper::sleep(std::chrono::milliseconds(10));
+			ops::TimeHelper::sleep(std::chrono::milliseconds(1));
 
 			if (doPause) {
 				printf("Queued %d\r", m->numQueued());

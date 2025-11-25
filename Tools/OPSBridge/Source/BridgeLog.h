@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -19,6 +19,8 @@
 */
 
 #pragma once
+
+#include <cinttypes>
 
 // For compilers not defining this for C++
 #ifndef PRId64

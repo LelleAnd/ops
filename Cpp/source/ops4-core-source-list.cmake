@@ -138,6 +138,10 @@ set(LIB_OPS_CORE_SRCS
   ${OPS_SRC_PATH}/SendDataHandlerFactory.h
   ${OPS_SRC_PATH}/SerializableCompositeFactory.cpp
   ${OPS_SRC_PATH}/SerializableInheritingTypeFactory.cpp
+  ${OPS_SRC_PATH}/ShmemBuffer.h
+  ${OPS_SRC_PATH}/ShmemReceiveDataHandler.cpp
+  ${OPS_SRC_PATH}/ShmemReceiveDataHandler.h
+  ${OPS_SRC_PATH}/ShmemSendDataHandler.h
   ${OPS_SRC_PATH}/Subscriber.cpp
   ${OPS_SRC_PATH}/TCPClientBase.h
   ${OPS_SRC_PATH}/TCPConnection.h

@@ -388,6 +388,7 @@
     <ClInclude Include="..\..\..\include\ErrorWriter.h" />
     <ClInclude Include="..\..\..\include\fixed_string.h" />
     <ClInclude Include="..\..\..\include\fixed_string_support.h" />
+    <ClInclude Include="..\..\..\include\LibraryOptions.h" />
     <ClInclude Include="..\..\..\include\memory_pool.h" />
     <ClInclude Include="..\..\..\include\memory_pool_lock_free.h" />
     <ClInclude Include="..\..\..\include\NetworkSupport.h" />
@@ -398,6 +399,7 @@
     <ClInclude Include="..\..\..\include\PubIdChecker.h" />
     <ClInclude Include="..\..\..\include\ReceiveDataChannel.h" />
     <ClInclude Include="..\..\..\include\SerializableInheritingTypeFactory.h" />
+    <ClInclude Include="..\..\..\include\Telemetry.h" />
     <ClInclude Include="..\..\..\include\Trace.h" />
     <ClInclude Include="..\..\..\include\TraceStream.h" />
     <ClInclude Include="..\..\..\include\Transport.h" />
@@ -420,6 +422,10 @@
     <ClInclude Include="..\..\..\source\ReceiveDataHandlerFactory.h" />
     <ClInclude Include="..\..\..\source\ReceiverFactory.h" />
     <ClInclude Include="..\..\..\source\SendDataHandlerFactory.h" />
+    <ClInclude Include="..\..\..\source\ShmemBuffer.h" />
+    <ClInclude Include="..\..\..\source\ShmemReceiveDataHandler.h" />
+    <ClInclude Include="..\..\..\source\ShmemReceiver.h" />
+    <ClInclude Include="..\..\..\source\ShmemSendDataHandler.h" />
     <ClInclude Include="..\..\..\source\TCPBoostConnection.h" />
     <ClInclude Include="..\..\..\source\TCPClient.h" />
     <ClInclude Include="..\..\..\source\TCPClientBase.h" />
@@ -501,6 +507,7 @@
     <ClCompile Include="..\..\..\source\ErrorService.cpp" />
     <ClCompile Include="..\..\..\source\IOService.cpp" />
     <ClCompile Include="..\..\..\source\KeyFilterQoSPolicy.cpp" />
+    <ClCompile Include="..\..\..\source\LibraryOptions.cpp" />
     <ClCompile Include="..\..\..\source\Lockable.cpp" />
     <ClCompile Include="..\..\..\source\MCReceiveDataHandler.cpp" />
     <ClCompile Include="..\..\..\source\memory_pool.cpp" />
@@ -527,6 +534,8 @@
     <ClCompile Include="..\..\..\source\Sender.cpp" />
     <ClCompile Include="..\..\..\source\SerializableCompositeFactory.cpp" />
     <ClCompile Include="..\..\..\source\SerializableInheritingTypeFactory.cpp" />
+    <ClCompile Include="..\..\..\source\ShmemReceiveDataHandler.cpp" />
+    <ClCompile Include="..\..\..\source\ShmemSendDataHandler.cpp" />
     <ClCompile Include="..\..\..\source\Subscriber.cpp" />
     <ClCompile Include="..\..\..\source\TCPClient.cpp" />
     <ClCompile Include="..\..\..\source\TCPReceiveDataChannel.cpp" />

@@ -35,6 +35,7 @@ set(APP_SRCS
   Serialization_test.cpp
   SetupOPSConfig.cpp
   SetupOPSConfig.h
+  ShmemBuffer_test.cpp
   Subscriber_test.cpp
   TCPOpsProtocol_test.cpp
   ThreadPool_test.cpp

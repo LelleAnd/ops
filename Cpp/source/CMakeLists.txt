@@ -20,6 +20,8 @@ set(LIB_BOTTOM_LAYER_SRC
   NetworkSupport.cpp
   Receiver.cpp
   Sender.cpp
+  ShmemReceiver.h
+  ShmemSendDataHandler.cpp
   TCPBoostConnection.h
   TCPClient.cpp
   TCPClient.h

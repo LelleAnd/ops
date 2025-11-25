@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2024 Lennart Andersson.
+* Copyright (C) 2018-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -27,6 +27,9 @@
 #include "UDPReceiveDataHandler.h"
 #include "TCPReceiveDataHandler.h"
 #include "InProcReceiveDataHandler.h"
+#ifndef OPS_NO_SHMEM_TRANSPORT
+#include "ShmemReceiveDataHandler.h"
+#endif
 #include "Participant.h"
 #include "BasicError.h"
 #include "NetworkSupport.h"
@@ -54,7 +57,12 @@ namespace ops
 		// Make a key with the transport info that uniquely defines the receiver.
 		InternalKey_T key(top.getTransport());
         if (top.getTransport() == Topic::TRANSPORT_INPROC) { return key; }
-		if (top.getTransport() == Topic::TRANSPORT_UDP) {
+        if (top.getTransport() == Topic::TRANSPORT_SHMEM) {
+            key += "-";
+            key += top.getChannelId();
+            return key;
+        }
+        if (top.getTransport() == Topic::TRANSPORT_UDP) {
 			if (!isMyNodeAddress(top.getDomainAddress(), ioServ)) {
 				return key;
 			}
@@ -133,6 +141,13 @@ namespace ops
             std::shared_ptr<ReceiveDataHandler> rdh = std::make_shared<InProcReceiveDataHandler>(top, participant, participant.inProcDistributor);
             receiveDataHandlerInstances[key] = rdh;
             return rdh;
+
+#ifndef OPS_NO_SHMEM_TRANSPORT
+        } else if (top.getTransport() == Topic::TRANSPORT_SHMEM) {
+            std::shared_ptr<ReceiveDataHandler> rdh = std::make_shared<ShmemReceiveDataHandler>(top, participant, key);
+            receiveDataHandlerInstances[key] = rdh;
+            return rdh;
+#endif
 
         } else {
             // See if an installed factory exist

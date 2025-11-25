@@ -2,15 +2,24 @@
 
 All configurations are placed in file *OPSTypeDefs.h*.
 
+#### OPS_NO_SHMEM_TRANSPORT ####
+Define this to disable the Shared Memory Transport that currently requires the Boost library.
+
 #### OPSSLIM_NORESERVE ####
 Define this to remove *Reservable* from *OPSMessage*.
 
 #### REPLACE_TRANSPORT_LAYER ####
-Define this to remove IOService.cpp, Sender.cpp, Receiver.cpp, DeadlineTimer.cpp, NetworkSupport.cpp and TimeHelper.cpp
-thats using the Boost library, so you can use your own implementations (e.g. for targets that has no Boost implementation).
+Define this to remove IOService.cpp, Sender.cpp, Receiver.cpp, DeadlineTimer.cpp, NetworkSupport.cpp, TimeHelper.cpp and ShmemNNN
+that uses the Boost library, so you can use your own implementations (e.g. for targets that has no Boost implementation).
 
 #### REPLACE_OPS_CONFIG ####
 Define this to remove the OPSConfig file reader, so you can implement your own for targets without a filesystem.
+
+#### REPLACE_NETWORK_ALLOC ####
+Removes the ops::DataSegmentPool::Allocate/Deallocate from library so you can use our own implementation.
+
+#### REPLACE_OPS_LOCKABLE ####
+Removes Lockable() implementation from library so you can use your own.
 
 #### OPS_ENABLE_DEBUG_HANDLER ####
 Defined to enable the built-in debug functionality in OPS.

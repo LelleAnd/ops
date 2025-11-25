@@ -150,6 +150,9 @@ namespace ops
         valCall = participant->valPubCall;
 
         sendDataHandler = participant->getSendDataHandler(topic);
+        if (!sendDataHandler) {
+            throw ConfigException(ExceptionMessage_T("Failed to create sender for topic ") + ExceptionMessage_T(topic.getName()));
+        }
 
 		message.setKey("");
         message.setPublisherName(m_name);

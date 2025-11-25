@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2020-2024 Lennart Andersson.
+* Copyright (C) 2020-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -29,6 +29,9 @@
 #include "McUdpSendDataHandler.h"
 #include "TCPSendDataHandler.h"
 #include "InProcSendDataHandler.h"
+#ifndef OPS_NO_SHMEM_TRANSPORT
+#include "ShmemSendDataHandler.h"
+#endif
 #include "Domain.h"
 #include "NetworkSupport.h"
 
@@ -57,13 +60,18 @@ namespace ops
 		}
 	}
 	
-	InternalKey_T getKey(const Topic& top, const Address_T& localIf)
+	static InternalKey_T getKey(const Topic& top, const Address_T& localIf)
 	{
 		// We need to store SendDataHandlers with more than just the name as key.
 		// Since topics can use the same port, we need to return the same SendDataHandler.
 		// Make a key with the transport info that uniquely defines the sender.
 		InternalKey_T key = top.getTransport();
         if (top.getTransport() == Topic::TRANSPORT_INPROC) { return key; }
+        if (top.getTransport() == Topic::TRANSPORT_SHMEM) {
+            key += "-";
+            key += top.getChannelId();
+            return key;
+        }
         key += "::";
         if (top.getTransport() == Topic::TRANSPORT_UDP) {
             key += localIf;
@@ -120,31 +128,29 @@ namespace ops
 		const int ttl = top.getTimeToLive();
         std::shared_ptr<SendDataHandler> sdh = nullptr;
 
-		if (top.getTransport() == Topic::TRANSPORT_MC)
-		{
-			sdh = std::make_shared<McSendDataHandler>(participant.getIOService(), top, localIf, ttl);
-		}
-		else if (top.getTransport() == Topic::TRANSPORT_UDP)
-		{
+		if (top.getTransport() == Topic::TRANSPORT_MC) {
+            sdh = std::make_shared<McSendDataHandler>(participant.getIOService(), top, localIf, ttl);
+
+        } else if (top.getTransport() == Topic::TRANSPORT_UDP) {
             // We have only one sender for all topics on the same interface, so use the domain value for buffer size
             sdh = std::make_shared<McUdpSendDataHandler>(participant.getIOService(), localIf,
                                                          participant.getDomain()->getOutSocketBufferSize());
             PostSetup(top, participant, sdh);
-		}
-		else if (top.getTransport() == Topic::TRANSPORT_TCP)
-		{
-			sdh = std::make_shared<TCPSendDataHandler>(participant.getIOService(), top);
-        }
-        else if (top.getTransport() == Topic::TRANSPORT_INPROC)
-        {
+
+        } else if (top.getTransport() == Topic::TRANSPORT_TCP) {
+            sdh = std::make_shared<TCPSendDataHandler>(participant.getIOService(), top);
+
+        } else if (top.getTransport() == Topic::TRANSPORT_INPROC) {
             sdh = std::make_shared<InProcSendDataHandler>(participant.inProcDistributor);
-        }
-        else
-        {
+
+#ifndef OPS_NO_SHMEM_TRANSPORT
+        } else if (top.getTransport() == Topic::TRANSPORT_SHMEM) {
+            sdh = std::make_shared<ShmemSendDataHandler>(key, top);
+#endif
+
+        } else {
             // See if an installed factory exist
-            if (backupfact != nullptr) {
-                sdh = backupfact(top, participant);
-            }
+            if (backupfact != nullptr) { sdh = backupfact(top, participant); }
         }
         if (sdh != nullptr) {
             sendDataHandlers[key] = sdh;

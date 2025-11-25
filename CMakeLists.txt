@@ -272,7 +272,7 @@ if (OPS_BUILD_CPP)
 
   else()
     if(CMAKE_BUILD_TYPE MATCHES "Release" OR CMAKE_BUILD_TYPE MATCHES "")
-  	  set(CMAKE_CXX_FLAGS "-O2")
+  	  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
   	  string(REPLACE "-O3 -DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE} )
     elseif(CMAKE_BUILD_TYPE MATCHES "Debug")
   	  set(CMAKE_CXX_FLAGS "-g -fprofile-arcs -ftest-coverage -O0") #fPIC is set

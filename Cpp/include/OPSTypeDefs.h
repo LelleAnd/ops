@@ -1,6 +1,6 @@
 /**
  * Copyright (C) 2006-2010 Anton Gravestam.
- * Copyright (C) 2018-2024 Lennart Andersson.
+ * Copyright (C) 2018-2025 Lennart Andersson.
 *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -59,12 +59,18 @@
 #define OPS_OBJ_TRACE(msg)  { OPS_NOTRACE(ops::trace::grp("OBJ") << msg); }
 #define OPS_PIFO_TRACE(msg) { OPS_NOTRACE(ops::trace::grp("PIFO") << msg); }
 #define OPS_TCP_TRACE(msg)  { OPS_NOTRACE(ops::trace::grp("TCP") << msg); }
+#define OPS_SHM_TRACE(msg)  { OPS_TRACE(ops::trace::grp("SHM") << msg); }
 
 #define OPS_TCP_INFO(msg)   { OPS_TRACE_INFO(ops::trace::grp("TCP") << msg); }
 
 #define OPS_ACK_ERROR(msg)  { OPS_TRACE_ERROR(ops::trace::grp("ACK") << msg); }
 #define OPS_TCP_ERROR(msg)  { OPS_TRACE_ERROR(ops::trace::grp("TCP") << msg); }
 #define OPS_UDP_ERROR(msg)  { OPS_TRACE_ERROR(ops::trace::grp("UDP") << msg); }
+
+#define OPS_TRACECODE(code) { code }
+#define OPS_NOTRACECODE(code)
+
+#define OPS_SHM_TRACE_CODE(code) OPS_NOTRACECODE(code)
 
 
 // -----------------------------------------------------------------------------
@@ -115,13 +121,15 @@
 #endif
 
 
+//#define OPS_NO_SHMEM_TRANSPORT	// Removes the Shared Memory transport that currently uses boost
+
 //#define OPS_REMOVE_ASSERT			// Define to skip assert() calls in OPS code.
 									// (can also be done by defining NDEBUG)
 
 //#define OPSSLIM_NORESERVE			// Removes Reservable from OPSMessage
 
 //#define REPLACE_TRANSPORT_LAYER	// Removes IOService.cpp, Sender.cpp, Receiver.cpp, DeadlineTimer.cpp,
-									// NetworkSupport.cpp and TimeHelper.cpp
+									// NetworkSupport.cpp, TimeHelper.cpp and ShmemNNN
 									// from library so you can use your own implementations.
 
 //#define REPLACE_OPS_CONFIG		// Removes the OPSConfig file reader from library so you can implement 
@@ -132,6 +140,7 @@
 
 //#define REPLACE_OPS_LOCKABLE      // Removes Lockable() implementation from library so you can use your own
 
+//#define REPLACE_OPS_EVENT			// Removes Event() implementation from library so you can use your own
 
 #define OPS_ENABLE_DEBUG_HANDLER	// Adds some debug functionality
 

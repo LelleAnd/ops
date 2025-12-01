@@ -62,4 +62,10 @@ public class IDLEnumType
         this.enumNames = enumNames;
     }
 
+    public String initValue(String suggest)
+    {
+        if (enumNames.contains(suggest)) return suggest;
+        return enumNames.get(0);
+    }
+
 }

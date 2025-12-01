@@ -46,6 +46,21 @@ public class CSharpCompiler extends opsc.Compiler
         super(projname);
     }
 
+    public String getName()
+    {
+        return "CsFactoryIDLCompiler";
+    }
+
+    protected String getFieldName(IDLField field)
+    {
+        return nonReservedName(field.getName());
+    }
+
+    protected String getClassName(IDLClass idlClass)
+    {
+        return nonReservedName(idlClass.getClassName());
+    }
+
     public void compileDataClasses(Vector<IDLClass> idlClasses, String projectDirectory)
     {
         createdFiles = "";
@@ -83,12 +98,12 @@ public class CSharpCompiler extends opsc.Compiler
 
     protected void compileEnum(IDLClass idlClass) throws IOException
     {
-        String className = idlClass.getClassName();
+        String className = getClassName(idlClass);
 
         String packageName = idlClass.getPackageName();
         String packageFilePart = packageName.replace(".", "/");
-        //setOutputFileName(projectDirectory + CS_DIR + "/" + packageFilePart + "/" + className + ".cs");
-        setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + className + ".cs");
+        // We want to keep the filename without mangling due to reserved names
+        setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + idlClass.getClassName() + ".cs");
 
         java.io.InputStream stream = findTemplateFile("csenumtemplate.tpl");
         setTemplateTextFromResource(stream);
@@ -125,7 +140,7 @@ public class CSharpCompiler extends opsc.Compiler
 
     public void compileDataClass(IDLClass idlClass) throws IOException
     {
-        String className = idlClass.getClassName();
+        String className = getClassName(idlClass);
         String baseClassName = "OPSObject";
         if (idlClass.getBaseClassName() != null)
         {
@@ -138,8 +153,8 @@ public class CSharpCompiler extends opsc.Compiler
         }
         String packageName = idlClass.getPackageName();
         String packageFilePart = packageName.replace(".", "/");
-        //setOutputFileName(projectDirectory + CS_DIR + "/" + packageFilePart + "/" + className + ".cs");
-        setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + className + ".cs");
+        // We want to keep the filename without mangling due to reserved names
+        setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + idlClass.getClassName() + ".cs");
 
         java.io.InputStream stream;
         if (isOnlyDefinition(idlClass)) {
@@ -166,19 +181,9 @@ public class CSharpCompiler extends opsc.Compiler
         createdFiles += "\"" + getOutputFileName() + "\"\n";
     }
 
-    public String getName()
-    {
-        return "CsFactoryIDLCompiler";
-    }
-
-    protected String getFieldName(IDLField field)
-    {
-        return nonReservedName(field.getName());
-    }
-
 //    private void compilePublisher(IDLClass idlClass) throws IOException
 //    {
-//        String className = idlClass.getClassName();
+//        String className = getClassName(idlClass);
 //        String packageName = idlClass.getPackageName();
 //
 //        String packageFilePart = packageName.replace(".", "/");
@@ -204,7 +209,7 @@ public class CSharpCompiler extends opsc.Compiler
 
 //    private void compileSubscriber(IDLClass idlClass) throws IOException
 //    {
-//        String className = idlClass.getClassName();
+//        String className = getClassName(idlClass);
 //        String packageName = idlClass.getPackageName();
 //
 //        String packageFilePart = packageName.replace(".", "/");
@@ -252,18 +257,18 @@ public class CSharpCompiler extends opsc.Compiler
         String createObjectBodyText = "";
         String createStringBodyText = "";
 
-        for (IDLClass iDLClass : idlClasses)
+        for (IDLClass idlClass : idlClasses)
         {
-            if (isOnlyDefinition(iDLClass) || isNoFactory(iDLClass)) continue;
+            if (isOnlyDefinition(idlClass) || isNoFactory(idlClass)) continue;
 
-            createObjectBodyText += tab(3) + "if (type.Equals(\"" + iDLClass.getPackageName() + "." + iDLClass.getClassName() + "\"))" + endl();
+            createObjectBodyText += tab(3) + "if (type.Equals(\"" + idlClass.getPackageName() + "." + getClassName(idlClass) + "\"))" + endl();
             createObjectBodyText += tab(3) + "{" + endl();
-            createObjectBodyText += tab(4) +      "return new " + iDLClass.getPackageName() + "." + iDLClass.getClassName() + "();" + endl();
+            createObjectBodyText += tab(4) +      "return new " + idlClass.getPackageName() + "." + getClassName(idlClass) + "();" + endl();
             createObjectBodyText += tab(3) + "}" + endl();
 
-            createStringBodyText += tab(3) + "if (obj is " + iDLClass.getPackageName() + "." + iDLClass.getClassName() + ")" + endl();
+            createStringBodyText += tab(3) + "if (obj is " + idlClass.getPackageName() + "." + getClassName(idlClass) + ")" + endl();
             createStringBodyText += tab(3) + "{" + endl();
-            createStringBodyText += tab(4) +    "return \"" + iDLClass.getPackageName() + "." + iDLClass.getClassName() + "\";" + endl();
+            createStringBodyText += tab(4) +    "return \"" + idlClass.getPackageName() + "." + getClassName(idlClass) + "\";" + endl();
             createStringBodyText += tab(3) + "}" + endl();
         }
         createObjectBodyText += tab(3) + "return null;" + endl();
@@ -291,10 +296,8 @@ public class CSharpCompiler extends opsc.Compiler
             if (field.isStatic()) continue;
             if (field.isArray() && (field.getArraySize() > 0)) {
                 String fieldName = getFieldName(field);
-                String eType = elementType(field.getType());
                 // for (int i = 0; i < 5; i++) _stringFixArr.Add("");
-                ret += tab(3) + "for (int i = 0; i < " + field.getArraySize() + "; i++) _" + fieldName + ".Add(" + initValue(eType) + ");" + endl();
-
+                ret += tab(3) + "for (int i = 0; i < " + field.getArraySize() + "; i++) _" + fieldName + ".Add(" + initValue(field) + ");" + endl();
             }
         }
         return ret;
@@ -303,7 +306,7 @@ public class CSharpCompiler extends opsc.Compiler
     private String getCloneBody(IDLClass idlClass)
     {
         String ret = "";
-        ret += tab(3) + "cloneResult." + idlClass.getClassName() + "_version = this." + idlClass.getClassName() + "_version;" + endl();
+        ret += tab(3) + "cloneResult." + getClassName(idlClass) + "_version = this." + getClassName(idlClass) + "_version;" + endl();
         for (IDLField field : idlClass.getFields())
         {
             if (field.isStatic()) continue;
@@ -390,7 +393,7 @@ public class CSharpCompiler extends opsc.Compiler
             int version = idlClass.getVersion();
             if (version < 0) { version = 0; }
             // Need an implicit version field that should be [de]serialized
-            ret += tab(2) + "public const byte " + idlClass.getClassName() + "_idlVersion = " + version + ";" + endl();
+            ret += tab(2) + "public const byte " + getClassName(idlClass) + "_idlVersion = " + version + ";" + endl();
         }
 
         for (IDLField field : idlClass.getFields())
@@ -405,8 +408,6 @@ public class CSharpCompiler extends opsc.Compiler
                   comment = comment.substring(idx+1);
                 }
                 ret += tab(2) + "///" + comment.replace("/*", "").replace("*/", "") + endl();
-///                ret += tab(2) + "///" + field.getComment().replace("/*", "").replace("*/", "") + endl();
-///                ret += tab(2) + "///" + field.getComment() + endl();
             }
             String vers = getVersionDescription(field.getDirective());
             if (vers.length() > 0) {
@@ -430,7 +431,7 @@ public class CSharpCompiler extends opsc.Compiler
                     ret += tab(2) + "public const " + languageType(field.getType()) + " " + fieldName + " = " + field.getValue() + ";" + endl() + endl();
                 } else {
                     ///TEST gives a description and category in a propertygrid
-                    /// ret += tab(2) + "[Description(\"TBD\"), Category(\"" + idlClass.getClassName() + "\")]" + endl();
+                    /// ret += tab(2) + "[Description(\"TBD\"), Category(\"" + getClassName(idlClass) + "\")]" + endl();
                     ///TEST
                     ret += tab(2) + "public " + languageType(field.getType()) + " " + fieldName + " { get; set; }" + endl() + endl();
                 }
@@ -445,12 +446,22 @@ public class CSharpCompiler extends opsc.Compiler
             }
             else //Simple primitive type
             {
+                String prefix = "";
+                String value = field.getValue();
+                String suffix = "";
+                if (languageType(field.getType()).equals("float")) suffix = "F";
+                if (field.isEnumType()) {
+                    prefix = field.getType() + ".";
+                    value = nonReservedName(value);
+                }
                 if (field.isStatic()) {
-                    String suffix = "";
-                    if (languageType(field.getType()).equals("float")) suffix = "F";
-                    ret += tab(2) + "public const " + languageType(field.getType()) + " " + fieldName + " = " + field.getValue() + suffix + ";" + endl() + endl();
+                    ret += tab(2) + "public const " + languageType(field.getType()) + " " + fieldName + " = " + value + suffix + ";" + endl() + endl();
                 } else {
-                    ret += tab(2) + "public " + languageType(field.getType()) + " " + fieldName + " { get; set; }" + endl() + endl();
+                    if (field.getValue().length() > 0) {
+                        ret += tab(2) + "public " + languageType(field.getType()) + " " + fieldName + " { get; set; } = " + prefix + value + suffix + ";" + endl() + endl();
+                    } else {
+                        ret += tab(2) + "public " + languageType(field.getType()) + " " + fieldName + " { get; set; }" + endl() + endl();
+                    }
                 }
             }
 
@@ -487,17 +498,38 @@ public class CSharpCompiler extends opsc.Compiler
         return s;
     }
 
-    protected String initValue(String s)
+    protected String initValue(IDLField field)
     {
-        s = elementType(s);
+        String s = elementType(field.getType());
         if (s.equals("string")) return "\"\"";
-        if (s.equals("boolean")) return "false";
-        if (s.equals("short")) return "0";
-        if (s.equals("int")) return "0";
-        if (s.equals("long")) return "0";
-        if (s.equals("double")) return "0.0";
-        if (s.equals("float")) return "0.0f";
-        if (s.equals("byte")) return "0";
+        if (s.equals("boolean")) { 
+            if (field.getValue().length() > 0) {
+                return field.getValue();
+            } else {
+                return "false"; 
+            }
+        }
+        if (field.isIntType()) {
+            if (field.getValue().length() > 0) {
+                return field.getValue();
+            } else {
+                return "0";
+            }
+        }
+        if (field.isFloatType()) {
+            String suffix = "";
+            if (s.equals("float")) suffix = "f";
+            if (field.getValue().length() > 0) {
+                return field.getValue() + suffix;
+            } else {
+                return "0.0" + suffix;
+            }
+        }
+        if (field.isEnumType()) {
+            if (field.getValue().length() > 0) {
+                return s + "." + nonReservedName(field.getValue());
+            }
+        }
         return "new " + s + "()";
     }
 
@@ -523,7 +555,7 @@ public class CSharpCompiler extends opsc.Compiler
     protected String getSerialize(IDLClass idlClass)
     {
         String ret = "";
-        String versionName = idlClass.getClassName() + "_version";
+        String versionName = getClassName(idlClass) + "_version";
         // Need an implicit version field that may be [de]serialized
         ret += tab(3) + "if (IdlVersionMask != 0) {" + endl();
         ret += tab(4) + versionName + " = archive.Inout(\"" + versionName + "\", " + versionName + ");" + endl();

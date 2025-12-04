@@ -671,7 +671,9 @@ public class OpsCompiler
               // Change this type to an enum from another idl and define the init value
               field.setIdlType(false);
               field.setEnumType(true);
-              field.setValue(et.getEnumNames().get(0));
+              String initVal = CompilerSupport.enuminitDirective(idlClass.getClassName(), field);
+              field.setValue(et.initValue(initVal));
+              //field.setValue(et.getEnumNames().get(0));
               field.setRange("0", Integer.toString(et.getEnumNames().size()-1));
               if (pName.equals("")) {
                 field.setFullyQualifiedType(idlClass.getPackageName() + "." + field.getType());
@@ -701,6 +703,7 @@ public class OpsCompiler
 
         // Fix some things that the parser couldn't
         int version = -1;
+        boolean noerror = true;
         for (IDLField field : idlClass.getFields()) {
           // Parser only set enumType for our locally defined enums
           // Set first enum value as init value for enum fields
@@ -708,7 +711,8 @@ public class OpsCompiler
             // look up type in local scope
             for (IDLEnumType et : idlClass.getEnumTypes()) {
               if (et.getName().equals(field.getType().replace("[]",""))) {
-                field.setValue(et.getEnumNames().get(0));
+                String initVal = CompilerSupport.enuminitDirective(idlClass.getClassName(), field);
+                field.setValue(et.initValue(initVal));
                 field.setRange("0", Integer.toString(et.getEnumNames().size()-1));
                 field.setFullyQualifiedType(idlClass.getPackageName() + "." + idlClass.getClassName() + "." + field.getType());
                 break;
@@ -728,9 +732,11 @@ public class OpsCompiler
           if (version < v) { version = v; }
 
           // Populate the field with values from directives, if any
-          CompilerSupport.rangeDirective("", field);
-          CompilerSupport.maxDirective("", field);
+          CompilerSupport.rangeDirective(idlClass.getClassName(), field);
+          CompilerSupport.maxDirective(idlClass.getClassName(), field);
+          noerror = CompilerSupport.initDirective(idlClass.getClassName(), field, noerror);
         }
+        if (!noerror) System.exit(99);
         idlClass.setVersion(version);
       }
 

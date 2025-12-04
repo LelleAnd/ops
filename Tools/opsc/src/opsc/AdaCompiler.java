@@ -655,19 +655,36 @@ public class AdaCompiler extends opsc.Compiler
 
     protected String getInitValue(IDLField field, IDLClass idlClass)
     {
-      String fieldType = getLastPart(field.getType());
-      fieldType = fieldType.replace("[]", "");
-      if (fieldType.equals("string"))    return "null";
-      if (fieldType.equals("boolean"))   return "False";
-      if (fieldType.equals("double"))    return "0.0";
-      if (fieldType.equals("float"))     return "0.0";
-      if (field.isEnumType()) {
-        //Set first enum value as init value
-        if (field.getValue().length() > 0) {
-            return nonReservedName(field.getValue());
+        String fieldType = getLastPart(field.getType());
+        fieldType = fieldType.replace("[]", "");
+        if (fieldType.equals("string")) return "null";
+        if (fieldType.equals("boolean")) {
+            if (field.getValue().length() > 0) {
+                return field.getValue();
+            } else {
+                return "False";
+            }
         }
-      }
-      return "0";
+        if (field.isFloatType()) {
+            if (field.getValue().length() > 0) {
+                return field.getValue();
+            } else {
+                return "0.0";
+            }
+        }
+        if (field.isIntType()) {
+            if (field.getValue().length() > 0) {
+                return field.getValue();
+            } else {
+                return "0";
+            }
+        }
+        if (field.isEnumType()) {
+            if (field.getValue().length() > 0) {
+                return nonReservedName(field.getValue());
+            }
+        }
+        return "0";
     }
 
     protected String getDeclareVector(IDLField field, IDLClass idlClass)

@@ -302,9 +302,9 @@ public class DelphiCompiler extends opsc.Compiler
       String ret = "";
       for (IDLField field : idlClass.getFields()) {
           if (field.isStatic()) continue;
-          if (field.isIdlType() && field.isArray() && field.getArraySize() > 0) {
+          if (field.isArray() && field.getArraySize() > 0) {
               ret += tab(0) + "var" + endl();
-              ret += tab(1) +   "i : Integer;";
+              ret += tab(1) +   "__i__ : Integer;";
               break;
           }
       }
@@ -326,12 +326,37 @@ public class DelphiCompiler extends opsc.Compiler
           if (field.isIdlType()) {
               if (field.isArray()) {
                   if (field.getArraySize() > 0) {
-                      ret += tab(1) + "for i := 0 to High(" + fieldName + ") do begin" + endl();
-                      ret += tab(2) +   fieldName + "[i] := " + getFullyQualifiedClassName(field.getType()) + ".Create;" + endl();
+                      ret += tab(1) + "for __i__ := 0 to High(" + fieldName + ") do begin" + endl();
+                      ret += tab(2) +   fieldName + "[__i__] := " + getFullyQualifiedClassName(field.getType()) + ".Create;" + endl();
                       ret += tab(1) + "end;" + endl();
                   }
               } else {
                   ret += tab(1) + fieldName + " := " + getFullyQualifiedClassName(field.getType()) + ".Create;" + endl();
+              }
+          }
+          if (field.getValue().length() > 0) {
+              if (field.isEnumType()) {
+                  String value = getFullyQualifiedEnumType(field.getType().replace("[]", "")) + "." + nonReservedName(field.getValue());
+                  if (field.isArray()) {
+                      if (field.getArraySize() > 0) {
+                          ret += tab(1) + "for __i__ := 0 to High(" + fieldName + ") do begin" + endl();
+                          ret += tab(2) +   fieldName + "[__i__] := " + value + ";" + endl();
+                          ret += tab(1) + "end;" + endl();
+                      }
+                  } else {
+                      ret += tab(1) + fieldName + " := " + value + ";" + endl();
+                  }
+              }
+              if (field.isIntType() || field.isFloatType() || (field.getType().equals("boolean"))) {
+                  if (field.isArray()) {
+                      if (field.getArraySize() > 0) {
+                          ret += tab(1) + "for __i__ := 0 to High(" + fieldName + ") do begin" + endl();
+                          ret += tab(2) +   fieldName + "[__i__] := " + field.getValue() + ";" + endl();
+                          ret += tab(1) + "end;" + endl();
+                      }
+                  } else {
+                      ret += tab(1) + fieldName + " := " + field.getValue() + ";" + endl();
+                  }
               }
           }
       }
@@ -345,7 +370,7 @@ public class DelphiCompiler extends opsc.Compiler
           if (field.isStatic()) continue;
           if (field.isIdlType() && field.isArray()) {
               ret += tab(0) + "var" + endl();
-              ret += tab(1) +   "i : Integer;";
+              ret += tab(1) +   "__i__ : Integer;";
               break;
           }
       }
@@ -360,8 +385,8 @@ public class DelphiCompiler extends opsc.Compiler
           String fieldName = getFieldName(field);
           if (field.isIdlType()) {
               if (field.isArray()) {
-                ret += tab(1) + "for i := 0 to High(" + fieldName + ") do begin" + endl();
-                ret += tab(2) +   "FreeAndNil(" + fieldName + "[i]);" + endl();
+                ret += tab(1) + "for __i__ := 0 to High(" + fieldName + ") do begin" + endl();
+                ret += tab(2) +   "FreeAndNil(" + fieldName + "[__i__]);" + endl();
                 ret += tab(1) + "end;" + endl();
               } else {
                 ret += tab(1) + "FreeAndNil(" + fieldName + ");" + endl();

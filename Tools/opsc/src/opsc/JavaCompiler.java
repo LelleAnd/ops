@@ -47,6 +47,21 @@ public class JavaCompiler extends opsc.Compiler
         super(projname);
     }
 
+    public String getName()
+    {
+        return "JavaCompiler";
+    }
+
+    protected String getFieldName(IDLField field)
+    {
+        return nonReservedName(field.getName());
+    }
+
+    protected String getClassName(IDLClass idlClass)
+    {
+        return nonReservedName(idlClass.getClassName());
+    }
+
     public void compileDataClasses(Vector<IDLClass> idlClasses, String projectDirectory)
     {
         createdFiles = "";
@@ -87,11 +102,10 @@ public class JavaCompiler extends opsc.Compiler
 
     protected void compileEnum(IDLClass idlClass) throws IOException
     {
-        String className = idlClass.getClassName();
+        String className = getClassName(idlClass);
 
         String packageName = idlClass.getPackageName();
         String packageFilePart = packageName.replace(".", "/");
-        //setOutputFileName(projectDirectory + JAVA_DIR + "/" + packageFilePart + "/" + className + ".java");
         setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + className + ".java");
 
         java.io.InputStream stream = findTemplateFile("javaenumtemplate.tpl");
@@ -129,7 +143,7 @@ public class JavaCompiler extends opsc.Compiler
 
     public void compileDataClass(IDLClass idlClass) throws IOException
     {
-        String className = idlClass.getClassName();
+        String className = getClassName(idlClass);
         String baseClassName = "OPSObject";
         if (idlClass.getBaseClassName() != null)
         {
@@ -166,19 +180,9 @@ public class JavaCompiler extends opsc.Compiler
         createdFiles += "\"" + getOutputFileName() + "\"\n";
     }
 
-    public String getName()
-    {
-        return "JavaCompiler";
-    }
-
-    protected String getFieldName(IDLField field)
-    {
-        return nonReservedName(field.getName());
-    }
-
     protected void compilePublisher(IDLClass idlClass) throws IOException
     {
-        String className = idlClass.getClassName();
+        String className = getClassName(idlClass);
         String packageName = idlClass.getPackageName();
 
         String packageFilePart = packageName.replace(".", "/");
@@ -203,7 +207,7 @@ public class JavaCompiler extends opsc.Compiler
 
     protected void compileSubscriber(IDLClass idlClass) throws IOException
     {
-        String className = idlClass.getClassName();
+        String className = getClassName(idlClass);
         String packageName = idlClass.getPackageName();
 
         String packageFilePart = packageName.replace(".", "/");
@@ -249,13 +253,13 @@ public class JavaCompiler extends opsc.Compiler
         //Save the modified text to the output file.
         String createBodyText = "";
 
-        for (IDLClass iDLClass : idlClasses)
+        for (IDLClass idlClass : idlClasses)
         {
-            if (isOnlyDefinition(iDLClass) || isNoFactory(iDLClass)) continue;
+            if (isOnlyDefinition(idlClass) || isNoFactory(idlClass)) continue;
 
-            createBodyText += tab(2) + "if(type.equals(\"" + iDLClass.getPackageName() + "." + iDLClass.getClassName() + "\"))" + endl();
+            createBodyText += tab(2) + "if(type.equals(\"" + idlClass.getPackageName() + "." + getClassName(idlClass) + "\"))" + endl();
             createBodyText += tab(2) + "{" + endl();
-            createBodyText += tab(3) + "return new " + iDLClass.getPackageName() + "." + iDLClass.getClassName() + "();" + endl();
+            createBodyText += tab(3) + "return new " + idlClass.getPackageName() + "." + getClassName(idlClass) + "();" + endl();
             createBodyText += tab(2) + "}" + endl();
         }
         createBodyText += tab(2) + "return null;" + endl();
@@ -291,33 +295,48 @@ public class JavaCompiler extends opsc.Compiler
             String fieldName = getFieldName(field);
             if (field.isArray() && (field.getArraySize() > 0)) {
                 // for (int i = 0; i < 5; i++) _stringFixArr.Add("");
-                if (!field.isEnumType()) iVal = initValue(eType);
+                if (!field.isEnumType()) iVal = initValue(field);
                 ret += tab(2) + "for (int i = 0; i < " + field.getArraySize() + "; i++) " + fieldName + ".add(" + iVal + ");" + endl();
-            } else if (field.isEnumType() && !field.isArray()) {
-                ret += tab(2) + fieldName + " = " + iVal + ";" + endl();
             }
         }
         return ret;
     }
 
-    protected String initValue(String s)
+    protected String initValue(IDLField field)
     {
-        s = elementType(s);
+        String s = elementType(field.getType());
+
+        if (field.getValue().length() > 0) {
+            String prefix = "";
+            String value = "";
+            String suffix = "";
+            if (s.equals("byte")) prefix = "(byte)";
+            if (s.equals("short")) prefix = "(short)";
+            if (s.equals("long")) prefix = "(long)";
+            if (s.equals("float")) suffix = "f";
+            if (field.isEnumType()) {
+                value = s + "." + nonReservedName(field.getValue());
+            } else {
+                value = prefix + field.getValue() + suffix;
+            }
+            return value;
+        }
+
         if (s.equals("string")) return "\"\"";
         if (s.equals("boolean")) return "false";
+        if (s.equals("byte")) return "(byte)0";
         if (s.equals("short")) return "(short)0";
         if (s.equals("int")) return "0";
         if (s.equals("long")) return "(long)0";
-        if (s.equals("double")) return "0.0";
         if (s.equals("float")) return "0.0f";
-        if (s.equals("byte")) return "(byte)0";
+        if (s.equals("double")) return "0.0";
         return "new " + s + "()";
     }
 
     protected String getCloneBody(IDLClass idlClass)
     {
         String ret = "";
-        ret += tab(2) + "cloneResult." + idlClass.getClassName() + "_version = this." + idlClass.getClassName() + "_version;" + endl();
+        ret += tab(2) + "cloneResult." + getClassName(idlClass) + "_version = this." + getClassName(idlClass) + "_version;" + endl();
         for (IDLField field : idlClass.getFields()) {
             if (field.isStatic()) continue;
             String fieldName = getFieldName(field);
@@ -384,7 +403,7 @@ public class JavaCompiler extends opsc.Compiler
         if (!isOnlyDefinition(idlClass)) {
             int version = idlClass.getVersion();
             if (version < 0) { version = 0; }
-            ret += tab(1) + "public static final byte " + idlClass.getClassName() + "_idlVersion = " + version + ";" + endl();
+            ret += tab(1) + "public static final byte " + getClassName(idlClass) + "_idlVersion = " + version + ";" + endl();
         }
 
         for (IDLField field : idlClass.getFields()) {
@@ -402,26 +421,29 @@ public class JavaCompiler extends opsc.Compiler
             if (vers.length() > 0) {
                 ret += tab(1) + "/// " + vers + endl();
             }
+            String value = "";
+            if (field.getValue().length() > 0) {
+                // We only initalize fields that have a specified value (others get the java default)
+                value = " = " + initValue(field);
+            }
             if (field.isArray()) {
                 ret += tab(1) + "public " + getDeclareVector(field);
             } else if (field.getType().equals("string")) {
                 if (field.isStatic()) {
-                    ret += tab(1) + "public static final " + languageType(field.getType()) + " " + fieldName + " = " + field.getValue() + ";" + endl() + endl();
+                    ret += tab(1) + "public static final " + languageType(field.getType()) + " " + fieldName + value + ";" + endl() + endl();
                 } else {
                     ret += tab(1) + "public " + languageType(field.getType()) + " " + fieldName + " = \"\";" + endl();
                 }
             } else if (field.isIdlType()) {
                 ret += tab(1) + "public " + languageType(field.getType()) + " " + fieldName + " = new " + languageType(field.getType()) + "();" + endl();
             } else if (field.isEnumType()) {
-                ret += tab(1) + "public " + field.getType() + " " + fieldName + ";" + endl();
-            } else //Simple primitive type
-            {
+                ret += tab(1) + "public " + field.getType() + " " + fieldName + value + ";" + endl();
+            } else {
+                //Simple primitive type
                 if (field.isStatic()) {
-                    String suffix = "";
-                    if (languageType(field.getType()).equals("float")) suffix = "f";
-                    ret += tab(1) + "public static final " + languageType(field.getType()) + " " + fieldName + " = " + field.getValue() + suffix + ";" + endl() + endl();
+                    ret += tab(1) + "public static final " + languageType(field.getType()) + " " + fieldName + value + ";" + endl() + endl();
                 } else {
-                    ret += tab(1) + "public " + languageType(field.getType()) + " " + fieldName + ";" + endl();
+                    ret += tab(1) + "public " + languageType(field.getType()) + " " + fieldName + value + ";" + endl();
                 }
             }
         }
@@ -484,13 +506,13 @@ public class JavaCompiler extends opsc.Compiler
     protected String getSerialize(IDLClass idlClass)
     {
         String ret = "";
-        String versionName = idlClass.getClassName() + "_version";
-        String versionIdlName = idlClass.getClassName() + "_idlVersion";
+        String versionName = getClassName(idlClass) + "_version";
+        String versionIdlName = getClassName(idlClass) + "_idlVersion";
         // Need an implicit version field that may be [de]serialized
         ret += tab(2) + "if (idlVersionMask != 0) {" + endl();
         ret += tab(3) + "byte tmp = archive.inout(\"" + versionName + "\", " + versionName + ");" + endl();
         ret += tab(3) + "if (tmp > " + versionIdlName + ") {" + endl();
-        ret += tab(4) + "throw new IOException(\"" + idlClass.getClassName() + ": received version '\" + tmp + \"' > known version '\" + " + versionIdlName + " + \"'\");" + endl();
+        ret += tab(4) + "throw new IOException(\"" + getClassName(idlClass) + ": received version '\" + tmp + \"' > known version '\" + " + versionIdlName + " + \"'\");" + endl();
         ret += tab(3) + "}" + endl();
         ret += tab(3) + versionName + " = tmp;" + endl();
         ret += tab(2) + "} else {" + endl();

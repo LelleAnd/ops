@@ -28,13 +28,13 @@ __constructorBody
     }
 
     ///Copy-constructor making full deep copy of a(n) __className object.
-    __className(const __className& __c)
+    __className(const __className& _c)
        : __baseClassName()
 __constructorHead
     {
         OPSObject::appendType(ops::TypeId_T("__packageName.__className"));
 __constructorBody
-        __c.fillClone(this);
+        _c.fillClone(this);
     }
 
     ///Assignment operator making full deep copy of a(n) __className object.

@@ -275,6 +275,21 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
         }
     }
 
+    public static String getVersionDescription(String directiveStr)
+    {
+        String res = "";
+        Vector<VersionEntry> vec = getReducedVersions("", directiveStr);
+        if (vec != null) {
+            res += "Field valid for version(s): ";
+            for (VersionEntry ent : vec) {
+                int stop = ent.stop;
+                if (stop < 0) stop = 255;
+                res += "(" + ent.start + ".." + stop + "), ";
+            }
+        }
+        return res;
+    }
+
     public static Vector<VersionEntry> getVersions(String msg, String directiveStr)
     {
         Vector<VersionEntry> vec = null;
@@ -344,21 +359,6 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
         return vec;
     }
 
-    public static String getVersionDescription(String directiveStr)
-    {
-        String res = "";
-        Vector<VersionEntry> vec = getReducedVersions("", directiveStr);
-        if (vec != null) {
-            res += "Field valid for version(s): ";
-            for (VersionEntry ent : vec) {
-                int stop = ent.stop;
-                if (stop < 0) stop = 255;
-                res += "(" + ent.start + ".." + stop + "), ";
-            }
-        }
-        return res;
-    }
-
     public static int highestVersion(String msg, String directiveStr)
     {
         int version = -1;
@@ -372,20 +372,27 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
         return version;
     }
 
-    public static void rangeDirective(String msg, IDLField field)
+    // usage: String val = getDirectiveValue("name = ", field)
+    private static String getDirectiveValue(String lookfor, IDLField field)
     {
         String directiveStr = field.getDirective();
-        int idx = directiveStr.indexOf("range = ");
-        if (idx == -1) return;
+        int idx = directiveStr.indexOf(lookfor);
+        if (idx == -1) return null;
         int idx2 = directiveStr.indexOf(",", idx);
-        idx += 8;  // Skip 'range = '
-        String sub;
+        idx += lookfor.length();  // Skip '..... = '
         if (idx2 == -1) {
-            sub = directiveStr.substring(idx);
+            return directiveStr.substring(idx);
         } else {
-            sub = directiveStr.substring(idx, idx2);
+            return directiveStr.substring(idx, idx2);
         }
-        // Make sure value type is 'int: ' or 'real: '
+    }
+
+    public static void rangeDirective(String msg, IDLField field)
+    {
+        String sub = getDirectiveValue("range = ", field);
+        if (sub == null) return;
+
+        // Make sure value type is 'int: ' or 'float: '
         String sublo = "";
         if (sub.indexOf("int: ") == 0) {
             sublo = sub.substring(5);
@@ -407,36 +414,168 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
         }
     }
 
-    // usage int xx = intDirective("", "maxarrlen = ", field)
-    private static int intDirective(String msg, String lookfor, IDLField field)
-    {
-        String directiveStr = field.getDirective();
-        int idx = directiveStr.indexOf(lookfor);
-        if (idx == -1) return 0;
-        int idx2 = directiveStr.indexOf(",", idx);
-        idx += lookfor.length();  // Skip '..... = '
-        String sub;
-        if (idx2 == -1) {
-            sub = directiveStr.substring(idx);
-        } else {
-            sub = directiveStr.substring(idx, idx2);
+    static class TupleL {
+        public final boolean exist;
+        public final boolean error;
+        public final long value;
+
+        public TupleL( boolean exist, boolean error, long value) {
+            this.exist = exist;
+            this.error = error;
+            this.value = value;
         }
+    }
+
+    // usage TupleL xx = intDirective("", "maxarrlen = ", field)
+    private static TupleL intDirective(String msg, String lookfor, IDLField field)
+    {
+        String sub = getDirectiveValue(lookfor, field);
+        if (sub == null) return new TupleL(false, false, 0);
+
         // Make sure value type is 'int: '
-        String sublo = "";
         if (sub.indexOf("int: ") == 0) {
-            sublo = sub.substring(5);
+            return new TupleL(true, false, Long.parseLong(sub.substring(5)));
         } else {
             System.out.println("Error: " + msg + ". Field " + field.getName() + ". //@" + lookfor + " specification invalid (not integer): '" + sub + "'");
+            return new TupleL(true, true, 0);
+        }
+    }
+
+    static class TupleD {
+        public final boolean exist;
+        public final boolean error;
+        public final double value;
+
+        public TupleD( boolean exist, boolean error, double value) {
+            this.exist = exist;
+            this.error = error;
+            this.value = value;
+        }
+    }
+
+    // usage TupleD xx = floatDirective("", "init = ", field)
+    private static TupleD floatDirective(String msg, String lookfor, IDLField field)
+    {
+        String sub = getDirectiveValue(lookfor, field);
+        if (sub == null) return new TupleD(false, false, 0.0);
+
+        // Make sure value type is 'float: '
+        if (sub.indexOf("float: ") == 0) {
+            return new TupleD(true, false, Double.parseDouble(sub.substring(7)));
+        } else {
+            System.out.println("Error: " + msg + ". Field " + field.getName() + ". //@" + lookfor + " specification invalid (not floating point): '" + sub + "'");
+            return new TupleD(true, true, 0.0);
+        }
+    }
+
+    static class TupleB {
+        public final boolean exist;
+        public final boolean error;
+        public final boolean value;
+
+        public TupleB( boolean exist, boolean error, boolean value) {
+            this.exist = exist;
+            this.error = error;
+            this.value = value;
+        }
+    }
+
+    // usage TupleB xx = boolDirective("", "flag = ", field)
+    private static TupleB boolDirective(String msg, String lookfor, IDLField field)
+    {
+        String sub = getDirectiveValue(lookfor, field);
+        if (sub == null) return new TupleB(false, false, false);
+
+        // Make sure value type is 'bool: '
+        if (sub.indexOf("bool: ") == 0) {
+            return new TupleB(true, false, Boolean.parseBoolean(sub.substring(6)));
+        } else {
+            System.out.println("Error: " + msg + ". Field " + field.getName() + ". //@" + lookfor + " specification invalid (not boolean): '" + sub + "'");
+            return new TupleB(true, true, false);
+        }
+    }
+
+    // usage String xx = idDirective("", "init = ", field)
+    private static String idDirective(String msg, String lookfor, IDLField field)
+    {
+        String sub = getDirectiveValue(lookfor, field);
+        if (sub == null) return "";
+
+        // Make sure value type is 'ID: '
+        String sublo = "";
+        if (sub.indexOf("ID: ") == 0) {
+            sublo = sub.substring(4);
+        } else {
+            System.out.println("Error: " + msg + ". Field " + field.getName() + ". //@" + lookfor + " specification invalid (not ID): '" + sub + "'");
             System.exit(99);
         }
-        return Integer.parseInt(sublo);
+        return sublo;
     }
 
     public static void maxDirective(String msg, IDLField field)
     {
-        int arrlen = intDirective(msg, "maxarrlen = ", field);
-        field.setArrayMaxSize(arrlen);
-        int strlen = intDirective(msg, "maxstrlen = ", field);
-        field.setStringMaxSize(strlen);
+        TupleL arrlen = intDirective(msg, "maxarrlen = ", field);
+        if (arrlen.error) System.exit(99);
+        field.setArrayMaxSize(arrlen.value);
+        TupleL strlen = intDirective(msg, "maxstrlen = ", field);
+        if (strlen.error) System.exit(99);
+        field.setStringMaxSize(strlen.value);
+    }
+
+    // Returns false on error
+    public static boolean initDirective(String msg, IDLField field, boolean flag)
+    {
+        boolean res = true;
+        if (field.isStatic()) return res && flag;
+
+        if (field.getType().replace("[]", "").equals("boolean")) {
+            TupleB tup = boolDirective(msg, "init = ", field);
+            if (!tup.exist) return res && flag;
+            if (tup.error) return false;
+            field.setValue(Boolean.toString(tup.value));
+
+        } else if (field.isIntType()) {
+            TupleL tup = intDirective(msg, "init = ", field);
+            if (!tup.exist) return res && flag;
+            if (tup.error) return false;
+            if (field.getType().replace("[]", "").equals("byte")) {
+                if ((tup.value < 0) || (tup.value > 255)) {
+                    System.out.println("Error: " + msg + ". Field " + field.getName() + ". '//@init = " + tup.value + "'. Invalid value for type byte");
+                    res = false;
+                }
+            }
+            if (field.getType().replace("[]", "").equals("short")) {
+                if ((tup.value < Short.MIN_VALUE) || (tup.value > Short.MAX_VALUE)) {
+                    System.out.println("Error: " + msg + ". Field " + field.getName() + ". '//@init = " + tup.value + "'. Invalid value for type short");
+                    res = false;
+                }
+            }
+            if (field.getType().replace("[]", "").equals("int")) {
+                if ((tup.value < Integer.MIN_VALUE) || (tup.value > Integer.MAX_VALUE)) {
+                    System.out.println("Error: " + msg + ". Field " + field.getName() + ". '//@init = " + tup.value + "'. Invalid value for type int");
+                    res = false;
+                }
+            }
+            if (res) field.setValue(Long.toString(tup.value));
+
+        } else if (field.isFloatType()) {
+            TupleD tup = floatDirective(msg, "init = ", field);
+            if (!tup.exist) return res && flag;
+            if (tup.error) return false;
+            if (field.getType().replace("[]", "").equals("float")) {
+                if ((tup.value < -Float.MAX_VALUE) || (tup.value > Float.MAX_VALUE)) {
+                    System.out.println("Error: " + msg + ". Field " + field.getName() + ". '//@init = " + tup.value + "'. Invalid value for type float");
+                    res = false;
+                }
+            }
+            if (res) field.setValue(Double.toString(tup.value));
+        }
+        return res && flag;
+    }
+
+    // usage String xx = enuminitDirective("", field)
+    public static String enuminitDirective(String msg, IDLField field)
+    {
+        return idDirective(msg, "init = ", field);
     }
 }

@@ -813,7 +813,7 @@ public class PythonCompiler extends opsc.CompilerSupport
                         ret += "=0";
                     }
                 } else {
-                    ret += "=" + getTypeInitialization(field.getType());
+                    ret += "=" + getTypeInitialization(field);
                 }
             }
         }
@@ -853,6 +853,7 @@ public class PythonCompiler extends opsc.CompilerSupport
             if (vers.length() > 0) {
                 ret += tab(t) + "# " + vers + endl();
             }
+           
             // Get type initialization value
             String typeInit = "";
             if (field.isIdlType()) {
@@ -879,8 +880,9 @@ public class PythonCompiler extends opsc.CompilerSupport
                     typeInit = "0";
                 }
             } else {
-                typeInit = getTypeInitialization(field.getType().replace("[]", ""));
+                typeInit = getTypeInitialization(field);
             }
+           
             // Generate initialization statement
             ret += tab(t) + "self." + fieldName + " = ";
             String conditional = "";
@@ -1067,17 +1069,30 @@ public class PythonCompiler extends opsc.CompilerSupport
         return "##### ERROR getValidationString("+type+")";
     }
 
-    protected String getTypeInitialization(String s)
+    protected String getTypeInitialization(IDLField field)
     {
-        if (s.equals("string"))       return "\"\"";
-        else if (s.equals("boolean")) return "False";
-        else if (s.equals("short"))   return "0";
-        else if (s.equals("int"))     return "0";
-        else if (s.equals("long"))    return "0";
-        else if (s.equals("double"))  return "0.0";
-        else if (s.equals("float"))   return "0.0";
-        else if (s.equals("byte"))    return "0";
-        else                          return "##### ERROR (" + s + ")";
+        String s = field.getType().replace("[]", "");
+
+        if (s.equals("string"))  return "\"\"";
+
+        if (field.getValue().length() > 0) {
+            if (field.isEnumType()) {
+                return field.getValue();
+            } else if (field.isIdlType()) {
+                // fall through
+            } else if (s.equals("boolean")) {
+                if (field.getValue().equals("true")) return "True";
+                // False handled below
+            } else {
+                return field.getValue();
+            }
+        }
+
+        if (s.equals("boolean")) return "False";
+        if (field.isIntType())   return "0";
+        if (field.isFloatType()) return "0.0";
+
+        return "##### ERROR (" + s + ")";
     }
 
     protected String getArchiverCall(IDLField field)

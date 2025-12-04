@@ -28,13 +28,13 @@ public class IDLField
     private boolean _static;
     private boolean array;
     private boolean _abstract;
-    private int arraySize = 0;
-    private int stringSize = 0;
+    private long arraySize = 0;
+    private long stringSize = 0;
     private String fullyQualifiedType;
     private String rangeLo = "";
     private String rangeHi = "";
-    private int arrayMaxSize = 0;
-    private int stringMaxSize = 0;
+    private long arrayMaxSize = 0;
+    private long stringMaxSize = 0;
 
     /** Creates a new instance of IDLField */
     public IDLField(String name, String type, String comment, String value)
@@ -66,38 +66,38 @@ public class IDLField
         this.name = name;
     }
 
-    public int getArraySize()
+    public long getArraySize()
     {
         return arraySize;
     }
-    public void setArraySize(int arraySize)
+    public void setArraySize(long arraySize)
     {
         this.arraySize = arraySize;
     }
 
-    public int getArrayMaxSize()
+    public long getArrayMaxSize()
     {
         return arrayMaxSize;
     }
-    public void setArrayMaxSize(int arrayMaxSize)
+    public void setArrayMaxSize(long arrayMaxSize)
     {
         this.arrayMaxSize = arrayMaxSize;
     }
 
-    public int getStringSize()
+    public long getStringSize()
     {
         return stringSize;
     }
-    public void setStringSize(int stringSize)
+    public void setStringSize(long stringSize)
     {
         this.stringSize = stringSize;
     }
 
-    public int getStringMaxSize()
+    public long getStringMaxSize()
     {
         return stringMaxSize;
     }
-    public void setStringMaxSize(int stringMaxSize)
+    public void setStringMaxSize(long stringMaxSize)
     {
         this.stringMaxSize = stringMaxSize;
     }

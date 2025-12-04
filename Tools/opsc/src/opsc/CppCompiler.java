@@ -548,8 +548,13 @@ public class CppCompiler extends opsc.Compiler
                       ret += tab(3) +   fieldName + "[_i] = " + languageType(field) + "::" + nonReservedName(field.getValue()) + ";" + endl();
                       ret += tab(2) + "}" + endl();
                     }
+                } else if (field.getType().equals("string[]")) {
                 } else {
-                    if (!field.getType().equals("string[]")) {
+                    if (field.getValue().length() > 0) {
+                        ret += tab(2) + "for(unsigned int _i = 0; _i < " + field.getArraySize() + "; _i++) {" + endl();
+                        ret += tab(3) +   fieldName + "[_i] = " + field.getValue() + ";" + endl();
+                        ret += tab(2) + "}" + endl();
+                    } else {
                         // int kalle[356]; --> memset(&kalle[0], 0, sizeof(kalle));
                         ret += tab(2) + "memset(&" + fieldName + "[0], 0, sizeof(" + fieldName + "));" + endl();
                     }
@@ -566,7 +571,11 @@ public class CppCompiler extends opsc.Compiler
             if (field.isStatic()) continue;
             String fieldName = getFieldName(field);
             if (field.getType().equals("boolean")) {
-                ret += ", " + fieldName + "(false)";
+                if (field.getValue().length() > 0) {
+                    ret += ", " + fieldName + "(" + field.getValue() + ")";
+                } else {
+                    ret += ", " + fieldName + "(false)";
+                }
             } else if (field.getType().equals("string") || field.isArray() || field.isIdlType()) {
                 //Do nothing in head
             } else if (field.isEnumType()) {
@@ -575,7 +584,13 @@ public class CppCompiler extends opsc.Compiler
                 }
             } else {
                 //Numeric
-                ret += ", " + fieldName + "(0)";
+                String suffix = "";
+                if (field.getType().equals("float")) suffix = "f";
+                if (field.getValue().length() > 0) {
+                    ret += ", " + fieldName + "(" + field.getValue() + suffix + ")";
+                } else {
+                    ret += ", " + fieldName + "(0)";
+                }
             }
         }
         return ret;

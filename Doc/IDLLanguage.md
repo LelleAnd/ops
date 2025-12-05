@@ -165,7 +165,7 @@ There is a special form of comments that is used to give instructions to the OPS
 
 | Directive | Values | Default | Applies to | Description |
 |-----------|--------|---------|------------|-------------|
-| init      | false/true, int or float number | - | field | Defines the initialization value for the field (applies to core types boolean, byte, short, int, long, float, double and enum and fixed sized arrays thereof). If not given the field is initialized to false, 0, 0.0 or first enum value, depending on type. |
+| init      | false/true, string, int or float number | - | field | Defines the initialization value for the field (applies to core types boolean, byte, short, int, long, float, double, string and enum and fixed sized arrays thereof). If not given the field is initialized to false, 0, 0.0, empty string or first enum value, depending on type. |
 | maxarrlen | number | - | field | Defines the maximum number of elements allowed for an open array. Validation code will be generated. See also [message validation](MessageValidation.md).  |
 | maxstrlen | number | - | field | Defines the maximum length of an open string. Validation code will be generated. See also [message validation](MessageValidation.md).  |
 | nofactory | - | - | class | Class is only ment to be a base class in a class hierarchy, so don't generate factory code for it (i.e. an object of this type can't be created by the OPS factory and therefore no field can be of this type). This also implies that the *toplevel* directive is false. |
@@ -182,7 +182,7 @@ package samples;
 //@ toplevel = false
 class UserData
 {
-  //@range = -42 .. 42
+  //@range = -42 .. 42  //@init = 17
   int A;
 
   //@version = 1 .. 4 //@version = 10

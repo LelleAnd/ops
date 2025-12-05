@@ -76,12 +76,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\..\Examples\OPSIdls\TestAll\Generated\Cpp;..\..\..\Cpp\include;..\..\..\Common\idl\Generated\Cpp</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\Examples\OPSIdls\TestAll\Generated\Cpp;..\..\..\Examples\OPSIdls\PizzaProject\Generated\Cpp;..\..\..\Cpp\include;..\..\..\Common\idl\Generated\Cpp</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(ProjectDir)\..\..\..\Cpp\lib-vc143-x86;C:\Program Files (x86)\Boost\boost_1_82\lib;D:\Git-Clones\tinyxml2\deploy32.debug\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>OPSCppLib_vc143_MDd.lib;tinyxml2.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -114,7 +116,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>D:\OPS\OPS4\Cpp\lib-vc143-x64;C:\Program Files (x86)\Boost\boost_1_82\lib;D:\Git-Clones\tinyxml2\deployx64.debug\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)\..\..\..\Cpp\lib-vc143-x64;C:\Program Files (x86)\Boost\boost_1_82\lib;D:\Git-Clones\tinyxml2\deployx64.debug\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>OPSCppLib_vc143_x64_MDd.lib;tinyxml2.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

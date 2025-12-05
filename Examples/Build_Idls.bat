@@ -1,5 +1,6 @@
 @pushd %~dp0
 @set OPS4_GPR_REL_PATH=../../../../../Ada/
+
 call ..\Tools\opsc\opsc.bat -P OPSIdls\ChatExample -g ALL -gpr %OPS4_GPR_REL_PATH%
 @if errorlevel 1 goto :error
 call ..\Tools\opsc\opsc.bat -P OPSIdls\Echotime -g ALL -gpr %OPS4_GPR_REL_PATH%
@@ -18,6 +19,25 @@ call ..\Tools\opsc\opsc.bat -P OPSIdls\TestAll -g ALL -gpr %OPS4_GPR_REL_PATH% -
 @if errorlevel 1 goto :error
 call ..\Tools\opsc\opsc.bat -P OPSIdls\WeatherStationExample -g ALL -gpr %OPS4_GPR_REL_PATH%
 @if errorlevel 1 goto :error
+
+call :build OPSIdls\DocSamples build.bat
+@if errorlevel 1 goto :error
+call :build OPSIdls\OpsInternal build.bat
+@if errorlevel 1 goto :error
+call :build OPSIdls\ParseTest build.bat
+@if errorlevel 1 goto :error
+call :build OPSIdls\PowerPointExamples build.bat
+@if errorlevel 1 goto :error
+
+@popd
+@goto :eof
+
+@rem call :build path bat_file
+:build
+@if not exist %~1\%~2 goto :eof
+@echo Building %~1 ...
+@pushd %~1
+@call %~2
 @popd
 @goto :eof
 

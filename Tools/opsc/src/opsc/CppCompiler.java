@@ -85,8 +85,8 @@ public class CppCompiler extends opsc.Compiler
                 compileEnum(idlClass);
             } else {
                 compileDataClass(idlClass);
-                if (!isOnlyDefinition(idlClass)) {
-                    if (!isTopLevel(idlClass)) {
+                if (!idlClass.isOnlyDefinition()) {
+                    if (!idlClass.isTopLevel()) {
                         System.out.println("Info: Cpp, skipping generation of publisher/subscriber for " + idlClass.getClassName());
                     } else {
                         compileSubscriber(idlClass);
@@ -130,7 +130,7 @@ public class CppCompiler extends opsc.Compiler
         setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + className + ".h");
 
         java.io.InputStream stream;
-        if (isOnlyDefinition(idlClass)) {
+        if (idlClass.isOnlyDefinition()) {
             stream = findTemplateFile("cpptemplatebare.tpl");
         } else {
             stream = findTemplateFile("cpptemplate.tpl");
@@ -321,7 +321,7 @@ public class CppCompiler extends opsc.Compiler
         String includes = "";
 
         for (IDLClass iDLClass : idlClasses) {
-            if (isOnlyDefinition(iDLClass) || isNoFactory(iDLClass)) continue;
+            if (iDLClass.isOnlyDefinition() || iDLClass.isNoFactory()) continue;
 
             createBodyText += tab(2) + "if(type == \"" + iDLClass.getPackageName() + "." + getClassName(iDLClass) + "\")" + endl();
             createBodyText += tab(2) + "{" + endl();
@@ -403,7 +403,7 @@ public class CppCompiler extends opsc.Compiler
                 // core types
                 if (field.isArray()) {
                     if (field.getArraySize() > 0) {
-                        if (!field.getType().equals("string[]")) {
+                        if (!field.isStringType()) {
                             ret += tab(2) + "memcpy(&obj->" + fieldName + "[0], &" + fieldName + "[0], sizeof(" + fieldName + "));" + endl();
                         } else {
                             ret += tab(2) + "for(unsigned int _i = 0; _i < " + field.getArraySize() + "; _i++) {" + endl();
@@ -451,7 +451,7 @@ public class CppCompiler extends opsc.Compiler
                 // core types
                 if (field.isArray()) {
                     if (field.getArraySize() > 0) {
-                        if (!field.getType().equals("string[]")) {
+                        if (!field.isStringType()) {
                             ret += tab(2) + "memcpy(&" + fieldName + "[0], &other." + fieldName + "[0], sizeof(" + fieldName + "));" + endl();
                         } else {
                             ret += tab(2) + "for(unsigned int _i = 0; _i < " + field.getArraySize() + "; _i++) {" + endl();
@@ -502,7 +502,7 @@ public class CppCompiler extends opsc.Compiler
                 // core types
                 if (field.isArray()) {
                     if (field.getArraySize() > 0) {
-                        if (field.getType().equals("string[]")) {
+                        if (field.isStringType()) {
                             ret += tab(pos) + "for(unsigned int _i = 0; _i < " + field.getArraySize() + "; _i++) {" + endl();
                             ret += tab(pos+1) +   fieldName + "[_i] = std::move(other." + fieldName + "[_i]);" + endl();
                             ret += tab(pos) + "}" + endl();
@@ -513,7 +513,7 @@ public class CppCompiler extends opsc.Compiler
                         ret += tab(pos) + "std::swap(" + fieldName + ", other." + fieldName + ");" + endl();
                     }
                 } else {
-                    if (field.getType().equals("string")) {
+                    if (field.isStringType()) {
                         ret += tab(pos) + fieldName + " = std::move(other." + fieldName + ");" + endl();
                     } else {
                         ret += tab(pos) + fieldName + " = other." + fieldName + ";" + endl();
@@ -548,7 +548,12 @@ public class CppCompiler extends opsc.Compiler
                       ret += tab(3) +   fieldName + "[_i] = " + languageType(field) + "::" + nonReservedName(field.getValue()) + ";" + endl();
                       ret += tab(2) + "}" + endl();
                     }
-                } else if (field.getType().equals("string[]")) {
+                } else if (field.isStringType()) {
+                    if (field.getValue().length() > 0) {
+                        ret += tab(2) + "for(unsigned int _i = 0; _i < " + field.getArraySize() + "; _i++) {" + endl();
+                        ret += tab(3) +   fieldName + "[_i] = " + field.getValue() + ";" + endl();
+                        ret += tab(2) + "}" + endl();
+                    }
                 } else {
                     if (field.getValue().length() > 0) {
                         ret += tab(2) + "for(unsigned int _i = 0; _i < " + field.getArraySize() + "; _i++) {" + endl();
@@ -570,26 +575,30 @@ public class CppCompiler extends opsc.Compiler
         for (IDLField field : idlClass.getFields()) {
             if (field.isStatic()) continue;
             String fieldName = getFieldName(field);
-            if (field.getType().equals("boolean")) {
+            if (field.isArray() || field.isIdlType()) {
+                //Do nothing in head
+            } else if (field.isBooleanType()) {
                 if (field.getValue().length() > 0) {
                     ret += ", " + fieldName + "(" + field.getValue() + ")";
                 } else {
                     ret += ", " + fieldName + "(false)";
                 }
-            } else if (field.getType().equals("string") || field.isArray() || field.isIdlType()) {
-                //Do nothing in head
             } else if (field.isEnumType()) {
                 if (field.getValue().length() > 0) {
                     ret += ", " + fieldName + "(" + languageType(field) + "::" + nonReservedName(field.getValue()) + ")";
                 }
             } else {
-                //Numeric
+                //Numeric / String
                 String suffix = "";
                 if (field.getType().equals("float")) suffix = "f";
                 if (field.getValue().length() > 0) {
                     ret += ", " + fieldName + "(" + field.getValue() + suffix + ")";
                 } else {
-                    ret += ", " + fieldName + "(0)";
+                    if (field.isStringType()) {
+                        // string is already default initialized
+                    } else {
+                        ret += ", " + fieldName + "(0)";
+                    }
                 }
             }
         }
@@ -626,7 +635,7 @@ public class CppCompiler extends opsc.Compiler
     {
         String ret = "";  
 
-        if (!isOnlyDefinition(idlClass)) {
+        if (!idlClass.isOnlyDefinition()) {
             int version = idlClass.getVersion();
             if (version < 0) { version = 0; }
             ret += tab(1) + "static const " + versionType() + " " + getClassName(idlClass) + "_idlVersion = " + version + ";" + endl() + endl();
@@ -647,14 +656,14 @@ public class CppCompiler extends opsc.Compiler
                 }
                 ret += tab(1) + "///" + comment.replace("/*", "").replace("*/", "") + endl();
             }
-            String vers = getVersionDescription(field.getDirective());
+            String vers = getVersionDescription(field.getDirectives());
             if (vers.length() > 0) {
                 ret += tab(1) + "/// " + vers + endl();
             }
             if (field.isArray()) {
                 ret += tab(1) + "" + getDeclareVector(field);
             } else {
-                if (field.getType().equals("string")) {
+                if (field.isStringType()) {
                     if (field.isStatic()) {
                         // NOTE strings can't be const in header file, so use a trick with an inline method
                         ret += tab(1) + "static const char* " + fieldName + "() { return " + field.getValue() + "; }" + endl();
@@ -711,7 +720,7 @@ public class CppCompiler extends opsc.Compiler
     {
         String ret = "";
 
-        if (isOnlyDefinition(idlClass)) {
+        if (idlClass.isOnlyDefinition()) {
             return ret;
         }
 
@@ -948,12 +957,21 @@ public class CppCompiler extends opsc.Compiler
     private String getFieldGuard(String versionName, IDLField field)
     {
         String ret = "";
-        Vector<VersionEntry> vec = getReducedVersions(field.getName(), field.getDirective());
+        Vector<VersionEntry> vec = getReducedVersions(field.getName(), field.getDirectives());
         if (vec != null) {
             for (VersionEntry ent : vec) {
-                String cond = "(" + versionName + " >= " + ent.start + ")";
+                String cond = "";
+                if (ent.start > 0) {
+                    cond = "(" + versionName + " >= " + ent.start + ")";
+                }
+                String cond2 = "";
                 if (ent.stop != -1) {
-                    cond = "(" + cond + " && (" + versionName + " <= " + ent.stop + "))";
+                    cond2 = "(" + versionName + " <= " + ent.stop + ")";
+                }
+                if ((cond.length() > 0) && (cond2.length() > 0)) {
+                    cond = "(" + cond + " && " + cond2 + ")";
+                } else if (cond2.length() > 0) {
+                    cond = cond2;
                 }
                 if (ret.length() > 0) {
                     ret += " || ";
@@ -1032,7 +1050,7 @@ public class CppCompiler extends opsc.Compiler
                     if (field.getArraySize() > 0) {
                         // idl = type[size] name;
                         ret += "archive->inoutfixarr(\"" + field.getName() + "\", ";
-                        if (!field.getType().equals("string[]")) {
+                        if (!field.isStringType()) {
                             //void inoutfixarr(InoutName_T name, bool* value, int numElements, int totalSize);
                             //void inoutfixarr(InoutName_T name, ...* value, int numElements, int totalSize);
                             //void inoutfixarr(InoutName_T name, double* value, int numElements, int totalSize);

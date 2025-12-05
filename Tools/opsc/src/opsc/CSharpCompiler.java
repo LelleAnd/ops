@@ -157,7 +157,7 @@ public class CSharpCompiler extends opsc.Compiler
         setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + idlClass.getClassName() + ".cs");
 
         java.io.InputStream stream;
-        if (isOnlyDefinition(idlClass)) {
+        if (idlClass.isOnlyDefinition()) {
             stream = findTemplateFile("cstemplatebare.tpl");
         } else {
             stream = findTemplateFile("cstemplate.tpl");
@@ -259,7 +259,7 @@ public class CSharpCompiler extends opsc.Compiler
 
         for (IDLClass idlClass : idlClasses)
         {
-            if (isOnlyDefinition(idlClass) || isNoFactory(idlClass)) continue;
+            if (idlClass.isOnlyDefinition() || idlClass.isNoFactory()) continue;
 
             createObjectBodyText += tab(3) + "if (type.Equals(\"" + idlClass.getPackageName() + "." + getClassName(idlClass) + "\"))" + endl();
             createObjectBodyText += tab(3) + "{" + endl();
@@ -389,7 +389,7 @@ public class CSharpCompiler extends opsc.Compiler
     {
         String ret = getEnumTypeDeclarations(idlClass);
 
-        if (!isOnlyDefinition(idlClass)) {
+        if (!idlClass.isOnlyDefinition()) {
             int version = idlClass.getVersion();
             if (version < 0) { version = 0; }
             // Need an implicit version field that should be [de]serialized
@@ -409,7 +409,7 @@ public class CSharpCompiler extends opsc.Compiler
                 }
                 ret += tab(2) + "///" + comment.replace("/*", "").replace("*/", "") + endl();
             }
-            String vers = getVersionDescription(field.getDirective());
+            String vers = getVersionDescription(field.getDirectives());
             if (vers.length() > 0) {
                 ret += tab(2) + "/// " + vers + endl();
             }
@@ -417,7 +417,7 @@ public class CSharpCompiler extends opsc.Compiler
             {
                 ret += tab(2) + "private " + languageType(field.getType()) + " _" + fieldName +
                         " = new " + languageType(field.getType()) + "();" + endl();
-                if(field.getType().equals("string[]")) {
+                if(field.isStringType()) {
                     ret += tab(2) + "[Editor(@\"System.Windows.Forms.Design.StringCollectionEditor,\" +" + endl() +
                            tab(3) + "\"System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a\"," + endl() +
                            tab(3) + "typeof(System.Drawing.Design.UITypeEditor))]" + endl();
@@ -425,7 +425,7 @@ public class CSharpCompiler extends opsc.Compiler
                 ret += tab(2) + "public " + languageType(field.getType()) + " " + fieldName +
                         " { get { return " + " _" + fieldName + "; } set { _" + fieldName + " = value; } } " + endl() + endl();
             }
-            else if(field.getType().equals("string"))
+            else if(field.isStringType())
             {
                 if (field.isStatic()) {
                     ret += tab(2) + "public const " + languageType(field.getType()) + " " + fieldName + " = " + field.getValue() + ";" + endl() + endl();
@@ -433,7 +433,11 @@ public class CSharpCompiler extends opsc.Compiler
                     ///TEST gives a description and category in a propertygrid
                     /// ret += tab(2) + "[Description(\"TBD\"), Category(\"" + getClassName(idlClass) + "\")]" + endl();
                     ///TEST
-                    ret += tab(2) + "public " + languageType(field.getType()) + " " + fieldName + " { get; set; }" + endl() + endl();
+                    if (field.getValue().length() > 0) {
+                        ret += tab(2) + "public " + languageType(field.getType()) + " " + fieldName + " { get; set; } = " + field.getValue() + ";" + endl() + endl();
+                    } else {
+                        ret += tab(2) + "public " + languageType(field.getType()) + " " + fieldName + " { get; set; } = \"\";" + endl() + endl();
+                    }
                 }
             }
             else if(field.isIdlType())
@@ -500,9 +504,14 @@ public class CSharpCompiler extends opsc.Compiler
 
     protected String initValue(IDLField field)
     {
-        String s = elementType(field.getType());
-        if (s.equals("string")) return "\"\"";
-        if (s.equals("boolean")) { 
+        if (field.isStringType()) {
+            if (field.getValue().length() > 0) {
+                return field.getValue();
+            } else {
+                return "\"\"";
+            }
+        }
+        if (field.isBooleanType()) { 
             if (field.getValue().length() > 0) {
                 return field.getValue();
             } else {
@@ -516,6 +525,7 @@ public class CSharpCompiler extends opsc.Compiler
                 return "0";
             }
         }
+        String s = elementType(field.getType());
         if (field.isFloatType()) {
             String suffix = "";
             if (s.equals("float")) suffix = "f";
@@ -536,12 +546,21 @@ public class CSharpCompiler extends opsc.Compiler
     private String getFieldGuard(String versionName, IDLField field)
     {
         String ret = "";
-        Vector<VersionEntry> vec = getReducedVersions(field.getName(), field.getDirective());
+        Vector<VersionEntry> vec = getReducedVersions(field.getName(), field.getDirectives());
         if (vec != null) {
             for (VersionEntry ent : vec) {
-                String cond = "(" + versionName + " >= " + ent.start + ")";
+                String cond = "";
+                if (ent.start > 0) {
+                    cond = "(" + versionName + " >= " + ent.start + ")";
+                }
+                String cond2 = "";
                 if (ent.stop != -1) {
-                    cond = "(" + cond + " && (" + versionName + " <= " + ent.stop + "))";
+                    cond2 = "(" + versionName + " <= " + ent.stop + ")";
+                }
+                if ((cond.length() > 0) && (cond2.length() > 0)) {
+                    cond = "(" + cond + " && " + cond2 + ")";
+                } else if (cond2.length() > 0) {
+                    cond = cond2;
                 }
                 if (ret.length() > 0) {
                     ret += " || ";

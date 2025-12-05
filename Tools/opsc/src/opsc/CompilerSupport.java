@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -196,51 +198,38 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
     // -----------------
 
     // Returns true if class is a 'toplevel' class
-    public static boolean isTopLevel(IDLClass idlClass)
+    public static boolean is_TopLevel(IDLClass idlClass)
     {
-        String s = idlClass.getDirective();
-        if (s == null) return false;
-        if (isNoFactory(idlClass)) return false;
-        int idx = s.indexOf("toplevel");
-        if (idx != -1) {
-            int idx2 = s.indexOf(",", idx);
-            String sub;
-            if (idx2 == -1) {
-                sub = s.substring(idx);
-            } else {
-                sub = s.substring(idx, idx2);
-            }
-            //System.out.println("Info: isTopLevel(), '" + sub + "',  " + idlClass.getClassName());
+        if (is_NoFactory(idlClass)) return false;
 
-            if (sub.toLowerCase().indexOf("false") != -1) return false;
+        for (String s : idlClass.getDirectives()) {
+            int idx = s.indexOf("toplevel");
+            if (idx == -1) continue;
+            //System.out.println("Info: isTopLevel(), '" + s + "',  " + idlClass.getClassName());
+
+            if (s.toLowerCase().indexOf("false") != -1) return false;
         }
-        return true;  //default
+        return true; //default
     }
 
     // Returns true if class is an 'onlydefinition' class
-    public static boolean isOnlyDefinition(IDLClass idlClass)
+    public static boolean is_OnlyDefinition(IDLClass idlClass)
     {
-        String s = idlClass.getDirective();
-        if (s == null) return false;
-        //System.out.println("Info: isOnlyDefinition(), class: '" + idlClass.getClassName() + "', getDirective() = " + s);
-        int idx = s.indexOf("onlydefinition");
-        if (idx != -1) {
-            //System.out.println("Info: isOnlyDefinition(), " + idlClass.getClassName());
-            return true;
+        for (String s : idlClass.getDirectives()) {
+            //System.out.println("Info: isOnlyDefinition(), class: '" + idlClass.getClassName() + "', getDirectives() = " + s);
+            int idx = s.indexOf("onlydefinition");
+            if (idx != -1) return true;
         }
         return false;  //default
     }
 
     // Returns true if class is a 'nofactory' class
-    public static boolean isNoFactory(IDLClass idlClass)
+    public static boolean is_NoFactory(IDLClass idlClass)
     {
-        String s = idlClass.getDirective();
-        if (s == null) return false;
-        //System.out.println("Info: isNoFactory(), class: '" + idlClass.getClassName() + "', getDirective() = " + s);
-        int idx = s.indexOf("nofactory");
-        if (idx != -1) {
-            //System.out.println("Info: isNoFactory(), " + idlClass.getClassName());
-            return true;
+        for (String s : idlClass.getDirectives()) {
+            //System.out.println("Info: isNoFactory(), class: '" + idlClass.getClassName() + "', getDirectives() = " + s);
+            int idx = s.indexOf("nofactory");
+            if (idx != -1) return true;
         }
         return false;  //default
     }
@@ -275,10 +264,10 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
         }
     }
 
-    public static String getVersionDescription(String directiveStr)
+    public static String getVersionDescription(List<String> directives)
     {
         String res = "";
-        Vector<VersionEntry> vec = getReducedVersions("", directiveStr);
+        Vector<VersionEntry> vec = getReducedVersions("", directives);
         if (vec != null) {
             res += "Field valid for version(s): ";
             for (VersionEntry ent : vec) {
@@ -290,22 +279,16 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
         return res;
     }
 
-    public static Vector<VersionEntry> getVersions(String msg, String directiveStr)
+    public static Vector<VersionEntry> getVersions(String msg, List<String> directives)
     {
         Vector<VersionEntry> vec = null;
-        while (directiveStr != null) {
+        for (String directiveStr : directives) {
             int idx = directiveStr.indexOf("version = ");
-            if (idx == -1) break;
-            int idx2 = directiveStr.indexOf(",", idx);
+            if (idx == -1) continue;
+            //System.out.println("Info: " + msg + ": " + directiveStr);
             idx += 10;  // Skip 'version = '
             String sub, sub2;
-            if (idx2 == -1) {
-                sub = directiveStr.substring(idx);
-                directiveStr = null;
-            } else {
-                sub = directiveStr.substring(idx, idx2);
-                directiveStr = directiveStr.substring(idx2+1);
-            }
+            sub = directiveStr.substring(idx);
             // Make sure value type is 'int: '
             if (sub.indexOf("int: ") != 0) {
                 System.out.println("Error: " + msg + ". //@version range invalid (not integer): '" + sub + "'");
@@ -327,14 +310,15 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
                 System.out.println("Error: " + msg + ". //@version range invalid : '" + ent.start + ".." + ent.stop + "'");
                 System.exit(99);
             }
+            //System.out.println("Info: " + msg + ". //@version range valid : '" + ent.start + ".." + ent.stop + "'");
             vec.add(ent);
         }
         return vec;
     }
 
-    public static Vector<VersionEntry> getReducedVersions(String msg, String directiveStr)
+    public static Vector<VersionEntry> getReducedVersions(String msg, List<String> directives)
     {
-        Vector<VersionEntry> vec = getVersions(msg, directiveStr);
+        Vector<VersionEntry> vec = getVersions(msg, directives);
         if (vec != null) {
             // Sort entries
             vec.sort(new VersionEntryComparator());
@@ -359,10 +343,10 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
         return vec;
     }
 
-    public static int highestVersion(String msg, String directiveStr)
+    public static int highestVersion(String msg, List<String> directives)
     {
         int version = -1;
-        Vector<VersionEntry> vec = getVersions(msg, directiveStr);
+        Vector<VersionEntry> vec = getVersions(msg, directives);
         if (vec != null) {
             for (VersionEntry ent : vec) {
                 if (version < ent.start) version = ent.start;
@@ -375,16 +359,13 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
     // usage: String val = getDirectiveValue("name = ", field)
     private static String getDirectiveValue(String lookfor, IDLField field)
     {
-        String directiveStr = field.getDirective();
-        int idx = directiveStr.indexOf(lookfor);
-        if (idx == -1) return null;
-        int idx2 = directiveStr.indexOf(",", idx);
-        idx += lookfor.length();  // Skip '..... = '
-        if (idx2 == -1) {
+        for (String directiveStr : field.getDirectives()) {
+            int idx = directiveStr.indexOf(lookfor);
+            if (idx == -1) continue;
+            idx += lookfor.length();  // Skip '..... = '
             return directiveStr.substring(idx);
-        } else {
-            return directiveStr.substring(idx, idx2);
         }
+        return null;
     }
 
     public static void rangeDirective(String msg, IDLField field)
@@ -512,6 +493,23 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
         return sublo;
     }
 
+    // usage String xx = stringDirective("", "init = ", field)
+    private static String stringDirective(String msg, String lookfor, IDLField field)
+    {
+        String sub = getDirectiveValue(lookfor, field);
+        if (sub == null) return "";
+
+        // Make sure value type is 'string: '
+        String sublo = "";
+        if (sub.indexOf("string: ") == 0) {
+            sublo = sub.substring(8);
+        } else {
+            System.out.println("Error: " + msg + ". Field " + field.getName() + ". //@" + lookfor + " specification invalid (not string): '" + sub + "'");
+            System.exit(99);
+        }
+        return sublo;
+    }
+
     public static void maxDirective(String msg, IDLField field)
     {
         TupleL arrlen = intDirective(msg, "maxarrlen = ", field);
@@ -569,6 +567,11 @@ public abstract class CompilerSupport extends AbstractTemplateBasedIDLCompiler
                 }
             }
             if (res) field.setValue(Double.toString(tup.value));
+        } else if (field.getType().replace("[]", "").equals("string")) {
+            String str = stringDirective(msg, "init = ", field);
+            if (str.length() > 0) {
+                field.setValue(str);
+            }
         }
         return res && flag;
     }

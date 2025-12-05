@@ -10,6 +10,7 @@
 package parsing;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -28,6 +29,10 @@ public class IDLClass
     private String baseClassName;
     private String comment;
     private String directive;
+    private List<String> directives = new ArrayList<>();
+    private boolean onlydefinition = false;
+    private boolean toplevel = true;
+    private boolean nofactory = false;
     private int version = -1;
     private ArrayList<IDLField> fields;
     private ArrayList<IDLEnumType> enumTypes;    // Used for enum types defined in a class
@@ -97,13 +102,39 @@ public class IDLClass
     }
 
     // ------------------------
-    public String getDirective()
+    public List<String> getDirectives()
     {
-        return directive;
+        return this.directives;
     }
-    public void setDirective(String directive)
+    public void setDirectives(List<String> directives)
     {
-        this.directive = directive;
+        this.directives.addAll(directives); 
+    }
+
+    // ------------------------
+    public boolean isOnlyDefinition()
+    {
+        return this.onlydefinition;
+    }
+    public boolean isTopLevel()
+    {
+        return this.toplevel;
+    }
+    public boolean isNoFactory()
+    {
+        return this.nofactory;
+    }
+    public void setOnlyDefinition(boolean value)
+    {
+        this.onlydefinition = value;
+    }
+    public void setTopLevel(boolean value)
+    {
+        this.toplevel = value;
+    }
+    public void setNoFactory(boolean value)
+    {
+        this.nofactory = value;
     }
 
     // ------------------------

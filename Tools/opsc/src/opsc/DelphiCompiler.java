@@ -147,7 +147,7 @@ public class DelphiCompiler extends opsc.Compiler
         setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + packageName + "." + className + ".pas");
 
         java.io.InputStream stream;
-        if (isOnlyDefinition(idlClass)) {
+        if (idlClass.isOnlyDefinition()) {
           stream = findTemplateFile("delphitemplatebare.tpl");
         } else {
           stream = findTemplateFile("delphitemplate.tpl");
@@ -209,7 +209,7 @@ public class DelphiCompiler extends opsc.Compiler
         String includes = "";
 
         for (IDLClass iDLClass : idlClasses) {
-            if (isOnlyDefinition(iDLClass) || isNoFactory(iDLClass)) continue;
+            if (iDLClass.isOnlyDefinition() || iDLClass.isNoFactory()) continue;
 
             createBodyText += tab(1) + "if types = '" + iDLClass.getPackageName() + "." + getClassName(iDLClass) + "' then begin" + endl();
             createBodyText += tab(2) + "Result := " + getFullyQualifiedClassName(iDLClass.getClassName()) + ".Create;" + endl();
@@ -333,30 +333,23 @@ public class DelphiCompiler extends opsc.Compiler
               } else {
                   ret += tab(1) + fieldName + " := " + getFullyQualifiedClassName(field.getType()) + ".Create;" + endl();
               }
-          }
-          if (field.getValue().length() > 0) {
+          } else if (field.getValue().length() > 0) {
+              String value;
               if (field.isEnumType()) {
-                  String value = getFullyQualifiedEnumType(field.getType().replace("[]", "")) + "." + nonReservedName(field.getValue());
-                  if (field.isArray()) {
-                      if (field.getArraySize() > 0) {
-                          ret += tab(1) + "for __i__ := 0 to High(" + fieldName + ") do begin" + endl();
-                          ret += tab(2) +   fieldName + "[__i__] := " + value + ";" + endl();
-                          ret += tab(1) + "end;" + endl();
-                      }
-                  } else {
-                      ret += tab(1) + fieldName + " := " + value + ";" + endl();
-                  }
+                  value = getFullyQualifiedEnumType(field.getType().replace("[]", "")) + "." + nonReservedName(field.getValue());
+              } else if (field.isStringType()) {
+                  value = field.getValue().replace("\"", "'");
+              } else {
+                  value = field.getValue();
               }
-              if (field.isIntType() || field.isFloatType() || (field.getType().equals("boolean"))) {
-                  if (field.isArray()) {
-                      if (field.getArraySize() > 0) {
-                          ret += tab(1) + "for __i__ := 0 to High(" + fieldName + ") do begin" + endl();
-                          ret += tab(2) +   fieldName + "[__i__] := " + field.getValue() + ";" + endl();
-                          ret += tab(1) + "end;" + endl();
-                      }
-                  } else {
-                      ret += tab(1) + fieldName + " := " + field.getValue() + ";" + endl();
+              if (field.isArray()) {
+                  if (field.getArraySize() > 0) {
+                      ret += tab(1) + "for __i__ := 0 to High(" + fieldName + ") do begin" + endl();
+                      ret += tab(2) +   fieldName + "[__i__] := " + value + ";" + endl();
+                      ret += tab(1) + "end;" + endl();
                   }
+              } else {
+                  ret += tab(1) + fieldName + " := " + value + ";" + endl();
               }
           }
       }
@@ -522,7 +515,7 @@ public class DelphiCompiler extends opsc.Compiler
     {
         String ret = "";
 
-        if (!isOnlyDefinition(idlClass)) {
+        if (!idlClass.isOnlyDefinition()) {
             int version = idlClass.getVersion();
             if (version < 0) { version = 0; }
             // Need an implicit version field that should be [de]serialized
@@ -534,7 +527,7 @@ public class DelphiCompiler extends opsc.Compiler
             if(!field.getComment().equals("")) {
                 ret += convertComment(2, field.getComment());
             }
-            String vers = getVersionDescription(field.getDirective());
+            String vers = getVersionDescription(field.getDirectives());
             if (vers.length() > 0) {
                 ret += tab(2) + "/// " + vers + endl();
             }
@@ -542,7 +535,7 @@ public class DelphiCompiler extends opsc.Compiler
             String fieldType = field.getType();
             if (field.isArray()) {
                 ret += getDeclareVector(field);
-            } else if (field.getType().equals("string")) {
+            } else if (field.isStringType()) {
                 ret += languageType(fieldType);
             } else if (field.isIdlType()) {
                 ret += languageType(getFullyQualifiedClassName(fieldType));
@@ -559,7 +552,7 @@ public class DelphiCompiler extends opsc.Compiler
     protected String getConstantDeclarations(IDLClass idlClass)
     {
         String ret = "";
-        if (!isOnlyDefinition(idlClass)) {
+        if (!idlClass.isOnlyDefinition()) {
             int version = idlClass.getVersion();
             if (version < 0) { version = 0; }
             // Need an implicit version field that should be [de]serialized
@@ -572,9 +565,9 @@ public class DelphiCompiler extends opsc.Compiler
                 ret += convertComment(3, field.getComment());
             }
             String fieldType = getLastPart(field.getType());
-            if (field.getType().equals("string")) {
+            if (field.isStringType()) {
                 ret += tab(3) + fieldName + " = " + languageType(fieldType) + "(" + field.getValue().replace("\"", "'") + ");" + endl();
-            } else if (field.getType().equals("float") || (field.getType().equals("double"))) {
+            } else if (field.isFloatType()) {
                 ret += tab(3) + fieldName + " = " + field.getValue() + ";" + endl();
             } else {
                 ret += tab(3) + fieldName + " = " + languageType(fieldType) + "(" + field.getValue() + ");" + endl();
@@ -697,12 +690,21 @@ public class DelphiCompiler extends opsc.Compiler
     private String getFieldGuard(String versionName, IDLField field)
     {
         String ret = "";
-        Vector<VersionEntry> vec = getReducedVersions(field.getName(), field.getDirective());
+        Vector<VersionEntry> vec = getReducedVersions(field.getName(), field.getDirectives());
         if (vec != null) {
             for (VersionEntry ent : vec) {
-                String cond = "(" + versionName + " >= " + ent.start + ")";
+                String cond = "";
+                if (ent.start > 0) {
+                    cond = "(" + versionName + " >= " + ent.start + ")";
+                }
+                String cond2 = "";
                 if (ent.stop != -1) {
-                    cond = "(" + cond + " and (" + versionName + " <= " + ent.stop + "))";
+                    cond2 = "(" + versionName + " <= " + ent.stop + ")";
+                }
+                if ((cond.length() > 0) && (cond2.length() > 0)) {
+                    cond = "(" + cond + " and " + cond2 + ")";
+                } else if (cond2.length() > 0) {
+                    cond = cond2;
                 }
                 if (ret.length() > 0) {
                     ret += " or ";
@@ -769,26 +771,26 @@ public class DelphiCompiler extends opsc.Compiler
                     ret += "__num__ := archiver.beginList('" + field.getName() + "', ";
                     if (field.getArraySize() == 0) {
                         ret += "Length(" + fieldName + "));" + endl();
-                        ret += tab(1) + "if Length(" + fieldName + ") <> __num__ then Setlength(" + fieldName + ", __num__);" + endl();
+                        ret += tab(tabCnt) + "if Length(" + fieldName + ") <> __num__ then Setlength(" + fieldName + ", __num__);" + endl();
                     } else {
                         ret += field.getArraySize() + ");" + endl();
-                        ret += tab(1) + "if __num__ <> " + field.getArraySize() + " then raise EArchiverException.Create('Illegal size of fix array received. name: " + fieldName + "');" + endl();
+                        ret += tab(tabCnt) + "if __num__ <> " + field.getArraySize() + " then raise EArchiverException.Create('Illegal size of fix array received. name: " + fieldName + "');" + endl();
                     }
-                    ret += tab(1) + "for __i__ := 0 to __num__-1 do begin" + endl();
+                    ret += tab(tabCnt) + "for __i__ := 0 to __num__-1 do begin" + endl();
                     fieldName += "[__i__]";
-                    ret += tab(2);
+                    ret += tab(tabCnt+1);
                 }
                 ret += "__tmp__ := Int16(" + fieldName + "); archiver.Inout('" + field.getName() + "', __tmp__); " + fieldName + " := " + getFullyQualifiedEnumType(elementType(field.getType())) + "(__tmp__); " + endl();
                 if (field.isArray()) {
-                    ret += tab(1) + "end;" + endl();
-                    ret += tab(1) + "archiver.endList('" + field.getName() + "');" + endl();
+                    ret += tab(tabCnt) + "end;" + endl();
+                    ret += tab(tabCnt) + "archiver.endList('" + field.getName() + "');" + endl();
                 }
             } else {
                 // core types
                 if (field.isArray()) {
                     if (field.getArraySize() > 0) {
                         // idl = type[size] name;
-                        if (field.getType().equals("string[]")) {
+                        if (field.isStringType()) {
                             ret += "archiver.Inoutfixarr('" + field.getName() + "', " + fieldName + ", " + field.getArraySize() + ");" + endl();
                         } else {
                             ret += "archiver.Inoutfixarr('" + field.getName() + "', @" + fieldName + "[0], " +

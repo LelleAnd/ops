@@ -79,8 +79,8 @@ public class AdaCompiler extends opsc.Compiler
                   compileEnum(iDLClass);
                 } else {
                   compileDataClass(iDLClass);
-                  if (!isOnlyDefinition(iDLClass)) {
-                    if (!isTopLevel(iDLClass)) {
+                  if (!iDLClass.isOnlyDefinition()) {
+                    if (!iDLClass.isTopLevel()) {
                       System.out.println("Info: Ada, skipping generation of publisher/subscriber for " + iDLClass.getClassName());
                     } else {
                       compileSubscriber(iDLClass);
@@ -206,7 +206,7 @@ public class AdaCompiler extends opsc.Compiler
         setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + getUnitName(className).replace(".", "-") + ".ads");
 
         java.io.InputStream stream;
-        if (isOnlyDefinition(idlClass)) {
+        if (idlClass.isOnlyDefinition()) {
           stream = findTemplateFile("adaspectemplatebare.tpl");
         } else {
           stream = findTemplateFile("adaspectemplate.tpl");
@@ -230,7 +230,7 @@ public class AdaCompiler extends opsc.Compiler
         saveOutputText(templateText);
         createdFiles += "\"" + getOutputFileName() + "\"\n";
 
-        if (isOnlyDefinition(idlClass)) return;
+        if (idlClass.isOnlyDefinition()) return;
 
         setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + getUnitName(className).replace(".", "-") + ".adb");
 
@@ -295,7 +295,7 @@ public class AdaCompiler extends opsc.Compiler
         String includes = "";
 
         for (IDLClass iDLClass : idlClasses) {
-            if (isOnlyDefinition(iDLClass) || isNoFactory(iDLClass)) continue;
+            if (iDLClass.isOnlyDefinition() || iDLClass.isNoFactory()) continue;
 
             createBodyText += tab(2) + "if types = \"" + iDLClass.getPackageName() + "." + iDLClass.getClassName() + "\" then" + endl();
             createBodyText += tab(3) +   "return Serializable_Class_At(" + getUnitName(iDLClass.getClassName()) + ".Create);" + endl();
@@ -655,10 +655,14 @@ public class AdaCompiler extends opsc.Compiler
 
     protected String getInitValue(IDLField field, IDLClass idlClass)
     {
-        String fieldType = getLastPart(field.getType());
-        fieldType = fieldType.replace("[]", "");
-        if (fieldType.equals("string")) return "null";
-        if (fieldType.equals("boolean")) {
+        if (field.isStringType()) {
+            if (field.getValue().length() > 0) {
+                return "Copy(" + field.getValue() + ")";
+            } else {
+                return "null";
+            }
+        }
+        if (field.isBooleanType()) {
             if (field.getValue().length() > 0) {
                 return field.getValue();
             } else {
@@ -703,7 +707,7 @@ public class AdaCompiler extends opsc.Compiler
             } else {
                 if (elementType(fieldType) == "String_At") {
                     typeStr = "String_Arr";
-                    initStr = " => null";
+                    initStr = " => " + getInitValue(field, idlClass);
                     tickStr = "'";
                 } else {
                     typeStr = elementType(fieldType) + "_Arr";
@@ -737,7 +741,7 @@ public class AdaCompiler extends opsc.Compiler
     protected String getDeclarations(IDLClass idlClass)
     {
         String ret = "";
-        if (!isOnlyDefinition(idlClass)) {
+        if (!idlClass.isOnlyDefinition()) {
             int version = idlClass.getVersion();
             if (version < 0) { version = 0; }
             // Need an implicit version field that should be [de]serialized
@@ -754,7 +758,7 @@ public class AdaCompiler extends opsc.Compiler
                 }
                 ret += tab(3) + "---" + comment.replace("/*", "").replace("*/", "") + endl();
             }
-            String vers = getVersionDescription(field.getDirective());
+            String vers = getVersionDescription(field.getDirectives());
             if (vers.length() > 0) {
                 ret += tab(3) + "--- " + vers + endl();
             }
@@ -777,7 +781,7 @@ public class AdaCompiler extends opsc.Compiler
     protected String getConstantDeclarations(IDLClass idlClass)
     {
       String ret = "";
-      if (!isOnlyDefinition(idlClass)) {
+      if (!idlClass.isOnlyDefinition()) {
           int version = idlClass.getVersion();
           if (version < 0) { version = 0; }
           ret += tab(1) + idlClass.getClassName() + "_idlVersion : constant Byte := " + version + ";" + endl();
@@ -911,12 +915,21 @@ public class AdaCompiler extends opsc.Compiler
     private String getFieldGuard(String versionName, IDLField field)
     {
         String ret = "";
-        Vector<VersionEntry> vec = getReducedVersions(field.getName(), field.getDirective());
+        Vector<VersionEntry> vec = getReducedVersions(field.getName(), field.getDirectives());
         if (vec != null) {
             for (VersionEntry ent : vec) {
-                String cond = "(" + versionName + " >= " + ent.start + ")";
+                String cond = "";
+                if (ent.start > 0) {
+                    cond = "(" + versionName + " >= " + ent.start + ")";
+                }
+                String cond2 = "";
                 if (ent.stop != -1) {
-                    cond = "(" + cond + " and (" + versionName + " <= " + ent.stop + "))";
+                    cond2 = "(" + versionName + " <= " + ent.stop + ")";
+                }
+                if ((cond.length() > 0) && (cond2.length() > 0)) {
+                    cond = "(" + cond + " and " + cond2 + ")";
+                } else if (cond2.length() > 0) {
+                    cond = cond2;
                 }
                 if (ret.length() > 0) {
                     ret += " or ";

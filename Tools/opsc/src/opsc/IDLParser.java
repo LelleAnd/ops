@@ -50,20 +50,21 @@ public class IDLParser
             // Parse file
             IDLClass newClass = _parser.parse(fileText);
 
+            // Set some class info from directives
+            newClass.setTopLevel(CompilerSupport.is_TopLevel(newClass));
+            newClass.setNoFactory(CompilerSupport.is_NoFactory(newClass));
+            newClass.setOnlyDefinition(CompilerSupport.is_OnlyDefinition(newClass));
+
             // Perform some post parsing checks
             // First check that file name and class name is the same
             if (newClass.getClassName().equals(name)) {
                 // Next check that onlydefinition classes don't have fields
-                String s = newClass.getDirective();
-                if (s != null) {
-                    int idx = s.indexOf("onlydefinition");
-                    if (idx != -1) {
-                        for (IDLField field : newClass.getFields()) {
-                            if (field.isStatic()) continue;
-                            System.out.println("Error: File " + name + " set as 'onlydefinition' but contains fields");
-                            _nrErrors++;
-                            return null;
-                        }
+                if (newClass.isOnlyDefinition()) {
+                    for (IDLField field : newClass.getFields()) {
+                        if (field.isStatic()) continue;
+                        System.out.println("Error: File " + name + " set as 'onlydefinition' but contains fields");
+                        _nrErrors++;
+                        return null;
                     }
                 }
 

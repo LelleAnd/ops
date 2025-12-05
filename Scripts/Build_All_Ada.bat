@@ -10,6 +10,8 @@
 @if errorlevel 1 goto :error
 @call :build Examples\AdaApps\GenSub gensub.gpr
 @if errorlevel 1 goto :error
+@call :build Examples\AdaApps\ParseTest ParseTest.gpr
+@if errorlevel 1 goto :error
 @call :build Examples\AdaApps\PizzaTest pizzatest.gpr
 @if errorlevel 1 goto :error
 @call :build Examples\AdaApps\TestAll verifyserdes.gpr

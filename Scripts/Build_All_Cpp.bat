@@ -6,9 +6,11 @@
 @set target=-t:Rebuild
 :noarg
 
+@call :build Examples\CppApps\Echotime Echotime.vcxproj
+@if errorlevel 1 goto :error
 @call :build Examples\CppApps\Example1 Example1.vcxproj
 @if errorlevel 1 goto :error
-@call :build Examples\CppApps\Echotime Echotime.vcxproj
+@call :build Examples\CppApps\GenericPub GenericPub.vcxproj
 @if errorlevel 1 goto :error
 @call :build Examples\CppApps\HelloRequesterCppImpl RequestHelloTopic_example.sln
 @if errorlevel 1 goto :error
@@ -16,9 +18,13 @@
 @if errorlevel 1 goto :error
 @call :build Examples\CppApps\HelloWorldWithKeyCppImpl HelloTopic_example.sln
 @if errorlevel 1 goto :error
+@call :build Examples\CppApps\ParseTest ParseTest.vcxproj
+@if errorlevel 1 goto :error
 @call :build Examples\CppApps\PizzaTest PizzaTest.vcxproj
 @if errorlevel 1 goto :error
 @call :build Examples\CppApps\TestAllC++Test\TestAllC++Test TestAllC++Test.sln
+@if errorlevel 1 goto :error
+@call :build Examples\CppApps\UnitTestExample UnitTestExample.vcxproj
 @if errorlevel 1 goto :error
 
 @call :build Tools\DebugConsole DebugConsole.vcxproj

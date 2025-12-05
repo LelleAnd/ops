@@ -223,7 +223,7 @@ public class JSONCompiler extends CompilerSupport
     private String getFieldGuard(String versionName, IDLField field)
     {
         String ret = "";
-        Vector<VersionEntry> vec = getReducedVersions(field.getName(), field.getDirective());
+        Vector<VersionEntry> vec = getReducedVersions(field.getName(), field.getDirectives());
         if (vec != null) {
             for (VersionEntry ent : vec) {
                 String cond = "{ \"low\": \"" + ent.start + "\", ";
@@ -251,7 +251,7 @@ public class JSONCompiler extends CompilerSupport
         if (idlClass.getBaseClassName() != null) {
           baseClass = idlClass.getBaseClassName();
         }
-        if (!isOnlyDefinition(idlClass)) {
+        if (!idlClass.isOnlyDefinition()) {
           res += tab(t+1) + "\"extends\": \"" + getFullyQualifiedClassName(baseClass) + "\"," + endl();
         }
 

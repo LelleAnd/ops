@@ -80,8 +80,8 @@ public class JavaCompiler extends opsc.Compiler
                 else
                 {
                   compileDataClass(iDLClass);
-                  if (!isOnlyDefinition(iDLClass)) {
-                    if (!isTopLevel(iDLClass)) {
+                  if (!iDLClass.isOnlyDefinition()) {
+                    if (!iDLClass.isTopLevel()) {
                       System.out.println("Info: Java, skipping generation of publisher/subscriber for " + iDLClass.getClassName());
                     } else {
                       compileSubscriber(iDLClass);
@@ -155,7 +155,7 @@ public class JavaCompiler extends opsc.Compiler
         setOutputFileName(_outputDir + File.separator + packageFilePart + File.separator + className + ".java");
 
         java.io.InputStream stream;
-        if (isOnlyDefinition(idlClass)) {
+        if (idlClass.isOnlyDefinition()) {
             stream = findTemplateFile("javatemplatebare.tpl");
         } else {
             stream = findTemplateFile("javatemplate.tpl");
@@ -255,7 +255,7 @@ public class JavaCompiler extends opsc.Compiler
 
         for (IDLClass idlClass : idlClasses)
         {
-            if (isOnlyDefinition(idlClass) || isNoFactory(idlClass)) continue;
+            if (idlClass.isOnlyDefinition() || idlClass.isNoFactory()) continue;
 
             createBodyText += tab(2) + "if(type.equals(\"" + idlClass.getPackageName() + "." + getClassName(idlClass) + "\"))" + endl();
             createBodyText += tab(2) + "{" + endl();
@@ -400,7 +400,7 @@ public class JavaCompiler extends opsc.Compiler
     {
         String ret = getEnumTypeDeclarations(idlClass);
 
-        if (!isOnlyDefinition(idlClass)) {
+        if (!idlClass.isOnlyDefinition()) {
             int version = idlClass.getVersion();
             if (version < 0) { version = 0; }
             ret += tab(1) + "public static final byte " + getClassName(idlClass) + "_idlVersion = " + version + ";" + endl();
@@ -417,22 +417,25 @@ public class JavaCompiler extends opsc.Compiler
                 }
                 ret += tab(1) + "///" + comment.replace("/*", "").replace("*/", "") + endl();
             }
-            String vers = getVersionDescription(field.getDirective());
+            String vers = getVersionDescription(field.getDirectives());
             if (vers.length() > 0) {
                 ret += tab(1) + "/// " + vers + endl();
             }
             String value = "";
+            // We only initalize fields that have a specified value, except for strings (others get the java default)
             if (field.getValue().length() > 0) {
-                // We only initalize fields that have a specified value (others get the java default)
                 value = " = " + initValue(field);
+            }
+            if (field.isStringType() && (value.length() == 0)) {
+                value = " = \"\"";
             }
             if (field.isArray()) {
                 ret += tab(1) + "public " + getDeclareVector(field);
-            } else if (field.getType().equals("string")) {
+            } else if (field.isStringType()) {
                 if (field.isStatic()) {
                     ret += tab(1) + "public static final " + languageType(field.getType()) + " " + fieldName + value + ";" + endl() + endl();
                 } else {
-                    ret += tab(1) + "public " + languageType(field.getType()) + " " + fieldName + " = \"\";" + endl();
+                    ret += tab(1) + "public " + languageType(field.getType()) + " " + fieldName + value + ";" + endl();
                 }
             } else if (field.isIdlType()) {
                 ret += tab(1) + "public " + languageType(field.getType()) + " " + fieldName + " = new " + languageType(field.getType()) + "();" + endl();
@@ -487,7 +490,7 @@ public class JavaCompiler extends opsc.Compiler
     private String getFieldGuard(String versionName, IDLField field)
     {
         String ret = "";
-        Vector<VersionEntry> vec = getReducedVersions(field.getName(), field.getDirective());
+        Vector<VersionEntry> vec = getReducedVersions(field.getName(), field.getDirectives());
         if (vec != null) {
             for (VersionEntry ent : vec) {
                 String cond = "(" + versionName + " >= " + ent.start + ")";

@@ -130,6 +130,8 @@ String directive_value():
     }
 |
     value = boolean_literal() {return "bool: " + value;}
+|
+    value = string_literal() {return "string: " + value;}
 }
 
 /* Production 3 */
@@ -257,6 +259,7 @@ void const_decl() :
         currentIDLField.setType(typeName);
         currentIDLField.setValue(cvalue);
         currentIDLField.setStatic(true);
+        currentIDLField.setIntType(true);
         fieldDeclareEvent.fireEvent(currentIDLField);
     }
 |
@@ -270,6 +273,7 @@ void const_decl() :
         currentIDLField.setType(typeName);
         currentIDLField.setValue(cvalue);
         currentIDLField.setStatic(true);
+        currentIDLField.setFloatType(true);
         fieldDeclareEvent.fireEvent(currentIDLField);
     }
 |
@@ -279,6 +283,7 @@ void const_decl() :
         currentIDLField.setType(typeName);
         currentIDLField.setValue(cvalue);
         currentIDLField.setStatic(true);
+        currentIDLField.setStringType(true);
         fieldDeclareEvent.fireEvent(currentIDLField);
     }
 |
@@ -288,6 +293,7 @@ void const_decl() :
         currentIDLField.setType(typeName);
         currentIDLField.setValue(cvalue);
         currentIDLField.setStatic(true);
+        currentIDLField.setBooleanType(true);
         fieldDeclareEvent.fireEvent(currentIDLField);
     }
 }
@@ -359,7 +365,7 @@ String base_type_spec() :
   {currentIDLField.setIntType(true); return typeName;}
 |
   typeName = boolean_type()
-  {return typeName;}
+  {currentIDLField.setBooleanType(true); return typeName;}
 |
   typeName = string_type()
   {currentIDLField.setStringType(true); return typeName;}

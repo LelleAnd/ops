@@ -476,7 +476,7 @@ public class PythonCompiler extends opsc.CompilerSupport
         }
 
         java.io.InputStream stream;
-        if (isOnlyDefinition(idlClass)) {
+        if (idlClass.isOnlyDefinition()) {
             stream = findTemplateFile("pythonclasstemplatebare.tpl");
         } else {
             stream = findTemplateFile("pythonclasstemplate.tpl");
@@ -670,7 +670,7 @@ public class PythonCompiler extends opsc.CompilerSupport
 
         for (IDLClass idlClass : idlClasses)
         {
-            if (isOnlyDefinition(idlClass) || isNoFactory(idlClass)) continue;
+            if (idlClass.isOnlyDefinition() || idlClass.isNoFactory()) continue;
             String relPath = "";
             if (genPythonPackage) { relPath = "."; }
             importString.add("from " + relPath + idlClass.getPackageName().replace(".","_") + " import " + idlClass.getClassName() + endl());
@@ -724,7 +724,7 @@ public class PythonCompiler extends opsc.CompilerSupport
     protected String getConstantDeclarations(IDLClass idlClass)
     {
         String ret = "";
-        if (!isOnlyDefinition(idlClass)) {
+        if (!idlClass.isOnlyDefinition()) {
             int version = idlClass.getVersion();
             if (version < 0) { version = 0; }
             ret += tab(1) + idlClass.getClassName().toUpperCase() + "_IDLVERSION = " + version + endl();
@@ -826,7 +826,7 @@ public class PythonCompiler extends opsc.CompilerSupport
         String ret = "";
         int t = 2;
 
-        if (!isOnlyDefinition(idlClass)) {
+        if (!idlClass.isOnlyDefinition()) {
             int version = idlClass.getVersion();
             if (version < 0) { version = 0; }
             // Need an implicit version field that should be [de]serialized
@@ -849,7 +849,7 @@ public class PythonCompiler extends opsc.CompilerSupport
                 }
                 ret += tab(t) + "#" + comment.replace("/*", "").replace("*/", "") + endl();
             }
-            String vers = getVersionDescription(field.getDirective());
+            String vers = getVersionDescription(field.getDirectives());
             if (vers.length() > 0) {
                 ret += tab(t) + "# " + vers + endl();
             }
@@ -928,7 +928,7 @@ public class PythonCompiler extends opsc.CompilerSupport
     private String getFieldGuard(String versionName, IDLField field)
     {
         String ret = "";
-        Vector<VersionEntry> vec = getReducedVersions(field.getName(), field.getDirective());
+        Vector<VersionEntry> vec = getReducedVersions(field.getName(), field.getDirectives());
         if (vec != null) {
             for (VersionEntry ent : vec) {
                 String cond = "(self." + versionName + " >= " + ent.start + ")";
@@ -1073,8 +1073,6 @@ public class PythonCompiler extends opsc.CompilerSupport
     {
         String s = field.getType().replace("[]", "");
 
-        if (s.equals("string"))  return "\"\"";
-
         if (field.getValue().length() > 0) {
             if (field.isEnumType()) {
                 return field.getValue();
@@ -1088,8 +1086,9 @@ public class PythonCompiler extends opsc.CompilerSupport
             }
         }
 
-        if (s.equals("boolean")) return "False";
-        if (field.isIntType())   return "0";
+        if (field.isStringType()) return "\"\"";
+        if (field.isBooleanType()) return "False";
+        if (field.isIntType()) return "0";
         if (field.isFloatType()) return "0.0";
 
         return "##### ERROR (" + s + ")";

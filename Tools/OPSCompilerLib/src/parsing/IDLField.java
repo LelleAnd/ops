@@ -13,18 +13,23 @@ package parsing;
  *
  * @author angr
  */
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class IDLField
 {
     private String name;
     private String type;
     private String comment;
-    private String directive;
+    private List<String> directives = new ArrayList<>();
     private String value;
     private boolean idlType;
     private boolean enumType;
     private boolean intType;
     private boolean floatType;
     private boolean stringType;
+    private boolean booleanType;
     private boolean _static;
     private boolean array;
     private boolean _abstract;
@@ -131,13 +136,13 @@ public class IDLField
         this.comment = comment;
     }
 
-    public String getDirective()
+    public List<String> getDirectives()
     {
-        return directive;
+        return this.directives;
     }
-    public void setDirective(String directive)
+    public void setDirectives(List<String> directives)
     {
-        this.directive = directive;
+        this.directives.addAll(directives); 
     }
 
     public String getValue()
@@ -167,45 +172,54 @@ public class IDLField
     {
         return idlType;
     }
-    public void setIdlType(boolean idlType)
+    public void setIdlType(boolean value)
     {
-        this.idlType = idlType;
+        this.idlType = value;
     }
 
     public boolean isEnumType()
     {
         return enumType;
     }
-    public void setEnumType(boolean enumType)
+    public void setEnumType(boolean value)
     {
-        this.enumType = enumType;
+        this.enumType = value;
+    }
+
+    public boolean isBooleanType()
+    {
+        return booleanType;
+    }
+    public void setBooleanType(boolean value)
+    {
+        this.booleanType = value;
     }
 
     public boolean isIntType()
     {
         return intType;
     }
-    public void setIntType(boolean intType)
+    public void setIntType(boolean value)
     {
-        this.intType = intType;
+        this.intType = value;
     }
 
     public boolean isFloatType()
     {
         return floatType;
     }
-    public void setFloatType(boolean floatType)
+    public void setFloatType(boolean value)
     {
-        this.floatType = floatType;
+        this.floatType = value;
     }
 
     public boolean isStringType()
     {
         return stringType;
     }
-    public void setStringType(boolean stringType)
+    public void setStringType(boolean value)
     {
-        this.stringType = stringType;
+        this.stringType = value;
     }
 
     public boolean isArray()
@@ -222,18 +236,18 @@ public class IDLField
     {
         return _static;
     }
-    public void setStatic(boolean _static)
+    public void setStatic(boolean value)
     {
-        this._static = _static;
+        this._static = value;
     }
 
     public boolean isAbstract()
     {
         return _abstract;
     }
-    public void setAbstract(boolean _abstract)
+    public void setAbstract(boolean value)
     {
-        this._abstract = _abstract;
+        this._abstract = value;
     }
 
 }

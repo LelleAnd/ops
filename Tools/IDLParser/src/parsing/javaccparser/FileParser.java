@@ -7,6 +7,8 @@ package parsing.javaccparser;
 import java.io.ByteArrayInputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.List;
 import parsing.IDLClass;
 import parsing.IDLEnumType;
 import parsing.IDLField;
@@ -22,7 +24,7 @@ public class FileParser implements IDLFileParser
     boolean parseComplete = false;
     IDLClass idlClass = new IDLClass();
     private String pendingComment = "";
-    private String pendingDirective = "";
+    private List<String> pendingDirectives = new ArrayList<>();
 
     public IDLClass parse(String content) throws ParseException
     {
@@ -35,9 +37,9 @@ public class FileParser implements IDLFileParser
             {
                 idlClass.setComment(pendingComment);
                 idlClass.setClassName(eventData);
-                idlClass.setDirective(pendingDirective);
+                idlClass.setDirectives(pendingDirectives);
                 pendingComment = "";
-                pendingDirective = "";
+                pendingDirectives.clear();
             }
         });
 
@@ -47,7 +49,7 @@ public class FileParser implements IDLFileParser
             {
                 parseComplete = true;
                 pendingComment = "";
-                pendingDirective = "";
+                pendingDirectives.clear();
             }
         });
 
@@ -57,7 +59,7 @@ public class FileParser implements IDLFileParser
             {
                 idlClass.setPackageName(eventData);
                 pendingComment = "";
-                pendingDirective = "";
+                pendingDirectives.clear();
             }
         });
 
@@ -69,7 +71,7 @@ public class FileParser implements IDLFileParser
                 idlClass.setClassName(eventData);
                 idlClass.setType(IDLClass.ENUM_TYPE);
                 pendingComment = "";
-                pendingDirective = "";
+                pendingDirectives.clear();
             }
         });
 
@@ -80,7 +82,7 @@ public class FileParser implements IDLFileParser
                 ///System.out.println("enum close");
                 parseComplete = true;
                 pendingComment = "";
-                pendingDirective = "";
+                pendingDirectives.clear();
             }
         });
 
@@ -91,7 +93,7 @@ public class FileParser implements IDLFileParser
                 ///System.out.println("enum element = " + eventData);
                 idlClass.getEnumNames().add(eventData);
                 pendingComment = "";
-                pendingDirective = "";
+                pendingDirectives.clear();
             }
         });
 
@@ -100,10 +102,10 @@ public class FileParser implements IDLFileParser
             public void onEvent(IDLField eventData, ParserEvent e)
             {
                 eventData.setComment(pendingComment);
-                eventData.setDirective(pendingDirective);
+                eventData.setDirectives(pendingDirectives);
                 idlClass.addIDLField(eventData);
                 pendingComment = "";
-                pendingDirective = "";
+                pendingDirectives.clear();
             }
         });
 
@@ -114,7 +116,7 @@ public class FileParser implements IDLFileParser
               eventData.setComment(pendingComment);
               idlClass.addIDLEnumType(eventData);
               pendingComment = "";
-              pendingDirective = "";
+              pendingDirectives.clear();
           }
         });
 
@@ -142,11 +144,7 @@ public class FileParser implements IDLFileParser
         {
             public void onEvent(String eventData, ParserEvent e)
             {
-                if (pendingDirective.isEmpty()) {
-                    pendingDirective = eventData;
-                } else {
-                    pendingDirective += ", " + eventData;
-                }
+                pendingDirectives.add(eventData);
             }
         });
 

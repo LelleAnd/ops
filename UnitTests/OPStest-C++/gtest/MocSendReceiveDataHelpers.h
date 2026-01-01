@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2020-2024 Lennart Andersson.
+* Copyright (C) 2020-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -83,7 +83,7 @@ struct MocReceiveDataHandler : public ops::ReceiveDataHandler
     };
 
     MocReceiveDataHandler(ops::Topic top, ops::Participant& part) :
-        ops::ReceiveDataHandler(part, new MocReceiveDataChannel(*this, top, part)), topic(top)
+        ops::ReceiveDataHandler(part, std::make_unique<MocReceiveDataChannel>(*this, top, part)), topic(top)
     {
         //std::cout << "MocReceiveDataHandler()\n";
     }
@@ -95,7 +95,7 @@ struct MocReceiveDataHandler : public ops::ReceiveDataHandler
 
     void connectStatus(ops::ConnectStatus& cst)
     {
-        onStatusChange(*rdc[0], cst);
+        onStatusChange(*rdcs[0], cst);
     }
 
     bool setData(const char* buf, const int size, uint32_t address, uint16_t port)
@@ -103,7 +103,7 @@ struct MocReceiveDataHandler : public ops::ReceiveDataHandler
         //std::cout << "setData()\n";
         if ((dstBuffer != nullptr) && (dstSize >= size)) {
             memcpy(dstBuffer, buf, size);
-            ((MocReceiveDataChannel*)rdc[0])->getReceiver()->IndicateNewData(size, address, port);
+            ((MocReceiveDataChannel*)rdcs[0].get())->getReceiver()->IndicateNewData(size, address, port);
         }
         return true;
     }

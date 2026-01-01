@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2024 Lennart Andersson.
+* Copyright (C) 2018-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -51,8 +51,8 @@ namespace ops
 		using Notifier<ConnectStatus>::addListener;
 		using Notifier<ConnectStatus>::removeListener;
 
-		ReceiveDataHandler(Participant& part, ReceiveDataChannelBase* rdc_ = nullptr);
-		virtual ~ReceiveDataHandler();
+		ReceiveDataHandler(Participant& part, std::unique_ptr<ReceiveDataChannelBase> rdc = nullptr);
+		virtual ~ReceiveDataHandler() = default;
 
 		bool aquireMessageLock();
 		void releaseMessageLock();
@@ -72,8 +72,8 @@ namespace ops
 		{
 			bool finished = true;
 			SafeLock lock(messageLock);
-			for (auto& x : rdc) {
-				finished &= x->asyncFinished();
+			for (auto& rdc : rdcs) {
+				finished &= rdc->asyncFinished();
 			}
 			return finished;
 		}
@@ -86,8 +86,8 @@ namespace ops
         bool dataAvailable()
         {
             SafeLock lock(messageLock);
-            for (auto& x : rdc) {
-                if (x->bytesAvailable() > 0) { return true; }
+            for (auto& rdc : rdcs) {
+                if (rdc->bytesAvailable() > 0) { return true; }
             }
             return false;
         }
@@ -96,8 +96,7 @@ namespace ops
 		Lockable messageLock;
 
 		//The receiver channel(s) used for this transport channel. 
-		//Currently only TCP transport may have more than one rdc
-		std::vector<ReceiveDataChannelBase*> rdc;
+        std::vector<std::unique_ptr<ReceiveDataChannelBase>> rdcs;
 
 		//The Participant to which this ReceiveDataHandler belongs.
 		Participant& participant;
@@ -108,10 +107,10 @@ namespace ops
 			UNUSED(top); UNUSED(used);
 		}
 
-		virtual void onMessage(ReceiveDataChannelBase& rdc_, OPSMessage* mess) override;
-		virtual void onStatusChange(ReceiveDataChannelBase& rdc_, ConnectStatus& status) override
+		virtual void onMessage(ReceiveDataChannelBase& rdc, OPSMessage* mess) override;
+		virtual void onStatusChange(ReceiveDataChannelBase& rdc, ConnectStatus& status) override
 		{
-			UNUSED(rdc_);
+			UNUSED(rdc);
 			Notifier<ConnectStatus>::notifyNewEvent(status);
 		}
 

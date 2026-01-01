@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2023 Lennart Andersson.
+ * Copyright (C) 2018-2025 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -66,8 +66,8 @@ namespace ops
 			{
 				boost::asio::io_service* ioService = BoostIOServiceImpl::get(ioServ);
 				const boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(serverIP.c_str()));
-				_endpoint = std::unique_ptr<boost::asio::ip::tcp::endpoint>(new boost::asio::ip::tcp::endpoint(ipAddr, serverPort));
-				_sock = std::unique_ptr<boost::asio::ip::tcp::socket>(new boost::asio::ip::tcp::socket(*ioService));
+				_endpoint = std::make_unique<boost::asio::ip::tcp::endpoint>(ipAddr, serverPort);
+				_sock = std::make_unique<boost::asio::ip::tcp::socket>(*ioService);
 			}
 
 			~TCPBoostConnectionWConnect() = default;

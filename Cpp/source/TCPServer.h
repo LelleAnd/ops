@@ -65,9 +65,9 @@ namespace ops
 		public:
 			impl(TCPServer* owner, boost::asio::io_service* ioService) : _owner(owner), _ioService(ioService)
 			{
-				_sock = std::unique_ptr<boost::asio::ip::tcp::socket>(new boost::asio::ip::tcp::socket(*_ioService));
+				_sock = std::make_unique<boost::asio::ip::tcp::socket>(*_ioService);
 				// This constructor opens, sets reuse_address, binds and listens to the given endpoint.
-				_acceptor = std::unique_ptr<boost::asio::ip::tcp::acceptor>(new boost::asio::ip::tcp::acceptor(*_ioService, *_owner->_endpoint));
+				_acceptor = std::make_unique<boost::asio::ip::tcp::acceptor>(*_ioService, *_owner->_endpoint);
 				_outSocketBufferSize = _owner->_outSocketBufferSize;
 			}
 
@@ -118,7 +118,7 @@ namespace ops
 						// By holding the mutex while in the callback, we are synchronized with clearCallbacks()
 						SafeLock lck(_ownerMtx);
 						if (_owner) _owner->AddSocket(std::make_shared<TCPBoostConnection>(_owner, _sock, _outSocketBufferSize));
-						_sock = std::unique_ptr<boost::asio::ip::tcp::socket>(new boost::asio::ip::tcp::socket(*_ioService));
+						_sock = std::make_unique<boost::asio::ip::tcp::socket>(*_ioService);
 					}
 					start_accept();
 				}
@@ -142,7 +142,7 @@ namespace ops
 		{
 			_ioService = BoostIOServiceImpl::get(ioServ);
 			//boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(serverIP));
-			_endpoint = std::unique_ptr<boost::asio::ip::tcp::endpoint>(new boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), serverPort));
+			_endpoint = std::make_unique<boost::asio::ip::tcp::endpoint>(boost::asio::ip::tcp::v4(), serverPort);
 		}
 		
 		virtual ~TCPServer()

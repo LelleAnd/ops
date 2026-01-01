@@ -2,7 +2,7 @@
 
 /**
 *
-* Copyright (C) 2017 Lennart Andersson.
+* Copyright (C) 2017-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -26,7 +26,7 @@
 namespace ops {
 	namespace thread_support {
 		// Called from Participant to create a thread pool on which to execute the Participant Run() method.
-		ThreadPool* CreateThreadPool();
+		std::unique_ptr<ThreadPool> CreateThreadPool();
 
 		// Called from within the thread to be named
 		void SetThreadName(const char* name);

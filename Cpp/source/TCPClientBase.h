@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2021 Lennart Andersson.
+ * Copyright (C) 2018-2025 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -51,7 +51,7 @@ namespace ops
     public:
         TCPClientBase(TCPClientCallbacks* client, IOService* ioServ, std::shared_ptr<TCPConnection> connection) :
 			_connection(connection), _client(client), _cs(false, 0), _started(false),
-			_timer(std::unique_ptr<DeadlineTimer>(DeadlineTimer::create(ioServ)))
+			_timer(DeadlineTimer::creat(ioServ))
         {
 			_timer->addListener(this);
 			_timer->start(period);

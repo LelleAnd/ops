@@ -1,6 +1,6 @@
 /**
  * Copyright (C) 2006-2010 Anton Gravestam.
- * Copyright (C) 2018-2024 Lennart Andersson.
+ * Copyright (C) 2018-2025 Lennart Andersson.
 *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -70,24 +70,16 @@
 // -----------------------------------------------------------------------------
 // Some OPS configurations
 
-// We require a c++11 compiler.
-#if __cplusplus >= 201103L		// Value according to standard for full C++11 conformity
-	#define OPS_C11_DETECTED
-#elif defined(_MSC_VER) && (_MSC_VER >= 1900)
-	// VS2015 still defines _cplusplus to 199711L but supports the features we need.
-	// VS2013 an earlier also defines _cplusplus to 199711L but does not support the features.
-	#define OPS_C11_DETECTED
-#endif
-#ifndef OPS_C11_DETECTED
-#error C++11 Compiler required
-#endif
-
+// We require a c++14 compiler.
 #if __cplusplus >= 201402L		// Value according to standard for full C++14 conformity
 	#define OPS_C14_DETECTED
 #elif defined(_MSC_VER) && (_MSC_VER >= 1916)
 	#if _MSVC_LANG >= 201402L
 		#define OPS_C14_DETECTED
 	#endif
+#endif
+#ifndef OPS_C14_DETECTED
+#error C++14 Compiler required
 #endif
 
 #if __cplusplus >= 201703L		// Value according to standard for full C++17 conformity

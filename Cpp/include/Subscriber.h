@@ -157,13 +157,11 @@ namespace ops
         ///If no message is received within deadline,
         ///listeners to deadlineMissedEvent will be notified
         static constexpr int64_t MAX_DEADLINE_TIMEOUT = TimeHelper::infinite;
-#ifdef OPS_C14_DETECTED
+
         [[deprecated("Deprecated. Replaced by setDeadline() taking chrono duration")]]
-#endif
         void setDeadlineQoS(int64_t deadlineT);
-#ifdef OPS_C14_DETECTED
+
         [[deprecated("Deprecated. Replaced by getDeadline() returning chrono duration")]]
-#endif
         int64_t getDeadlineQoS() const noexcept;
 
         void setDeadline(const std::chrono::milliseconds& deadlineT);
@@ -178,22 +176,17 @@ namespace ops
 
         ///Sets the minimum time separation between to consecutive messages.
         ///Received messages in between will be ignored by this Subscriber
-#ifdef OPS_C14_DETECTED
         [[deprecated("Deprecated. Replaced by setTimeBasedFilter() taking chrono duration")]]
-#endif
         void setTimeBasedFilterQoS(int64_t timeBaseMinSeparationMillis) noexcept;   // (CB)
-#ifdef OPS_C14_DETECTED
+
         [[deprecated("Deprecated. Replaced by getTimeBasedFilter() returning chrono duration")]]
-#endif
         int64_t getTimeBasedFilterQoS() const noexcept;                             // (CB)
         void setTimeBasedFilter(const std::chrono::milliseconds& minSeparation) noexcept;  // (CB)
         std::chrono::milliseconds getTimeBasedFilter() const noexcept;              // (CB)                // (CB)
 
         ///Waits for new data to arrive or timeout.
         ///Returns: true if new data (i.e. unread data) exist.
-#ifdef OPS_C14_DETECTED
         [[deprecated("Deprecated. Replaced by waitForNewData() taking chrono duration")]]
-#endif
         bool waitForNewData(int timeoutMs);
         bool waitForNewData(const std::chrono::milliseconds& timeout);
 

@@ -26,24 +26,16 @@
 #endif
 #include <exception>
 
-// noexcept and default specifiers requires a c++11 compiler.
-#if __cplusplus >= 201103L		// Value according to standard for full C++11 conformity
-	#define FIXED_C11_DETECTED
-#elif defined(_MSC_VER) && (_MSC_VER >= 1900)
-	// VS2015 still defines _cplusplus to 199711L but supports the features we need.
-	// VS2013 an earlier also defines _cplusplus to 199711L but does not support the features.
-	#define FIXED_C11_DETECTED
-#endif
-#ifndef FIXED_C11_DETECTED
-	#error C++11 Compiler required
-#endif
-
+// constexpr usage with non-empty bodies require at least a c++14 compiler.
 #if __cplusplus >= 201402L		// Value according to standard for full C++14 conformity
 	#define FIXED_C14_DETECTED
 #elif defined(_MSC_VER) && (_MSC_VER >= 1915)
 	#if _MSVC_LANG >= 201402L
 		#define FIXED_C14_DETECTED
 	#endif
+#endif
+#ifndef FIXED_C14_DETECTED
+#error C++14 Compiler required
 #endif
 
 #if __cplusplus >= 201703L		// Value according to standard for full C++17 conformity

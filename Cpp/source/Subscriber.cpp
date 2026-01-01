@@ -63,7 +63,7 @@ namespace ops
     void SubscriberBase::setupDeadlineTimer()
     {
         if (deadlineTimer == nullptr) {
-            deadlineTimer = std::unique_ptr<DeadlineTimer>(DeadlineTimer::create(participant->getIOService()));
+            deadlineTimer = DeadlineTimer::creat(participant->getIOService());
             deadlineTimer->addListener(this);
         }
     }
@@ -119,7 +119,7 @@ namespace ops
     struct Subscriber::ACKFilter : public FilterQoSPolicy
     {
         explicit ACKFilter(const Topic& ackTopic) :
-            _pub(new Publisher(ackTopic))   // Create Publisher for sending REGISTER, ACK, UNREGISTER
+            _pub(std::make_unique<Publisher>(ackTopic))   // Create Publisher for sending REGISTER, ACK, UNREGISTER
         {
         }
 
@@ -192,7 +192,7 @@ namespace ops
             }
 
             // Add a filter that will handle ACK sending and remove duplicates
-            _ackFilter = std::unique_ptr<ACKFilter>(new ACKFilter(Topic::CreateAckTopic(topic)));
+            _ackFilter = std::make_unique<ACKFilter>(Topic::CreateAckTopic(topic));
         }
 
 #ifdef OPS_ENABLE_DEBUG_HANDLER

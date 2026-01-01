@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2020-2021 Lennart Andersson.
+* Copyright (C) 2020-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -32,14 +32,14 @@ namespace ops
 	{
 	public:
 		virtual void start(const std::chrono::milliseconds& timeout) = 0;
-#ifdef OPS_C14_DETECTED
 		[[deprecated("Deprecated. Replaced by start() taking chrono duration")]]
-#endif
 		virtual void start(int64_t timeoutMs) = 0;
 		virtual void cancel() = 0;
 		virtual ~DeadlineTimer() = default;
 
+		[[deprecated("Deprecated. Replaced by creat() returning a unique_ptr")]]
 		static DeadlineTimer* create(IOService* ioService);
+		static std::unique_ptr<DeadlineTimer> creat(IOService* ioService);
 	};
 }
 

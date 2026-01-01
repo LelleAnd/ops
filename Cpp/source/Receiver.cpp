@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2020 Lennart Andersson.
+* Copyright (C) 2018-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -35,15 +35,15 @@ namespace ops
 {
 	std::unique_ptr<Receiver> Receiver::createMCReceiver(Address_T ip, int bindPort, IOService* ioService, Address_T localInterface, int64_t inSocketBufferSize)
 	{
-		return std::unique_ptr<Receiver>(new MulticastReceiver(ip, (uint16_t)bindPort, ioService, localInterface, (int)inSocketBufferSize));
+		return std::make_unique<MulticastReceiver>(ip, (uint16_t)bindPort, ioService, localInterface, (int)inSocketBufferSize);
 	}
 	std::unique_ptr<Receiver> Receiver::createTCPClient(TCPClientCallbacks* client, Address_T ip, int port, IOService* ioService, int64_t inSocketBufferSize)
 	{
-		return std::unique_ptr<Receiver>(new TCPClient(client, ip, (uint16_t)port, ioService, (int)inSocketBufferSize));
+		return std::make_unique<TCPClient>(client, ip, (uint16_t)port, ioService, (int)inSocketBufferSize);
 	}
 	std::unique_ptr<Receiver> Receiver::createUDPReceiver(int port, IOService* ioService, Address_T localInterface, int64_t inSocketBufferSize)
 	{
-		return std::unique_ptr<Receiver>(new UDPReceiver((uint16_t)port, ioService, localInterface, (int)inSocketBufferSize));
+		return std::make_unique<UDPReceiver>((uint16_t)port, ioService, localInterface, (int)inSocketBufferSize);
 	}
 
 }

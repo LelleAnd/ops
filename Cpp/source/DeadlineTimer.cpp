@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2020 Lennart Andersson.
+* Copyright (C) 2020-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -32,11 +32,16 @@
 
 namespace ops
 {
-
+	// Deprecated
 	DeadlineTimer* DeadlineTimer::create(IOService* ioService)
 	{
         return new BoostDeadlineTimerImpl(BoostIOServiceImpl::get(ioService));
     }
+
+	std::unique_ptr<DeadlineTimer> DeadlineTimer::creat(IOService* ioService)
+	{
+		return std::make_unique<BoostDeadlineTimerImpl>(BoostIOServiceImpl::get(ioService));
+	}
 
 }
 #endif // REPLACE_TRANSPORT_LAYER

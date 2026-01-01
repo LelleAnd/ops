@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2020-2023 Lennart Andersson.
+ * Copyright (C) 2020-2025 Lennart Andersson.
 *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -67,18 +67,18 @@ namespace ops
                     const boost::asio::ip::address addr = it->endpoint().address();
                     if (addr.is_v4()) {
                         ipaddress = addr.to_string().c_str();
-                        localEndpoint = std::unique_ptr<endpoint_t>(new endpoint_t(addr, bindPort));
+                        localEndpoint = std::make_unique<endpoint_t>(addr, bindPort);
                         break;
                     }
                     ++it;
                 }
             } else {
                 const boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(localInterface.c_str()));
-                localEndpoint = std::unique_ptr<endpoint_t>(new endpoint_t(ipAddr, bindPort));
-				ipaddress = localInterface;
+                localEndpoint = std::make_unique<endpoint_t>(ipAddr, bindPort);
+                ipaddress = localInterface;
             }
 
-            sock = std::unique_ptr<socket_t>(new socket_t(*ioService));
+            sock = std::make_unique<socket_t>(*ioService);
 
             sock->open(localEndpoint->protocol());
 

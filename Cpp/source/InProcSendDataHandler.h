@@ -1,6 +1,6 @@
 /**
  *
- * Copyright (C) 2024 Lennart Andersson.
+ * Copyright (C) 2024-2025 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -45,7 +45,7 @@ namespace ops
     public:
         explicit InProcSendDataHandler(std::shared_ptr<InProcDistributor> dist) : distributor(dist)
         {
-            sender = std::unique_ptr<Sender>(new DummySender());
+            sender = std::make_unique<DummySender>();
         }
 
         // Should not be called

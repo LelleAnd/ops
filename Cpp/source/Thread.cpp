@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2021 Lennart Andersson.
+* Copyright (C) 2019-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -36,7 +36,7 @@ namespace ops
     int Thread::start()
     {
         if (thread.get() == nullptr) {
-			thread = std::unique_ptr<std::thread>(new std::thread(&Thread::EntryPoint, this));
+            thread = std::make_unique<std::thread>(&Thread::EntryPoint, this);
 		}
         return 0;
     }

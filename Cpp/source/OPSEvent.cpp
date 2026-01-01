@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2019-2021 Lennart Andersson.
+ * Copyright (C) 2019-2025 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -64,9 +64,9 @@ namespace ops {
         bool signaled = false;
     };
 
-    Event::Event() : _impl(new InternalImpl) {}
+    Event::Event() : _impl(std::make_unique<InternalImpl>()) {}
 
-    Event::Event(const Event& ) : _impl(new InternalImpl) {}
+    Event::Event(const Event&) : _impl(std::make_unique<InternalImpl>()) {}
 
     Event& Event::operator= (const Event& rhs)
     {

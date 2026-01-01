@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2020-2021 Lennart Andersson.
+ * Copyright (C) 2020-2025 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -37,17 +37,17 @@ namespace ops
 
     std::unique_ptr<Sender> Sender::create(IOService* ioService, Address_T localInterface, int ttl, int64_t outSocketBufferSize)
     {
-        return std::unique_ptr<Sender>(new UDPSender(ioService, localInterface, ttl, (int)outSocketBufferSize, true));
+        return std::make_unique<UDPSender>(ioService, localInterface, ttl, (int)outSocketBufferSize, true);
     }
 
     std::unique_ptr<Sender> Sender::createUDPSender(IOService* ioService, Address_T localInterface, int ttl, int64_t outSocketBufferSize)
     {
-        return std::unique_ptr<Sender>(new UDPSender(ioService, localInterface, ttl, (int)outSocketBufferSize, false));
+        return std::make_unique<UDPSender>(ioService, localInterface, ttl, (int)outSocketBufferSize, false);
     }
 
     std::unique_ptr<Sender> Sender::createTCPServer(TCPServerCallbacks* client, IOService* ioService, Address_T ip, int port, int64_t outSocketBufferSize)
     {
-		return std::unique_ptr<Sender>(new TCPServer(client, ioService, ip, (uint16_t)port, (int)outSocketBufferSize));
+        return std::make_unique<TCPServer>(client, ioService, ip, (uint16_t)port, (int)outSocketBufferSize);
     }
 
 }

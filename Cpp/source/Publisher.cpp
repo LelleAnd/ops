@@ -150,6 +150,9 @@ namespace ops
         valCall = participant->valPubCall;
 
         sendDataHandler = participant->getSendDataHandler(topic);
+        if (!sendDataHandler) {
+            throw ConfigException(ExceptionMessage_T("Failed to create sender for topic ") + ExceptionMessage_T(topic.getName()));
+        }
 
 		message.setKey("");
         message.setPublisherName(m_name);
@@ -172,7 +175,7 @@ namespace ops
             }
 
             // Create Subscriber for ACK's
-            _ackSub = std::unique_ptr<AckSubscriber>(new AckSubscriber(Topic::CreateAckTopic(topic)));
+            _ackSub = std::make_unique<AckSubscriber>(Topic::CreateAckTopic(topic));
             _ackSub->_sourceIP = sendDataHandler->getLocalAddressHost();
             _ackSub->_sourcePort = sendDataHandler->getLocalPort();
             _ackSub->start();

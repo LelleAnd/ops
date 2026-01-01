@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2024 Lennart Andersson.
+ * Copyright (C) 2018-2025 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -32,10 +32,10 @@ namespace ops
     {
 		// Handle TCP channels specified with an address and port
 		if ((top.getTransport() == Topic::TRANSPORT_TCP) && (top.getPort() != 0)) {
-			ReceiveDataChannel* const rdc_ = new TCPReceiveDataChannel(top, part);
-            rdc_->connect(this);
-            sampleMaxSize = rdc_->getSampleMaxSize();
-            rdc.push_back(rdc_);
+			std::unique_ptr<ReceiveDataChannelBase> rdc = std::make_unique<TCPReceiveDataChannel>(top, part);
+            rdc->connect(this);
+            sampleMaxSize = rdc->getSampleMaxSize();
+            rdcs.push_back(std::move(rdc));
 			usingPartInfo = false;
 		} else {
 			// Since we use the same "topic" parameters for all created RDC's, we can set the sampleMaxSize here
@@ -57,8 +57,8 @@ namespace ops
 
 		// Look for it in rdc, if not there, create one
 		bool found = false;
-		for (auto const x : rdc) {
-			if (x->key == key) {
+		for (auto const& rdc : rdcs) {
+			if (rdc->key == key) {
 				found = true;
 				break;
 			}
@@ -68,16 +68,14 @@ namespace ops
 			topic.setDomainAddress(ip);
 			topic.setPort(port);
 			try {
-				ReceiveDataChannel* const rdc_ = new TCPReceiveDataChannel(topic, participant);
-				rdc_->key = key;
-				rdc_->connect(this);
+				std::unique_ptr<ReceiveDataChannelBase> rdc = std::make_unique<TCPReceiveDataChannel>(topic, participant);
+				rdc->key = key;
+				rdc->connect(this);
 
 				const SafeLock lock(messageLock);
-				rdc.push_back(rdc_);
+                if (Notifier<OPSMessage*>::getNrOfListeners() > 0) { rdc->start(); }
+                rdcs.push_back(std::move(rdc));
 
-				if (Notifier<OPSMessage*>::getNrOfListeners() > 0) {
-					rdc_->start();
-				}
 			} catch (const std::exception &e) {
 				ExceptionMessage_T msg("Unknown exception: ");
 				msg += e.what();

@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2021-2023 Lennart Andersson.
+* Copyright (C) 2021-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -30,8 +30,6 @@
 
 #include <boost/asio.hpp>
 #include <boost/bind/bind.hpp>
-#include <boost/enable_shared_from_this.hpp>
-#include <boost/shared_ptr.hpp>
 
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
@@ -55,7 +53,7 @@ namespace ops
         // of our destructor and the asynch callback will perform the actual delete of the
         // inner class instance.
         class impl;
-        boost::shared_ptr<impl> pimpl_;
+        std::shared_ptr<impl> pimpl_;
 
         // Listens on events from the inner class and forwards them to our user(s).
 		void onNewEvent(Notifier<int>* sender, int message) override;
@@ -72,7 +70,7 @@ namespace ops
 
     // -------------------------------------------
 
-    class BoostDeadlineTimerImpl::impl : public Notifier<int>, public boost::enable_shared_from_this< BoostDeadlineTimerImpl::impl >
+    class BoostDeadlineTimerImpl::impl : public Notifier<int>, public std::enable_shared_from_this< BoostDeadlineTimerImpl::impl >
 	{
 		boost::asio::steady_timer deadlineTimer;
 	public:

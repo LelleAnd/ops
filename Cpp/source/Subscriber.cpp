@@ -362,11 +362,12 @@ namespace ops
                 m_message = message;
                 data = o;
 
+                hasUnreadData = true;
+
                 // Notify all registered listeners
                 notifyNewData();
 
                 // Signal any waiting thread
-                hasUnreadData = true;
                 newDataEvent.signal();
 
 				// Update deadline variables
@@ -410,18 +411,18 @@ namespace ops
 
     bool Subscriber::waitForNewData(const std::chrono::milliseconds& timeout)
     {
-        if (hasUnreadData) {
-            return true;
+        if (!hasUnreadData) {
+            newDataEvent.waitFor(timeout);
         }
-        return newDataEvent.waitFor(timeout);
+        return hasUnreadData;
     }
 
     bool Subscriber::waitForNewData(int const timeoutMs)
     {
-        if (hasUnreadData) {
-            return true;
+        if (!hasUnreadData) {
+            newDataEvent.waitFor(std::chrono::milliseconds(timeoutMs));
         }
-        return newDataEvent.waitFor(std::chrono::milliseconds(timeoutMs));
+        return hasUnreadData;
     }
 
     OPSObject* Subscriber::getData() noexcept

@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <atomic>
 #include <list>
 #include <deque>
 #include <climits>
@@ -263,7 +264,7 @@ namespace ops
         OPSObject* data{ nullptr };
         OPSObject* getData() noexcept;
         bool firstDataReceived{ false };
-        bool hasUnreadData{ false };
+        std::atomic_bool hasUnreadData{ false };
 
 	private:
         ///Name of this subscriber

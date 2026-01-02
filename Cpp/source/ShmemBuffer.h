@@ -92,7 +92,7 @@ namespace ops
                 oldestidx(t.arr[10])
             { }
         };
-        static_assert(sizeof(ShmemTelemetry) == sizeof(Telemetry));
+        static_assert(sizeof(ShmemTelemetry) == sizeof(Telemetry), "");
 
     private:
         // Format in shared memory:

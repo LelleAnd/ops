@@ -30,7 +30,7 @@ namespace ops {
     {
         uint32_t arr[16]{};
     };
-    static_assert(sizeof(Telemetry) == 64);
+    static_assert(sizeof(Telemetry) == 64, "");
 
 }
 #endif

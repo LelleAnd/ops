@@ -90,8 +90,8 @@ namespace ops
             // Map the whole shared memory in this process
             region = mapped_region(shm_obj, read_write);
 
-            shmem = std::unique_ptr<SharedMemoryBuffer>(new SharedMemoryBuffer(
-                (uint8_t*)region.get_address(), (uint32_t)region.get_size(), SharedMemoryBuffer::type::writer));
+            shmem = std::make_unique<SharedMemoryBuffer>(
+                (uint8_t*)region.get_address(), (uint32_t)region.get_size(), SharedMemoryBuffer::type::writer);
         }
 
         bool write(char* buf, int bufSize)
@@ -137,8 +137,8 @@ namespace ops
     ShmemSendDataHandler::ShmemSendDataHandler(const InternalKey_T& name, const Topic& top)
     {
         try {
-            sender = std::unique_ptr<Sender>(new DummySender());
-            shmem = std::unique_ptr<Impl>(new Impl(name, top.getOutSocketBufferSize()));
+            sender = std::make_unique<DummySender>();
+            shmem = std::make_unique<Impl>(name, top.getOutSocketBufferSize());
         } catch (...) {
             ErrorMessage_T msg("Failed to create Shared Memory Handler for: ");
             msg += name;

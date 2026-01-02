@@ -150,7 +150,7 @@ namespace ops
         virtual void asynchWait(char* bytes, int size) override
         {
             {
-                std::lock_guard lk(mtx);
+                std::lock_guard<std::mutex> lk(mtx);
                 data = bytes;
                 max_length = size;
             }
@@ -184,16 +184,16 @@ namespace ops
                     shm_obj = boost::interprocess::shared_memory_object(
                         boost::interprocess::open_only, shmem_name.c_str(), boost::interprocess::read_only);
 
-                    mutex = std::unique_ptr <boost::interprocess::named_mutex>(
-                        new boost::interprocess::named_mutex(boost::interprocess::open_only, mutex_name.c_str()));
-                    condv = std::unique_ptr <boost::interprocess::named_condition>(
-                        new boost::interprocess::named_condition(boost::interprocess::open_only, condv_name.c_str()));
+                    mutex = std::make_unique<boost::interprocess::named_mutex>(
+                        boost::interprocess::open_only, mutex_name.c_str());
+                    condv = std::make_unique<boost::interprocess::named_condition>(
+                        boost::interprocess::open_only, condv_name.c_str());
 
                     // Map the whole shared memory in this process
                     region = boost::interprocess::mapped_region(shm_obj, boost::interprocess::read_only);
 
-                    shmem = std::unique_ptr<SharedMemoryBuffer>(new SharedMemoryBuffer(
-                        (uint8_t*)region.get_address(), (uint32_t)region.get_size(), SharedMemoryBuffer::type::reader));
+                    shmem = std::make_unique<SharedMemoryBuffer>(
+                        (uint8_t*)region.get_address(), (uint32_t)region.get_size(), SharedMemoryBuffer::type::reader);
                     
                     return;
                 }
@@ -214,7 +214,7 @@ namespace ops
                 while (!cancelled) {
                     // Wait for an active buffer (via asynchWait(...)), ie. data != nullptr
                     if (data == nullptr) {
-                        std::unique_lock lk(mtx);
+                        std::unique_lock<std::mutex> lk(mtx);
                         cv.wait(lk, [this] { return (data != nullptr) || cancelled; });
                     }
                     if (cancelled) break;

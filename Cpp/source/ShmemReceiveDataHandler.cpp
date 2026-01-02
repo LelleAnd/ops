@@ -26,8 +26,8 @@ namespace ops
 
 #ifndef OPS_NO_SHMEM_TRANSPORT
 	ShmemReceiveDataHandler::ShmemReceiveDataHandler(Topic top, Participant& part, const InternalKey_T& name) :
-		ReceiveDataHandler(part, new ReceiveDataChannel(top, part,
-            std::unique_ptr<ops::Receiver>(new ShmemReceiver(name))))
+		ReceiveDataHandler(part, std::make_unique<ReceiveDataChannel>(top, part,
+            std::make_unique<ShmemReceiver>(name)))
 	{
 	}
 #endif

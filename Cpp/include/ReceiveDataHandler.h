@@ -97,8 +97,8 @@ namespace ops
 		{
 			SafeLock lock(messageLock);
 			///TODO only reports from the first RDC
-			if (rdc.size() > 0) {
-				return rdc[0]->getTelemetry();
+			if (rdcs.size() > 0) {
+				return rdcs[0]->getTelemetry();
 			}
 			return Telemetry();
 		}

@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018 Lennart Andersson.
+* Copyright (C) 2018-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -26,7 +26,7 @@
 #include "UDPReceiver.h"
 #include "TCPClient.h"
 
-class MyBSPListener : public ops::Listener<ops::BytesSizePair>
+class MyBSPListener : public ops::SingleListener<ops::BytesSizePair>
 {
 public:
 	bool isUdp;
@@ -37,7 +37,7 @@ public:
 
 	MyBSPListener(bool udp) : isUdp(udp), counter(0), srcPort(0), bsp(nullptr, 0) {}
 
-	virtual void onNewEvent(ops::Notifier<ops::BytesSizePair>* sender, ops::BytesSizePair arg)
+	virtual void onNewEvent(ops::SingleNotifier<ops::BytesSizePair>* sender, ops::BytesSizePair arg)
 	{
 		//std::cout << "callback from receiver" << std::endl;
 		counter++;

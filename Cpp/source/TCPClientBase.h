@@ -107,7 +107,7 @@ namespace ops
 			///TODO this could be simplified to a simple callback (when all Receiver's updated)
 			///Notifier has a list and takes a lock which isn't necessary, we can only have 1 listener
 			///and a lock is already taken in TCPConnection() calling us.
-			Notifier<BytesSizePair>::notifyNewEvent(arg);
+			SingleNotifier<BytesSizePair>::notifyNewEvent(arg);
 		}
 
 		// Called from TCPConnection()
@@ -121,7 +121,7 @@ namespace ops
 			conn.stop();
 
 			//Notify our user
-			Notifier<BytesSizePair>::notifyNewEvent(BytesSizePair(nullptr, -1));
+			SingleNotifier<BytesSizePair>::notifyNewEvent(BytesSizePair(nullptr, -1));
 
 			if (_started) {
 				//Try to connect again

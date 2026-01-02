@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2024 Lennart Andersson.
+ * Copyright (C) 2018-2025 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -66,7 +66,7 @@ namespace ops
 
     ///Override from Listener
     ///Called whenever the receiver has new data.
-    void TCPReceiveDataChannel::onNewEvent(Notifier<BytesSizePair>* const sender, BytesSizePair const byteSizePair)
+    void TCPReceiveDataChannel::onNewEvent(SingleNotifier<BytesSizePair>* const sender, BytesSizePair const byteSizePair)
     {
 		/// Here we got some data in our buffer
 		///TODO Check if it is an internal TCP Transport info and if so handle it and start a new asynch read

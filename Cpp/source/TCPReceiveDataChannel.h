@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2024 Lennart Andersson.
+* Copyright (C) 2018-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -36,7 +36,7 @@ namespace ops
 		virtual ~TCPReceiveDataChannel();
 
 	protected:
-		void onNewEvent(Notifier<BytesSizePair>* sender, BytesSizePair byteSizePair) override;
+		void onNewEvent(SingleNotifier<BytesSizePair>* sender, BytesSizePair byteSizePair) override;
 
 		// Called from client when a connection is made
 		void onConnect(TCPConnection& conn, ConnectStatus status) override;

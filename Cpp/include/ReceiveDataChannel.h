@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2024 Lennart Andersson.
+* Copyright (C) 2018-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -88,7 +88,7 @@ namespace ops
 	};
 
 	class ReceiveDataChannel : public ReceiveDataChannelBase,
-		protected Listener<BytesSizePair>, 
+		protected SingleListener<BytesSizePair>,
 		public Listener<ConnectStatus>
 	{
 	public:
@@ -128,7 +128,7 @@ namespace ops
 	protected:
 		///Override from Listener
 		///Called whenever the receiver has new data.
-		void onNewEvent(Notifier<BytesSizePair>* sender, BytesSizePair byteSizePair) override;
+		void onNewEvent(SingleNotifier<BytesSizePair>* sender, BytesSizePair byteSizePair) override;
 		bool calculateAndSetSpareBytes(ByteBuffer &buf, OPSObject* obj, int segmentPaddingSize);
 
         void onNewEvent(Notifier<ConnectStatus>*, ConnectStatus arg) override;

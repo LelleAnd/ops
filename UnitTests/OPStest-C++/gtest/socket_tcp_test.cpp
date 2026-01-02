@@ -167,7 +167,7 @@ TEST(Test_Sockets, TestTCPdefault) {
 
 	// Create TCP Client with default buffersize
 	TCPClient rcv(&ClientCB, "127.0.0.1", serverPort, ioServ());
-	rcv.Notifier<BytesSizePair>::addListener(&listener);
+	rcv.SingleNotifier<BytesSizePair>::connect(&listener);
 
 	EXPECT_FALSE(rcv.isConnected());
 	EXPECT_EQ(snd.numConnected(), 0);
@@ -277,7 +277,7 @@ TEST(Test_Sockets, TestTCPdelete) {
 
 		// Create TCP Client with default buffersize
 		TCPClient rcv(&ClientCB, "127.0.0.1", serverPort, ioServ());
-		rcv.Notifier<BytesSizePair>::addListener(&listener);
+		rcv.SingleNotifier<BytesSizePair>::connect(&listener);
 
 		EXPECT_FALSE(rcv.isConnected());
 		EXPECT_EQ(snd.numConnected(), 0);

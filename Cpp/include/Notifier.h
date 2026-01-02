@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2021 Lennart Andersson.
+ * Copyright (C) 2021-2025 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -27,10 +27,12 @@
 
 namespace ops
 {
-    ///class which in the conjunction with Listener forms an implementation of the
-    ///observer GoF-pattern. classes extending this class extends an interface to which
-    ///Listeners can register their interest to be notified when new events are available.
-
+    /// <summary>
+    /// Class which in the conjunction with Listener forms an implementation of the
+    /// observer GoF-pattern. Classes extending this class extends an interface to which
+    /// Listeners can register their interest to be notified when new events are available.
+    /// </summary>
+    /// <typeparam name="ArgType"></typeparam>
     template<typename ArgType>
     class Notifier
     {
@@ -99,5 +101,34 @@ namespace ops
             listeners.clear();
         }
     };
-}
+
+    /// <summary>
+    /// Class which in the conjunction with SingleListener forms an implementation of
+    /// a callback mechanism. Classes extending this class extends an interface to which
+    /// the SingleListener can register its interest to be notified with new data.
+    /// </summary>
+    /// <typeparam name="ArgType"></typeparam>
+    template <typename ArgType>
+    class SingleNotifier
+    {
+      private:
+        SingleListener<ArgType>* listener{ nullptr };
+
+      protected:
+        /// Called by subclass to notify its listener of the arrival of new data.
+        void notifyNewEvent(ArgType arg)
+        {
+            if (listener != nullptr) { listener->onNewEvent(this, arg); }
+        }
+
+      public:
+        virtual ~SingleNotifier() = default;
+
+        void connect(SingleListener<ArgType>* listener_)
+        {
+            this->listener = listener_;
+        }
+    };
+
+} // namespace ops
 #endif

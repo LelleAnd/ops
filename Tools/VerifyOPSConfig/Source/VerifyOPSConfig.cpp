@@ -9,10 +9,10 @@
 #include "PrintArchiverOut.h"
 #include "NetworkSupport.h"
 #include "IOService.h"
-
+#include "LibraryOptions.h"
 #include "Configuration.h"
 
-const std::string sVersion = "Version 2024-11-19";
+const std::string sVersion = "Version 2025-11-23";
 
 
 bool gErrorGiven = false;
@@ -821,7 +821,7 @@ private:
 
 };
 
-void PrintDescription()
+static void PrintDescription()
 {
 	std::cout << std::endl;
 	std::cout << "  " << sVersion << std::endl;
@@ -837,11 +837,12 @@ void PrintDescription()
 	std::cout << std::endl;
 }
 
-void Usage()
+static void Usage()
 {
 	std::cout << std::endl;
 	std::cout << "  Usage:" << std::endl;
 	std::cout << "    VerifyOPSConfig [-?] [-debug] [-noNameCheck] <filename> " << std::endl;
+	std::cout << "    VerifyOPSConfig [-?] [-debug] -buildinfo " << std::endl;
 	std::cout << "    VerifyOPSConfig [-?] [-debug] -host " << std::endl;
 	std::cout << "    VerifyOPSConfig [-?] [-debug] -list [<name>] " << std::endl;
 	std::cout << "    VerifyOPSConfig [-?] [-debug] -resolve <name> " << std::endl;
@@ -850,6 +851,7 @@ void Usage()
 	std::cout << "    -debug            Print some debug info during work" << std::endl;
 	std::cout << "    -noNameCheck      Skip hostname translation check" << std::endl;
 	std::cout << std::endl;
+	std::cout << "    -buildinfo        Show build info used when building OPS" << std::endl;
 	std::cout << "    -host             Show host name" << std::endl;
 	std::cout << "    -list [<name>]    List known interfaces for host or given name" << std::endl;
 	std::cout << "    -resolve <name>   Try to find IP address" << std::endl;
@@ -860,6 +862,7 @@ int main(const int argc, const char* argv[])
 	std::string infile = "";
 	bool printUsage = false;
 	bool printDescription = false;
+	bool printBuildinfo = false;
 	bool debug = false;
 	bool showHost = false;
 	bool printList = false;
@@ -875,6 +878,9 @@ int main(const int argc, const char* argv[])
 		} else if (arg == "-?") {
 			printUsage = true;
 			printDescription = true;
+
+		} else if (arg == "-buildinfo") {
+			printBuildinfo = true;
 
 		} else if (arg == "-debug") {
 			debug = true;
@@ -905,6 +911,11 @@ int main(const int argc, const char* argv[])
 		}
 	}
 
+	if (printBuildinfo) {
+		std::string buildOptions(ops::GetUsedBuildOptions());
+		std::cout << "OPS Build Options:\n" << buildOptions << "\n";
+		return 0;
+	}
 	if (showHost) {
 		std::cout << "ops::GetHostName(): " << ops::GetHostName() << "\n";
 		return 0;

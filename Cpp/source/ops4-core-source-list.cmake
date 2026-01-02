@@ -29,6 +29,7 @@ set(LIB_OPS_PUBLIC_HEADERS
   ${OPS_HEADER_PATH}/fixed_string_support.h
   ${OPS_HEADER_PATH}/IOService.h
   ${OPS_HEADER_PATH}/KeyFilterQoSPolicy.h
+  ${OPS_HEADER_PATH}/LibraryOptions.h
   ${OPS_HEADER_PATH}/Listener.h
   ${OPS_HEADER_PATH}/Lockable.h
   ${OPS_HEADER_PATH}/memory_pool.h
@@ -105,6 +106,7 @@ set(LIB_OPS_CORE_SRCS
   ${OPS_SRC_PATH}/InProcReceiveDataHandler.h
   ${OPS_SRC_PATH}/InProcSendDataHandler.h
   ${OPS_SRC_PATH}/KeyFilterQoSPolicy.cpp
+  ${OPS_SRC_PATH}/LibraryOptions.cpp
   ${OPS_SRC_PATH}/Lockable.cpp
   ${OPS_SRC_PATH}/MCReceiveDataHandler.h
   ${OPS_SRC_PATH}/MCReceiveDataHandler.cpp

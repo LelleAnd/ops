@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2024 Lennart Andersson.
+ * Copyright (C) 2018-2025 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -27,7 +27,7 @@ namespace ops
 {
     MCReceiveDataHandler::MCReceiveDataHandler(const Topic& top, Participant& part) :
 		ReceiveDataHandler(part,
-			new ReceiveDataChannel(top, part))
+			std::make_unique<ReceiveDataChannel>(top, part))
     {
 	}
 }

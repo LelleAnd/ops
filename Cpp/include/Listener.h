@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2020 Lennart Andersson.
+ * Copyright (C) 2020-2025 Lennart Andersson.
  *
  * This notice apply to all source files, *.cpp, *.h, *.java, and *.cs in this directory
  * and all its subdirectories if nothing else is explicitly stated within the source file itself.
@@ -28,12 +28,14 @@
 
 namespace ops
 {
-    //Forward declaration//
+    //Forward declaration
     template<typename T> class Notifier;
 
-    ///Interface that used in conjunction with Notifier 
-    ///forms an implementation of the Observer GoF-pattern.
-
+    /// <summary>
+    /// Interface that used in conjunction with Notifier forms an implementation of the
+    /// Observer GoF-pattern.
+    /// </summary>
+    /// <typeparam name="ArgType"></typeparam>
     template<typename ArgType>
     class Listener
     {
@@ -43,5 +45,24 @@ namespace ops
         virtual void onNewEvent(Notifier<ArgType>* sender, ArgType arg) = 0;
         virtual ~Listener() = default;
     };
-}
+
+    // Forward declaration
+    template <typename T>
+    class SingleNotifier;
+
+    /// <summary>
+    /// Interface that used in conjunction with SingleNotifier
+    /// </summary>
+    /// <typeparam name="ArgType"></typeparam>
+    template <typename ArgType>
+    class SingleListener
+    {
+      public:
+        /// If this interface is registred with a SingleNotifier, this method will be called when the
+        /// SingleNotifier wants to inform that new data is available.
+        virtual void onNewEvent(SingleNotifier<ArgType>* sender, ArgType arg) = 0;
+        virtual ~SingleListener() = default;
+    };
+
+} // namespace ops
 #endif

@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018-2021 Lennart Andersson.
+* Copyright (C) 2018-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -180,22 +180,14 @@ namespace ops {
 	private:
 		void setup()
 		{
-#ifdef OPS_C14_DETECTED
 			_sub = std::make_unique<Subscriber>(_part.createDebugTopic());
-#else
-			_sub = std::unique_ptr<Subscriber>(new Subscriber(_part.createDebugTopic()));
-#endif
 			_sub->addDataListener(this);
 			std::vector<ObjectKey_T> keyStrings;
 			keyStrings.push_back(gKey);
 			keyStrings.push_back("*");
 			_sub->addFilterQoSPolicy(new KeyFilterQoSPolicy(keyStrings));
 			_sub->start();
-#ifdef OPS_C14_DETECTED
 			_pub = std::make_unique<Publisher>(_part.createDebugTopic());
-#else
-			_pub = std::unique_ptr<Publisher>(new Publisher(_part.createDebugTopic()));
-#endif
 			_pub->setKey(gKey);
 			_pub->start();
 		}
@@ -255,11 +247,7 @@ namespace ops {
 	};
 
 	DebugHandler::DebugHandler(Participant& part) :
-#ifdef OPS_C14_DETECTED
         _pimpl(std::make_unique<InternalDebugListener>(part))
-#else
-        _pimpl(new InternalDebugListener(part))
-#endif
 	{
 	}
 	

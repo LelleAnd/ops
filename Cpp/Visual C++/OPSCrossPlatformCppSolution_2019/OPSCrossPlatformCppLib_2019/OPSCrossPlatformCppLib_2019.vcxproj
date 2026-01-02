@@ -387,6 +387,7 @@
     <ClInclude Include="..\..\..\include\ErrorWriter.h" />
     <ClInclude Include="..\..\..\include\fixed_string.h" />
     <ClInclude Include="..\..\..\include\fixed_string_support.h" />
+    <ClInclude Include="..\..\..\include\LibraryOptions.h" />
     <ClInclude Include="..\..\..\include\memory_pool.h" />
     <ClInclude Include="..\..\..\include\memory_pool_lock_free.h" />
     <ClInclude Include="..\..\..\include\NetworkSupport.h" />
@@ -496,6 +497,7 @@
     <ClCompile Include="..\..\..\source\ErrorService.cpp" />
     <ClCompile Include="..\..\..\source\IOService.cpp" />
     <ClCompile Include="..\..\..\source\KeyFilterQoSPolicy.cpp" />
+    <ClCompile Include="..\..\..\source\LibraryOptions.cpp" />
     <ClCompile Include="..\..\..\source\Lockable.cpp" />
     <ClCompile Include="..\..\..\source\MCReceiveDataHandler.cpp" />
     <ClCompile Include="..\..\..\source\memory_pool.cpp" />

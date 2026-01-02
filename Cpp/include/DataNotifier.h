@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2021 Lennart Andersson.
+* Copyright (C) 2018-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -39,9 +39,7 @@ namespace ops
         typedef void (*CallbackFunc)(DataNotifier* sender, void* userData);
 
         ///Register a DataListener that uses callbacks
-#ifdef OPS_C14_DETECTED
         [[deprecated("Deprecated. Replaced by the more flexible addDataListener(std::function<...>) interface")]]
-#endif
         void addDataListener(CallbackFunc func, void* userData)
         {
             addDataListener([=](DataNotifier* sender) { func(sender, userData); });

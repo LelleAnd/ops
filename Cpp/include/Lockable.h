@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2021 Lennart Andersson.
+* Copyright (C) 2019-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -52,9 +52,7 @@ namespace ops
 	private:
 		Lockable& _lockable;
 	public:
-#ifdef OPS_C14_DETECTED
 		[[deprecated("Deprecated. Use constructor taking reference instead")]]
-#endif
 		explicit SafeLock(Lockable* lockable) : _lockable(*lockable)
 		{
 			_lockable.lock();
@@ -80,9 +78,7 @@ namespace ops
         Lockable& _lockable;
 		bool locked{ false };
     public:
-#ifdef OPS_C14_DETECTED
 		[[deprecated("Deprecated. Use constructor taking reference instead")]]
-#endif
 		explicit SafeTryLock(Lockable* lockable) : _lockable(*lockable)
         {
             locked = _lockable.trylock();

@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2021 Lennart Andersson.
+* Copyright (C) 2021-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -35,18 +35,14 @@ namespace ops
 	{
 	public:
 		///Returns the current time as a number of milliseconds since Epoch 1970-01-01.
-#ifdef OPS_C14_DETECTED
 		[[deprecated("Deprecated. Replaced by ops::ops_clock::now() returning a time_point")]]
-#endif
 		static int64_t currentTimeMillis() noexcept;
 
 		///Sleeps the given duration
 		static void sleep(const std::chrono::milliseconds& sleep_duration);
 		static void sleep(const std::chrono::seconds& sleep_duration);
 
-#ifdef OPS_C14_DETECTED
 		[[deprecated("Deprecated. Replaced by sleep() taking chrono duration")]]
-#endif
 		///Sleeps the given number of milliseconds (millis).
 	    static void sleep(int64_t millis);
 

@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2024 Lennart Andersson.
+* Copyright (C) 2024-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -38,7 +38,7 @@ namespace ops
 
 	public:
 		InProcReceiveDataHandler(Topic top, Participant& part, std::shared_ptr<InProcDistributor> dist) :
-			ReceiveDataHandler(part, new ReceiveDataChannelBase(top)), distributor(dist)
+			ReceiveDataHandler(part, std::make_unique<ReceiveDataChannelBase>(top)), distributor(dist)
 		{
 		}
 
@@ -58,7 +58,7 @@ namespace ops
 					distributor->regInProcReceiver(topic, [=](OPSMessage* msg)
 						{
 							msg->setDataOwner(true);
-							onMessage(*rdc[0], msg);
+							onMessage(*rdcs[0], msg);
 						}
 					);
 				}

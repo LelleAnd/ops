@@ -32,7 +32,7 @@ namespace ops
 {
 	struct TCPClientCallbacks;
 
-	class Receiver : public Notifier<BytesSizePair>
+	class Receiver : public SingleNotifier<BytesSizePair>
 	{
 	public:
 		virtual ~Receiver() = default;

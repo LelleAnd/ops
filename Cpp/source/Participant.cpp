@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2024 Lennart Andersson.
+* Copyright (C) 2019-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -76,7 +76,7 @@ namespace ops
 
 	// --------------------------------------------------------------------------------
 
-	ParticipantKey_T getKey(const ObjectName_T& domainID_, const ObjectName_T& participantID)
+	static ParticipantKey_T getKey(const ObjectName_T& domainID_, const ObjectName_T& participantID)
 	{
 		ParticipantKey_T key = domainID_;
 		key += "::";
@@ -166,7 +166,7 @@ namespace ops
 		}
 
 		//Create a factory instance for each participant
-		objectFactory = std::unique_ptr<OPSObjectFactory>(new OPSObjectFactoryImpl());
+		objectFactory = std::make_unique<OPSObjectFactoryImpl>();
 
 		// Initialize static data in partInfoData (ReceiveDataHandlerFactory() will set some more fields)
 		InternalString_T Name = GetHostName();
@@ -183,14 +183,14 @@ namespace ops
         partInfoData.domain = domainID;
 
 		//-----------Create delegate helper classes---
-		errorService = std::unique_ptr<ErrorService>(new ErrorService());
-		receiveDataHandlerFactory = std::unique_ptr<ReceiveDataHandlerFactory>(new ReceiveDataHandlerFactory());
-		sendDataHandlerFactory = std::unique_ptr<SendDataHandlerFactory>(new SendDataHandlerFactory());
+		errorService = std::make_unique<ErrorService>();
+		receiveDataHandlerFactory = std::make_unique<ReceiveDataHandlerFactory>();
+		sendDataHandlerFactory = std::make_unique<SendDataHandlerFactory>();
 		inProcDistributor = std::make_shared<InProcDistributor>();
 		//--------------------------------------------
 
 		//------------Create timer for periodic events-
-		aliveDeadlineTimer = std::unique_ptr<DeadlineTimer>(DeadlineTimer::create(ioService.get()));
+		aliveDeadlineTimer = DeadlineTimer::creat(ioService.get());
 		aliveDeadlineTimer->addListener(this);
 		// Start our timer. Calls onNewEvent(Notifier<int>* sender, int message) on timeout
 		aliveDeadlineTimer->start(aliveTimeout);
@@ -198,7 +198,7 @@ namespace ops
 
 		//------------Create thread pool--------------
 		if (_policy == execution_policy::threading) {
-			threadPool = std::unique_ptr<ThreadPool>(thread_support::CreateThreadPool());
+			threadPool = thread_support::CreateThreadPool();
 			threadPool->addRunnable(this);
 			threadPool->start();
 		}
@@ -208,7 +208,7 @@ namespace ops
 		// The actual subscriber won't be created until some one needs it.
 		// We use the information for topics with UDP as transport, to know the destination for UDP sends
 		// ie. we extract ip and port from the information and add it to our McUdpSendDataHandler.
-		partInfoListener = std::unique_ptr<ParticipantInfoDataListener>(new ParticipantInfoDataListener(*this));
+		partInfoListener = std::make_unique<ParticipantInfoDataListener>(*this);
 	}
 
 	Participant::~Participant()
@@ -368,7 +368,7 @@ namespace ops
 				// The meta data publisher is only necessary if we have topics using transport UDP.
 				if ( (partInfoPub == nullptr) && (domain->getMetaDataMcPort() > 0) )
 				{
-					partInfoPub = std::unique_ptr<Publisher>(new Publisher(createParticipantInfoTopic()));
+					partInfoPub = std::make_unique<Publisher>(createParticipantInfoTopic());
 				}
 				if (partInfoPub != nullptr) {
 					const SafeLock lck(partInfoDataMutex);

@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018-2020 Lennart Andersson.
+* Copyright (C) 2018-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -87,7 +87,7 @@ namespace opsbridge {
 			// Use UDP
 			_receivers[key].receiver = ops::Receiver::createUDPReceiver(port, _ioService.get(), ip);
 		}
-		_receivers[key].receiver->addListener(this);
+		_receivers[key].receiver->connect(this);
 
 		BL_TRACE("RawMcUdp::AddReceiver(): Created receiver for %s\n", key.c_str());
 
@@ -103,7 +103,7 @@ namespace opsbridge {
 		return true;
 	}
 
-	void RawMcUdp::onNewEvent(ops::Notifier<ops::BytesSizePair>* const sender, ops::BytesSizePair byteSizePair)
+	void RawMcUdp::onNewEvent(ops::SingleNotifier<ops::BytesSizePair>* const sender, ops::BytesSizePair byteSizePair)
 	{
 		ops::Receiver* const receiver = dynamic_cast<ops::Receiver*>(sender);
 

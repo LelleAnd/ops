@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2024 Lennart Andersson.
+ * Copyright (C) 2018-2025 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -32,20 +32,13 @@
 
 namespace ops
 {
-    ReceiveDataHandler::ReceiveDataHandler(Participant& part, ReceiveDataChannelBase* const rdc_) :
+    ReceiveDataHandler::ReceiveDataHandler(Participant& part, std::unique_ptr<ReceiveDataChannelBase> rdc) :
 		participant(part)
     {
-		if (rdc_ != nullptr) {
-            sampleMaxSize = rdc_->getSampleMaxSize();
-			rdc.push_back(rdc_);
-			rdc_->connect(this);
-		}
-    }
-
-    ReceiveDataHandler::~ReceiveDataHandler()
-    {
-		for (auto const x : rdc) {
-			delete x;
+		if (rdc != nullptr) {
+            sampleMaxSize = rdc->getSampleMaxSize();
+            rdc->connect(this);
+            rdcs.push_back(std::move(rdc));
 		}
     }
 
@@ -55,8 +48,8 @@ namespace ops
             const SafeLock lock(messageLock);
             Notifier<OPSMessage*>::addListener(listener);
             if (Notifier<OPSMessage*>::getNrOfListeners() == 1) {
-                for (auto const x : rdc) {
-                    x->start();
+                for (auto const& rdc : rdcs) {
+                    rdc->start();
                 }
             }
         }
@@ -70,8 +63,8 @@ namespace ops
         const SafeLock lock(messageLock);
 		Notifier<OPSMessage*>::removeListener(listener);
 		if (Notifier<OPSMessage*>::getNrOfListeners() == 0) {
-			for (auto const x : rdc) {
-				x->stop();
+			for (auto const& rdc : rdcs) {
+				rdc->stop();
 			}
 		}
 	}
@@ -110,8 +103,8 @@ namespace ops
 	// Called when there are no more listeners and we are about to be put on the garbage-list for later removal
     void ReceiveDataHandler::clear()
     {
-		for (auto const x : rdc) {
-			x->clear();
+		for (auto const& rdc : rdcs) {
+			rdc->clear();
 		}
 
 		// Need to release the last message we received, if any.

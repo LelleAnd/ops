@@ -4,8 +4,11 @@ The major changes for each release tag is noted below. For minor changes see the
 ## tags 4.3.x-y ##
 Requires the tinyxml2 library which 4.2.x-y doesn't.
 
+### 4.3.2-2 ###
+* Added missing string member initialization using compile directives in the idl-files. See [compile directive description](IDLLanguage.md#compile-directives) for directive "//@init = ...".
+
 ### 4.3.2-1 ###
-* Added possibility to explicitly **initialize idl members** of OPS core types (incl. arrays thereof), except type string, from compile directives in the idl-files. See [compile directive description](IDLLanguage.md#compile-directives) for directive "//@init = ...".
+* Added possibility to explicitly **initialize idl members** of OPS core types (incl. fixed sized arrays thereof), except type string, from compile directives in the idl-files. See [compile directive description](IDLLanguage.md#compile-directives) for directive "//@init = ...".
 * Updated naming of some internal member variables in generated C++ and Delphi classes.
 
 ### 4.3.2-0 ###

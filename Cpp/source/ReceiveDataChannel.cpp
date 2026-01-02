@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2024 Lennart Andersson.
+ * Copyright (C) 2018-2025 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -45,7 +45,7 @@ namespace ops
             throw exceptions::CommException("Could not create receiver");
         }
 
-        receiver->addListener(this);
+        receiver->connect(this);
     }
 
 	void ReceiveDataChannel::start()
@@ -85,9 +85,9 @@ namespace ops
         }
     }
 
-    ///Override from Listener
+    ///Override from SingleListener
     ///Called whenever the receiver has new data.
-    void ReceiveDataChannel::onNewEvent(Notifier<BytesSizePair>* const sender, BytesSizePair const byteSizePair)
+    void ReceiveDataChannel::onNewEvent(SingleNotifier<BytesSizePair>* const sender, BytesSizePair const byteSizePair)
     {
 		UNUSED(sender);
         if (byteSizePair.size <= 0) {
@@ -214,7 +214,6 @@ namespace ops
 	// Called when there are no more listeners and we are about to be put on the garbage-list for later removal
     void ReceiveDataChannel::clear()
     {
-        receiver->removeListener(this);
     }
 
     bool ReceiveDataChannel::calculateAndSetSpareBytes(ByteBuffer &buf, OPSObject* obj, int const segmentPaddingSize)

@@ -94,7 +94,7 @@ namespace ops
 	};
 
 	class ReceiveDataChannel : public ReceiveDataChannelBase,
-		protected Listener<BytesSizePair>, 
+		protected SingleListener<BytesSizePair>,
 		public Listener<ConnectStatus>
 	{
 	public:
@@ -140,7 +140,7 @@ namespace ops
 	protected:
 		///Override from Listener
 		///Called whenever the receiver has new data.
-		void onNewEvent(Notifier<BytesSizePair>* sender, BytesSizePair byteSizePair) override;
+		void onNewEvent(SingleNotifier<BytesSizePair>* sender, BytesSizePair byteSizePair) override;
 		bool calculateAndSetSpareBytes(ByteBuffer &buf, OPSObject* obj, int segmentPaddingSize);
 
         void onNewEvent(Notifier<ConnectStatus>*, ConnectStatus arg) override;

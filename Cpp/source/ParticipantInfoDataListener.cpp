@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2021 Lennart Andersson.
+* Copyright (C) 2019-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -38,7 +38,7 @@ namespace ops
     {
         const SafeLock lock(mutex);
         if (partInfo->mc_udp_port != 0) {
-            for (auto x : partInfo->subscribeTopics) {
+            for (const auto& x : partInfo->subscribeTopics) {
                 if ((x.transport == Topic::TRANSPORT_UDP) && participant.hasPublisherOn(x.name)) {
                     // Lookup topic in map. If found call handler
                     const auto result = sendDataHandlers.find(x.name);
@@ -101,7 +101,7 @@ namespace ops
 			return false;
 		}
 
-		partInfoSub = std::unique_ptr<Subscriber>(new Subscriber(participant.createParticipantInfoTopic()));
+		partInfoSub = std::make_unique<Subscriber>(participant.createParticipantInfoTopic());
 		partInfoSub->addDataListener(this);
 		partInfoSub->start();
 

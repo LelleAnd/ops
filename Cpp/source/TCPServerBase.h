@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2021 Lennart Andersson.
+* Copyright (C) 2018-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -66,7 +66,7 @@ namespace ops
     {
     public:
 		TCPServerBase(TCPServerCallbacks* client, IOService* ioServ) :
-			_timer(std::unique_ptr<DeadlineTimer>(DeadlineTimer::create(ioServ))),
+			_timer(DeadlineTimer::creat(ioServ)),
 			_client(client)
 		{
 			_timer->addListener(this);

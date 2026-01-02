@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016-2020 Lennart Andersson.
+* Copyright (C) 2016-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -41,7 +41,7 @@ OPSConfigRepository* OPSConfigRepository::Instance()
 }
 
 OPSConfigRepository::OPSConfigRepository() :
-    m_config(new OPSConfig())
+    m_config(std::make_shared<OPSConfig>())
 {
 }
 

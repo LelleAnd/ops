@@ -175,7 +175,7 @@ namespace ops
             }
 
             // Create Subscriber for ACK's
-            _ackSub = std::unique_ptr<AckSubscriber>(new AckSubscriber(Topic::CreateAckTopic(topic)));
+            _ackSub = std::make_unique<AckSubscriber>(Topic::CreateAckTopic(topic));
             _ackSub->_sourceIP = sendDataHandler->getLocalAddressHost();
             _ackSub->_sourcePort = sendDataHandler->getLocalPort();
             _ackSub->start();

@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2020-2023 Lennart Andersson.
+* Copyright (C) 2020-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -50,6 +50,8 @@ namespace ops
 
 	class MulticastReceiver : public Receiver
 	{
+		using endpoint_t = boost::asio::ip::udp::endpoint;
+		using socket_t = boost::asio::ip::udp::socket;
 	public:
 		MulticastReceiver(Address_T mcAddress, uint16_t bindPort, IOService* ioServ, Address_T localInterface = "0.0.0.0", int inSocketBufferSizent = 16000000):
 		  _ipaddress(mcAddress),
@@ -66,9 +68,9 @@ namespace ops
             const boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string("0.0.0.0"));
             //boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(localInterface));
 
-			localEndpoint = new boost::asio::ip::udp::endpoint(ipAddr, bindPort);
+			localEndpoint = std::make_unique<endpoint_t>(ipAddr, bindPort);
 
-			sock = new boost::asio::ip::udp::socket(*ioService);
+			sock = std::make_unique<socket_t>(*ioService);
 		}
 
         ///Override from Receiver
@@ -257,9 +259,6 @@ namespace ops
 			while (m_working) {
 				TimeHelper::sleep(std::chrono::milliseconds(1));
 			}
-
-            if (sock != nullptr) { delete sock; }
-            if (localEndpoint != nullptr) { delete localEndpoint; }
 		}
 
 		int receive(char* buf, int size)
@@ -308,11 +307,11 @@ namespace ops
 		Address_T _ipaddress;
 		Address_T _localInterface;
 		int _inSocketBufferSizent = 0;
-		boost::asio::ip::udp::socket* sock = nullptr;
-		boost::asio::ip::udp::endpoint* localEndpoint = nullptr;
-		boost::asio::ip::udp::endpoint lastEndpoint;
+		std::unique_ptr<socket_t> sock;
+		std::unique_ptr<endpoint_t> localEndpoint;
+		endpoint_t lastEndpoint;
 
-		boost::asio::ip::udp::endpoint sendingEndPoint;
+		endpoint_t sendingEndPoint;
 
 		int max_length = 65535;
 		char* data = nullptr;

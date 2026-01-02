@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2020-2021 Lennart Andersson.
+* Copyright (C) 2020-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -42,14 +42,13 @@ namespace ops
     public:
 		RequestReply(Topic reqTopic, Topic repTopic, ObjectKey_T key_) : keyFilter(key_), key(key_)
 		{
-			pub = std::unique_ptr<Publisher>(new Publisher(reqTopic));
-			sub = std::unique_ptr<Subscriber>(new Subscriber(repTopic));
+			pub = std::make_unique<Publisher>(reqTopic);
+			sub = std::make_unique<Subscriber>(repTopic);
 			sub->addFilterQoSPolicy(&keyFilter);
 			sub->start();
 		}
-#ifdef OPS_C14_DETECTED
+
 		[[deprecated("Deprecated. Replaced by request() taking chrono duration")]]
-#endif
 		RepType* request(ReqType* req, int timeout)
 		{
 			return request(req, std::chrono::milliseconds(timeout));

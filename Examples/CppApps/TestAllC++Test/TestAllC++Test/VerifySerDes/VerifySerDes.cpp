@@ -467,6 +467,27 @@ TestAll::ChildData f(TestAll::ChildData o)
 	return o;
 }
 
+
+struct MyPubIdListener : ops::Listener<ops::PublicationIdNotification_T>
+{
+	virtual void onNewEvent(ops::Notifier<ops::PublicationIdNotification_T>* sender, ops::PublicationIdNotification_T arg) override
+	{
+		UNUSED(sender);
+		ops::Address_T address;
+		uint16_t port;
+		arg.mess->getSource(address, port);
+
+		std::string newPub = (arg.newPublisher) ? "NEW Publisher" : "SEQ ERROR";
+
+		std::cout << "PubIdChecker(): " << newPub <<
+			", Addr: " << address <<
+			", Port: " << port <<
+			", Expected: " << arg.expectedPubID <<
+			", Got: " << arg.mess->getPublicationID() <<
+			std::endl;
+	}
+};
+
 int main(const int argc, const char* args[])
 {
 	std::map<ops::ObjectName_T, uint32_t> pubs;
@@ -704,19 +725,27 @@ int main(const int argc, const char* args[])
 #if defined(DEBUG_OPSOBJECT_COUNTER)
 			std::cout << "ops::OPSObject::NumOpsObjects(): " << ops::OPSObject::NumOpsObjects() << std::endl;
 #endif
+			MyPubIdListener PubIdList;
+			sub.pubIdChecker = new ops::PublicationIdChecker;
+			sub.pubIdChecker->addListener(&PubIdList);
 
 			std::cout << "Waiting for more data during 60 seconds... (Press Ctrl-C to terminate)" << std::endl;
 			ops::ops_clock::time_point PubTime = ops::ops_clock::now() + std::chrono::milliseconds(5000);
 			const ops::ops_clock::time_point Limit = ops::ops_clock::now() + std::chrono::milliseconds(60000);
 			while ((!gTerminate) && (Limit >= ops::ops_clock::now())) {
 				if (sub.waitForNewData(std::chrono::milliseconds(100))) {
-					sub.aquireMessageLock();
-					ops::ObjectName_T pubName = sub.getMessage()->getPublisherName();
-					size_t spareSize = sub.getMessage()->spareBytes.size();
-					sub.releaseMessageLock();
-					sub.getData(cd3);
+					ops::ObjectName_T pubName;
+					int64_t pubid;
+					size_t spareSize;
+					{
+						ops::MessageLock lck(sub);
+						pubName = sub.getMessage()->getPublisherName();
+						pubid = sub.getMessage()->getPublicationID();
+						spareSize = sub.getMessage()->spareBytes.size();
+						sub.getTypedDataReference()->fillClone(&cd3);
+					}
 
-					std::cout << "Received new data from " << pubName << ". Checking..." << std::endl;
+					std::cout << "Received new data (pubid: " << pubid <<") from " << pubName << ". Checking..." << std::endl;
 					AssertEQ<size_t>(spareSize, 0, "spareBytes");
 					checkObjects(cd3, cd1);
 					std::cout << "Data check done" << std::endl;
@@ -758,8 +787,8 @@ int main(const int argc, const char* args[])
 		std::cout << std::endl << "T e s t   O k" << std::endl;
 	}
 
-	std::cout << std::endl << "Sleeping for 10 seconds..." << std::endl;
-	std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+	std::cout << std::endl << "Sleeping for 15 seconds..." << std::endl;
+	std::this_thread::sleep_for(std::chrono::milliseconds(15000));
 
 	return 0;
 }

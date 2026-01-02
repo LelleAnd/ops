@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2021 Lennart Andersson.
+ * Copyright (C) 2018-2025 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -51,7 +51,7 @@ namespace ops
     public:
         TCPClientBase(TCPClientCallbacks* client, IOService* ioServ, std::shared_ptr<TCPConnection> connection) :
 			_connection(connection), _client(client), _cs(false, 0), _started(false),
-			_timer(std::unique_ptr<DeadlineTimer>(DeadlineTimer::create(ioServ)))
+			_timer(DeadlineTimer::creat(ioServ))
         {
 			_timer->addListener(this);
 			_timer->start(period);
@@ -107,7 +107,7 @@ namespace ops
 			///TODO this could be simplified to a simple callback (when all Receiver's updated)
 			///Notifier has a list and takes a lock which isn't necessary, we can only have 1 listener
 			///and a lock is already taken in TCPConnection() calling us.
-			Notifier<BytesSizePair>::notifyNewEvent(arg);
+			SingleNotifier<BytesSizePair>::notifyNewEvent(arg);
 		}
 
 		// Called from TCPConnection()
@@ -121,7 +121,7 @@ namespace ops
 			conn.stop();
 
 			//Notify our user
-			Notifier<BytesSizePair>::notifyNewEvent(BytesSizePair(nullptr, -1));
+			SingleNotifier<BytesSizePair>::notifyNewEvent(BytesSizePair(nullptr, -1));
 
 			if (_started) {
 				//Try to connect again

@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -42,7 +42,7 @@ namespace opsbridge {
 		virtual void onUdpMcMessage(RawMcUdp* sender, TUdpMcMessage& mess, const char* data) = 0;
 	};
 
-	class RawMcUdp : ops::Runnable, ops::Listener<ops::BytesSizePair>
+	class RawMcUdp : ops::Runnable, ops::SingleListener<ops::BytesSizePair>
 	{
 	public:
 		RawMcUdp(RawMcUdpListener* const client);
@@ -81,6 +81,6 @@ namespace opsbridge {
 #if defined(_MSC_VER) && (_MSC_VER == 1900)
 #pragma warning( disable : 4373)
 #endif
-		void onNewEvent(ops::Notifier<ops::BytesSizePair>* const sender, ops::BytesSizePair byteSizePair) override;
+		void onNewEvent(ops::SingleNotifier<ops::BytesSizePair>* const sender, ops::BytesSizePair byteSizePair) override;
 	};
 }

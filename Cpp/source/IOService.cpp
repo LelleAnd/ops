@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2020 Lennart Andersson.
+* Copyright (C) 2020-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -35,11 +35,7 @@ namespace ops
 
     std::unique_ptr<IOService> IOService::create()
 	{
-#ifdef OPS_C14_DETECTED
         return std::make_unique<BoostIOServiceImpl>();
-#else
-        return std::unique_ptr<BoostIOServiceImpl>(new BoostIOServiceImpl());
-#endif
 	}
 
 }

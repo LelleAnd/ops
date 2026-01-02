@@ -34,8 +34,6 @@ namespace ops {
         res += "C++17, ";
 #elif defined(OPS_C14_DETECTED)
         res += "C++14, ";
-#elif defined(OPS_C11_DETECTED)
-        res += "C++11, ";
 #endif
 #ifdef OPS_ENABLE_TRACE
         res += "OPS_ENABLE_TRACE, ";
@@ -43,10 +41,10 @@ namespace ops {
 #ifdef OPS_NO_SHMEM_TRANSPORT
         res += "OPS_NO_SHMEM_TRANSPORT, ";
 #endif
-#ifdef OPS_REMOVE_ASSERT		
+#ifdef OPS_REMOVE_ASSERT
         res += "OPS_REMOVE_ASSERT, ";
 #endif
-#ifdef OPSSLIM_NORESERVE		
+#ifdef OPSSLIM_NORESERVE
         res += "OPSSLIM_NORESERVE, ";
 #endif
 #ifdef REPLACE_TRANSPORT_LAYER

@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2021 Lennart Andersson.
+* Copyright (C) 2019-2025 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -63,7 +63,7 @@ namespace ops
         if (socket != nullptr) { return true; }
 
         boost::system::error_code ec;
-        socket = std::unique_ptr<boost::asio::ip::udp::socket>(new boost::asio::ip::udp::socket(*io_service));
+        socket = std::make_unique<boost::asio::ip::udp::socket>(*io_service);
         socket->open(localEndpoint.protocol(), ec);
         if (ec.value() != 0) {
             ErrorMessage_T msg("Open failed with error: ");

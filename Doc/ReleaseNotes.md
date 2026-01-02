@@ -4,6 +4,10 @@ The major changes for each release tag is noted below. For minor changes see the
 ## tags 4.3.x-y ##
 Requires the tinyxml2 library which 4.2.x-y doesn't.
 
+### 4.3.2-3 ###
+* Cleanup of C++ code (removed a lot of ifdef's for C++14 features)
+* Corrected C++ Subscriber methods waitForNewData() used when polling for messages
+
 ### 4.3.2-2 ###
 * Added missing string member initialization using compile directives in the idl-files. See [compile directive description](IDLLanguage.md#compile-directives) for directive "//@init = ...".
 
@@ -16,7 +20,7 @@ Requires the tinyxml2 library which 4.2.x-y doesn't.
 * Changed generated C++ type for idl 'byte' from 'char' to 'uint8_t'. The old behaviour can be retained by adding argument *'-retain char'* to the **opsc** command when compiling idl's. See also the [opsc description](IDLCommandlineCompiler.md). 
 
 ### 4.3.1-1 ###
-* Made C++ class *fixed_string* constexpr capable.
+* Made C++ class *fixed_string* constexpr capable. Requires at least a **C++14** compiler.
 * Updated naming of internal member variables in generated C++ classes.
 
 ### 4.3.1-0 ###

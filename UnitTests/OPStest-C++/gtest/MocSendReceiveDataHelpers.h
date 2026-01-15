@@ -146,7 +146,12 @@ struct MocSendDataHandler : public ops::SendDataHandler
     public:
         MocSender(MocSendDataHandler& o) : owner(o) {}
         virtual bool sendTo(const char* , const int , const ops::Address_T& , const uint16_t ) override { return true; }
-        virtual bool open() override { ++owner.oc_cnt; return true; };
+        virtual bool send(const char* , const int ) { return false; }
+        virtual bool open() override
+        {
+            ++owner.oc_cnt;
+            return true;
+        };
         virtual void close() override { --owner.oc_cnt; };
 
         virtual uint16_t getLocalPort() override { return owner.local_port; };

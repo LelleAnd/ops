@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2020-2025 Lennart Andersson.
+ * Copyright (C) 2020-2026 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -43,7 +43,8 @@ namespace ops
     {
     public:
         virtual bool sendTo(const char* buf, const int size, const Address_T& ip, const uint16_t port) = 0;
-		virtual bool open() = 0;
+        virtual bool send(const char* buf, const int size) = 0;
+        virtual bool open() = 0;
 		virtual void close() = 0;
 
 		virtual uint16_t getLocalPort() = 0;

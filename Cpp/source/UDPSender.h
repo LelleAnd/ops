@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2023 Lennart Andersson.
+* Copyright (C) 2019-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -54,6 +54,7 @@ namespace ops
 		virtual void close() override;
 
         virtual bool sendTo(const char* buf, const int size, const Address_T& ip, const uint16_t port) override;
+        virtual bool send(const char*, const int) override { return false; }
         virtual uint16_t getLocalPort() override {return socket->local_endpoint().port();};
         virtual Address_T getLocalAddress() override {return socket->local_endpoint().address().to_string().c_str();};
         virtual uint32_t getLocalAddressHost() override { return (uint32_t)socket->local_endpoint().address().to_v4().to_ulong(); };

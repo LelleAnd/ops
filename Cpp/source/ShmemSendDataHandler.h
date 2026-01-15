@@ -1,6 +1,6 @@
 /**
  *
- * Copyright (C) 2025 Lennart Andersson.
+ * Copyright (C) 2025-2026 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -30,16 +30,13 @@ namespace ops
     class ShmemSendDataHandler : public SendDataHandler
     {
     private:
-        class DummySender;
-        class Impl;
-
-        std::unique_ptr<Impl> shmem;
+        class ShmemSender;
 
     public:
         explicit ShmemSendDataHandler(const InternalKey_T& name, const Topic& top);
-        ~ShmemSendDataHandler();    // Need to be implemented in cpp-file where class Impl is known (due to unique_ptr)
+        virtual ~ShmemSendDataHandler() = default;
 
-        bool sendData(char*, int, const Topic&) override;
+        bool sendData(char* buf, int bufSize, const Topic&) override;
 
         // Get some collected telemetry from the sender
         virtual Telemetry getTelemetry() override;

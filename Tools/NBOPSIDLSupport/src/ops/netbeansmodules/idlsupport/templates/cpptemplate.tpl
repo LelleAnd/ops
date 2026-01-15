@@ -14,6 +14,8 @@ __classComment
 class __className :
 	public __baseClassName
 {
+protected:
+__generationCheck
 public:
   	static ops::TypeId_T getTypeName(){ return ops::TypeId_T("__packageName.__className"); }
 
@@ -21,7 +23,6 @@ __declarations
     ///Default constructor.
     __className()
         : __baseClassName()
-__constructorHead
     {
         OPSObject::appendType(ops::TypeId_T("__packageName.__className"));
 __constructorBody
@@ -29,12 +30,10 @@ __constructorBody
 
     ///Copy-constructor making full deep copy of a(n) __className object.
     __className(const __className& _c)
-       : __baseClassName()
-__constructorHead
+       : __baseClassName(_c)
     {
-        OPSObject::appendType(ops::TypeId_T("__packageName.__className"));
-__constructorBody
-        _c.fillClone(this);
+__copyConstructorBody
+        _c.fillCloneShallow(this);
     }
 
     ///Assignment operator making full deep copy of a(n) __className object.
@@ -78,9 +77,17 @@ __clone
     void fillClone(__className* obj) const
     {
         if (this == obj) { return; }
+        __baseClassName::fillClone(obj);
+        fillCloneShallow(obj);
+    }
+
+private:
+    void fillCloneShallow(__className* obj) const
+    {
 __fillClone
     }
 
+public:
 	///Validation routine for fields
 	virtual bool isValid() const noexcept override
     {

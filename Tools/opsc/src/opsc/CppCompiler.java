@@ -36,9 +36,10 @@ import parsing.IDLEnumType;
 public class CppCompiler extends opsc.Compiler
 {
     final static String CONSTRUCTOR_BODY_REGEX = "__constructorBody";
-    final static String CONSTRUCTOR_HEAD_REGEX = "__constructorHead";
+    final static String COPYCONSTRUCTOR_BODY_REGEX = "__copyConstructorBody";
     final static String DESTRUCTOR_BODY_REGEX = "__destructorBody";
     final static String DECLARATIONS_REGEX = "__declarations";
+    final static String GENERATION_CHECK_REGEX = "__generationCheck";
     final static String SERIALIZE_REGEX = "__serialize";
     final static String CLONE_REGEX = "__clone";
     final static String FILL_CLONE_REGEX = "__fillClone";
@@ -149,10 +150,11 @@ public class CppCompiler extends opsc.Compiler
         templateText = templateText.replace(PACKAGE_DECLARATION_REGEX, getPackageDeclaration(packageName));
         templateText = templateText.replace(PACKAGE_CLOSER_REGEX, getPackageCloser(packageName));
         templateText = templateText.replace(IMPORTS_REGEX, getImports(idlClass));
-        templateText = templateText.replace(CONSTRUCTOR_HEAD_REGEX, getConstructorHead(idlClass));
+        templateText = templateText.replace(COPYCONSTRUCTOR_BODY_REGEX, getCopyConstructorBody(idlClass));
         templateText = templateText.replace(CONSTRUCTOR_BODY_REGEX, getConstructorBody(idlClass));
         templateText = templateText.replace(DESTRUCTOR_BODY_REGEX, getDestructorBody(idlClass));
         templateText = templateText.replace(DECLARATIONS_REGEX, getDeclarations(idlClass));
+        templateText = templateText.replace(GENERATION_CHECK_REGEX, getGenerationCheck(idlClass));
         templateText = templateText.replace(SERIALIZE_REGEX, getSerialize(idlClass));
         templateText = templateText.replace(CLONE_REGEX, getClone(idlClass));
         templateText = templateText.replace(FILL_CLONE_REGEX, getFillClone(idlClass));
@@ -362,11 +364,6 @@ public class CppCompiler extends opsc.Compiler
     {
         String ret = "";
 
-        if (idlClass.getBaseClassName() != null) {
-            ret += tab(2) + applyLanguagePackageSeparator(idlClass.getBaseClassName()) + "::fillClone(obj);" + endl();
-        } else {
-            ret += tab(2) + "ops::OPSObject::fillClone(obj);" + endl();
-        }
         ret += tab(2) + "obj->" + getClassName(idlClass) + "_version = " + getClassName(idlClass) + "_version;" + endl();
         for (IDLField field : idlClass.getFields()) {
             if (field.isStatic()) continue;
@@ -569,38 +566,46 @@ public class CppCompiler extends opsc.Compiler
         return ret;
     }
 
-    private String getConstructorHead(IDLClass idlClass)
+    protected String getCopyConstructorBody(IDLClass idlClass)
     {
-        String ret = tab(2) + "";
+        String ret = "";
         for (IDLField field : idlClass.getFields()) {
-            if (field.isStatic()) continue;
-            String fieldName = getFieldName(field);
-            if (field.isArray() || field.isIdlType()) {
-                //Do nothing in head
-            } else if (field.isBooleanType()) {
-                if (field.getValue().length() > 0) {
-                    ret += ", " + fieldName + "(" + field.getValue() + ")";
-                } else {
-                    ret += ", " + fieldName + "(false)";
+            if (field.isIdlType() && field.isAbstract()) {
+                String fieldName = getFieldName(field);
+                if (!field.isArray()) {
+                    ret += tab(2) + fieldName + " = nullptr;" + endl();
                 }
-            } else if (field.isEnumType()) {
-                if (field.getValue().length() > 0) {
-                    ret += ", " + fieldName + "(" + languageType(field) + "::" + nonReservedName(field.getValue()) + ")";
-                }
-            } else {
-                //Numeric / String
-                String suffix = "";
-                if (field.getType().equals("float")) suffix = "f";
-                if (field.getValue().length() > 0) {
-                    ret += ", " + fieldName + "(" + field.getValue() + suffix + ")";
-                } else {
-                    if (field.isStringType()) {
-                        // string is already default initialized
-                    } else {
-                        ret += ", " + fieldName + "(0)";
-                    }
+                if (field.isArray() && (field.getArraySize() > 0)) {
+                    ret += tab(2) + "for(unsigned int _i = 0; _i < " + field.getArraySize() + "; _i++) {" + endl();
+                    ret += tab(3) +   fieldName + "[_i] = nullptr;" + endl();
+                    ret += tab(2) + "}" + endl();
                 }
             }
+        }
+        return ret;
+    }
+
+    protected String getFullyQualifiedClassName(IDLClass idlClass)
+    {
+        return idlClass.getPackageName() + "." + getClassName(idlClass);
+    }
+
+    protected String getGenerationCheck(IDLClass idlClass)
+    {
+        String ret = "";
+        String baseClassName = idlClass.getBaseClassName();
+        if (baseClassName == null) baseClassName = "";
+        if (baseClassName.equals("ops.Reply")) baseClassName = "";
+        if (baseClassName.equals("ops.Request")) baseClassName = "";
+        if (baseClassName == "") {
+            ret += tab(1) + "// Defined to be able to ensure that all generated classes have the reworked copy constructor" + endl();
+            ret += tab(1) + "using " + getFullyQualifiedClassName(idlClass).replace(".", "_") + "_new_copycons = bool;" + endl();
+        } else {
+            if (baseClassName.indexOf('.') < 0) {
+                baseClassName = idlClass.getPackageName() + "." + baseClassName;
+            }
+            ret += tab(1) + "// Ensure that base class has the reworked copy constructor. If not, re-generate base class" + endl();
+            ret += tab(1) + "using " + getFullyQualifiedClassName(idlClass).replace(".", "_") + "_new_copycons = " + baseClassName.replace(".", "_") + "_new_copycons;" + endl();
         }
         return ret;
     }
@@ -663,12 +668,40 @@ public class CppCompiler extends opsc.Compiler
             if (field.isArray()) {
                 ret += tab(1) + "" + getDeclareVector(field);
             } else {
+
+                String initValue = "";
+                if (field.isBooleanType()) {
+                    if (field.getValue().length() > 0) {
+                        initValue = field.getValue();
+                    } else {
+                        initValue = "false";
+                    }
+                } else if (field.isEnumType()) {
+                    if (field.getValue().length() > 0) {
+                        initValue = languageType(field) + "::" + nonReservedName(field.getValue());
+                    }
+                } else {
+                    //Numeric / String
+                    String suffix = "";
+                    if (field.getType().equals("float")) suffix = "f";
+                    if (field.getValue().length() > 0) {
+                        initValue = field.getValue() + suffix;
+                    } else {
+                        if (field.isStringType()) {
+                            // string is already default initialized
+                        } else {
+                            initValue = "0";
+                        }
+                    }
+                }
+                if (initValue.length() > 0) initValue = "{ " + initValue + " }";
+
                 if (field.isStringType()) {
                     if (field.isStatic()) {
                         // NOTE strings can't be const in header file, so use a trick with an inline method
                         ret += tab(1) + "static const char* " + fieldName + "() { return " + field.getValue() + "; }" + endl();
                     } else {
-                        ret += tab(1) + "" + languageType(field) + " " + fieldName + ";" + endl();
+                        ret += tab(1) + "" + languageType(field) + " " + fieldName + initValue + ";" + endl();
                     }
                 } else {
                     if (field.isIdlType()) {
@@ -689,7 +722,7 @@ public class CppCompiler extends opsc.Compiler
                                 ret += tab(1) + "static const " + languageType(field) + " " + fieldName + " = " + field.getValue() + ";" + endl();
                             }
                         } else {
-                            ret += tab(1) + "" + languageType(field) + " " + fieldName + ";" + endl();
+                            ret += tab(1) + "" + languageType(field) + " " + fieldName + initValue + ";" + endl();
                         }
                     }
                 }

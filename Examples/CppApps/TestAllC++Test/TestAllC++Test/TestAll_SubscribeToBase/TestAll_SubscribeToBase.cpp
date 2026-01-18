@@ -20,7 +20,7 @@
 class BaseTypeFactory : public ops::SerializableFactory
 {
 public:
-    virtual ops::Serializable* create(const ops::TypeId_T& type) override
+    virtual ops::Serializable* create(CreateType_T type) override
     {
 		if (type == "TestAll.BaseData") {
 			return new TestAll::BaseData();

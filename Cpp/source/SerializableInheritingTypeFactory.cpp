@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2019-2020 Lennart Andersson.
+ * Copyright (C) 2019-2026 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -19,6 +19,8 @@
  * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <type_traits>
+
 #include "OPSTypeDefs.h"
 #include "SerializableInheritingTypeFactory.h"
 
@@ -27,14 +29,16 @@ namespace ops
 	/**
 	 * Tries to construct the most specialized object in the given typeString list
 	 */
-	Serializable* SerializableInheritingTypeFactory::create(const TypeId_T& typeString)
+	Serializable* SerializableInheritingTypeFactory::create(CreateType_T typeString)
 	{
-		TypeId_T::size_type i = typeString.find_first_not_of(' ');  // Skip any leeding spaces
-		if (i == TypeId_T::npos) return nullptr;
+		using Param_t = std::remove_const_t<std::remove_reference_t<CreateType_T>>;
 
-		TypeId_T::size_type j = typeString.find(' ', i);
+		Param_t::size_type i = typeString.find_first_not_of(' ');  // Skip any leeding spaces
+		if (i == Param_t::npos) return nullptr;
 
-		while (j != TypeId_T::npos) {
+		Param_t::size_type j = typeString.find(' ', i);
+
+		while (j != Param_t::npos) {
 			Serializable* const serializable = SerializableCompositeFactory::create(typeString.substr(i, j - i));
 			if (serializable != nullptr) {
 				return serializable;

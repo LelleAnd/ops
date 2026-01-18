@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018-2025 Lennart Andersson.
+* Copyright (C) 2018-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -340,7 +340,7 @@ TEST(Test_Serialization, TestFixedArraysXml) {
 class ObjectFactory_SerDesObjects : public SerializableFactory
 {
 public:
-	virtual Serializable* create(const TypeId_T& type) override
+	virtual Serializable* create(CreateType_T type) override
 	{
 		if (type == SerDesObject_Core::getTypeName()) { return new SerDesObject_Core(); }
 		return nullptr;

@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2020 Lennart Andersson.
+* Copyright (C) 2020-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -22,16 +22,26 @@
 #ifndef ops_SerializableFactoryH
 #define ops_SerializableFactoryH
 
+#ifdef OPS_C17_DETECTED
+#include <string_view>
+#endif
+
 #include "OPSTypeDefs.h"
 #include "Serializable.h"
 
 namespace ops
 {
+
 	class SerializableFactory
 	{
 	public:
+#ifdef OPS_C17_DETECTED
+		using CreateType_T = std::string_view;
+#else
+		using CreateType_T = const TypeId_T&;
+#endif
 		virtual ~SerializableFactory() = default;
-		virtual Serializable* create(const TypeId_T& type) = 0;
+		virtual Serializable* create(CreateType_T type) = 0;
 	};
 
 }

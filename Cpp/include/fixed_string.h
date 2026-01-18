@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2017-2025 Lennart Andersson.
+* Copyright (C) 2017-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -68,6 +68,10 @@
 	#define FIXED_IF_CONSTEXPR if
 #endif
 
+#ifdef FIXED_C17_DETECTED
+#include <string_view>
+#endif
+
 namespace ops { namespace strings {
 
 #ifdef FIXED_C17_DETECTED
@@ -114,9 +118,9 @@ namespace ops { namespace strings {
 		constexpr fixed_string(const char* s, size_type len) { const size_type sz = constexpr_strlen(s); append(s, (sz < len) ? sz : len); }
 #ifndef FIXED_NO_STD_STRING
 		constexpr fixed_string(const std::string& s) { append(s.c_str(), s.size()); }
+#endif
 #ifdef FIXED_C17_DETECTED
 		constexpr fixed_string(const std::string_view& s) { append(s.data(), s.size()); }
-#endif
 #endif
 
 		template<size_t M, overrun_policy_t POL>
@@ -253,9 +257,9 @@ namespace ops { namespace strings {
 #ifndef FIXED_NO_STD_STRING
 		// Implicit conversion operator
 		operator std::string() const { return std::string(_array); }
+#endif
 #ifdef FIXED_C17_DETECTED
         constexpr operator std::string_view() const { return std::string_view(_array, _size); }
-#endif
 #endif
 
 		// String operations

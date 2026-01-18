@@ -10,7 +10,7 @@ __packageDeclaration
 class __className : public ops::SerializableFactory
 {
 public:
-    ops::Serializable* create(const ops::TypeId_T& type)
+    ops::Serializable* create(CreateType_T type)
     {
 __createBody
     }

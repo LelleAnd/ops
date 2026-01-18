@@ -1,6 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
+* Copyright (C) 2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -21,8 +22,9 @@
 #ifndef ops_SerializableCompositeFactoryH
 #define ops_SerializableCompositeFactoryH
 
-#include "SerializableFactory.h"
 #include <vector>
+
+#include "SerializableFactory.h"
 
 namespace ops
 {
@@ -55,7 +57,7 @@ public:
 		if (o) childFactories.push_back(o);
 	}
 
-	virtual Serializable* create(const TypeId_T& type) override
+	virtual Serializable* create(CreateType_T type) override
 	{
         Serializable* obj = nullptr;
 

@@ -3,7 +3,7 @@
 * Copyright (C) 2010-2012 Saab Dynamics AB
 *   author Lennart Andersson <nnnn@saabgroup.com>
 *
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -32,7 +32,7 @@ namespace opsbridge {
 class BridgeTypeFactory : public ops::SerializableFactory
 {
 public:
-    ops::Serializable* create(const ops::TypeId_T& type)
+    ops::Serializable* create(CreateType_T type)
     {
 		if (type != "") {
 			return new ops::OPSObject();

@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -72,7 +72,7 @@ private:
 class ObjectFactory_1 : public SerializableFactory
 {
 public:
-	virtual Serializable* create(const TypeId_T& type) override
+	virtual Serializable* create(CreateType_T type) override
 	{
 		if (type == "Object_A") { return new Object_A(); }
 		if (type == "Object_B") { return new Object_B(); }
@@ -90,7 +90,7 @@ public:
 class ObjectFactory_2 : public SerializableFactory
 {
 public:
-	virtual Serializable* create(const TypeId_T& type) override
+	virtual Serializable* create(CreateType_T type) override
 	{
 		if (type == "Object_C") { return new Object_C(); }
 		return nullptr;

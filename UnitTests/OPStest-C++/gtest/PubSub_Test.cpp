@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2020-2021 Lennart Andersson.
+* Copyright (C) 2020-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -70,7 +70,7 @@ namespace GTest {
     class PubSubFactory_1 : public SerializableFactory
     {
     public:
-        virtual Serializable* create(const TypeId_T& type) override
+        virtual Serializable* create(CreateType_T type) override
         {
             if (type == "GTest.TestData") { return new GTest::TestData(); }
             return nullptr;

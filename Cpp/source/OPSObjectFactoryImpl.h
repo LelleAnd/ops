@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2020-2021 Lennart Andersson.
+ * Copyright (C) 2020-2026 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -44,7 +44,7 @@ namespace ops
     {
     public:
 
-        Serializable* create(const TypeId_T& type) override
+        Serializable* create(CreateType_T type) override
         {
             if (type == "opsidls.SendAckPatternData")
             {

@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -111,7 +111,7 @@ public:
 class OpsObject_MessageTest_Factory : public SerializableFactory
 {
 public:
-	virtual Serializable* create(const TypeId_T& type) override
+	virtual Serializable* create(CreateType_T type) override
 	{
 		if (type == "OpsObject_MessageTest") { return new OpsObject_MessageTest(); }
 		return nullptr;
@@ -301,4 +301,27 @@ TEST(Test_OPSMessage, Test_CopyMove) {
 		EXPECT_EQ(OpsObject_MessageTest_Cnt, 2);
 	}
 	EXPECT_EQ(OpsObject_MessageTest_Cnt, 0);
+
+	{
+        // Default constructed
+        OPSMessage obj1;
+
+		// Create some data
+        OpsObject_MessageTest* const data = new OpsObject_MessageTest();
+        EXPECT_EQ(OpsObject_MessageTest_Cnt, 1);
+  
+		obj1.setData(data);
+        obj1.setDataOwner(false);
+    
+		// Copy constructed with data that obj1 doesn't own, but the copy constructor will make a clone of data for obj3
+        OPSMessage obj3(obj1);
+    
+		EXPECT_EQ(OpsObject_MessageTest_Cnt, 2);
+
+        delete data;
+
+        EXPECT_EQ(OpsObject_MessageTest_Cnt, 1);
+    }
+    EXPECT_EQ(OpsObject_MessageTest_Cnt, 0);
+
 }

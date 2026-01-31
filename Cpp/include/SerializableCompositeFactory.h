@@ -23,64 +23,57 @@
 #define ops_SerializableCompositeFactoryH
 
 #include <vector>
+#include <algorithm>
 
 #include "SerializableFactory.h"
 
 namespace ops
 {
 
-class SerializableCompositeFactory : public SerializableFactory
-{
-
-	std::vector<SerializableFactory*> childFactories;
-
-public:
-	// Removes the given object from the factory and ownership are returned to the caller.
-	bool remove(SerializableFactory* o)
+	class SerializableCompositeFactory : public SerializableFactory
 	{
-		std::vector<SerializableFactory*>::iterator it = childFactories.begin();
-		for(unsigned int i = 0; i < childFactories.size(); i++ )
+
+		std::vector<SerializableFactory*> childFactories;
+
+	public:
+		// Removes the given object from the factory and ownership are returned to the caller.
+		bool remove(SerializableFactory* o)
 		{
-			if(childFactories[i] == o)
-			{
-				it += i;
+			auto it = std::find(childFactories.begin(), childFactories.end(), o);
+			if (it != childFactories.end()) {
 				childFactories.erase(it);
 				return true;
 			}
+			return false;
 		}
-		return false;
-	}
 
-	// Adds the given object and takes ownership over it.
-	void add(SerializableFactory* o)
-	{
-		if (o) childFactories.push_back(o);
-	}
-
-	virtual Serializable* create(CreateType_T type) override
-	{
-        Serializable* obj = nullptr;
-
-		for(unsigned int i = 0; i < childFactories.size(); i++ )
+		// Adds the given object and takes ownership over it.
+		void add(SerializableFactory* o)
 		{
-			obj = childFactories[i]->create(type);
-			if(obj != nullptr)
-			{
-				return obj;
+			if (o) { childFactories.push_back(o); }
+		}
+
+		virtual Serializable* create(CreateType_T type) override
+		{
+			Serializable* obj = nullptr;
+
+			for (auto const& fact : childFactories) {
+				obj = fact->create(type);
+				if (obj != nullptr) {
+					return obj;
+				}
+			}
+			return obj;
+		}
+
+		virtual ~SerializableCompositeFactory()
+		{
+			// Delete all objects that we still owns
+			for (auto fact : childFactories) {
+				delete fact;
 			}
 		}
-		return obj;
-	}
-
-	virtual ~SerializableCompositeFactory()
-	{
-		// Delete all objects that we still owns
-		for(unsigned int i = 0; i < childFactories.size(); i++ )
-		{
-			delete childFactories[i];
-		}
-	}
-};
+	};
 
 }
 

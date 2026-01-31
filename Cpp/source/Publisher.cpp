@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2025 Lennart Andersson.
+ * Copyright (C) 2018-2026 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -191,8 +191,8 @@ namespace ops
 		OPS_DES_TRACE("Pub: Destructor()...\n");
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 		participant->debugHandler.UnregisterPub(this, topic.getName());
-		for (unsigned int i = 0; i < _replace.size(); i++) {
-			if (_replace[i] != nullptr) { delete _replace[i]; }
+		for (auto obj : _replace) {
+			if (obj != nullptr) { delete obj; }
 		}
 #endif
 		stop();
@@ -498,9 +498,9 @@ namespace ops
 			break;
 		case 6: // Send instead of next x ordinary
 			// Free ev. objects stored since earlier 
-			for (unsigned int i = 0; i < _replace.size(); i++) {
-				if (_replace[i] != nullptr) { delete _replace[i]; }
-			}
+            for (auto obj : _replace) {
+                if (obj != nullptr) { delete obj; }
+            }
 			_replace.clear();
 			// Store backwards in _replace vector
 			for (auto i = req.Objs.size(); i > 0; i--) {

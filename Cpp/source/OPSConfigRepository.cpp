@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016-2025 Lennart Andersson.
+* Copyright (C) 2016-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -143,17 +143,17 @@ bool OPSConfigRepository::extractDomains(std::shared_ptr<OPSConfig>& config, Obj
 	// Get all domains read from file 
 	std::vector<ops::Domain* > domains = config->getDomains();
 	// Add the choosen one(s) to our list if not already there
-	for (unsigned int i = 0; i < domains.size(); i++) {
-		if ((domain == "") || (domains[i]->getDomainID() == domain)) {
-			if (domainExist(domains[i]->getDomainID())) {
+	for (auto const& dom : domains) {
+		if ((domain == "") || (dom->getDomainID() == domain)) {
+			if (domainExist(dom->getDomainID())) {
 				ErrorMessage_T msg("domain '");
-				msg += domains[i]->getDomainID();
+				msg += dom->getDomainID();
 				msg += "' already exist";
 				BasicError err("OPSConfigRepository", "Add", msg);
 				Participant::reportStaticError(&err);
 			} else {
 				// Add unique domains to our list
-				m_config->getRefToDomains().push_back(domains[i]);
+				m_config->getRefToDomains().push_back(dom);
 				retVal = true;
 			}
 		}
@@ -176,9 +176,7 @@ void OPSConfigRepository::TotalClear()
 	const SafeLock lock(repoLock);
 	m_config->getRefToDomains().clear();
 
-	for (auto it = m_configFiles.begin(); it != m_configFiles.end(); ++it) {
-		it->second.reset();
-	}
+    // Release all references to shared objects, which may delete them
 	m_configFiles.clear();
 }
 

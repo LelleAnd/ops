@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2020-2025 Lennart Andersson.
+* Copyright (C) 2020-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -269,15 +269,13 @@ namespace ops
         std::unique_ptr<SendDataHandlerFactory> sendDataHandlerFactory;
 
 		//Visible to friends only
-		//TODO: Deprecate and delegate to receiveDataHandlerFactory???
-        std::shared_ptr<ReceiveDataHandler> getReceiveDataHandler(Topic top);
-		void releaseReceiveDataHandler(Topic top);
+		std::shared_ptr<ReceiveDataHandler> getReceiveDataHandler(const Topic& top);
+		void releaseReceiveDataHandler(const Topic& top);
 
 		///Visible to friends only
-		//TODO: Deprecate and delegate to sendDataHandlerFactory???
-		std::shared_ptr<SendDataHandler> getSendDataHandler(Topic top);
-		void releaseSendDataHandler(const Topic top);		
-		void updateSendPartInfo(const Topic top);
+		std::shared_ptr<SendDataHandler> getSendDataHandler(const Topic& top);
+		void releaseSendDataHandler(const Topic& top);
+		void updateSendPartInfo(const Topic& top);
 
 		///Mutex for ioService, used to shutdown safely
 		Lockable serviceMutex;

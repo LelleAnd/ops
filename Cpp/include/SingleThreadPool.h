@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2019-2021 Lennart Andersson.
+ * Copyright (C) 2019-2026 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -25,6 +25,7 @@
 #include <vector>
 #include <atomic>
 #include <chrono>
+#include <algorithm>
 
 #include "Thread.h"
 #include "ThreadPool.h"
@@ -69,13 +70,9 @@ namespace ops
                 {
                     SafeLock lock(mutex);
                     if (!running.load()) {
-                        std::vector<Runnable*>::iterator it = runnables.begin();
-                        for (unsigned int i = 0; i < runnables.size(); i++) {
-                            if (runnables[i] == runnable) {
-                                it += i;
-                                runnables.erase(it);
-                                break;
-                            }
+                        auto it = std::find(runnables.begin(), runnables.end(), runnable);
+                        if (it != runnables.end()) {
+                            runnables.erase(it);
                         }
                         return;
                     }

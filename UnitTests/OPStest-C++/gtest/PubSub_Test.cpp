@@ -36,6 +36,15 @@ namespace GTest {
     {
     public:
         static ops::TypeId_T getTypeName() { return ops::TypeId_T("GTest.TestData"); }
+#ifdef OPS_C17_DETECTED
+        TestData() : ops::OPSObject(getTypeName())
+        {
+        }
+        TestData(const TestData& __c) : ops::OPSObject(getTypeName())
+        {
+            __c.fillClone(this);
+        }
+#else
         TestData() : ops::OPSObject()
         {
             OPSObject::appendType(ops::TypeId_T("GTest.TestData"));
@@ -45,6 +54,7 @@ namespace GTest {
             OPSObject::appendType(ops::TypeId_T("GTest.TestData"));
             __c.fillClone(this);
         }
+#endif
         TestData& operator = (const TestData& other)
         {
             other.fillClone(this);

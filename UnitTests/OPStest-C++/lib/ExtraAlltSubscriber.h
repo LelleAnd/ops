@@ -1,19 +1,17 @@
-#ifndef pizza_special_ExtraAlltSubscriber_h
-#define pizza_special_ExtraAlltSubscriber_h
+//Auto generated OPS-code. DO NOT MODIFY!
+#pragma once
 
 #include "Subscriber.h"
 #include "Topic.h"
 #include "OPSObject.h"
 #include "ExtraAllt.h"
 
-
 namespace pizza { namespace special {
-
 
 class ExtraAlltSubscriber : public ops::Subscriber
 {
 public:
-    ExtraAlltSubscriber(ops::Topic t)
+    explicit ExtraAlltSubscriber(ops::Topic t)
         : ops::Subscriber(t)
     {
     }
@@ -57,5 +55,3 @@ public:
 
 }}
 
-
-#endif

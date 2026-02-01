@@ -1,5 +1,5 @@
-#ifndef pizza_PizzaDataPublisher_h
-#define pizza_PizzaDataPublisher_h
+//Auto generated OPS-code. DO NOT MODIFY!
+#pragma once
 
 #include "Publisher.h"
 #include "Topic.h"
@@ -12,7 +12,7 @@ class PizzaDataPublisher : public ops::Publisher
 {
     using ops::Publisher::write;    // Hide base
 public:
-    PizzaDataPublisher(ops::Topic t)
+    explicit PizzaDataPublisher(ops::Topic t)
         : ops::Publisher(t)
     {
     }
@@ -21,19 +21,17 @@ public:
     {
     }
 
-    void write(PizzaData* data)
+    bool write(PizzaData* data)
     {
-        ops::Publisher::write(data);
+        return ops::Publisher::write(data);
     }
 
-    void write(PizzaData& data)
+    bool write(PizzaData& data)
     {
-        ops::Publisher::write(&data);
+        return ops::Publisher::write(&data);
     }
 
 };
 
 }
 
-
-#endif

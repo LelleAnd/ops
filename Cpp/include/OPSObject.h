@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2025 Lennart Andersson.
+* Copyright (C) 2019-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -55,6 +55,10 @@ namespace ops
 
         uint8_t OPSObject_version = OPSObject_idlVersion;
 
+#ifdef OPS_C17_DETECTED
+        // Base for compile-time generated inheritance description string
+        constexpr static auto _inheritDesc = ops::strings::make_fixed_string_trunc("");
+#else
         void appendType(const TypeId_T& type)
 		{
 			const TypeId_T old = typesString;
@@ -62,6 +66,7 @@ namespace ops
 			typesString += ' ';
 			typesString += old;
 		}
+#endif
 
     public:
         static constexpr uint8_t OPSObject_idlVersion = 0;
@@ -106,8 +111,16 @@ namespace ops
 
         virtual bool isValid() const noexcept;
 
+#ifdef OPS_C17_DETECTED
+    protected:
+        OPSObject(std::string_view tName);
+
+    public:
+        OPSObject() : OPSObject("") {}
+#else
     public:
         OPSObject();
+#endif
         virtual ~OPSObject();
 
         OPSObject(const OPSObject& other);                       // Copy constructor

@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016-2025 Lennart Andersson.
+* Copyright (C) 2016-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -28,6 +28,13 @@ namespace ops
 {
     class Transport : public OPSObject
     {
+#ifdef OPS_C17_DETECTED
+    protected:
+        // Compile-time generated type and inheritance description strings
+        constexpr static auto _typeName = ops::strings::make_fixed_string_trunc("Transport");
+        constexpr static auto _inheritDesc = ops::strings::make_fixed_string_trunc(_typeName, ops::OPSObject::_inheritDesc, ' ');
+#endif
+
     public:
         static constexpr uint8_t Transport_idlVersion = 0;
         uint8_t Transport_version = Transport_idlVersion;
@@ -35,7 +42,15 @@ namespace ops
         ChannelId_T channelID;
         std::vector<ObjectName_T> topics;
 
+#ifdef OPS_C17_DETECTED
+    protected:
+        Transport(std::string_view tName);
+
+    public:
+        Transport() : Transport(std::string_view(_inheritDesc)) {}
+#else
         Transport();
+#endif
         Transport(const Transport& other) = default;
         Transport(Transport&& other) = default;
         Transport& operator= (const Transport& other) = default;

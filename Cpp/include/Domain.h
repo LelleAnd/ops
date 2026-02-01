@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2025 Lennart Andersson.
+* Copyright (C) 2019-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -33,6 +33,13 @@ namespace ops
 {
     class Domain : public OPSObject
 	{
+#ifdef OPS_C17_DETECTED
+	protected:
+		// Compile-time generated type and inheritance description strings
+		constexpr static auto _typeName = ops::strings::make_fixed_string_trunc("Domain");
+		constexpr static auto _inheritDesc = ops::strings::make_fixed_string_trunc(_typeName, ops::OPSObject::_inheritDesc, ' ');
+	private:
+#endif
 		static constexpr uint8_t Domain_idlVersion = 0;
 		uint8_t Domain_version = Domain_idlVersion;
 
@@ -60,8 +67,16 @@ namespace ops
 		Channel* findChannel(ChannelId_T id) const;
 		Topic* findTopic(ObjectName_T id) const;
 
+#ifdef OPS_C17_DETECTED
+	protected:
+		Domain(std::string_view tName);
+
+	public:
+		Domain() : Domain(std::string_view(_inheritDesc)) {}
+#else
 	public:
 		Domain();
+#endif
 
 		Address_T getDomainAddress() const noexcept;
 		virtual std::vector<Topic* > getTopics() const;

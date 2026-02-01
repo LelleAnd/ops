@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -31,10 +31,16 @@ using namespace ops;
 class MyOpsObject : public OPSObject
 {
 public:
-	MyOpsObject(): OPSObject()
-	{ 
-		appendType("MyOpsObject"); 
+#ifdef OPS_C17_DETECTED
+	MyOpsObject() : OPSObject("MyOpsObject ")
+	{
 	}
+#else
+	MyOpsObject() : OPSObject()
+	{
+		appendType("MyOpsObject");
+	}
+#endif
 	virtual ~MyOpsObject() = default;
 
     virtual MyOpsObject* clone() override

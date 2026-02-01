@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2025 Lennart Andersson.
+* Copyright (C) 2019-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -29,8 +29,14 @@ namespace ops
 	std::atomic<uint32_t> OPSObject::_NumOpsObjects{ 0 };
 #endif
 
-    OPSObject::OPSObject()
-    {
+#ifdef OPS_C17_DETECTED
+	OPSObject::OPSObject(std::string_view tName)
+	{
+		typesString = tName;
+#else
+	OPSObject::OPSObject()
+	{
+#endif
 		OPS_OBJ_TRACE("OPSObject()\n");
 #if defined(DEBUG_OPSOBJECT_COUNTER)
         _NumOpsObjects++;

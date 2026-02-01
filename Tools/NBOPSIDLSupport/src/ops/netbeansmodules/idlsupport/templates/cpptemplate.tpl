@@ -15,19 +15,37 @@ class __className :
 	public __baseClassName
 {
 protected:
+#ifdef OPS_C17_DETECTED
+    // Compile-time generated type and inheritance description strings
+    constexpr static auto _typeName = ops::strings::make_fixed_string_trunc("__packageName.__className");
+    constexpr static auto _inheritDesc = ops::strings::make_fixed_string_trunc(_typeName, __baseClassName::_inheritDesc, ' ');
+#endif
+
 __generationCheck
 public:
   	static ops::TypeId_T getTypeName(){ return ops::TypeId_T("__packageName.__className"); }
 
 __declarations
     ///Default constructor.
+#ifdef OPS_C17_DETECTED
+    __className() : __className(std::string_view(_inheritDesc)) {}
+
+protected:
+    __className(std::string_view tName)
+        : __baseClassName(tName)
+    {
+#else
     __className()
         : __baseClassName()
     {
         OPSObject::appendType(ops::TypeId_T("__packageName.__className"));
+#endif
 __constructorBody
     }
 
+#ifdef OPS_C17_DETECTED
+public:
+#endif
     ///Copy-constructor making full deep copy of a(n) __className object.
     __className(const __className& _c)
        : __baseClassName(_c)

@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2025 Lennart Andersson.
+* Copyright (C) 2019-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -28,6 +28,13 @@ namespace ops
 {
 	class Reply : public OPSObject
 	{
+#ifdef OPS_C17_DETECTED
+	protected:
+		// Compile-time generated type and inheritance description strings
+		constexpr static auto _typeName = ops::strings::make_fixed_string_trunc("Reply");
+		constexpr static auto _inheritDesc = ops::strings::make_fixed_string_trunc(_typeName, ops::OPSObject::_inheritDesc, ' ');
+#endif
+
 	public:
 		static constexpr uint8_t Reply_idlVersion = 0;
 		uint8_t Reply_version = Reply_idlVersion;
@@ -35,6 +42,21 @@ namespace ops
         std::string requestId;
         bool requestAccepted{ false };
         std::string message;
+
+#ifdef OPS_C17_DETECTED
+	protected:
+		Reply(std::string_view tName) :
+			ops::OPSObject(tName)
+		{
+		}
+
+	public:
+		Reply() : Reply(std::string_view(_inheritDesc)) {}
+#else
+		Reply()
+		{
+		}
+#endif
 
 		void serialize(ops::ArchiverInOut* archiver) override
 		{

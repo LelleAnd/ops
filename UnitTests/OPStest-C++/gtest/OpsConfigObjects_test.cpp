@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018-2020 Lennart Andersson.
+* Copyright (C) 2018-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -40,6 +40,15 @@
 
 using namespace ops;
 using namespace opsidls;
+
+ops::TypeId_T Trim(const ops::TypeId_T& str)
+{
+	auto pos1 = str.find_first_not_of(' ');
+	auto pos2 = str.find_last_not_of(' ');
+	if ((pos1 == pos2) && (pos1 == ops::TypeId_T::npos)) return "";
+	return str.substr(pos1 == ops::TypeId_T::npos ? 0 : pos1,
+		pos2 == ops::TypeId_T::npos ? str.length() - 1 : pos2 - pos1 + 1);
+}
 
 ///=========================================================================
 
@@ -1056,7 +1065,7 @@ TEST_F(OpsConfigTestFixture, Test) {
 
 	// Default constructor
 	DefaultOPSConfigImpl obj1;
-	EXPECT_STREQ(obj1.getTypeString().c_str(), "DefaultOPSConfigImpl ");
+	EXPECT_STREQ(Trim(obj1.getTypeString()).c_str(), "DefaultOPSConfigImpl");
 	EXPECT_EQ(obj1.getRefToDomains().size(), (size_t)0);
 	EXPECT_EQ(obj1.getDomains().size(), (size_t)0);
 	EXPECT_EQ(obj1.getDomain("Test"), nullptr);
@@ -1135,7 +1144,7 @@ TEST_F(OpsConfigTestFixture, Test_Serialize) {
 		DefaultOPSConfigImpl obj1;
 		getFromString(gcontent, obj1);
 
-		EXPECT_STREQ(obj1.getTypeString().c_str(), "DefaultOPSConfigImpl ");
+		EXPECT_STREQ(Trim(obj1.getTypeString()).c_str(), "DefaultOPSConfigImpl");
 		EXPECT_EQ(obj1.getRefToDomains().size(), (size_t)2);
 		EXPECT_EQ(obj1.getDomains().size(), (size_t)2);
 		EXPECT_EQ(obj1.getDomain("Test"), nullptr);

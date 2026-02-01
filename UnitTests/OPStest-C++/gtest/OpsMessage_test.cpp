@@ -75,11 +75,18 @@ class OpsObject_MessageTest : public OPSObject
 public:
 	std::string Message;
 
+#ifdef OPS_C17_DETECTED
+	OpsObject_MessageTest() : OPSObject("OpsObject_MessageTest ")
+	{
+		++OpsObject_MessageTest_Cnt;
+	}
+#else
 	OpsObject_MessageTest() : OPSObject()
 	{
 		appendType("OpsObject_MessageTest");
 		++OpsObject_MessageTest_Cnt;
 	}
+#endif
 	virtual ~OpsObject_MessageTest()
 	{
 		--OpsObject_MessageTest_Cnt;

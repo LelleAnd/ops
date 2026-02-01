@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2021 Lennart Andersson.
+* Copyright (C) 2019-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -19,6 +19,8 @@
 * along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <algorithm>
+
 #include "OPSTypeDefs.h"
 #include "Domain.h"
 #include "NoSuchTopicException.h"
@@ -28,10 +30,17 @@
 namespace ops
 {
 
+#ifdef OPS_C17_DETECTED
+Domain::Domain(std::string_view tName)
+	: ops::OPSObject(tName)
+{
+}
+#else
 Domain::Domain()
 {
 	appendType(TypeId_T("Domain"));
 }
+#endif
 
 Domain::Domain(const Domain& other)
 {

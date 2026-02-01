@@ -1,19 +1,17 @@
-#ifndef pizza_VessuvioDataSubscriber_h
-#define pizza_VessuvioDataSubscriber_h
+//Auto generated OPS-code. DO NOT MODIFY!
+#pragma once
 
 #include "Subscriber.h"
 #include "Topic.h"
 #include "OPSObject.h"
 #include "VessuvioData.h"
 
-
 namespace pizza {
-
 
 class VessuvioDataSubscriber : public ops::Subscriber
 {
 public:
-    VessuvioDataSubscriber(ops::Topic t)
+    explicit VessuvioDataSubscriber(ops::Topic t)
         : ops::Subscriber(t)
     {
     }
@@ -57,5 +55,3 @@ public:
 
 }
 
-
-#endif

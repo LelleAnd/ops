@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016-2025 Lennart Andersson.
+* Copyright (C) 2016-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -25,10 +25,18 @@
 
 namespace ops
 {
+#ifdef OPS_C17_DETECTED
+    Channel::Channel(std::string_view tName)
+        : ops::OPSObject(tName)
+    {
+    }
+#else
     Channel::Channel()
     {
         appendType(TypeId_T("Channel"));
     }
+#endif
+
 
     // Returns a deep copy of this object.
     Channel* Channel::clone()

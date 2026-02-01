@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2025 Lennart Andersson.
+* Copyright (C) 2019-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -35,11 +35,26 @@ namespace ops
 		friend class Domain;
 		friend class Participant;
     
+#ifdef OPS_C17_DETECTED
+	protected:
+		// Compile-time generated type and inheritance description strings
+		constexpr static auto _typeName = ops::strings::make_fixed_string_trunc("Topic");
+		constexpr static auto _inheritDesc = ops::strings::make_fixed_string_trunc(_typeName, ops::OPSObject::_inheritDesc, ' ');
+#endif
+
 	public:
 		static constexpr uint8_t Topic_idlVersion = 0;
 		uint8_t Topic_version = Topic_idlVersion;
 
-        Topic();
+#ifdef OPS_C17_DETECTED
+	protected:
+		Topic(std::string_view tName);
+
+	public:
+		Topic() : Topic(std::string_view(_inheritDesc)) {}
+#else
+		Topic();
+#endif
         Topic(const ObjectName_T namee, int portt, const TypeId_T typeIDd, const Address_T domainAddresss);
         Topic(const ObjectName_T namee, const TypeId_T typeIDd, int sampleMaxSize, bool useAck, const Topic& base);
 

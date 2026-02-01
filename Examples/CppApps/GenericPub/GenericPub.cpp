@@ -60,10 +60,16 @@ struct DummyObject : public ops::OPSObject
 {
 	static ops::TypeId_T fakeTypeName;
 	static ops::TypeId_T getTypeName() { return fakeTypeName; }
+#ifdef OPS_C17_DETECTED
+	DummyObject() : ops::OPSObject(fakeTypeName)
+	{
+	}
+#else
 	DummyObject()
 	{
 		OPSObject::appendType(fakeTypeName);
 	}
+#endif
 };
 ops::TypeId_T DummyObject::fakeTypeName;
 

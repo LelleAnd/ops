@@ -36,19 +36,40 @@ namespace ops
 	, public Reservable
 #endif
     {
+#ifdef OPS_C17_DETECTED
+    protected:
+        // Compile-time generated type and inheritance description strings
+        constexpr static auto _typeName = ops::strings::make_fixed_string_trunc("ops.protocol.OPSMessage");
+        constexpr static auto _inheritDesc = ops::strings::make_fixed_string_trunc(_typeName, ops::OPSObject::_inheritDesc, ' ');
+#endif
+
     public:
         static constexpr uint8_t OPSMessage_idlVersion = 0;
         uint8_t OPSMessage_version = OPSMessage_idlVersion;
 
-        OPSMessage() :
-            OPSObject()
+#ifdef OPS_C17_DETECTED
+    protected:
+        OPSMessage(std::string_view tName) :
+            ops::OPSObject(tName)
 #ifndef OPSSLIM_NORESERVE
             , Reservable()
 #endif
         {
-			TypeId_T const typeName("ops.protocol.OPSMessage");
+        }
+
+    public:
+        OPSMessage() : OPSMessage(std::string_view(_inheritDesc)) {}
+#else
+        OPSMessage() :
+            OPSObject()
+    #ifndef OPSSLIM_NORESERVE
+            , Reservable()
+    #endif
+        {
+            TypeId_T const typeName("ops.protocol.OPSMessage");
             OPSObject::appendType(typeName);
         }
+#endif
 
 		// Copy constructor
 		// Note: A copied OPSMessage will NOT copy the Reservable data, ie. the copy will not belong to a reference

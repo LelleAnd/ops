@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2019-2025 Lennart Andersson.
+ * Copyright (C) 2019-2026 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -32,14 +32,32 @@ namespace ops
 {
     class DefaultOPSConfigImpl : public OPSConfig
     {
+#ifdef OPS_C17_DETECTED
+    protected:
+        // Compile-time generated type and inheritance description strings
+        constexpr static auto _typeName = ops::strings::make_fixed_string_trunc("DefaultOPSConfigImpl");
+        constexpr static auto _inheritDesc = ops::strings::make_fixed_string_trunc(_typeName, OPSConfig::_inheritDesc, ' ');
+#endif
+
     public:
         static constexpr uint8_t DefaultOPSConfigImpl_idlVersion = 0;
         uint8_t DefaultOPSConfigImpl_version = DefaultOPSConfigImpl_idlVersion;
 
+#ifdef OPS_C17_DETECTED
+    protected:
+        DefaultOPSConfigImpl(std::string_view tName) :
+            OPSConfig(tName)
+        {
+        }
+
+    public:
+        DefaultOPSConfigImpl() : DefaultOPSConfigImpl(std::string_view(_inheritDesc)) {}
+#else
         DefaultOPSConfigImpl()
         {
             appendType(TypeId_T("DefaultOPSConfigImpl"));
         }
+#endif
 
         DefaultOPSConfigImpl(const DefaultOPSConfigImpl& other) = default;
         DefaultOPSConfigImpl& operator= (const DefaultOPSConfigImpl& other) = default;

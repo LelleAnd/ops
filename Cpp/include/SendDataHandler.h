@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2025 Lennart Andersson.
+* Copyright (C) 2018-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -22,6 +22,7 @@
 #pragma once
 
 #include <memory>
+#include <algorithm>
 
 #include "OPSMessage.h"
 #include "Topic.h"
@@ -49,9 +50,9 @@ namespace ops
 		{
             SafeLock lock(mutex);
 			// Check that it isn't already in the list
-			for (unsigned int i = 0; i < publishers.size(); i++) {
-				if (publishers[i] == client) return;
-			}
+			auto it = std::find(publishers.begin(), publishers.end(), client);
+			if (it != publishers.end()) return;
+
 			// Save client in the list
 			publishers.push_back(client);
 			// For the first client, we open the sender
@@ -63,13 +64,10 @@ namespace ops
 		{
             SafeLock lock(mutex);
 			// Remove it from the list
-			std::vector<void*>::iterator Iter;
-			for (Iter = publishers.begin(); Iter != publishers.end(); Iter++) {
-				if (*Iter == client) {
-					publishers.erase(Iter);
-					topicUsage(top, false);
-					break;
-				}
+			auto it = std::find(publishers.begin(), publishers.end(), client);
+			if (it != publishers.end()) {
+				publishers.erase(it);
+				topicUsage(top, false);
 			}
 			if (publishers.size() == 0) sender->close();
 		}

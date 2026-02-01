@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016-2021 Lennart Andersson.
+* Copyright (C) 2016-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -23,10 +23,17 @@
 
 namespace ops
 {
+#ifdef OPS_C17_DETECTED
+    Transport::Transport(std::string_view tName)
+        : ops::OPSObject(tName)
+    {
+    }
+#else
     Transport::Transport()
     {
         appendType(TypeId_T("Transport"));
     }
+#endif
 
     // Returns a newely allocated deep copy/clone of this object.
     Transport* Transport::clone()

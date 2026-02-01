@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2016-2025 Lennart Andersson.
+* Copyright (C) 2016-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -29,6 +29,13 @@ namespace ops
 {
     class Channel : public OPSObject
     {
+#ifdef OPS_C17_DETECTED
+    protected:
+        // Compile-time generated type and inheritance description strings
+        constexpr static auto _typeName = ops::strings::make_fixed_string_trunc("Channel");
+        constexpr static auto _inheritDesc = ops::strings::make_fixed_string_trunc(_typeName, ops::OPSObject::_inheritDesc, ' ');
+#endif
+
     public:
         static constexpr uint8_t Channel_idlVersion = 0;
         uint8_t Channel_version = Channel_idlVersion;
@@ -46,7 +53,15 @@ namespace ops
         int registerTimeMs{ -1 };
         int sampleMaxSize{ -1 };
 
+#ifdef OPS_C17_DETECTED
+    protected:
+        Channel(std::string_view tName);
+
+    public:
+        Channel() : Channel(std::string_view(_inheritDesc)) {}
+#else
         Channel();
+#endif
         Channel(const Channel& other) = default;
         Channel(Channel&& other)= default;
         Channel& operator= (const Channel& other) = default;

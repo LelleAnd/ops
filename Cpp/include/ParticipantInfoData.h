@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2025 Lennart Andersson.
+* Copyright (C) 2019-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -30,15 +30,33 @@ namespace ops
 	///Defines the meta-data that can be sent between Participants
 	class ParticipantInfoData : public OPSObject
 	{
+#ifdef OPS_C17_DETECTED
+	protected:
+		// Compile-time generated type and inheritance description strings
+		constexpr static auto _typeName = ops::strings::make_fixed_string_trunc("ops.ParticipantInfoData");
+		constexpr static auto _inheritDesc = ops::strings::make_fixed_string_trunc(_typeName, ops::OPSObject::_inheritDesc, ' ');
+#endif
+
 	public:
 		// NOTE. Must be kept in sync with other OPS language implementations
 		static constexpr uint8_t ParticipantInfoData_idlVersion = 0;
 		uint8_t ParticipantInfoData_version = ParticipantInfoData_idlVersion;
 
-        ParticipantInfoData()
+#ifdef OPS_C17_DETECTED
+	protected:
+		ParticipantInfoData(std::string_view tName) :
+			ops::OPSObject(tName)
+		{
+		}
+
+	public:
+		ParticipantInfoData() : ParticipantInfoData(std::string_view(_inheritDesc)) {}
+#else
+		ParticipantInfoData()
 		{
 			appendType(TypeId_T("ops.ParticipantInfoData"));
 		}
+#endif
 		
 		// Returns a newely allocated deep copy/clone of this object.
 		virtual ParticipantInfoData* clone() override

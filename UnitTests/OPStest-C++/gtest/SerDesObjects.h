@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018-2025 Lennart Andersson.
+* Copyright (C) 2018-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -25,7 +25,11 @@ class SerDesObject_Core : public ops::OPSObject
 {
 public:
     static ops::TypeId_T getTypeName() { return ops::TypeId_T("SerDesObject_Core"); }
+#ifdef OPS_C17_DETECTED
+    SerDesObject_Core() : ops::OPSObject(getTypeName()) {}
+#else
     SerDesObject_Core() { appendType(getTypeName()); }
+#endif
     ~SerDesObject_Core() = default;
 
     bool bo;
@@ -66,7 +70,11 @@ class SerDesObject_Vectors : public ops::OPSObject
 {
 public:
     static ops::TypeId_T getTypeName() { return ops::TypeId_T("SerDesObject_Vectors"); }
+#ifdef OPS_C17_DETECTED
+    SerDesObject_Vectors() : ops::OPSObject(getTypeName()) {}
+#else
     SerDesObject_Vectors() { appendType(getTypeName()); }
+#endif
     ~SerDesObject_Vectors() = default;
 
     std::vector<bool> bo;
@@ -105,7 +113,11 @@ class SerDesObject_Fixarrays : public ops::OPSObject
 {
 public:
     static ops::TypeId_T getTypeName() { return ops::TypeId_T("SerDesObject_Fixarrays"); }
+#ifdef OPS_C17_DETECTED
+    SerDesObject_Fixarrays() : ops::OPSObject(getTypeName()) {}
+#else
     SerDesObject_Fixarrays() { appendType(getTypeName()); }
+#endif
     ~SerDesObject_Fixarrays() = default;
 
     bool bo[4];
@@ -144,6 +156,15 @@ class SerDesObject_Serializables : public ops::OPSObject
 {
 public:
     static ops::TypeId_T getTypeName() { return ops::TypeId_T("SerDesObject_Serializables"); }
+#ifdef OPS_C17_DETECTED
+    SerDesObject_Serializables() :
+        ops::OPSObject(getTypeName()),
+        obj2(new SerDesObject_Core()), obj3(new SerDesObject_Core())
+    {
+        fixarr2[0] = new SerDesObject_Core();
+        fixarr2[1] = new SerDesObject_Core();
+    }
+#else
     SerDesObject_Serializables() :
         obj2(new SerDesObject_Core()), obj3(new SerDesObject_Core())
     {
@@ -151,6 +172,7 @@ public:
         fixarr2[0] = new SerDesObject_Core();
         fixarr2[1] = new SerDesObject_Core();
     }
+#endif
     virtual ~SerDesObject_Serializables()
     {
         if (obj2 != nullptr) { delete obj2; }

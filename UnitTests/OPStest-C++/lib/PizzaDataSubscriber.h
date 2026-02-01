@@ -1,19 +1,17 @@
-#ifndef pizza_PizzaDataSubscriber_h
-#define pizza_PizzaDataSubscriber_h
+//Auto generated OPS-code. DO NOT MODIFY!
+#pragma once
 
 #include "Subscriber.h"
 #include "Topic.h"
 #include "OPSObject.h"
 #include "PizzaData.h"
 
-
 namespace pizza {
-
 
 class PizzaDataSubscriber : public ops::Subscriber
 {
 public:
-    PizzaDataSubscriber(ops::Topic t)
+    explicit PizzaDataSubscriber(ops::Topic t)
         : ops::Subscriber(t)
     {
     }
@@ -57,5 +55,3 @@ public:
 
 }
 
-
-#endif

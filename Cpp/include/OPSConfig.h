@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2025 Lennart Andersson.
+* Copyright (C) 2019-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -33,6 +33,13 @@ namespace ops
 {
     class OPSConfig : public OPSObject
 	{
+#ifdef OPS_C17_DETECTED
+	protected:
+		// Compile-time generated type and inheritance description strings
+		constexpr static auto _typeName = ops::strings::make_fixed_string_trunc("");
+		constexpr static auto _inheritDesc = ops::strings::make_fixed_string_trunc(_typeName, ops::OPSObject::_inheritDesc, ' ');
+#endif
+
 	public:
 		static constexpr uint8_t OPSConfig_idlVersion = 0;
 		uint8_t OPSConfig_version = OPSConfig_idlVersion;
@@ -41,7 +48,19 @@ namespace ops
 		static std::shared_ptr<OPSConfig> getConfig(FileName_T configFile);
 		static std::shared_ptr<OPSConfig> getConfig(std::istream& inStream);
 
+#ifdef OPS_C17_DETECTED
+	protected:
+		OPSConfig(std::string_view tName) :
+			ops::OPSObject(tName)
+		{
+		}
+
+	public:
+		OPSConfig() : OPSConfig(std::string_view(_inheritDesc)) {}
+#else
 		OPSConfig() = default;
+#endif
+
 		OPSConfig(const OPSConfig & other);
 		OPSConfig& operator= (const OPSConfig & other);
 		OPSConfig(OPSConfig && other) = default;

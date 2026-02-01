@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2025 Lennart Andersson.
+* Copyright (C) 2019-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -29,19 +29,42 @@ namespace ops
 	///Defines part of the meta-data that can be sent between Participants
 	class TopicInfoData : public OPSObject
 	{
+#ifdef OPS_C17_DETECTED
+	protected:
+		// Compile-time generated type and inheritance description strings
+		constexpr static auto _typeName = ops::strings::make_fixed_string_trunc("TopicInfoData");
+		constexpr static auto _inheritDesc = ops::strings::make_fixed_string_trunc(_typeName, ops::OPSObject::_inheritDesc, ' ');
+#endif
+
 	public:
 		// NOTE. Must be kept in sync with other OPS language implementations
 		static constexpr uint8_t TopicInfoData_idlVersion = 0;
 		uint8_t TopicInfoData_version = TopicInfoData_idlVersion;
 
-        TopicInfoData()
+#ifdef OPS_C17_DETECTED
+	protected:
+		TopicInfoData(std::string_view tName) :
+			ops::OPSObject(tName)
+		{
+		}
+
+	public:
+		TopicInfoData() : TopicInfoData(std::string_view(_inheritDesc)) {}
+#else
+		TopicInfoData()
 		{
 			appendType(TypeId_T("TopicInfoData"));
 		}
+#endif
 
 		explicit TopicInfoData(const Topic& topic)
+#ifdef OPS_C17_DETECTED
+			: ops::OPSObject(std::string_view(_inheritDesc))
+		{
+#else
 		{
 			appendType(TypeId_T("TopicInfoData"));
+#endif
 			name = topic.getName();
 			type = topic.getTypeID();
 			transport = topic.getTransport();

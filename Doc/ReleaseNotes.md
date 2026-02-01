@@ -4,6 +4,11 @@ The major changes for each release tag is noted below. For minor changes see the
 ## tags 4.3.x-y ##
 Requires the tinyxml2 library which 4.2.x-y doesn't.
 
+### 4.3.3-0 ###
+* Added compile-time construction of idl type-strings for C++17 and up
+* Changed C++ SerializableFactory::create parameter type to string_view for C++17 and up
+* Changed member initialization to direct-initialization in generated C++ code
+
 ### 4.3.2-3 ###
 * Cleanup of C++ code (removed a lot of ifdef's for C++14 features)
 * Corrected C++ Subscriber methods waitForNewData() used when polling for messages

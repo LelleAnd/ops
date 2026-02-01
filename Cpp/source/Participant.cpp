@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2025 Lennart Andersson.
+* Copyright (C) 2019-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -20,6 +20,7 @@
 */
 #include <sstream>
 #include <thread>
+#include <algorithm>
 #ifdef _WIN32
 #include <process.h>
 #include <winsock.h>
@@ -27,6 +28,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #endif
+
 #include "OPSTypeDefs.h"
 #include "Participant.h"
 #include "opsidls/OPSConstants.h"
@@ -459,9 +461,8 @@ namespace ops
 	{
 		const SafeLock lock(partInfoDataMutex);
 		// Check if topic exist in partInfoData.publishTopics
-		std::vector<TopicInfoData>::iterator it;
-		for (it = partInfoData.publishTopics.begin(); it != partInfoData.publishTopics.end(); ++it) {
-            if (it->name == topicName) { return true; }
+		for (auto const& td : partInfoData.publishTopics) {
+			if (td.name == topicName) { return true; }
 		}
 		return false;
 	}
@@ -470,14 +471,13 @@ namespace ops
 	{
 		const SafeLock lock(partInfoDataMutex);
 		// Check if topic exist in partInfoData.subscribeTopics
-		std::vector<TopicInfoData>::iterator it;
-		for (it = partInfoData.subscribeTopics.begin(); it != partInfoData.subscribeTopics.end(); ++it) {
-            if (it->name == topicName) { return true; }
+		for (auto const& td : partInfoData.subscribeTopics) {
+			if (td.name == topicName) { return true; }
 		}
 		return false;
 	}
 
-    std::shared_ptr<ReceiveDataHandler> Participant::getReceiveDataHandler(Topic top)
+	std::shared_ptr<ReceiveDataHandler> Participant::getReceiveDataHandler(const Topic& top)
 	{
         std::shared_ptr<ReceiveDataHandler> result = receiveDataHandlerFactory->getReceiveDataHandler(top, *this);
 		if (result != nullptr) {
@@ -488,47 +488,47 @@ namespace ops
 		return result;
 	}
 
-	void Participant::releaseReceiveDataHandler(Topic top)
+	void Participant::releaseReceiveDataHandler(const Topic& top)
 	{
 		receiveDataHandlerFactory->releaseReceiveDataHandler(top, *this);
 
+		ObjectName_T topicName{ top.getName() };
+
 		const SafeLock lock(partInfoDataMutex);
 		// Remove topic from partInfoData.subscribeTopics (TODO the same topic, ref count?)
-		std::vector<TopicInfoData>::iterator it;
-		for (it = partInfoData.subscribeTopics.begin(); it != partInfoData.subscribeTopics.end(); ++it) {
-			if (it->name == top.getName()) {
-				partInfoData.subscribeTopics.erase(it);
-				break;
-			}
+		auto it = std::find_if(partInfoData.subscribeTopics.begin(), partInfoData.subscribeTopics.end(),
+			[&](TopicInfoData const& td) { return td.name == topicName; });
+		if (it != partInfoData.subscribeTopics.end()) {
+			partInfoData.subscribeTopics.erase(it);
 		}
 	}
 
-	std::shared_ptr<SendDataHandler> Participant::getSendDataHandler(Topic top)
+	std::shared_ptr<SendDataHandler> Participant::getSendDataHandler(const Topic& top)
 	{
 		const std::shared_ptr<SendDataHandler> result = sendDataHandlerFactory->getSendDataHandler(top, *this);
 		// We can't update Participant Info here, delayed until updateSendPartInfo()
 		return result;
 	}
 
-	void Participant::updateSendPartInfo(const Topic top)
+	void Participant::updateSendPartInfo(const Topic& top)
 	{
 		const SafeLock lock(partInfoDataMutex);
 		//Need to add topic to partInfoData.subscribeTopics (TODO ref count if same topic??)
 		partInfoData.publishTopics.push_back(TopicInfoData(top));
 	}
 
-	void Participant::releaseSendDataHandler(const Topic top)
+	void Participant::releaseSendDataHandler(const Topic& top)
 	{
 		sendDataHandlerFactory->releaseSendDataHandler(top, *this);
 
+		ObjectName_T topicName{ top.getName() };
+
 		const SafeLock lock(partInfoDataMutex);
 		// Remove topic from partInfoData.publishTopics (TODO the same topic, ref count?)
-		std::vector<TopicInfoData>::iterator it;
-		for (it = partInfoData.publishTopics.begin(); it != partInfoData.publishTopics.end(); ++it) {
-			if (it->name == top.getName()) {
-				partInfoData.publishTopics.erase(it);
-				break;
-			}
+		auto it = std::find_if(partInfoData.publishTopics.begin(), partInfoData.publishTopics.end(),
+			[&](TopicInfoData const& td) { return td.name == topicName; });
+		if (it != partInfoData.publishTopics.end()) {
+			partInfoData.publishTopics.erase(it);
 		}
 	}
 

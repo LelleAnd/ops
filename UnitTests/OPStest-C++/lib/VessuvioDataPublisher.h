@@ -1,5 +1,5 @@
-#ifndef pizza_VessuvioDataPublisher_h
-#define pizza_VessuvioDataPublisher_h
+//Auto generated OPS-code. DO NOT MODIFY!
+#pragma once
 
 #include "Publisher.h"
 #include "Topic.h"
@@ -12,7 +12,7 @@ class VessuvioDataPublisher : public ops::Publisher
 {
     using ops::Publisher::write;    // Hide base
 public:
-    VessuvioDataPublisher(ops::Topic t)
+    explicit VessuvioDataPublisher(ops::Topic t)
         : ops::Publisher(t)
     {
     }
@@ -21,19 +21,17 @@ public:
     {
     }
 
-    void write(VessuvioData* data)
+    bool write(VessuvioData* data)
     {
-        ops::Publisher::write(data);
+        return ops::Publisher::write(data);
     }
 
-    void write(VessuvioData& data)
+    bool write(VessuvioData& data)
     {
-        ops::Publisher::write(&data);
+        return ops::Publisher::write(&data);
     }
 
 };
 
 }
 
-
-#endif

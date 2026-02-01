@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018-2020 Lennart Andersson.
+* Copyright (C) 2018-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -176,6 +176,7 @@ TEST_F(ParticipantInfoDataTestFixture, Test) {
 	{
 		// Default constructed
 		ParticipantInfoData obj1;
+		EXPECT_STREQ(obj1.getTypeString().c_str(), "ops.ParticipantInfoData ");
 		EXPECT_STREQ(obj1.name.c_str(), "");
 		EXPECT_STREQ(obj1.id.c_str(), "");
 		EXPECT_STREQ(obj1.domain.c_str(), "");

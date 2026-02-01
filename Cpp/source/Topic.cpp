@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2019-2025 Lennart Andersson.
+ * Copyright (C) 2019-2026 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -31,26 +31,43 @@ namespace ops
 
     static_assert(OPSConstants::PACKET_MAX_SIZE - OPSConstants::SEGMENT_HEADER_SIZE == OPSConstants::USABLE_SEGMENT_SIZE, "Sizes don't compute");
 
-    Topic::Topic() :
-        participantID(OPSConstants::DEFAULT_PARTICIPANT_ID()),
-        sampleMaxSize(OPSConstants::USABLE_SEGMENT_SIZE)
-    {
-        appendType(TypeId_T("Topic"));
-    }
+#ifdef OPS_C17_DETECTED
+	Topic::Topic(std::string_view tName) :
+		ops::OPSObject(tName),
+		participantID(OPSConstants::DEFAULT_PARTICIPANT_ID()),
+		sampleMaxSize(OPSConstants::USABLE_SEGMENT_SIZE)
+	{
+	}
+#else
+	Topic::Topic() :
+		participantID(OPSConstants::DEFAULT_PARTICIPANT_ID()),
+		sampleMaxSize(OPSConstants::USABLE_SEGMENT_SIZE)
+	{
+		appendType(TypeId_T("Topic"));
+	}
+#endif
 
     Topic::Topic(const ObjectName_T namee, int const portt, const TypeId_T typeIDd, const Address_T domainAddresss) :
-		name(namee), 
+#ifdef OPS_C17_DETECTED
+		ops::OPSObject(std::string_view(_inheritDesc)),
+#endif
+		name(namee),
 		port(portt), 
 		typeID(typeIDd), 
 		domainAddress(domainAddresss),
 		participantID(OPSConstants::DEFAULT_PARTICIPANT_ID()),
 		sampleMaxSize(OPSConstants::USABLE_SEGMENT_SIZE)
 	{
+#ifndef OPS_C17_DETECTED
 		appendType(TypeId_T("Topic"));
+#endif
 	}
 
     Topic::Topic(const ObjectName_T namee, const TypeId_T typeIDd, const int sampleMaxSizee, const bool useAckk, const Topic& base) :
-        name(namee),
+#ifdef OPS_C17_DETECTED
+		ops::OPSObject(std::string_view(_inheritDesc)),
+#endif
+		name(namee),
         port(base.port),
         timeToLive(base.timeToLive),
         typeID(typeIDd),
@@ -71,8 +88,10 @@ namespace ops
         registerTimeMs(base.registerTimeMs),
         channelID(base.channelID)
     {
-        appendType(TypeId_T("Topic"));
-    }
+#ifndef OPS_C17_DETECTED
+		appendType(TypeId_T("Topic"));
+#endif
+	}
 
     // Create ACK topic based on given topic
     Topic Topic::CreateAckTopic(const Topic& base)

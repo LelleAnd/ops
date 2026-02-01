@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2025 Lennart Andersson.
+* Copyright (C) 2019-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -28,11 +28,33 @@ namespace ops
 {
 	class Request : public OPSObject
 	{
+#ifdef OPS_C17_DETECTED
+	protected:
+		// Compile-time generated type and inheritance description strings
+		constexpr static auto _typeName = ops::strings::make_fixed_string_trunc("Request");
+		constexpr static auto _inheritDesc = ops::strings::make_fixed_string_trunc(_typeName, ops::OPSObject::_inheritDesc, ' ');
+#endif
+
 	public:
 		static constexpr uint8_t Request_idlVersion = 0;
 		uint8_t Request_version = Request_idlVersion;
 
         std::string requestId;
+
+#ifdef OPS_C17_DETECTED
+	protected:
+		Request(std::string_view tName) :
+			ops::OPSObject(tName)
+		{
+		}
+
+	public:
+		Request() : Request(std::string_view(_inheritDesc)) {}
+#else
+		Request()
+		{
+		}
+#endif
 
 		void serialize(ops::ArchiverInOut* archiver) override
 		{

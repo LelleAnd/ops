@@ -1,5 +1,5 @@
-#ifndef pizza_special_ExtraAlltPublisher_h
-#define pizza_special_ExtraAlltPublisher_h
+//Auto generated OPS-code. DO NOT MODIFY!
+#pragma once
 
 #include "Publisher.h"
 #include "Topic.h"
@@ -12,7 +12,7 @@ class ExtraAlltPublisher : public ops::Publisher
 {
     using ops::Publisher::write;    // Hide base
 public:
-    ExtraAlltPublisher(ops::Topic t)
+    explicit ExtraAlltPublisher(ops::Topic t)
         : ops::Publisher(t)
     {
     }
@@ -21,19 +21,17 @@ public:
     {
     }
 
-    void write(ExtraAllt* data)
+    bool write(ExtraAllt* data)
     {
-        ops::Publisher::write(data);
+        return ops::Publisher::write(data);
     }
 
-    void write(ExtraAllt& data)
+    bool write(ExtraAllt& data)
     {
-        ops::Publisher::write(&data);
+        return ops::Publisher::write(&data);
     }
 
 };
 
 }}
 
-
-#endif

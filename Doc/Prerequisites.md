@@ -36,7 +36,7 @@ Versions older than 1.71 hasn't been used/tested for quite a while. It is recomm
 ## TinyXML-2 (required for OPS C++ Core) ##
 TinyXML-2 can be downloaded from https://github.com/leethomason/tinyxml2.
 
-OPS has been used with TinyXML-2 version 9.0.0.
+OPS has been used with TinyXML-2 version 9.0.0 upto 11.0.0.
 
 ## CMake ##
 Version 3.10.0 or later is required to build OPS with CMake. Make sure the cmake command is in your path. CMake can be downloaded at https://cmake.org/.
@@ -49,7 +49,7 @@ OPS for C++ requires a C++14 compiler and has therefore only support for VS2015,
 OPS for C# requires language version 7.3 or later (due to generics and constraining type parameters to System.Enum), i.e. Visual Studio 2017 version 15.7 or later.
 
 ## gcc (Linux) ##
-OPS for C++ requires a C++14 compiler and has therefore only support for gcc 6.1 an later.
+OPS for C++ requires a C++14 compiler and has therefore only support for gcc 6.1 and later.
 
 OPS has been used with 6.2.1, 6.4.1, 7.3.1, 9.2.0, 9.3.0, 11.3.0, 13.3 and 14.2.
 Versions older than 9.2.0 hasn't been used/tested for quite a while. It is recommended to use a more modern version.

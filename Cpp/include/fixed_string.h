@@ -436,19 +436,19 @@ namespace ops { namespace strings {
 	//   static_assert(fs6.size() == 8);
 	//   static_assert(std::string_view(fs6.c_str()) == "Hej Hopp");
 
-	template <int Size>
+	template <size_t Size>
 	constexpr auto make_fixed_string(const char (&cstr)[Size]) -> fixed_string<Size - 1>
 	{
 		return fixed_string<Size - 1>(cstr);
 	}
 
-	template <int Size>
+	template <size_t Size>
 	constexpr auto make_fixed_string_trunc(const char (&cstr)[Size]) -> fixed_string_trunc<Size - 1>
 	{
 		return fixed_string_trunc<Size - 1>(cstr);
 	}
 
-    template <int N, int M>
+    template <size_t N, size_t M>
     constexpr auto make_fixed_string_trunc(const fixed_string_trunc<N>& fst1, const fixed_string_trunc<M>& fst2, const char sep)
         -> fixed_string_trunc<N + M + 1>
     {

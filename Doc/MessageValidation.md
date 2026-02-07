@@ -6,8 +6,12 @@ When the directive *//@range* is added to a field, the opsc compiler will add co
 
 In a similar way restrictions can be put on open arrays with the directive *//@maxarrlen* and on open strings with the directive *//@maxstrlen*.
 
-The user can then define if this message validation should be used and if so, how an invalid message should be handled. For backward compatibility the default is to NOT use message validation.
+The generated method can be called in user code to check if the object instance is valid. Currently validation code is only generated for C++ and Delphi, see also the [Feature List](FeatureList.md).
+
+## C++ specifics
+The user can define if the message validation should be called automatically and if so, how an invalid message should be handled. For backward compatibility the default is to NOT call message validation.
 
 The default behavior can be changed on the *Participant* before any *Publisher* or *Subscriber* is created. Then it is possible to change the behavior for individual *Publishers* and *Subscribers*.
 
-Currently this is only generated and implemented for C++, see also the [Feature List](FeatureList.md).
+## Delphi specifics
+The validation code is automatically called by the *Publisher* when an object is written. If the object isn't valid, an exception is thrown and the object is NOT published.

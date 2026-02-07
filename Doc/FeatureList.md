@@ -30,4 +30,4 @@ The following table lists some other OPS features and the support in different p
 | Debug Support       | -   | X   | -  | -      | -      | -    |
 | Checksum Archiver   | X   | X   | -  | X      | X      | -    |
 | PubID Checker       | -   | X   | -  | -      | -      | -    |
-| Field Validation    | -   | X   | -  | -      | -      | -    |
+| Field Validation    | -   | X   | -  | X      | -      | -    |

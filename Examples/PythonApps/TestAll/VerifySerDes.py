@@ -400,6 +400,13 @@ def FillChildData(data):
 	data.ffruitarr[0].value = TestAll.Fruit.PEAR
 	data.ffruitarr[14].value = TestAll.Fruit.PEAR
 
+
+class Counter(dict):
+    def __missing__(self, key):
+        return 0
+
+pubCounters = Counter()
+
 def onChildData(sub,mess):
 	addr,port = map(str,mess.getSource())
 	data=mess.data
@@ -407,6 +414,7 @@ def onChildData(sub,mess):
 	tempStr +="] (From " + addr + ":" + port + ") Comparing..."
 	print(tempStr)
 	#prt.printObject("data", data)
+	pubCounters[mess.publisherName] += 1
 	CompareChildData(data, cd1)
 	print("Comparing finished")
 
@@ -515,6 +523,15 @@ for x in range(10):
 sub.stop()
 pub.stop()
 
-print("Sleeping for 5 seconds ...")
+print("")
+print("-----------------------------------")
 
-time.sleep(5)
+for key, value in pubCounters.items():
+   print(f"{value} messages from '{key}'")
+
+print("-----------------------------------")
+print("")
+
+print("Sleeping for 15 seconds ...")
+
+time.sleep(15)

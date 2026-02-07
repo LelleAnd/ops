@@ -75,6 +75,7 @@ type
     LabeledEdit_PizzadataVersion: TLabeledEdit;
     Edit1: TEdit;
     Button_GetHostAddress: TButton;
+    CheckBox_Valid: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure Button_CreateParticipantsClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -917,6 +918,11 @@ begin
         end else begin
           Data.IdlVersionMask := 1;
           Data.PizzaData_version := pdver;
+        end;
+        if CheckBox_Valid.Checked then begin
+          Data.Kalle := 1;
+        end else begin
+          Data.Kalle := -99;
         end;
         Data.cheese := AnsiString('Pizza from Delphi: ' + IntToStr(FCounter));
         Data.tomatoSauce := 'Tomato';

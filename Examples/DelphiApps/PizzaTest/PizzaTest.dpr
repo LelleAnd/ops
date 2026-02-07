@@ -1,5 +1,7 @@
 program PizzaTest;
 
+{$WARN SYMBOL_PLATFORM OFF}
+
 uses
   Vcl.Forms,
   uPizzaTest in 'uPizzaTest.pas' {Form1},

@@ -33,7 +33,7 @@ __declarations
     ///instance of this class to a format dictated by the implementation of the ArchiverInout.
     procedure Serialize(archiver : TArchiverInOut); override;
 
-    // Validates that contained object references are of the correct type
+    // Validation routine for fields, incl. that contained object references are of the correct type
     function Validate : Boolean; override;
 
 		//Returns a newely allocated deep copy/clone of this object.
@@ -106,7 +106,7 @@ begin
 __serialize
 end;
 
-// Validates that contained object references are of the correct type
+// Validation routine for fields, incl. that contained object references are of the correct type
 function __className.Validate : Boolean;
 __validateHead
 begin

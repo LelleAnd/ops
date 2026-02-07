@@ -1,10 +1,11 @@
+using Ops;
 using System;
-using System.IO;
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Timers;
-using Ops;
 
 namespace TestAll
 {
@@ -19,6 +20,9 @@ namespace TestAll
         ChildDataSubscriber sub = null;
         ChildDataPublisher pub = null;
         ChildData cd1 = null;
+
+        private Dictionary<string, int> pubCounters = new Dictionary<string, int>();
+        private int sendCounter = 0;
 
         SafeLog safeLog = null;
 
@@ -799,8 +803,21 @@ namespace TestAll
 
         private void OnTimedEvent(Object source, ElapsedEventArgs e)
         {
-            // Publish data
-            pub.Write(cd1);
+            sendCounter++;
+            if (sendCounter > 14)
+            {
+                aTimer.Enabled = false;
+                LogNL("-------------------------");
+                foreach (var kvp in pubCounters)
+                {
+                    LogNL($"{kvp.Value} messages from  {kvp.Key}");
+                }
+                LogNL("-------------------------");
+            } else
+            {
+                // Publish data
+                pub.Write(cd1);
+            }
         }
 
         private void SubscriberNewData(ChildDataSubscriber sender, ChildData data)
@@ -814,6 +831,16 @@ namespace TestAll
                 {
                     Log("Received Data from " + msg.GetPublisherName() + ": ");
                     CheckObjects(cd1, cd3);
+
+                    if (pubCounters.ContainsKey(msg.GetPublisherName()))
+                    {
+                        pubCounters[msg.GetPublisherName()] = pubCounters[msg.GetPublisherName()] + 1;
+                    }
+                    else
+                    {
+                        pubCounters[msg.GetPublisherName()] = 0;
+                    }
+
                 }
             }
             else

@@ -1,7 +1,7 @@
 object Form1: TForm1
   Left = 0
   Top = 0
-  Caption = 'PizzaTest (Version 2024-05-10)'
+  Caption = 'PizzaTest (Version 2026-02-07)'
   ClientHeight = 516
   ClientWidth = 746
   Color = clBtnFace
@@ -34,8 +34,6 @@ object Form1: TForm1
       'Memo1')
     ScrollBars = ssBoth
     TabOrder = 0
-    ExplicitWidth = 742
-    ExplicitHeight = 296
   end
   object Panel1: TPanel
     Left = 0
@@ -44,7 +42,6 @@ object Form1: TForm1
     Height = 216
     Align = alTop
     TabOrder = 1
-    ExplicitWidth = 742
     object Label_NumOpsMessages: TLabel
       Left = 614
       Top = 14
@@ -144,7 +141,7 @@ object Form1: TForm1
     end
     object Button_WriteData: TButton
       Left = 648
-      Top = 130
+      Top = 151
       Width = 91
       Height = 25
       Caption = 'Write Data'
@@ -162,7 +159,7 @@ object Form1: TForm1
     end
     object LabeledEdit1: TLabeledEdit
       Left = 648
-      Top = 103
+      Top = 95
       Width = 91
       Height = 21
       EditLabel.Width = 62
@@ -193,7 +190,7 @@ object Form1: TForm1
     end
     object LabeledEdit_Deadline: TLabeledEdit
       Left = 556
-      Top = 103
+      Top = 95
       Width = 82
       Height = 21
       EditLabel.Width = 65
@@ -205,7 +202,7 @@ object Form1: TForm1
     end
     object Button_SetDeadline: TButton
       Left = 556
-      Top = 130
+      Top = 122
       Width = 82
       Height = 25
       Caption = 'Set Deadline'
@@ -214,7 +211,7 @@ object Form1: TForm1
     end
     object LabeledEdit_SendPeriod: TLabeledEdit
       Left = 648
-      Top = 64
+      Top = 56
       Width = 91
       Height = 21
       EditLabel.Width = 89
@@ -226,7 +223,7 @@ object Form1: TForm1
     end
     object LabeledEdit_PizzadataVersion: TLabeledEdit
       Left = 556
-      Top = 64
+      Top = 56
       Width = 82
       Height = 21
       EditLabel.Width = 84
@@ -251,6 +248,16 @@ object Form1: TForm1
       Caption = 'GetHostAddress'
       TabOrder = 20
       OnClick = Button_GetHostAddressClick
+    end
+    object CheckBox_Valid: TCheckBox
+      Left = 648
+      Top = 128
+      Width = 91
+      Height = 17
+      Caption = 'Valid'
+      Checked = True
+      State = cbChecked
+      TabOrder = 21
     end
   end
   object Timer1: TTimer

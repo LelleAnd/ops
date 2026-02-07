@@ -745,8 +745,8 @@ begin
   end;
   Log('');
 
-  Log('Sleeping for 10 seconds...');
-  Sleep(10000);
+  Log('Sleeping for 15 seconds...');
+  Sleep(15000);
 
   FreeAndNil(pub);
   FreeAndNil(sub);

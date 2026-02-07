@@ -48,6 +48,8 @@ public class DelphiCompiler extends opsc.Compiler
 
     String createdFiles = "";
 
+    private boolean needIndexVariable = false;
+
     public DelphiCompiler(String projname)
     {
         super(projname);
@@ -173,8 +175,9 @@ public class DelphiCompiler extends opsc.Compiler
         templateText = templateText.replace(SERIALIZE_REGEX, getSerialize(idlClass));
         templateText = templateText.replace(FILL_CLONE_HEAD_REGEX, getFillCloneHead(idlClass));
         templateText = templateText.replace(FILL_CLONE_BODY_REGEX, getFillCloneBody(idlClass));
-        templateText = templateText.replace(VALIDATE_HEAD_REGEX, getValidationHead(idlClass));
+        // Body need to be called before Head 
         templateText = templateText.replace(VALIDATE_BODY_REGEX, getValidationBody(idlClass));
+        templateText = templateText.replace(VALIDATE_HEAD_REGEX, getValidationHead(idlClass));
 
         //Save the modified text to the output file.
         saveOutputText(templateText);
@@ -303,9 +306,11 @@ public class DelphiCompiler extends opsc.Compiler
       for (IDLField field : idlClass.getFields()) {
           if (field.isStatic()) continue;
           if (field.isArray() && field.getArraySize() > 0) {
-              ret += tab(0) + "var" + endl();
-              ret += tab(1) +   "__i__ : Integer;";
-              break;
+              if (field.isIdlType() || (field.getValue().length() > 0)) {
+                  ret += tab(0) + "var" + endl();
+                  ret += tab(1) +   "__i__ : Integer;";
+                  break;
+              }
           }
       }
       return ret;
@@ -604,43 +609,126 @@ public class DelphiCompiler extends opsc.Compiler
 
     protected String getValidationHead(IDLClass idlClass)
     {
-      String ret = "";
-      for (IDLField field : idlClass.getFields()) {
-          if (field.isStatic()) continue;
-          if (field.isIdlType() && !field.isAbstract()) {
-              if (field.isArray()) {
-                ret += tab(0) + "var" + endl();
-                ret += tab(1) +   "__i__ : Integer;";
-                break;
-              }
-          }
-      }
-      return ret;
+        String ret = "";
+        if (needIndexVariable) {
+            ret += tab(0) + "var" + endl();
+            ret += tab(1) +   "__i__ : Integer;";
+        }
+        return ret;
     }
 
     protected String getValidationBody(IDLClass idlClass)
     {
-      String ret = "";
-      for (IDLField field : idlClass.getFields()) {
-          if (field.isStatic()) continue;
-          String fieldName = getFieldName(field);
-          String fieldType = getLastPart(field.getType());
-          if (field.isIdlType() && !field.isAbstract()) {
-              // 'virtual': All fields that are objects are also virtual in Delphi!!
-              // Need to validate that an object that isn't declared 'virtual' really
-              // is of the correct type
-              if (field.isArray()) {
-                String s = field.getType();
-                s = convOpsName(getLastPart(s.substring(0, s.indexOf('['))));
-                ret += tab(1) + "for __i__ := 0 to High(" + fieldName + ") do begin" + endl();
-                ret += tab(2) + "if not " + fieldName + "[__i__].ClassNameIs('" + s + "') then Result := False;" + endl();
-                ret += tab(1) + "end;" + endl();
-              } else {
-                ret += tab(1) + "if not " + fieldName + ".ClassNameIs('" + getLastPart(field.getType()) + "') then Result := False;" + endl();
-              }
-          }
-      }
-      return ret;
+        String ret = "";
+
+        needIndexVariable = false;
+
+        if (idlClass.isOnlyDefinition()) {
+            return ret;
+        }
+
+        String versionName = getClassName(idlClass) + "_version";
+        int version = idlClass.getVersion();
+        if (version < 0) { version = 0; }
+
+        // Validate version field
+        ret += tab(1) + "Result := Result and ";
+        if (version == 0) {
+            // No versions used for this idl, so only the exact match is valid
+            ret += "(" + versionName + " = " + getClassName(idlClass) + "_idlVersion);" + endl();
+        } else {
+            ret += "(" + versionName + " <= " + getClassName(idlClass) + "_idlVersion);" + endl();
+        }
+
+        for (IDLField field : idlClass.getFields()) {
+            if (field.isStatic()) continue;
+            String fieldName = getFieldName(field);
+            String fieldType = getLastPart(field.getType());
+            String fieldGuard = getFieldGuard(versionName, field);
+            String preStr = "";
+            String postStr = "";
+            String idxStr = "";
+            String forceStr = "";
+            int t = 1;
+            if (fieldGuard.length() > 0) {
+                preStr  += tab(t) + "if " + fieldGuard + " then begin" + endl();
+                postStr += tab(t) + "end;" + endl();
+                t += 1;
+            }
+            if (field.isArray()) {
+                String upper = "Length(" + fieldName + ") - 1";
+                if ((field.getArraySize() == 0) && (field.getArrayMaxSize() > 0)) {
+                    ret += preStr;
+                    ret += tab(t) + "Result := Result and (" + upper + " <= " + field.getArrayMaxSize() + ");" + endl();
+                    forceStr = postStr;
+                    preStr = "";
+                    postStr = "";
+                }
+                if (field.getArraySize() > 0) {
+                    upper = "High(" + fieldName + ")";
+                }
+                preStr  += tab(t) + "for __i__ := 0 to " + upper + " do begin" + endl();
+                postStr += tab(t) + "end;" + endl();
+                idxStr = "[__i__]";
+                t += 1;
+            }
+            if (field.isEnumType()) {
+                String lo = field.getRangeLo();
+                String hi = field.getRangeHi();
+                ret += preStr;
+                ret += tab(t) + "//validate range: " + lo + ".." + hi + endl();
+                ret += tab(t) + "Result := Result and (Int16(" + fieldName + idxStr + ") >= " + lo +
+                                ") and (Int16(" + fieldName + idxStr + ") <= " + hi + ");" + endl();
+                if (idxStr.length() > 0) needIndexVariable = true;
+                ret += postStr;
+
+            } else {
+                if (field.isIdlType()) {
+                    ret += preStr;
+                    ret += tab(t) + "Result := Result and " + fieldName + idxStr + ".Validate;" + endl();
+                    if (idxStr.length() > 0) needIndexVariable = true;
+
+                    if (!field.isAbstract()) {
+                        // 'virtual': All fields that are objects are also virtual in Delphi!!
+                        // Need to validate that an object that isn't declared 'virtual' really
+                        // is of the correct type
+                        String s = field.getType();
+                        if (field.isArray()) {
+                            s = convOpsName(getLastPart(s.substring(0, s.indexOf('['))));
+                        } else {
+                            s = getLastPart(s);
+                        }
+                        ret += tab(t) + "Result := Result and " + fieldName + idxStr + ".ClassNameIs('" + s + "');" + endl();
+                    }
+                    ret += postStr;
+
+                } else {
+                    if (field.isStringType() && (field.getStringSize() == 0) && (field.getStringMaxSize() > 0)) {
+                        ret += preStr;
+                        ret += tab(t) + "Result := Result and (Length(" + fieldName + idxStr + ") <= " + field.getStringMaxSize() + ");" + endl();
+                        if (idxStr.length() > 0) needIndexVariable = true;
+                        ret += postStr;
+
+                    } else {
+                        String lo = field.getRangeLo();
+                        String hi = field.getRangeHi();
+                        if (!(lo.equals("") || hi.equals(""))) {
+                            if (field.isIntType() || field.isFloatType()) {
+                                ret += preStr;
+                                ret += tab(t) + "//validate range: " + lo + ".." + hi + endl();
+                                ret += tab(t) + "Result := Result and (" + fieldName + idxStr + " >= " + lo + 
+                                                ") and (" + fieldName + idxStr + " <= " + hi + ");" + endl();
+                                if (idxStr.length() > 0) needIndexVariable = true;
+                                ret += postStr;
+                            }
+                        }
+                    }
+
+                }
+            }
+            ret += forceStr;
+        }
+        return ret;
     }
 
     protected String languageType(String s)

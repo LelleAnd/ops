@@ -2,7 +2,7 @@ unit uOps.Publisher;
 
 (**
 *
-* Copyright (C) 2016-2022 Lennart Andersson.
+* Copyright (C) 2016-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -172,7 +172,7 @@ begin
   // field that is supposed to be 'static' in the containing object.
   // So we need to check that the non-virtual fields contain the correct objects.
   if not data.Validate then begin
-    raise EPublisherException.Create('Data object contains invalid object references');
+    raise EPublisherException.Create('Data object contains invalid fields or object references');
   end;
 
   if FKey <> '' then begin

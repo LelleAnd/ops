@@ -30,6 +30,7 @@
 #include "Notifier.h"
 #include "Lockable.h"
 #include "ConnectStatus.h"
+#include "Telemetry.h"
 
 namespace ops
 {
@@ -66,7 +67,7 @@ namespace ops
 			auto it = std::find(publishers.begin(), publishers.end(), client);
 			if (it != publishers.end()) {
 				publishers.erase(it);
-					topicUsage(top, false);
+				topicUsage(top, false);
 			}
 			if (publishers.size() == 0) sender->close();
 		}
@@ -89,6 +90,12 @@ namespace ops
         // At least one publisher must be added to us for this call to work correct
 		virtual void updateTransportInfo(Topic&)
 		{
+		}
+
+		// Get some collected telemetry from the sender
+		virtual Telemetry getTelemetry()
+		{
+			return Telemetry();
 		}
 
 	protected:

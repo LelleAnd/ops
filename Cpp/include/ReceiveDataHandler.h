@@ -92,6 +92,17 @@ namespace ops
             return false;
         }
 
+		// Get some collected telemetry from the reciever
+		Telemetry getTelemetry()
+		{
+			SafeLock lock(messageLock);
+			///TODO only reports from the first RDC
+			if (rdcs.size() > 0) {
+				return rdcs[0]->getTelemetry();
+			}
+			return Telemetry();
+		}
+
     protected:
 		Lockable messageLock;
 

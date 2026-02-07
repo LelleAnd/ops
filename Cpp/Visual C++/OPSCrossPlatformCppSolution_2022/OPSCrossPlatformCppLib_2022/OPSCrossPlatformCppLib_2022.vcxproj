@@ -399,6 +399,7 @@
     <ClInclude Include="..\..\..\include\PubIdChecker.h" />
     <ClInclude Include="..\..\..\include\ReceiveDataChannel.h" />
     <ClInclude Include="..\..\..\include\SerializableInheritingTypeFactory.h" />
+    <ClInclude Include="..\..\..\include\Telemetry.h" />
     <ClInclude Include="..\..\..\include\Trace.h" />
     <ClInclude Include="..\..\..\include\TraceStream.h" />
     <ClInclude Include="..\..\..\include\Transport.h" />

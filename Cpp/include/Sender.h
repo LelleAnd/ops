@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2020-2021 Lennart Andersson.
+ * Copyright (C) 2020-2026 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -32,6 +32,7 @@
 #include "OPSTypeDefs.h"
 #include "ByteBuffer.h"
 #include "IOService.h" 
+#include "Telemetry.h"
 
 namespace ops
 {
@@ -48,6 +49,12 @@ namespace ops
 		virtual uint16_t getLocalPort() = 0;
 		virtual Address_T getLocalAddress() = 0;
         virtual uint32_t getLocalAddressHost() = 0;
+
+		// Get some collected telemetry from the sender
+		virtual Telemetry getTelemetry()
+		{
+			return Telemetry();	// Default empty
+		}
 
         static std::unique_ptr<Sender> create(IOService* ioService, Address_T localInterface = "0.0.0.0", int ttl = 1, int64_t outSocketBufferSize = 16000000);
         static std::unique_ptr<Sender> createUDPSender(IOService* ioService, Address_T localInterface = "0.0.0.0", int ttl = 1, int64_t outSocketBufferSize = 16000000);

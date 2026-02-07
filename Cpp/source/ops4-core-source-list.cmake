@@ -74,6 +74,7 @@ set(LIB_OPS_PUBLIC_HEADERS
   ${OPS_HEADER_PATH}/Serializable.h
   ${OPS_HEADER_PATH}/SingleThreadPool.h
   ${OPS_HEADER_PATH}/Subscriber.h
+  ${OPS_HEADER_PATH}/Telemetry.h
   ${OPS_HEADER_PATH}/Thread.h
   ${OPS_HEADER_PATH}/ThreadPool.h
   ${OPS_HEADER_PATH}/TimeHelper.h

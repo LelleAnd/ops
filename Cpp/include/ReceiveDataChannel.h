@@ -79,6 +79,12 @@ namespace ops
 		virtual uint16_t getLocalPort() { return 0; }
 		virtual Address_T getLocalAddress() { return "0.0.0.0"; }
 
+		// Get some collected telemetry from the reciever
+		virtual Telemetry getTelemetry()
+		{
+			return Telemetry();  // Default empty
+		}
+
 		// Key used to identify channel when several channels are keept in a container
 		InternalKey_T key;
 
@@ -123,6 +129,12 @@ namespace ops
 		virtual void topicUsage(const Topic& top, bool used)
 		{
 			UNUSED(top); UNUSED(used);
+		}
+
+		// Get some collected telemetry from the reciever
+		virtual Telemetry getTelemetry() override
+		{
+			return receiver->getTelemetry();
 		}
 
 	protected:

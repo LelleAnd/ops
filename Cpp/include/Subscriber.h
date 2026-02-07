@@ -244,6 +244,9 @@ namespace ops
         ///TBD controllable if called by user or timer???
         void Activate();
 
+        // Get some collected telemetry from the reciever
+        Telemetry getTelemetry();
+
 		//Default nullptr. Create a PublicationIdChecker if you want OPS to perform Publication Id checking.
 		//The check is performed before any QoS filtering, so it sees all messages.
 		//Add listerner(s) to the checker and you will be notified when:
@@ -256,7 +259,7 @@ namespace ops
 		//User data field that the owner of the subscriber can use for any purpose. Not used by OPS.
         void* userPtr{ nullptr };
 
-      protected:
+    protected:
         void checkAndNotifyDeadlineMissed();
 
         OPSMessage* m_message{ nullptr };

@@ -11,6 +11,7 @@ import java.util.Observable;
 import java.util.Vector;
 import java.nio.ByteBuffer;
 import java.nio.file.Paths;
+import java.util.HashMap;
 
 import ops.Participant;
 import ops.OPSConfig;
@@ -47,6 +48,7 @@ public class testallmain implements ops.Listener<ops.Error> {
 
   public Definitions.Command enumTest = Definitions.Command.PAUSE;
 
+  private HashMap<String, Integer> pubCounters = new HashMap<String, Integer>();
 
   public void OnLog(final String str) {
     System.out.println (str);
@@ -783,6 +785,8 @@ public class testallmain implements ops.Listener<ops.Error> {
               if (msg != null) {
                   cd3 = (ChildData)msg.getData();
                   OnLog("Got message from: " + msg.getPublisherName());
+                  int value = pubCounters.getOrDefault(msg.getPublisherName(), 0);
+                  pubCounters.put(msg.getPublisherName(), value + 1);
               }
               AssertTRUE((msg != null) && (cd3 != null), "No received data");
               if ((msg != null) && (cd3 != null)) CheckObjects(cd1, cd3);
@@ -802,6 +806,19 @@ public class testallmain implements ops.Listener<ops.Error> {
       sub.stop();
       participant.stopThread();
       DeadlineNotifier.getInstance().stopRunning();
+      try {
+        Thread.sleep(2000);
+      } catch (InterruptedException e) {
+          OnLog("Exception: " + e.getMessage());
+      }
+
+      OnLog("------------------------------------");
+
+      for (String key : pubCounters.keySet()) {
+        OnLog(pubCounters.get(key) + " messages from '" + key + "'");
+      }
+
+      OnLog("------------------------------------");
 
       try {
           if (gTestFailed) {
@@ -811,9 +828,11 @@ public class testallmain implements ops.Listener<ops.Error> {
               Thread.sleep(20000);
           } else {
               OnLog("");
-              OnLog(" T E S T   O K        Sleeping for 5 seconds");
+              OnLog(" T E S T   O K ");
               OnLog("");
-              Thread.sleep(5000);
+              OnLog(" Sleeping for 15 seconds");
+              OnLog("");
+              Thread.sleep(15000);
           }
       } catch (InterruptedException e) {
           OnLog("Exception: " + e.getMessage());

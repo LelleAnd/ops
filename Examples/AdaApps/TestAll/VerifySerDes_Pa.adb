@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2017-2025 Lennart Andersson.
+-- Copyright (C) 2017-2026 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -19,6 +19,7 @@
 with System.Atomic_Counters;
 with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Directories; use Ada.Directories;
+with Ada.Containers.Indefinite_Ordered_Maps;
 with Ada.Strings.Fixed; use Ada.Strings.Fixed;
 with Ops_Pa;
 
@@ -109,6 +110,44 @@ package body VerifySerDes_Pa is
 
   EnumTest : TestAll_Definitions.Command := TestAll_Definitions.PAUSE;
 
+  -- ---------------------
+
+   function Less (Left, Right : String) return Boolean;
+   function Equal (Left, Right : Integer) return Boolean;
+
+   package MyMap is new Ada.Containers.Indefinite_Ordered_Maps(String, Integer, Less, Equal);
+
+   function Less (Left, Right : String) return Boolean is
+   begin
+      return Left < Right;
+   end;
+
+   function Equal (Left, Right : Integer) return Boolean is
+   begin
+      return Left = Right;
+   end;
+
+   pubCounters : MyMap.Map;
+
+   use type MyMap.cursor;
+
+   procedure IncPubCounter(pubName : String) is
+
+      procedure Inc( key : in String; element : in out Integer ) is
+      begin
+         element := element + 1;
+      end;
+
+      pos : MyMap.Cursor;
+   begin
+      pos := pubCounters.Find( pubName );
+      if pos /= MyMap.No_Element then
+         -- Increment usage count
+         pubCounters.Update_Element(pos, Process => Inc'Access);
+      else
+         pubCounters.Insert(pubName, 0);
+      end if;
+   end;
 
   -- ---------------------
 
@@ -935,6 +974,7 @@ package body VerifySerDes_Pa is
                 sub.acquireMessageLock;
                 msg := sub.getMessage;
                 Log("Received new data from " & msg.PublisherName & ". Checking...");
+                IncPubCounter(msg.PublisherName);
                 sub.releaseMessageLock;
               end;
               flag := sub.getData(cd3);
@@ -982,18 +1022,33 @@ package body VerifySerDes_Pa is
   end;
 
   procedure VerifySerDes is
+
+      procedure Process( Pos : in MyMap.Cursor ) is
+         Value : Integer := MyMap.Element(Pos);
+      begin
+         Log(Value'Image & " messages from '" & MyMap.Key(Pos) & "'");
+      end;
+
   begin
     GNAT.Ctrl_C.Install_Handler(My_Ctrl_C_Handler'Access);
     VerifySerDes_Internal;
     Log("");
+
+    Log("-----------------------------------");
+
+    pubCounters.Iterate(Process'Access);
+
+    Log("-----------------------------------");
+    Log("");
+
     if gErrorCount > 0 then
       Log("  !!!! " & Integer'Image(gErrorCount) & " ERRORS occurred !!!! ");
     else
-      Log("  VERFIFY == OK ");
+      Log("  T e s t   O K ");
     end if;
     Log("");
-    Log("Sleeping for 10 seconds...");
-    delay 10.0;
+    Log("Sleeping for 15 seconds...");
+    delay 15.0;
     GNAT.Ctrl_C.Uninstall_Handler;
   exception
     when others =>

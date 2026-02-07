@@ -8,7 +8,7 @@ project VerifySerDes is
    Os : Os_Type := external ("OS");
    type Build_Kind is
       ("static", "relocatable", "static-pic");
-   Xmlada_Build : Build_Kind := external ("XMLADA_BUILD");
+   Xmlada_Build : Build_Kind := "static"; --external ("XMLADA_BUILD");
    for Object_Dir use ".obj";
    for Exec_Dir use ".";
    for Main use ("VerifySerDes_Main.adb");

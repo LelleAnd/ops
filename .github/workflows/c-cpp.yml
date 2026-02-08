@@ -21,13 +21,15 @@ jobs:
 
     runs-on: ubuntu-latest
     #runs-on: ubuntu-20.04
+    #runs-on: ubuntu-18.04
 
     steps:
       - uses: actions/checkout@v5
-      - name: list environment
-        run: env
-      - name: cmake version
-        run: cmake --version
+      #
+      #- name: list environment
+      #  run: env
+      #- name: cmake version
+      #  run: cmake --version
       #
       - name: TinyXML2 Get
         run: git clone https://github.com/leethomason/tinyxml2.git $HOME/tinyxml2
@@ -47,7 +49,7 @@ jobs:
         run: sudo apt-get install cppcheck
       #
       - name: boost Install
-        run: sudo apt-get install libboost-system-dev libboost-thread-dev libboost-regex-dev libboost-filesystem-dev libboost-date-time-dev
+        run: sudo apt-get update && sudo apt-get install libboost-system-dev libboost-thread-dev libboost-regex-dev libboost-filesystem-dev libboost-date-time-dev
       #- name: Set BOOST_HOME
       #  run: echo "BOOST_HOME=$BOOST_ROOT_1_72_0" >> $GITHUB_ENV
       #

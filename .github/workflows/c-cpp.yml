@@ -21,14 +21,14 @@ jobs:
 
     runs-on: ubuntu-latest
     #runs-on: ubuntu-20.04
-    #runs-on: ubuntu-18.04
 
     steps:
       - uses: actions/checkout@v5
-      #- name: list environment
-      #  run: env
-      #- name: cmake version
-      #  run: cmake --version
+      - name: list environment
+        run: env
+      - name: cmake version
+        run: cmake --version
+      #
       - name: TinyXML2 Get
         run: git clone https://github.com/leethomason/tinyxml2.git $HOME/tinyxml2
       - name: TinyXML2 Build
@@ -42,18 +42,22 @@ jobs:
         run: echo "GOOGLETEST_HOME=$HOME/gtest/deploy" >> $GITHUB_ENV
       #- name: debug
       #  run: ls -alR $GOOGLETEST_HOME
+      #
       - name: CppCheck Install
         run: sudo apt-get install cppcheck
       #
       - name: boost Install
-        run: sudo apt-get update && apt-get install libboost-system-dev libboost-thread-dev libboost-regex-dev libboost-filesystem-dev libboost-date-time-dev
+        run: sudo apt-get install libboost-system-dev libboost-thread-dev libboost-regex-dev libboost-filesystem-dev libboost-date-time-dev
       #- name: Set BOOST_HOME
       #  run: echo "BOOST_HOME=$BOOST_ROOT_1_72_0" >> $GITHUB_ENV
+      #
       - name: Build
         run: make BOOST_ARCH=-x64 CXXSTANDARD=17 TINYXML2_INSTALL_DIR=$HOME/tinyxml2/deploy
         env:
           MAKEFLAGS: "-j2"
+      #
       - name: Run C++ Tests
         run: make CXXSTANDARD=17 unittest-c++
+      #
       - name: CppCheck Analysis
         run: cppcheck --enable=all Cpp/source Cpp/include > /dev/null

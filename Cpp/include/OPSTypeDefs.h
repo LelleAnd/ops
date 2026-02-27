@@ -1,6 +1,6 @@
 /**
  * Copyright (C) 2006-2010 Anton Gravestam.
- * Copyright (C) 2018-2025 Lennart Andersson.
+ * Copyright (C) 2018-2026 Lennart Andersson.
 *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -30,6 +30,8 @@
 #include <string>
 #include <sstream>
 #include <cstdint>
+
+#include "OPSVersion.h"
 
 // -----------------------------------------------------------------------------
 // Macros used for trace of some functionality during development

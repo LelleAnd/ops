@@ -1,6 +1,6 @@
 /**
  *
- * Copyright (C) 2025 Lennart Andersson.
+ * Copyright (C) 2025-2026 Lennart Andersson.
 *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -25,6 +25,10 @@ namespace ops {
     std::string GetUsedBuildOptions()
     {
         std::string res = "";
+
+        res += "OPS Version ";
+        res += OPS_VERSION;
+        res += ", ";
 
 #if defined(OPS_C23_DETECTED)
         res += "C++23, ";

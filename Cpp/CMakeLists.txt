@@ -41,6 +41,12 @@ if((OPS_BOOTSTRAP_BUILD) OR (DEFINED OPS_NO_SEPARATE_BOOTSTRAP))
   configure_file(OPSStringLengths.h.in ${CMAKE_CURRENT_SOURCE_DIR}/include/OPSStringLengths.h)
 endif()
 
+## example: "4.3.3" --> OPS_VERSION_NUMBER = 40303
+math(EXPR OPS_VERSION_NUMBER "(10000 * ${OPS_VERSION_MAJOR}) + (100 * ${OPS_VERSION_MINOR}) + ${OPS_VERSION_PATCH}")
+
+## Configure C++ include file with the constant values
+configure_file(OPSVersion.h.in ${CMAKE_CURRENT_SOURCE_DIR}/include/OPSVersion.h)
+
 # Make the headers visible to everything (below this location)
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/include

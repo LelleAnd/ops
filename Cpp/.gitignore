@@ -3,3 +3,4 @@ build/opt
 lib-*/
 *~
 include/OPSStringLengths.h
+include/OPSVersion.h

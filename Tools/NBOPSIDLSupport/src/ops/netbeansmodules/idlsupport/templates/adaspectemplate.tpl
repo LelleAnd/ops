@@ -39,6 +39,9 @@ __declarations
   -- Fills the parameter obj with all values from Self.
   overriding procedure FillClone( Self : __className_Class; obj : OpsObject_Class_At );
 
+  -- Validation routine for fields
+  overriding function IsValid( Self : __className_Class ) return Boolean;
+
 --private
 
   procedure InitInstance( Self : in out __className_Class );

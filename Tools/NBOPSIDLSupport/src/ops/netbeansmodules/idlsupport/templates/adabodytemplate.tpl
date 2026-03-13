@@ -1,4 +1,5 @@
 -- Auto generated OPS-code. DO NOT MODIFY!
+with Ada.Tags; use Ada.Tags;
 
 package body __unitName is
 
@@ -59,6 +60,14 @@ __destructorBody
         Free(Arr(i));
       end if;
     end loop;
+  end;
+
+  -- Validation routine for fields
+  overriding function IsValid( Self : __className_Class ) return Boolean is
+    Result : Boolean := IsValid( __baseClassName_Class(Self) );
+  begin
+__validateBody
+    return Result;
   end;
 
 end __unitName;

@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2020 Lennart Andersson.
+-- Copyright (C) 2016-2026 Lennart Andersson.
 --  
 -- This file is part of OPS (Open Publish Subscribe).
 --  
@@ -54,6 +54,9 @@ package Ops_Pa.OpsObject_Pa is
 
   -- Fills the parameter obj with all values from this object.
   procedure FillClone( Self : OpsObject_Class; obj : OpsObject_Class_At );
+
+  -- Validation routine for fields
+  function IsValid( Self : OpsObject_Class ) return Boolean;
 
 private
   procedure ValidateVersion(typ : String; gotVer : Byte; maxVer : Byte);

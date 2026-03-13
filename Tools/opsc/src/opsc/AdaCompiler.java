@@ -39,7 +39,6 @@ public class AdaCompiler extends opsc.Compiler
     final static String SERIALIZE_REGEX = "__serialize";
     final static String FILL_CLONE_HEAD_REGEX = "__fillCloneHead";
     final static String FILL_CLONE_BODY_REGEX = "__fillCloneBody";
-    final static String VALIDATE_HEAD_REGEX = "__validateHead";
     final static String VALIDATE_BODY_REGEX = "__validateBody";
     final static String SIZE_REGEX = "__size";
     final static String CS_DIR = "Ada";
@@ -65,6 +64,17 @@ public class AdaCompiler extends opsc.Compiler
     public String getName()
     {
         return "AdaFactoryIDLCompiler";
+    }
+
+    protected String getClassName(IDLClass idlclass)
+    {
+        // No need for nonReservedName() check since we always add more chars to identifier
+        return idlclass.getClassName();
+    }
+
+    protected String getFieldName(IDLField field)
+    {
+        return nonReservedName(field.getName());
     }
 
     public void compileDataClasses(Vector<IDLClass> idlClasses, String projectDirectory)
@@ -120,7 +130,7 @@ public class AdaCompiler extends opsc.Compiler
 
     protected void compilePublisher(IDLClass idlClass) throws IOException
     {
-      String className = idlClass.getClassName();
+      String className = getClassName(idlClass);
       String packageName = idlClass.getPackageName();
       String packageFilePart = packageName.replace(".", "/");
       String baseFileName = _outputDir + File.separator + packageFilePart + File.separator + getPubUnitName(className).replace(".", "-");
@@ -130,7 +140,7 @@ public class AdaCompiler extends opsc.Compiler
 
     protected void compileSubscriber(IDLClass idlClass) throws IOException
     {
-      String className = idlClass.getClassName();
+      String className = getClassName(idlClass);
       String packageName = idlClass.getPackageName();
       String packageFilePart = packageName.replace(".", "/");
       String baseFileName = _outputDir + File.separator + packageFilePart + File.separator + getSubUnitName(className).replace(".", "-");
@@ -162,7 +172,7 @@ public class AdaCompiler extends opsc.Compiler
 
     protected void compileEnum(IDLClass idlClass) throws IOException
     {
-        String className = idlClass.getClassName();
+        String className = getClassName(idlClass);
         String packageName = idlClass.getPackageName();
         String packageFilePart = packageName.replace(".", "/");
         String baseFileName = _outputDir + File.separator + packageFilePart + File.separator + getUnitName(className).replace(".", "-");
@@ -190,7 +200,7 @@ public class AdaCompiler extends opsc.Compiler
 
     public void compileDataClass(IDLClass idlClass) throws IOException
     {
-        String className = idlClass.getClassName();
+        String className = getClassName(idlClass);
         String baseClassName = "OpsObject";
         if (idlClass.getBaseClassName() != null) {
           baseClassName = idlClass.getBaseClassName();
@@ -241,7 +251,7 @@ public class AdaCompiler extends opsc.Compiler
         templateText = getTemplateText();
 
         //Replace regular expressions in the template file.
-        templateText = templateText.replace(UNIT_REGEX, getUnitName(idlClass.getClassName()));
+        templateText = templateText.replace(UNIT_REGEX, getUnitName(getClassName(idlClass)));
         templateText = templateText.replace(CLASS_NAME_REGEX, className);
         templateText = templateText.replace(BASE_CLASS_NAME_REGEX, baseClassName);
         templateText = templateText.replace(PACKAGE_NAME_REGEX, packageName);
@@ -249,6 +259,7 @@ public class AdaCompiler extends opsc.Compiler
         templateText = templateText.replace(DESTRUCTOR_BODY_REGEX, getDestructorBody(idlClass));
         templateText = templateText.replace(SERIALIZE_REGEX, getSerialize(idlClass));
         templateText = templateText.replace(FILL_CLONE_BODY_REGEX, getFillCloneBody(idlClass));
+        templateText = templateText.replace(VALIDATE_BODY_REGEX, getValidateBody(idlClass));
 
         //Save the modified text to the output file.
         saveOutputText(templateText);
@@ -297,11 +308,11 @@ public class AdaCompiler extends opsc.Compiler
         for (IDLClass iDLClass : idlClasses) {
             if (iDLClass.isOnlyDefinition() || iDLClass.isNoFactory()) continue;
 
-            createBodyText += tab(2) + "if types = \"" + iDLClass.getPackageName() + "." + iDLClass.getClassName() + "\" then" + endl();
-            createBodyText += tab(3) +   "return Serializable_Class_At(" + getUnitName(iDLClass.getClassName()) + ".Create);" + endl();
+            createBodyText += tab(2) + "if types = \"" + iDLClass.getPackageName() + "." + getClassName(iDLClass) + "\" then" + endl();
+            createBodyText += tab(3) +   "return Serializable_Class_At(" + getUnitName(getClassName(iDLClass)) + ".Create);" + endl();
             createBodyText += tab(2) + "end if;" + endl();
 
-            includes += tab(1) + getUnitName(iDLClass.getClassName()) + "," + endl();
+            includes += tab(1) + getUnitName(getClassName(iDLClass)) + "," + endl();
         }
 
         templateText = templateText.replace(CREATE_MAKE_BODY_REGEX, createBodyText);
@@ -368,8 +379,8 @@ public class AdaCompiler extends opsc.Compiler
 
       String s = getLastPart(className);
       for (IDLClass cl : this._idlClasses) {
-        if (cl.getClassName().equals(s)) {
-          String unit = cl.getPackageName() + "." + cl.getClassName();
+        if (getClassName(cl).equals(s)) {
+          String unit = cl.getPackageName() + "." + getClassName(cl);
           return baseUnit + unit.replace(".", "_");
         }
       }
@@ -498,8 +509,8 @@ public class AdaCompiler extends opsc.Compiler
     {
         String ret = "";
         int pos = 3;
-        String className = idlClass.getClassName() + "_Class";
-        ret += tab(pos) + className + "(obj.all)." + idlClass.getClassName() + "_version := Self." + idlClass.getClassName() + "_version;" + endl();
+        String className = getClassName(idlClass) + "_Class";
+        ret += tab(pos) + className + "(obj.all)." + getClassName(idlClass) + "_version := Self." + getClassName(idlClass) + "_version;" + endl();
         for (IDLField field : idlClass.getFields()) {
             if (field.isStatic()) continue;
             String fieldName = getFieldName(field);
@@ -648,11 +659,6 @@ public class AdaCompiler extends opsc.Compiler
         return ret;
     }
 
-    protected String getFieldName(IDLField field)
-    {
-        return nonReservedName(field.getName());
-    }
-
     protected String getInitValue(IDLField field, IDLClass idlClass)
     {
         if (field.isStringType()) {
@@ -745,7 +751,7 @@ public class AdaCompiler extends opsc.Compiler
             int version = idlClass.getVersion();
             if (version < 0) { version = 0; }
             // Need an implicit version field that should be [de]serialized
-            ret += tab(3) + idlClass.getClassName() + "_version : Byte := " + idlClass.getClassName() + "_idlVersion;" + endl();
+            ret += tab(3) + getClassName(idlClass) + "_version : Byte := " + getClassName(idlClass) + "_idlVersion;" + endl();
         }
         for (IDLField field : idlClass.getFields()) {
             if (field.isStatic()) continue;
@@ -784,7 +790,7 @@ public class AdaCompiler extends opsc.Compiler
       if (!idlClass.isOnlyDefinition()) {
           int version = idlClass.getVersion();
           if (version < 0) { version = 0; }
-          ret += tab(1) + idlClass.getClassName() + "_idlVersion : constant Byte := " + version + ";" + endl();
+          ret += tab(1) + getClassName(idlClass) + "_idlVersion : constant Byte := " + version + ";" + endl();
       }
       for (IDLField field : idlClass.getFields()) {
           if (!field.isStatic()) continue;
@@ -844,47 +850,117 @@ public class AdaCompiler extends opsc.Compiler
       return ret;
     }
 
-//    protected String getValidationHead(IDLClass idlClass)
-//    {
-//      String ret = "";
-//      for (IDLField field : idlClass.getFields())
-//      {
-//          if (field.isIdlType() && !field.isAbstract()) {
-//              if (field.isArray()) {
-//                  ret += tab(0) + "var" + endl();
-//                  ret += tab(1) +   "__i__ : Integer;" + endl();
-//                  break;
-//              }
-//          }
-//      }
-//      return ret;
-//    }
+    protected String getValidateBody(IDLClass idlClass)
+    {
+        String ret = "";
 
-//    protected String getValidationBody(IDLClass idlClass)
-//    {
-//      String ret = "";
-//      for (IDLField field : idlClass.getFields())
-//      {
-//          String fieldType = getLastPart(field.getType());
-//          String fieldName = getFieldName(field);
-//          if (field.isIdlType() && !field.isAbstract())
-//          {
-//              // 'virtual': All fields that are objects are also virtual in Delphi!!
-//              // Need to validate that an object that isn't declared 'virtual' really
-//              // is of the correct type
-//              if (field.isArray()) {
-//                String s = field.getType();
-//                s = getLastPart(s.substring(0, s.indexOf('[')));
-//                ret += tab(1) + "for __i__ := 0 to High(" + fieldName + ") do begin" + endl();
-//                ret += tab(2) + "if not " + fieldName + "[__i__].ClassNameIs('" + s + "') then Result := False;" + endl();
-//                ret += tab(1) + "end;" + endl();
-//              } else {
-//                ret += tab(1) + "if not " + fieldName + ".ClassNameIs('" + getLastPart(field.getType()) + "') then Result := False;" + endl();
-//              }
-//          }
-//      }
-//      return ret;
-//    }
+        if (idlClass.isOnlyDefinition()) {
+            return ret;
+        }
+
+        String versionName = "Self." + getClassName(idlClass) + "_version";
+        String versionNameIdl = getClassName(idlClass) + "_idlVersion";
+        int version = idlClass.getVersion();
+        if (version < 0) { version = 0; }
+
+        // Validate version field
+        ret += tab(2) + "Result := Result and ";
+        if (version == 0) {
+            // No versions used for this idl, so only the exact match is valid
+            ret += "(" + versionName + " = " + versionNameIdl + ");" + endl();
+        } else {
+            ret += "(" + versionName + " <= " + versionNameIdl + ");" + endl();
+        }
+
+        for (IDLField field : idlClass.getFields()) {
+            if (field.isStatic()) continue;
+            String fieldName = getFieldName(field);
+            String fieldType = getLastPart(field.getType());
+            String fieldGuard = getFieldGuard(versionName, field);
+            String preStr = "";
+            String postStr = "";
+            String idxStr = "";
+            String forceStr = "";
+            int t = 2;
+            if (fieldGuard.length() > 0) {
+                preStr  = tab(t) + "if " + fieldGuard + " then" + endl();
+                postStr = tab(t) + "end if;" + endl();
+                t += 1;
+            }
+            if (field.isArray()) {
+                String upper = "";
+                String elsePart = "";
+                if ((field.getArraySize() == 0) && (field.getArrayMaxSize() > 0)) {
+                    // Dynamic array and max size specified
+                    upper = "<= " + field.getArrayMaxSize();
+                } else if (field.getArraySize() > 0) {
+                    // Fixed array should always exist
+                    upper = "= " + field.getArraySize();
+                    elsePart = tab(t) + "else" + endl() + 
+                               tab(t+1) + "return False;" + endl();  
+                }
+                preStr += tab(t) + "if Self." + fieldName + " /= null then" + endl();
+                postStr = elsePart + tab(t) + "end if;" + endl() + postStr;
+                t += 1;
+                if (upper.length() > 0) {
+                    ret += preStr;
+                    ret += tab(t) + "Result := Result and (Self." + fieldName + "'Length " + upper + ");" + endl();
+                    forceStr = postStr;
+                    preStr = "";
+                    postStr = "";
+                }
+                preStr += tab(t) + "for i in Self." + fieldName + "'Range loop" + endl();
+                postStr = tab(t) + "end loop;" + endl() + postStr;
+                idxStr = "(i)";
+                t += 1;
+            }
+            if (field.isEnumType()) {
+                // No need to check this field. 
+                // Received data uses "field := Enum'Val(binary)" which gives Constraint_Error on invalid values
+                // Sent data is correct by Ada type system
+
+            } else {
+                if (field.isIdlType()) {
+                    ret += preStr;
+                    ret += tab(t) + "Result := Result and Self." + fieldName + idxStr + ".IsValid;" + endl();
+
+                    if (!field.isAbstract()) {
+                        // 'virtual': All fields that are objects are also virtual in Ada!!
+                        // Need to validate that an object that isn't declared 'virtual' really
+                        // is of the correct type
+                        String s = fieldType;
+                        if (field.isArray()) {
+                            s = s.substring(0, s.indexOf('['));
+                        }
+                        ret += tab(t) + "Result := Result and (Self." + fieldName + idxStr + "'Tag = " + s + "_Class'Tag);" + endl();
+                    }
+                    ret += postStr;
+
+                } else {
+                    if (field.isStringType() && (field.getStringSize() == 0) && (field.getStringMaxSize() > 0)) {
+                        ret += preStr;
+                        ret += tab(t) + "Result := Result and (Self." + fieldName + idxStr + "'Length <= " + field.getStringMaxSize() + ");" + endl();
+                        ret += postStr;
+
+                    } else {
+                        String lo = field.getRangeLo();
+                        String hi = field.getRangeHi();
+                        if (!(lo.equals("") || hi.equals(""))) {
+                            if (field.isIntType() || field.isFloatType()) {
+                                ret += preStr;
+                                ret += tab(t) + "-- validate range: " + lo + ".." + hi + endl();
+                                ret += tab(t) + "Result := Result and (Self." + fieldName + idxStr + " >= " + lo + 
+                                                ") and (Self." + fieldName + idxStr + " <= " + hi + ");" + endl();
+                                ret += postStr;
+                            }
+                        }
+                    }
+                }            
+            }
+            ret += forceStr;
+        }
+        return ret;
+    }
 
     private String elementType(String type)
     {
@@ -943,12 +1019,12 @@ public class AdaCompiler extends opsc.Compiler
     protected String getSerialize(IDLClass idlClass)
     {
         String ret = "";
-        String versionName = idlClass.getClassName() + "_version";
-        String versionNameIdl = idlClass.getClassName() + "_idlVersion";
+        String versionName = getClassName(idlClass) + "_version";
+        String versionNameIdl = getClassName(idlClass) + "_idlVersion";
         // Need an implicit version field that may be [de]serialized
         ret += tab(2) + "if Self.IdlVersionMask /= 0 then" + endl();
         ret += tab(3) + "archiver.Inout(\"" + versionName + "\", Self." + versionName + ");" + endl();
-        ret += tab(3) + "ValidateVersion(\"" + idlClass.getClassName() + "\", Self." + versionName + ", " + versionNameIdl + ");" + endl();
+        ret += tab(3) + "ValidateVersion(\"" + getClassName(idlClass) + "\", Self." + versionName + ", " + versionNameIdl + ");" + endl();
         ret += tab(2) + "else" + endl();
         ret += tab(3) + "Self." + versionName + " := 0;" + endl();
         ret += tab(2) + "end if;" + endl();

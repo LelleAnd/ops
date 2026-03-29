@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2021-2025 Lennart Andersson.
+* Copyright (C) 2021-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -59,7 +59,7 @@ namespace ops
 		void onNewEvent(Notifier<int>* sender, int message) override;
 
     public:
-        explicit BoostDeadlineTimerImpl(boost::asio::io_service* boostIOService);
+        explicit BoostDeadlineTimerImpl(boost::asio::io_context* boostIOService);
         virtual ~BoostDeadlineTimerImpl();
 
         void start(const std::chrono::milliseconds& timeout) override;
@@ -74,14 +74,18 @@ namespace ops
 	{
 		boost::asio::steady_timer deadlineTimer;
 	public:
-        explicit impl(boost::asio::io_service* boostIOService) : deadlineTimer(*boostIOService)
+        explicit impl(boost::asio::io_context* boostIOService) : deadlineTimer(*boostIOService)
 		{
 		}
 
         virtual void start(const std::chrono::milliseconds& timeout)
         {
             deadlineTimer.cancel();
+#if BOOST_VERSION > 108100
+            deadlineTimer.expires_after(timeout);
+#else
             deadlineTimer.expires_from_now(timeout);
+#endif
             // Here we pass in a shared_ptr to our instance
             using namespace boost::placeholders;
             deadlineTimer.async_wait(boost::bind(&impl::asynchHandleDeadlineTimeout, shared_from_this(), boost::asio::placeholders::error));
@@ -108,7 +112,7 @@ namespace ops
 
     // -------------------------------------------
 
-    BoostDeadlineTimerImpl::BoostDeadlineTimerImpl(boost::asio::io_service* boostIOService): 
+    BoostDeadlineTimerImpl::BoostDeadlineTimerImpl(boost::asio::io_context* boostIOService):
         pimpl_(new impl(boostIOService))
     {
         pimpl_->addListener(this);

@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2020-2025 Lennart Andersson.
+ * Copyright (C) 2020-2026 Lennart Andersson.
 *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -56,24 +56,21 @@ namespace ops
     public:
         UDPReceiver(uint16_t bindPort, IOService* ioServ, Address_T localInterface = "0.0.0.0", int inSocketBufferSizent = 16000000)
         {
-            boost::asio::io_service* ioService = BoostIOServiceImpl::get(ioServ);
+            boost::asio::io_context* ioService = BoostIOServiceImpl::get(ioServ);
 
             if (localInterface == "0.0.0.0") {
                 udp::resolver resolver(*ioService);
-                udp::resolver::query query(boost::asio::ip::host_name(), "");
-                udp::resolver::iterator it = resolver.resolve(query);
-                udp::resolver::iterator end;
-                while (it != end) {
-                    const boost::asio::ip::address addr = it->endpoint().address();
+                udp::resolver::results_type endpoints = resolver.resolve(boost::asio::ip::host_name(), "");
+                for (auto const& endp : endpoints) {
+                    const boost::asio::ip::address addr = endp.endpoint().address();
                     if (addr.is_v4()) {
                         ipaddress = addr.to_string().c_str();
                         localEndpoint = std::make_unique<endpoint_t>(addr, bindPort);
                         break;
                     }
-                    ++it;
                 }
             } else {
-                const boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(localInterface.c_str()));
+                const boost::asio::ip::address ipAddr(boost::asio::ip::make_address_v4(localInterface.c_str()));
                 localEndpoint = std::make_unique<endpoint_t>(ipAddr, bindPort);
                 ipaddress = localInterface;
             }
@@ -85,7 +82,7 @@ namespace ops
             if (inSocketBufferSizent > 0) {
                 boost::asio::socket_base::receive_buffer_size option(inSocketBufferSizent);
                 boost::system::error_code ec;
-                ec = sock->set_option(option, ec);
+                sock->set_option(option, ec);
                 sock->get_option(option);
                 if (ec || option.value() != inSocketBufferSizent) {
 					ErrorMessage_T msg("Socket buffer size ");
@@ -135,7 +132,7 @@ namespace ops
 
         virtual void getSource(uint32_t& address, uint16_t& port) override
         {
-            address = (uint32_t)sendingEndPoint.address().to_v4().to_ulong();
+            address = (uint32_t)sendingEndPoint.address().to_v4().to_uint();
             port = sendingEndPoint.port();
         }
 

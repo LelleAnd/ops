@@ -22,15 +22,7 @@ If you do not have a JDK installed on your system follow these steps:
 ## Boost (required for OPS C++ Core) ##
 Make sure you have boost installed, otherwise download pre-built binaries for boost or build boost from source http://www.boost.org/users/download/.
 
-  * Select at least the following components:
-    * Boost header files
-    * Boost DateTime
-    * Boost Filesystem
-    * Boost Regex
-    * Boost System
-    * Boost Thread
-
-OPS has been used with Boost versions 1.60, 1.64, 1.66, 1.67, 1.71, 1.72, 1.74, 1.82, 1.83 and 1.84.
+OPS has been used with Boost versions 1.66, 1.67, 1.71, 1.72, 1.74, 1.82, 1.83, 1.84 and 1.90. Support for versions older than 1.66 has been dropped in favour of version 1.87 and newer.
 Versions older than 1.71 hasn't been used/tested for quite a while. It is recommended to use a more modern version.
 
 ## TinyXML-2 (required for OPS C++ Core) ##

@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2023 Lennart Andersson.
+* Copyright (C) 2018-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -74,7 +74,7 @@ namespace ops
 			if ((_sock != nullptr) && (size > 0)) {
 				boost::asio::socket_base::send_buffer_size option(size);
 				boost::system::error_code ec;
-				ec = _sock->set_option(option, ec);
+				_sock->set_option(option, ec);
 				_sock->get_option(option);
 				if (ec || option.value() != size) {
 					ErrorMessage_T msg("Socket buffer size ");
@@ -92,7 +92,7 @@ namespace ops
 			if ((_sock != nullptr) && (size > 0)) {
 				boost::asio::socket_base::receive_buffer_size option(size);
 				boost::system::error_code ec;
-				ec = _sock->set_option(option, ec);
+				_sock->set_option(option, ec);
 				_sock->get_option(option);
 				if (ec || option.value() != size) {
 					ErrorMessage_T msg("Socket buffer size ");
@@ -125,7 +125,7 @@ namespace ops
 				boost::asio::ip::tcp::endpoint sendingEndPoint;
 				sendingEndPoint = _sock->remote_endpoint(error);
 				if (!error) {
-                    _remoteAddressHost = (uint32_t)sendingEndPoint.address().to_v4().to_ulong();
+                    _remoteAddressHost = (uint32_t)sendingEndPoint.address().to_v4().to_uint();
 					_remoteAddress = sendingEndPoint.address().to_string().c_str();
 					_remotePort = sendingEndPoint.port();
 				}
@@ -201,7 +201,7 @@ namespace ops
             boost::system::error_code error;
             boost::asio::ip::tcp::endpoint localEndPoint;
             localEndPoint = _sock->local_endpoint(error);
-            address = (uint32_t)localEndPoint.address().to_v4().to_ulong();
+            address = (uint32_t)localEndPoint.address().to_v4().to_uint();
             port = localEndPoint.port();
         }
     };

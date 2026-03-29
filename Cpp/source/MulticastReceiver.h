@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2020-2025 Lennart Andersson.
+* Copyright (C) 2020-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -58,15 +58,15 @@ namespace ops
 		  _localInterface(localInterface),
 		  _inSocketBufferSizent(inSocketBufferSizent)
 		{
-			boost::asio::io_service* ioService = BoostIOServiceImpl::get(ioServ);
+			boost::asio::io_context* ioService = BoostIOServiceImpl::get(ioServ);
 			//udp::resolver resolver(*ioService);
 			//udp::resolver::query query(boost::asio::ip::host_name(),"");
 			//udp::resolver::iterator it=resolver.resolve(query);
 			//boost::asio::ip::address addr=(it++)->endpoint().address();
 
             // Linux needs INADDR_ANY here, for Windows it works with INADDR_ANY or localInterface
-            const boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string("0.0.0.0"));
-            //boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(localInterface));
+            const boost::asio::ip::address ipAddr(boost::asio::ip::make_address_v4("0.0.0.0"));
+            //boost::asio::ip::address ipAddr(boost::asio::ip::make_address_v4(localInterface));
 
 			localEndpoint = std::make_unique<endpoint_t>(ipAddr, bindPort);
 
@@ -91,7 +91,7 @@ namespace ops
 			if (_inSocketBufferSizent > 0) {
 				boost::asio::socket_base::receive_buffer_size option(_inSocketBufferSizent);
 				boost::system::error_code ec1, ec2;
-				ec1 = sock->set_option(option, ec1);
+				sock->set_option(option, ec1);
 				sock->get_option(option, ec2);
 				if (ec1 || ec2 || option.value() != _inSocketBufferSizent) {
 					ErrorMessage_T msg("Socket buffer size ");
@@ -122,8 +122,8 @@ namespace ops
             }
 
             // Join the multicast group.
-            const boost::asio::ip::address_v4 multicastAddress = boost::asio::ip::address_v4::from_string(_ipaddress.c_str());
-            const boost::asio::ip::address_v4 networkInterface(boost::asio::ip::address_v4::from_string(_localInterface.c_str()));
+            const boost::asio::ip::address_v4 multicastAddress = boost::asio::ip::make_address_v4(_ipaddress.c_str());
+            const boost::asio::ip::address_v4 networkInterface(boost::asio::ip::make_address_v4(_localInterface.c_str()));
             sock->set_option(boost::asio::ip::multicast::join_group(multicastAddress, networkInterface), ec);
             if (ec) {
                 ErrorMessage_T msg("Join MC group failed with error: ");
@@ -145,11 +145,7 @@ namespace ops
             // If set to 1, the socket will receive messages from all the groups that have been joined
             // globally on the whole system. Otherwise, it will deliver messages only from the groups that
             // have been explicitly joined (for example via the IP_ADD_MEMBERSHIP option) on this particular socket.
-#if BOOST_VERSION > 106000
             int nsock = sock->native_handle();
-#else
-            int nsock = sock->native();
-#endif
             if (nsock >= 0) {
                 int mc_all = 0;
                 if ((setsockopt(nsock, IPPROTO_IP, IP_MULTICAST_ALL, (void*)&mc_all, sizeof(mc_all))) < 0) {
@@ -199,7 +195,7 @@ namespace ops
 
         virtual void getSource(uint32_t& address, uint16_t& port) override
         {
-            address = (uint32_t)sendingEndPoint.address().to_v4().to_ulong();
+            address = (uint32_t)sendingEndPoint.address().to_v4().to_uint();
             port = sendingEndPoint.port();
         }
 

@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2024 Lennart Andersson.
+* Copyright (C) 2019-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -37,7 +37,7 @@ namespace ops
 
 	uint32_t IPString2Addr(const Address_T addr) 
 	{
-		return (uint32_t)boost::asio::ip::address_v4::from_string(addr.c_str()).to_ulong();
+		return (uint32_t)boost::asio::ip::make_address_v4(addr.c_str()).to_uint();
 	}
 
 	Address_T IPAddr2String(const uint32_t addr)
@@ -50,7 +50,7 @@ namespace ops
 	{
 		//std::cout << "isValidNodeAddress(): " << addr << std::endl;
         if (addr == "") { return false; }
-		const unsigned long Ip = boost::asio::ip::address_v4::from_string(addr.c_str()).to_ulong();
+		const unsigned long Ip = boost::asio::ip::make_address_v4(addr.c_str()).to_uint();
 		//std::cout << "isValidNodeAddress(): " << std::hex << Ip << std::dec << std::endl;
         if ((Ip >= 0xE0000000) && (Ip < 0xF0000000)) { return true; }
 		return false;
@@ -61,7 +61,7 @@ namespace ops
 	{
 		//std::cout << "isValidNodeAddress(): " << addr << std::endl;
         if (addr == "") { return false; }
-		const unsigned long Ip = boost::asio::ip::address_v4::from_string(addr.c_str()).to_ulong();
+		const unsigned long Ip = boost::asio::ip::make_address_v4(addr.c_str()).to_uint();
 		//std::cout << "isValidNodeAddress(): " << std::hex << Ip << std::dec << std::endl;
         if (Ip == 0) { return false; }
         if (Ip >= 0xE0000000) { return false; }  // Skip multicast and above
@@ -72,11 +72,11 @@ namespace ops
 	{
 		//std::cout << "isMyNodeAddress(): " << addr << std::endl;
         if (addr == "") { return false; }
-		const unsigned long Ip = boost::asio::ip::address_v4::from_string(addr.c_str()).to_ulong();
+		const unsigned long Ip = boost::asio::ip::make_address_v4(addr.c_str()).to_uint();
 		//std::cout << "isMyNodeAddress(): " << std::hex << Ip << std::dec << std::endl;
         if (Ip == 0x7F000001) { return true; }  // localhost
 
-		boost::asio::io_service* const ioService = BoostIOServiceImpl::get(ioServ);
+		boost::asio::io_context* const ioService = BoostIOServiceImpl::get(ioServ);
 		if (ioService == nullptr) { return false; }
 
 		using boost::asio::ip::udp;
@@ -85,17 +85,14 @@ namespace ops
 		// e.g due to the hostname beeing listed with an ipv4 address in /etc/hosts.
 		// On linux this can be tested by using the command "hostname -i"
 		udp::resolver resolver(*ioService);
-		const udp::resolver::query query(boost::asio::ip::host_name(), "");
-		udp::resolver::iterator it = resolver.resolve(query);
-		const udp::resolver::iterator end;
-		while (it != end) {
-			const boost::asio::ip::address ipaddr = it->endpoint().address();
+		udp::resolver::results_type endpoints = resolver.resolve(boost::asio::ip::host_name(), "");
+		for (auto const& endp : endpoints) {
+			const boost::asio::ip::address ipaddr = endp.endpoint().address();
 			if (ipaddr.is_v4()) {
-				const unsigned long myIp = ipaddr.to_v4().to_ulong();
+				const unsigned long myIp = ipaddr.to_v4().to_uint();
 				//std::cout << "isMyNodeAddress() avail: " << std::hex << myIp << std::dec << std::endl;
                 if (myIp == Ip) { return true; }
 			}
-			++it;
 		}
 		return false;
 	}
@@ -116,7 +113,7 @@ Address_T doSubnetTranslation(const Address_T addr, IOService* const ioServ)
 	Address_T subnet = addr.substr(0, index);
 	const Address_T mask = addr.substr(index+1);
 
-	const unsigned long subnetIp = boost::asio::ip::address_v4::from_string(subnet.c_str()).to_ulong();
+	const unsigned long subnetIp = boost::asio::ip::make_address_v4(subnet.c_str()).to_uint();
 	unsigned long subnetMask;
 	if (mask.length() <= 2) {
 		// Expand to the number of bits given
@@ -124,28 +121,25 @@ Address_T doSubnetTranslation(const Address_T addr, IOService* const ioServ)
         if ((subnetMask == 0) || (subnetMask > 31)) { return subnet; }
 		subnetMask = (((1u << subnetMask)-1u) << (32u - subnetMask)) & 0xFFFFFFFF;
 	} else {
-		subnetMask = boost::asio::ip::address_v4::from_string(mask.c_str()).to_ulong();
+		subnetMask = boost::asio::ip::make_address_v4(mask.c_str()).to_uint();
 	}
 
-	boost::asio::io_service* const ioService = BoostIOServiceImpl::get(ioServ);
+	boost::asio::io_context* const ioService = BoostIOServiceImpl::get(ioServ);
 	if (ioService == nullptr) { return subnet; }
 
 	// Note: The resolver requires that the hostname can be used to resolve to an ip
 	// e.g due to the hostname beeing listed with an ipv4 address in /etc/hosts.
 	// On linux this can be tested by using the command "hostname -i"
 	udp::resolver resolver(*ioService);
-	const udp::resolver::query query(boost::asio::ip::host_name(), "");
-	udp::resolver::iterator it = resolver.resolve(query);
-	const udp::resolver::iterator end;
-	while (it != end) {
-		const boost::asio::ip::address ipaddr = it->endpoint().address();
+	udp::resolver::results_type endpoints = resolver.resolve(boost::asio::ip::host_name(), "");
+	for (auto const& endp : endpoints) {
+		const boost::asio::ip::address ipaddr = endp.endpoint().address();
 		if (ipaddr.is_v4()) {
-			const unsigned long Ip = ipaddr.to_v4().to_ulong();
+			const unsigned long Ip = ipaddr.to_v4().to_uint();
 			if ((Ip & subnetMask) == (subnetIp & subnetMask)) {
 				return ipaddr.to_string().c_str();
 			}
 		}
-		++it;
 	}
 
 	return subnet;
@@ -155,7 +149,7 @@ void ShowKnownInterfaces(IOService* const ioServ, InternalString_T name)
 {
 	using boost::asio::ip::udp;
 
-	boost::asio::io_service* const ioService = BoostIOServiceImpl::get(ioServ);
+	boost::asio::io_context* const ioService = BoostIOServiceImpl::get(ioServ);
 	if (ioService == nullptr) { return; }
 
 	if (name == "") {
@@ -168,21 +162,18 @@ void ShowKnownInterfaces(IOService* const ioServ, InternalString_T name)
 	// e.g due to the hostname beeing listed with an ipv4 address in /etc/hosts.
 	// On linux this can be tested by using the command "hostname -i"
 	udp::resolver resolver(*ioService);
-	const udp::resolver::query query(name.c_str(), "");
 	boost::system::error_code ec;
-	udp::resolver::iterator it = resolver.resolve(query, ec);
-	const udp::resolver::iterator end;
+	udp::resolver::results_type endpoints = resolver.resolve(name.c_str(), "", ec);
 
 	if (ec) {
 		std::cout << "Host '" << name << "' not found (" << ec.message() << ")\n";
 
 	} else {
-		while (it != end) {
-			const boost::asio::ip::address ipaddr = it->endpoint().address();
+		for (auto const& endp : endpoints) {
+			const boost::asio::ip::address ipaddr = endp.endpoint().address();
 			if (ipaddr.is_v4()) {
 				std::cout << "  Ip: " << ipaddr.to_string() << "\n";
 			}
-			++it;
 		}
 	}
 }
@@ -195,19 +186,18 @@ InternalString_T GetHostName()
 // Return first address found for name
 Address_T GetAddrFromName(const InternalString_T name, IOService* const ioServ)
 {
-	boost::asio::io_service* const ioService = BoostIOServiceImpl::get(ioServ);
+	boost::asio::io_context* const ioService = BoostIOServiceImpl::get(ioServ);
 	if (ioService == nullptr) { return ""; }
 
 	boost::asio::ip::tcp::resolver resolver(*ioService);
-	const boost::asio::ip::tcp::resolver::iterator end;
 	boost::system::error_code ec;
-	boost::asio::ip::tcp::resolver::iterator it = resolver.resolve({ name.c_str(), "" }, ec);
+	boost::asio::ip::tcp::resolver::results_type endpoints = resolver.resolve(name.c_str(), "", ec);
+
 	if (ec) { return name; }
 
-	while (it != end) {
-        const boost::asio::ip::address ipaddr = it->endpoint().address();
+	for (auto const& endp : endpoints) {
+        const boost::asio::ip::address ipaddr = endp.endpoint().address();
         if (ipaddr.is_v4()) { return ipaddr.to_string(); }
-        ++it;
     }
 	return name;
 }

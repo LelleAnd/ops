@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2025 Lennart Andersson.
+* Copyright (C) 2019-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -45,7 +45,7 @@ namespace ops
 {
     using boost::asio::ip::udp;
 	UDPSender::UDPSender(IOService* const ioServ, const Address_T localInterface, const int ttl, const int outSocketBufferSize, const bool multicastSocket):
-		ipAddr(boost::asio::ip::address_v4::from_string(localInterface.c_str())),
+		ipAddr(boost::asio::ip::make_address_v4(localInterface.c_str())),
 		localEndpoint(ipAddr, 0),
 		io_service(BoostIOServiceImpl::get(ioServ)),
 		_localInterface(localInterface), _ttl(ttl), _outSocketBufferSize(outSocketBufferSize), _multicastSocket(multicastSocket)
@@ -79,7 +79,7 @@ namespace ops
         if (_outSocketBufferSize > 0) {
             boost::asio::socket_base::send_buffer_size option(_outSocketBufferSize);
             boost::system::error_code ec1, ec2;
-            ec1 = socket->set_option(option, ec1);
+            socket->set_option(option, ec1);
             socket->get_option(option, ec2);
             if ((ec1.value() != 0) || (ec2.value() != 0) || option.value() != _outSocketBufferSize)
             {
@@ -103,7 +103,7 @@ namespace ops
                 ec.clear();
             }
 
-            const boost::asio::ip::address_v4 local_interface = boost::asio::ip::address_v4::from_string(_localInterface.c_str());
+            const boost::asio::ip::address_v4 local_interface = boost::asio::ip::make_address_v4(_localInterface.c_str());
             const boost::asio::ip::multicast::outbound_interface ifOption(local_interface);
             socket->set_option(ifOption, ec);
             if (ec.value() != 0) {
@@ -115,12 +115,7 @@ namespace ops
             }
         }
 
-#if BOOST_VERSION > 106500
         socket->non_blocking(true, ec);
-#else
-        boost::asio::socket_base::non_blocking_io command(true);
-        socket->io_control(command, ec);
-#endif
         if (ec.value() != 0) {
             ErrorMessage_T msg("Set non-blocking failed with error: ");
             msg += ec.message();
@@ -154,7 +149,7 @@ namespace ops
 		if (socket == nullptr) { return false; }
         try
         {
-            const boost::asio::ip::address ipaddress = boost::asio::ip::address::from_string(ip.c_str());
+            const boost::asio::ip::address ipaddress = boost::asio::ip::make_address_v4(ip.c_str());
             const boost::asio::ip::udp::endpoint endpoint(ipaddress, port);
             const std::size_t res = socket->send_to(boost::asio::buffer(buf, size), endpoint);
 			if (res != (std::size_t)size) {

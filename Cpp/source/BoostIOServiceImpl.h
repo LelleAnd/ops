@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2020-2021 Lennart Andersson.
+* Copyright (C) 2020-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -40,7 +40,7 @@ namespace ops
 	class BoostIOServiceImpl : public IOService
 	{
 	public:
-		boost::asio::io_service boostIOService;
+		boost::asio::io_context boostIOService;
 	
 		virtual void run() override
 		{
@@ -62,7 +62,7 @@ namespace ops
 			boostIOService.stop();
 		}
 
-        static boost::asio::io_service* get(IOService* ioService)
+        static boost::asio::io_context* get(IOService* ioService)
         {
             return &dynamic_cast<BoostIOServiceImpl*>(ioService)->boostIOService;
         }

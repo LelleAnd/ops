@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2025 Lennart Andersson.
+ * Copyright (C) 2018-2026 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -64,8 +64,8 @@ namespace ops
 				_owner(owner), _tryToConnect(false), _inBufferSize(inBufferSize),
 				_timer(*BoostIOServiceImpl::get(ioServ))
 			{
-				boost::asio::io_service* ioService = BoostIOServiceImpl::get(ioServ);
-				const boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(serverIP.c_str()));
+				boost::asio::io_context* ioService = BoostIOServiceImpl::get(ioServ);
+				const boost::asio::ip::address ipAddr(boost::asio::ip::make_address_v4(serverIP.c_str()));
 				_endpoint = std::make_unique<boost::asio::ip::tcp::endpoint>(ipAddr, serverPort);
 				_sock = std::make_unique<boost::asio::ip::tcp::socket>(*ioService);
 			}
@@ -116,7 +116,11 @@ namespace ops
 							// Delay new connect attempt
 							std::shared_ptr<TCPConnection> self = shared_from_this();
 							_timer.cancel();
+#if BOOST_VERSION > 108100
+							_timer.expires_after(std::chrono::milliseconds(100));
+#else
 							_timer.expires_from_now(std::chrono::milliseconds(100));
+#endif
 							_timer.async_wait([self](const boost::system::error_code& e) {
 								OPS_TCP_TRACE("Client: handleConnect(), delay error: " << e << '\n');
 								if (e != boost::asio::error::operation_aborted) {

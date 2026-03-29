@@ -11,7 +11,7 @@ if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.15.0")
 endif()
 
 # The main project name
-project(OPS VERSION 4.3.3)
+project(OPS VERSION 4.3.4)
 
 ################################################################################
 #
@@ -39,7 +39,7 @@ project(OPS VERSION 4.3.3)
 #       OPS_FIXED_FILENAME_SIZE     default: 1024
 #
 #   CMAKE:
-#     CMAKE_CXX_STANDARD            default: 17 ( 11 / 14 / 17 / 20 / 23 )
+#     CMAKE_CXX_STANDARD            default: 17 ( 14 / 17 / 20 / 23 )
 #     CMAKE_BUILD_TYPE              Bootstrap / Debug / Opt
 #     BOOST_ARCH                    -
 #     OPS_BUILD_CPP                 default: ON
@@ -164,12 +164,15 @@ if (OPS_BUILD_CPP)
     set(Boost_ARCHITECTURE ${BOOST_ARCH})
   endif()
 
+  ## BOOST system has been removed in BOOST version 1.89 and later (it has been a header only since 1.69)
+  ## To be compatible with BOOST older than 1.69, set system as optional
+  ## e.g.: find_package(Boost COMPONENTS ... OPTIONAL_COMPONENTS system)
   if(MSVC)
     set(Boost_USE_STATIC_LIBS ON)
     ##set(Boost_USE_STATIC_RUNTIME ON)
-    find_package(Boost MODULE COMPONENTS system thread regex)
+    find_package(Boost MODULE COMPONENTS thread regex OPTIONAL_COMPONENTS system)
   else()
-    find_package(Boost MODULE COMPONENTS system thread)
+    find_package(Boost MODULE COMPONENTS thread OPTIONAL_COMPONENTS system)
   endif()
 
   ## Boost's -mt-s corresponds to VS' Runtime Library setting /MT
@@ -272,7 +275,7 @@ if (OPS_BUILD_CPP)
 
   else()
     if(CMAKE_BUILD_TYPE MATCHES "Release" OR CMAKE_BUILD_TYPE MATCHES "")
-  	  set(CMAKE_CXX_FLAGS "-O2")
+  	  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
   	  string(REPLACE "-O3 -DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE} )
     elseif(CMAKE_BUILD_TYPE MATCHES "Debug")
   	  set(CMAKE_CXX_FLAGS "-g -fprofile-arcs -ftest-coverage -O0") #fPIC is set

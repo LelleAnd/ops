@@ -169,11 +169,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\CArguments.cpp" />
     <ClCompile Include="..\..\Source\MessageDump.cpp" />
     <ClCompile Include="..\..\Source\OPSListener.cpp" />
     <ClCompile Include="..\..\Source\SdsSystemTime.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\CArguments.h" />
     <ClInclude Include="..\..\Source\COpsConfigHelper.h" />
     <ClInclude Include="..\..\Source\FilterMessage.h" />
     <ClInclude Include="..\..\Source\MessageDump.h" />

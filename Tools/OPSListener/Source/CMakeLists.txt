@@ -3,6 +3,8 @@
 set(EXE_NAME OPSListener)
 
 set(EXE_SRCS
+  CArguments.cpp
+  CArguments.h
   COpsConfigHelper.h
   FilterMessage.h
   MessageDump.cpp

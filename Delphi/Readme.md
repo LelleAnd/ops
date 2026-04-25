@@ -1,11 +1,10 @@
 # Delphi OPS Implementation #
 
-The Delphi implementation is now in pair with the C++ implementation regarding functionality.
+The Delphi implementation is mostly in pair with the C++ implementation regarding functionality. See [OPS feature list](../Doc/FeatureList.md).
 
-The implementation uses generics which arrived in Delphi 2009 and namespaces that requires Delphi XE2.
-The implementation has only been tested with **Delphi XE2** and **Delphi 10.x** Starter Edition, but should work with any version from Delphi XE2 and forward.
+The implementation uses generics which arrived in Delphi 2009 and namespaces that requires Delphi XE2. The implementation has been used with **Delphi XE2**, **Delphi 10.x Starter Edition**, **Delphi 11 Community Edition** and **Delphi 12 Community Edition**, and should work with any version from Delphi XE2 and forward.
 
-There are two ways to use OPS in your program, either:
+There are two ways to use OPS in your Delphi program, either:
 
 * Add all source files in *Common* and *Source* directories to your project or
 

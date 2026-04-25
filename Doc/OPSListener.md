@@ -1,6 +1,6 @@
 # OPS Listener #
 To listen to OPS traffic, OPS comes with a command line tool called ***OPSListener***.
-The following shows the available command arguments:
+The following shows the available command arguments (as of the date shown):
 
 ```
 D:\OPS\ops4>deploy\bin\OPSListener.exe -?

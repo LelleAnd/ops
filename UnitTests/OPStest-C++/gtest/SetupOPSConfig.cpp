@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018-2020 Lennart Andersson.
+* Copyright (C) 2018-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -28,12 +28,20 @@
 
 using namespace ops;
 
-SetupOPSConfig::SetupOPSConfig()
+SetupOPSConfig::SetupOPSConfig(configType cfg)
 {
-	InternalSetup();
+	switch (cfg) {
+	case configType::meta: 
+		metaSetup();
+		break;
+	case configType::base:
+	default:
+		baseSetup();
+		break;
+	}
 }
 
-void SetupOPSConfig::InternalSetup()
+void SetupOPSConfig::baseSetup()
 {
 	std::string content(
 		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
@@ -77,7 +85,41 @@ void SetupOPSConfig::InternalSetup()
 	ASSERT_FALSE(OPSConfigRepository::Instance()->Add(config));	// Duplicate test
 }
 
-SetupOPSConfig::~SetupOPSConfig() 
+void SetupOPSConfig::metaSetup()
+{
+	std::string content(
+		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+		"<!--"
+		"	Description:"
+		"-->"
+		"<root>"
+		"	<ops_config type = \"DefaultOPSConfigImpl\">"
+		"		<domains>"
+		"			<element type = \"Domain\">"
+		"				<domainID>MetaDomain</domainID>"
+		"				<domainAddress>234.5.6.8</domainAddress>"
+		"				<localInterface>127.0.0.1</localInterface>"
+		"               <metaDataMcPort>0</metaDataMcPort>"
+		"				<topics>"
+		"					<element type = \"Topic\">"
+		"						<name>MetaTopic</name>"
+		"						<dataType>ops.ParticipantInfoData</dataType>"
+		"						<transport>inprocess</transport>"
+		"                       <port>7780</port>"
+		"					</element>"
+		"				</topics>"
+		"			</element>"
+		"		</domains>"
+		"	</ops_config>"
+		"</root>"
+	);
+	std::istringstream iss(content);
+	std::shared_ptr<OPSConfig> const config = OPSConfig::getConfig(iss);
+	ASSERT_NE(config, nullptr);
+	ASSERT_TRUE(OPSConfigRepository::Instance()->Add(config));
+}
+
+SetupOPSConfig::~SetupOPSConfig()
 {
 	OPSConfigRepository::Instance()->TotalClear();
 }

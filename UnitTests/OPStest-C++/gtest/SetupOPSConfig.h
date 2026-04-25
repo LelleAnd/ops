@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018 Lennart Andersson.
+* Copyright (C) 2018-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -22,8 +22,12 @@
 
 class SetupOPSConfig {
 public:
-	SetupOPSConfig();
+	enum class configType { base, meta};
+
+	explicit SetupOPSConfig( configType cfg = configType::base );
 	~SetupOPSConfig();
+
 private:
-	void InternalSetup();
+	void baseSetup();
+	void metaSetup();
 };

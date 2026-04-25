@@ -95,6 +95,17 @@ TEST_F(TopicInfoDataTestFixture, Test) {
 	EXPECT_STREQ(obj5.name.c_str(), "Kalle");
 	ASSERT_EQ(obj5.keys.size(), (size_t)1);
 	EXPECT_STREQ(obj5.keys[0].c_str(), "hejhopp");
+
+	// Constructor with Topic param
+	Topic top("Kalle", 66, "typeid", "addr");
+	top.setTransport("trans");
+	TopicInfoData obj6(top);
+	EXPECT_STREQ(obj6.getTypeString().c_str(), "TopicInfoData ");
+	EXPECT_STREQ(obj6.name.c_str(), "Kalle");
+	EXPECT_STREQ(obj6.type.c_str(), "typeid");
+	EXPECT_STREQ(obj6.transport.c_str(), "trans");
+	EXPECT_STREQ(obj6.address.c_str(), "addr");
+	EXPECT_EQ(obj6.port, 66);
 }
 
 TEST_F(TopicInfoDataTestFixture, Test_Clone) {

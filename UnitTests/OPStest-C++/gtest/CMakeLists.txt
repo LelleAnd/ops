@@ -15,6 +15,7 @@ set(APP_SRCS
   listener_helpers.h
   Lockable_test.cpp
   MemoryMap_test.cpp
+  MetaData_test.cpp
   MocSendReceiveDataHelpers.cpp
   MocSendReceiveDataHelpers.h
   NotifierListener_test.cpp

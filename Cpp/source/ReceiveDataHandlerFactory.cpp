@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2025 Lennart Andersson.
+* Copyright (C) 2018-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -183,7 +183,7 @@ namespace ops
                 rdh->clear();
 
 				if (key == Topic::TRANSPORT_UDP) {
-					participant.setUdpTransportInfo("", 0);
+					participant.metaDataHnd.setUdpTransportInfo("", 0);
 				}
 
                 garbageReceiveDataHandlers.push_back(rdh);

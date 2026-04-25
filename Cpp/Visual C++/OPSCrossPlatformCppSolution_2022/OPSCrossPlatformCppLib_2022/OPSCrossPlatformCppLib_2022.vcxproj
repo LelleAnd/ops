@@ -391,6 +391,7 @@
     <ClInclude Include="..\..\..\include\LibraryOptions.h" />
     <ClInclude Include="..\..\..\include\memory_pool.h" />
     <ClInclude Include="..\..\..\include\memory_pool_lock_free.h" />
+    <ClInclude Include="..\..\..\include\MetaDataHandler.h" />
     <ClInclude Include="..\..\..\include\NetworkSupport.h" />
     <ClInclude Include="..\..\..\include\OPSConfigRepository.h" />
     <ClInclude Include="..\..\..\include\OPSEvent.h" />
@@ -511,6 +512,7 @@
     <ClCompile Include="..\..\..\source\Lockable.cpp" />
     <ClCompile Include="..\..\..\source\MCReceiveDataHandler.cpp" />
     <ClCompile Include="..\..\..\source\memory_pool.cpp" />
+    <ClCompile Include="..\..\..\source\MetaDataHandler.cpp" />
     <ClCompile Include="..\..\..\source\MulticastReceiver.cpp" />
     <ClCompile Include="..\..\..\source\NetworkSupport.cpp" />
     <ClCompile Include="..\..\..\source\OPSArchiverIn.cpp" />

@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2025 Lennart Andersson.
+ * Copyright (C) 2018-2026 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -30,7 +30,7 @@ namespace ops
 			std::make_unique<ReceiveDataChannel>(top, part))
     {
 		if (commonReceiver) {
-			part.setUdpTransportInfo(rdcs[0]->getLocalAddress(), rdcs[0]->getLocalPort());
+			part.metaDataHnd.setUdpTransportInfo(rdcs[0]->getLocalAddress(), rdcs[0]->getLocalPort());
 		}
 	}
 }

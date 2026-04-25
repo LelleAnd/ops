@@ -43,6 +43,7 @@
 #include "BasicError.h"
 #include "BasicWarning.h"
 #include "TCPBoostConnection.h"
+#include "TimeHelper.h"
 
 namespace ops
 {

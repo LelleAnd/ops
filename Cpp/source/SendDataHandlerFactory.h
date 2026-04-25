@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2020-2024 Lennart Andersson.
+* Copyright (C) 2020-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -51,7 +51,7 @@ namespace ops
         std::map<InternalKey_T, std::shared_ptr<SendDataHandler>> sendDataHandlers;
         Lockable mutex;
 
-        void PostSetup(const Topic& top, const Participant& participant, std::shared_ptr<SendDataHandler> sdh);
+        void PostSetup(const Topic& top, Participant& participant, std::shared_ptr<SendDataHandler> sdh);
     };
 
 }

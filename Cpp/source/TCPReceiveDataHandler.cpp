@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2025 Lennart Andersson.
+ * Copyright (C) 2018-2026 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -99,12 +99,12 @@ namespace ops
 			if (used) {
 				++count;
 				if (count == 1) {
-					participant.registerTcpTopic(top.getName(), shared_from_this());
+					participant.metaDataHnd.registerReceiveTopic(top, shared_from_this());
 				}
 			} else {
 				--count;
 				if (count == 0) {
-					participant.unregisterTcpTopic(top.getName(), shared_from_this());
+					participant.metaDataHnd.unregisterReceiveTopic(top, shared_from_this());
 				}
 			}
 			topics[top.getName()] = count;

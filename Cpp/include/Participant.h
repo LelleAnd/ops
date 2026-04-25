@@ -38,11 +38,10 @@
 #include "DeadlineTimer.h"
 #include "Error.h"
 #include "ErrorService.h"
-#include "ParticipantInfoData.h"
-#include "ParticipantInfoDataListener.h"
 #include "SendDataHandler.h"
 #include "DebugHandler.h"
 #include "Validation.h"
+#include "MetaDataHandler.h"
 
 namespace ops
 {
@@ -115,9 +114,9 @@ namespace ops
 		//Create a Topic for subscribing or publishing on ParticipantInfoData
 		ops::Topic createParticipantInfoTopic() const;
 
-		//Get the name that this participant has set in its ParticipantInfoData
+		//Get the name that this participant has set in its published meta-data
 		InternalString_T getPartInfoName() const {
-			return partInfoData.name;
+			return metaDataHnd.getPartInfoName();
 		}
 
 		//Add a SerializableFactory which has support for data types (i.e. OPSObject derivatives you want this Participant to understand)
@@ -150,9 +149,9 @@ namespace ops
 			return config.get();
 		}
 		
-		ErrorService* getErrorService() const
+		ErrorService* getErrorService()
 		{
-			return errorService.get();
+			return &errorService;
 		}
 
 		// A static error service that user could create, by calling getStaticErrorService(), and connect to. 
@@ -234,7 +233,7 @@ namespace ops
 		std::shared_ptr<InProcDistributor> inProcDistributor;
 
 		///The ErrorService
-        std::unique_ptr<ErrorService> errorService;
+        ErrorService errorService;
 
 		///The threadPool drives ioService. By default Participant use a SingleThreadPool i.e. only one thread drives ioService.
         std::unique_ptr<ThreadPool> threadPool;
@@ -243,25 +242,11 @@ namespace ops
         std::unique_ptr<DeadlineTimer> aliveDeadlineTimer;
 
 		//------------------------------------------------------------------------
-		///A publisher of ParticipantInfoData
-        std::unique_ptr<Publisher> partInfoPub;
-                
-		///The ParticipantInfoData that partInfoPub will publish periodically
-		ParticipantInfoData partInfoData;
-		Lockable partInfoDataMutex;
-
 		//Visible to friends only
-		void setUdpTransportInfo(Address_T ip, int port);
-		void registerTcpTopic(const ObjectName_T topicName, std::shared_ptr<ReceiveDataHandler> handler);
-		void unregisterTcpTopic(const ObjectName_T topicName, std::shared_ptr<ReceiveDataHandler> handler);
 		bool hasPublisherOn(const ObjectName_T& topicName);
 		bool hasSubscriberOn(const ObjectName_T&topicName);
 
         Domain* domain{ nullptr };
-
-		//------------------------------------------------------------------------
-		///A listener and handler for ParticipantInfoData
-        std::unique_ptr<ParticipantInfoDataListener> partInfoListener;
 
 		//------------------------------------------------------------------------
 		//
@@ -284,6 +269,8 @@ namespace ops
 		ObjectName_T domainID;
 		///The id of this participant, must be unique in process
 		ObjectName_T participantID;
+
+		MetaDataHandler metaDataHnd;
 
 		///As long this is true, we keep on running this participant
         volatile bool keepRunning{ true };

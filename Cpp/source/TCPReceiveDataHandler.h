@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2024 Lennart Andersson.
+* Copyright (C) 2018-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -32,7 +32,7 @@ namespace ops
 	public:
 		TCPReceiveDataHandler(Topic top, Participant& part);
 
-		void AddReceiveChannel(const ObjectName_T& topicName, const Address_T& ip, int port);
+		void AddReceiveChannel(const ObjectName_T& topicName, const Address_T& ip, int port) override;
 
 	protected:
         Topic topic;

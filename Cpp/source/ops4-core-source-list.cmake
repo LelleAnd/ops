@@ -34,6 +34,7 @@ set(LIB_OPS_PUBLIC_HEADERS
   ${OPS_HEADER_PATH}/Lockable.h
   ${OPS_HEADER_PATH}/memory_pool.h
   ${OPS_HEADER_PATH}/MemoryMap.h
+  ${OPS_HEADER_PATH}/MetaDataHandler.h
   ${OPS_HEADER_PATH}/NetworkSupport.h
   ${OPS_HEADER_PATH}/NoSuchTopicException.h
   ${OPS_HEADER_PATH}/Notifier.h
@@ -115,6 +116,7 @@ set(LIB_OPS_CORE_SRCS
   ${OPS_SRC_PATH}/McSendDataHandler.h
   ${OPS_SRC_PATH}/McUdpSendDataHandler.h
   ${OPS_SRC_PATH}/memory_pool.cpp
+  ${OPS_SRC_PATH}/MetaDataHandler.cpp
   ${OPS_SRC_PATH}/MultiThreadPool.h
   ${OPS_SRC_PATH}/OPSArchiverIn.cpp
   ${OPS_SRC_PATH}/OPSArchiverOut.cpp

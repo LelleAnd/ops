@@ -72,7 +72,7 @@ namespace ops
             return result;
         }
 
-		void addSink(const ObjectName_T& topic, const Address_T& ip, const int& port, bool staticRoute = false)
+		void addSink(const ObjectName_T& topic, const Address_T& ip, const int& port, bool staticRoute = false) override
 		{
             SafeLock lock(mutex);
 

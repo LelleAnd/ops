@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2025 Lennart Andersson.
+* Copyright (C) 2018-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -53,6 +53,10 @@ namespace ops
 
 		ReceiveDataHandler(Participant& part, std::unique_ptr<ReceiveDataChannelBase> rdc = nullptr);
 		virtual ~ReceiveDataHandler() = default;
+
+		virtual void AddReceiveChannel(const ObjectName_T& /*topicName*/, const Address_T& /*ip*/, int /*port*/)
+		{
+		}
 
 		bool aquireMessageLock();
 		void releaseMessageLock();

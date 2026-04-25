@@ -72,6 +72,11 @@ namespace ops
 			if (publishers.size() == 0) sender->close();
 		}
 
+		virtual void addSink(const ObjectName_T& /*topic*/, const Address_T& /*ip*/, const int& /*port*/, bool staticRoute = false)
+		{
+			UNUSED(staticRoute)
+		}
+
 		uint16_t getLocalPort()
 		{
 			return sender->getLocalPort();

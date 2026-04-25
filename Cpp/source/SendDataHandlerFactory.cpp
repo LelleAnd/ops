@@ -1,7 +1,7 @@
 /**
 *
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2020-2025 Lennart Andersson.
+* Copyright (C) 2020-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -90,7 +90,7 @@ namespace ops
 		return key;
 	}
 
-    void SendDataHandlerFactory::PostSetup(const Topic& top, const Participant& participant, std::shared_ptr<SendDataHandler> const sdh)
+    void SendDataHandlerFactory::PostSetup(const Topic& top, Participant& participant, std::shared_ptr<SendDataHandler> const sdh)
     {
         if (top.getTransport() == Topic::TRANSPORT_UDP) {
             // If topic specifies a valid node address, add that as a static destination address for topic
@@ -103,8 +103,8 @@ namespace ops
                 // Setup a listener on the participant info data published by participants on our domain.
                 // We use the information for topics with UDP as transport, to know the destination for UDP sends
                 // ie. we extract ip and port from the information and add it to our McUdpSendDataHandler
-                // Note: need to call connectUdp/disconnectUdp equal number of times
-                participant.partInfoListener->connectUdp(top, sdh);
+                // Note: need to call connectSDH/disconnectSDH equal number of times
+                participant.metaDataHnd.registerSendTopic(top, sdh);
             }
         }
     }
@@ -169,7 +169,7 @@ namespace ops
             if (sendDataHandlers.find(key) != sendDataHandlers.end()) {
                 const std::shared_ptr<SendDataHandler> sdh = sendDataHandlers[key];
                 if (!isValidNodeAddress(top.getDomainAddress())) {
-                    participant.partInfoListener->disconnectUdp(top, sdh);
+                    participant.metaDataHnd.unregisterSendTopic(top, sdh);
                 }
             }
         }

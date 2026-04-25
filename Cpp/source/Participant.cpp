@@ -39,6 +39,7 @@
 #include "ConfigException.h"
 #include "CommException.h"
 #include "Publisher.h"
+#include "Subscriber.h"
 #include "BasicError.h"
 #include "NetworkSupport.h"
 #include "ThreadSupport.h"
@@ -135,7 +136,8 @@ namespace ops
 #endif
 		_policy(policy),
 		domainID(domainID_),
-		participantID(participantID_)
+		participantID(participantID_),
+		metaDataHnd(errorService, participantID_, domainID_)
 	{
         ioService = IOService::create();
 
@@ -170,22 +172,7 @@ namespace ops
 		//Create a factory instance for each participant
 		objectFactory = std::make_unique<OPSObjectFactoryImpl>();
 
-		// Initialize static data in partInfoData (ReceiveDataHandlerFactory() will set some more fields)
-		InternalString_T Name = GetHostName();
-		std::ostringstream myStream;
-#ifdef _WIN32
-		myStream << Name << " (" << _getpid() << ")" << std::ends;
-#else
-		myStream << Name << " (" << getpid() << ")" << std::ends;
-#endif
-		Name = myStream.str().c_str();
-		partInfoData.name = Name;
-        partInfoData.languageImplementation = "C++";
-        partInfoData.id = participantID;
-        partInfoData.domain = domainID;
-
 		//-----------Create delegate helper classes---
-		errorService = std::make_unique<ErrorService>();
 		receiveDataHandlerFactory = std::make_unique<ReceiveDataHandlerFactory>();
 		sendDataHandlerFactory = std::make_unique<SendDataHandlerFactory>();
 		inProcDistributor = std::make_shared<InProcDistributor>();
@@ -194,7 +181,20 @@ namespace ops
 		//------------Create timer for periodic events-
 		aliveDeadlineTimer = DeadlineTimer::creat(ioService.get());
 		aliveDeadlineTimer->addListener(this);
-		// Start our timer. Calls onNewEvent(Notifier<int>* sender, int message) on timeout
+
+		// Create the meta data publisher if user hasn't disabled it for the domain.
+		try {
+			if (domain->getMetaDataMcPort() > 0) { metaDataHnd.setup(createParticipantInfoTopic()); }
+		} catch (std::exception& ex)
+		{
+			ErrorMessage_T errMessage = "Failed to create publisher for ParticipantInfoTopic. Check localInterface and metaDataMcPort in configuration file.";
+			errMessage += " Exception: ";
+			errMessage += ex.what();
+			BasicError err("Participant", "constructor", errMessage);
+			reportStaticError(&err);
+		}
+
+		// Now start the timer. Calls onNewEvent(Notifier<int>* , int ) on timeout
 		aliveDeadlineTimer->start(aliveTimeout);
 		//--------------------------------------------
 
@@ -204,13 +204,6 @@ namespace ops
 			threadPool->addRunnable(this);
 			threadPool->start();
 		}
-		//--------------------------------------------
-
-		// Create the listener object for the participant info data published by participants on our domain.
-		// The actual subscriber won't be created until some one needs it.
-		// We use the information for topics with UDP as transport, to know the destination for UDP sends
-		// ie. we extract ip and port from the information and add it to our McUdpSendDataHandler.
-		partInfoListener = std::make_unique<ParticipantInfoDataListener>(*this);
 	}
 
 	Participant::~Participant()
@@ -230,18 +223,14 @@ namespace ops
 			// Indicate that shutdown is in progress
 			keepRunning = false;
 
-			// We have indicated shutdown in progress. Delete the partInfoData Publisher.
-			// Note that this uses our sendDataHandlerFactory.
-			partInfoPub.reset();
+			// We have indicated shutdown in progress. Cleanup the meta-data handler.
+			// Note that this uses our sendDataHandlerFactory, receiveDataHandlerFactory and requires ioService to be running.
+			metaDataHnd.cleanup();
 
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 			debugHandler.Stop();
 #endif
 		}
-
-		// Stop the subscriber for partInfoData. This requires ioService to be running.
-		// Note that this (the subscriber) uses our receiveDataHandlerFactory.
-		if (partInfoListener != nullptr) { partInfoListener->prepareForDelete(); }
 
 		// Now delete our send factory
 		sendDataHandlerFactory.reset();
@@ -275,9 +264,7 @@ namespace ops
 		threadPool.reset();
 
 		// Now when the threads are gone, it's safe to delete the rest of our objects
-		partInfoListener.reset();
 		objectFactory.reset();
-		errorService.reset();
 		config.reset();
 		// All objects connected to our ioservice should now be deleted, so it should be safe to delete it
         ioService.reset();
@@ -314,7 +301,7 @@ namespace ops
 	// Report an error via the participants ErrorService
 	void Participant::reportError(Error* const err)
 	{
-		errorService->report(err);
+		errorService.report(err);
 	}
 
 	// Report an error via all participants ErrorServices
@@ -366,24 +353,12 @@ namespace ops
 
 		if (keepRunning) {
 			try {
-				// Create the meta data publisher if user hasn't disabled it for the domain.
-				// The meta data publisher is only necessary if we have topics using transport UDP.
-				if ( (partInfoPub == nullptr) && (domain->getMetaDataMcPort() > 0) )
-				{
-					partInfoPub = std::make_unique<Publisher>(createParticipantInfoTopic());
-				}
-				if (partInfoPub != nullptr) {
-					const SafeLock lck(partInfoDataMutex);
-					partInfoPub->writeOPSObject(&partInfoData);
+				if (domain->getMetaDataMcPort() > 0) {
+					metaDataHnd.publish();
 				}
 			} catch (std::exception& ex)
 			{
-				ErrorMessage_T errMessage;
-				if (partInfoPub == nullptr) {
-					errMessage = "Failed to create publisher for ParticipantInfoTopic. Check localInterface and metaDataMcPort in configuration file.";
-				} else {
-					errMessage = "Failed to publish ParticipantInfoTopic data.";
-				}
+				ErrorMessage_T errMessage = "Failed to publish ParticipantInfoTopic data.";
 				errMessage += " Exception: ";
 				errMessage += ex.what();
 				BasicError err("Participant", "onNewEvent", errMessage);
@@ -399,27 +374,6 @@ namespace ops
 
 		// Start a new timeout
 		aliveDeadlineTimer->start(aliveTimeout);
-	}
-
-	void Participant::setUdpTransportInfo(Address_T const ip, int const port)
-	{
-		const SafeLock lock(partInfoDataMutex);
-		partInfoData.ip = ip;
-		partInfoData.mc_udp_port = port;
-	}
-
-	void Participant::registerTcpTopic(const ObjectName_T topicName, std::shared_ptr<ReceiveDataHandler> const handler)
-	{
-		if (partInfoListener != nullptr) {
-			partInfoListener->connectTcp(topicName, handler);
-		}
-	}
-
-	void Participant::unregisterTcpTopic(const ObjectName_T topicName, std::shared_ptr<ReceiveDataHandler> const handler)
-	{
-		if (partInfoListener != nullptr) {
-			partInfoListener->disconnectTcp(topicName, handler);
-		}
 	}
 
 	void Participant::addTypeSupport(ops::SerializableFactory* const typeSupport)
@@ -448,42 +402,30 @@ namespace ops
 	///Deprecated, use getErrorService()->addListener instead. Add a listener for OPS core reported Errors
 	void Participant::addListener(Listener<Error*>* const listener)
 	{
-		errorService->addListener(listener);
+		errorService.addListener(listener);
 	}
 
 	///Deprecated, use getErrorService()->removeListener instead. Remove a listener for OPS core reported Errors
 	void Participant::removeListener(Listener<Error*>* const listener)
 	{
-		errorService->removeListener(listener);
+		errorService.removeListener(listener);
 	}
 
 	bool Participant::hasPublisherOn(const ObjectName_T& topicName)
 	{
-		const SafeLock lock(partInfoDataMutex);
-		// Check if topic exist in partInfoData.publishTopics
-		for (auto const& td : partInfoData.publishTopics) {
-			if (td.name == topicName) { return true; }
-		}
-		return false;
+		return metaDataHnd.hasPublisherOn(topicName);
 	}
 
 	bool Participant::hasSubscriberOn(const ObjectName_T& topicName)
 	{
-		const SafeLock lock(partInfoDataMutex);
-		// Check if topic exist in partInfoData.subscribeTopics
-		for (auto const& td : partInfoData.subscribeTopics) {
-			if (td.name == topicName) { return true; }
-		}
-		return false;
+		return metaDataHnd.hasSubscriberOn(topicName);
 	}
 
 	std::shared_ptr<ReceiveDataHandler> Participant::getReceiveDataHandler(const Topic& top)
 	{
         std::shared_ptr<ReceiveDataHandler> result = receiveDataHandlerFactory->getReceiveDataHandler(top, *this);
 		if (result != nullptr) {
-			const SafeLock lock(partInfoDataMutex);
-			//Need to add topic to partInfoData.subscribeTopics (TODO ref count if same topic??)
-            partInfoData.subscribeTopics.push_back(TopicInfoData(top));
+			metaDataHnd.addSubTopic(top);
 		}
 		return result;
 	}
@@ -491,16 +433,7 @@ namespace ops
 	void Participant::releaseReceiveDataHandler(const Topic& top)
 	{
 		receiveDataHandlerFactory->releaseReceiveDataHandler(top, *this);
-
-		ObjectName_T topicName{ top.getName() };
-
-		const SafeLock lock(partInfoDataMutex);
-		// Remove topic from partInfoData.subscribeTopics (TODO the same topic, ref count?)
-		auto it = std::find_if(partInfoData.subscribeTopics.begin(), partInfoData.subscribeTopics.end(),
-			[&](TopicInfoData const& td) { return td.name == topicName; });
-		if (it != partInfoData.subscribeTopics.end()) {
-			partInfoData.subscribeTopics.erase(it);
-		}
+		metaDataHnd.removeSubTopic(top);
 	}
 
 	std::shared_ptr<SendDataHandler> Participant::getSendDataHandler(const Topic& top)
@@ -512,24 +445,13 @@ namespace ops
 
 	void Participant::updateSendPartInfo(const Topic& top)
 	{
-		const SafeLock lock(partInfoDataMutex);
-		//Need to add topic to partInfoData.subscribeTopics (TODO ref count if same topic??)
-		partInfoData.publishTopics.push_back(TopicInfoData(top));
+		metaDataHnd.addPubTopic(top);
 	}
 
 	void Participant::releaseSendDataHandler(const Topic& top)
 	{
 		sendDataHandlerFactory->releaseSendDataHandler(top, *this);
-
-		ObjectName_T topicName{ top.getName() };
-
-		const SafeLock lock(partInfoDataMutex);
-		// Remove topic from partInfoData.publishTopics (TODO the same topic, ref count?)
-		auto it = std::find_if(partInfoData.publishTopics.begin(), partInfoData.publishTopics.end(),
-			[&](TopicInfoData const& td) { return td.name == topicName; });
-		if (it != partInfoData.publishTopics.end()) {
-			partInfoData.publishTopics.erase(it);
-		}
+		metaDataHnd.removePubTopic(top);
 	}
 
 }

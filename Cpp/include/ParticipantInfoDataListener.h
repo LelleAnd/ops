@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2020-2021 Lennart Andersson.
+* Copyright (C) 2020-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -23,36 +23,43 @@
 
 #include <map>
 
-#include "DataNotifier.h"
-#include "ParticipantInfoData.h"
-#include "Subscriber.h"
-#include "SendDataHandler.h"
-#include "ReceiveDataHandler.h"
+#include "OPSTypeDefs.h"
+#include "DataListener.h"
 #include "Lockable.h"
+#include "Topic.h"
 
 namespace ops
 {
-	class Participant;
+	// Forward declarations
+	class ErrorService;
+	class ParticipantInfoData;
+	class ReceiveDataHandler;
+	class SendDataHandler;
+	class Subscriber;
 
-	///A listener for Participant meta-data
-	class ParticipantInfoDataListener : public DataListener
+	// Listener for Participant meta-data
+	class ParticipantInfoDataListener
 	{
 	public:
-		explicit ParticipantInfoDataListener(Participant& part);
+		ParticipantInfoDataListener(ErrorService& errorSvc, const ObjectName_T& domId);
 
-		void prepareForDelete();
-		virtual ~ParticipantInfoDataListener();
+		// Define topic to listen to
+		void setup(const Topic& top);
 
-		virtual void onNewData(DataNotifier* notifier) override;
+		void cleanup();
 
-		void connectUdp(const Topic& top, std::shared_ptr<SendDataHandler> handler);
-		void disconnectUdp(const Topic& top, std::shared_ptr<SendDataHandler> handler);
+		void connectSDH(const Topic& top, std::shared_ptr<SendDataHandler> handler);
+		void disconnectSDH(const Topic& top, std::shared_ptr<SendDataHandler> handler);
 
-		void connectTcp(const ObjectName_T& top, std::shared_ptr<ReceiveDataHandler> handler);
-		void disconnectTcp(const ObjectName_T& top, std::shared_ptr<ReceiveDataHandler> handler);
+		void connectRDH(const ObjectName_T& top, std::shared_ptr<ReceiveDataHandler> handler);
+		void disconnectRDH(const ObjectName_T& top, std::shared_ptr<ReceiveDataHandler> handler);
 
 	private:
-		Participant& participant;
+		ErrorService& errorService;
+		ObjectName_T domainId;
+
+		// Meta-data topic to listen to (initialized as empty)
+		Topic partInfoTopic;
 
 		Lockable mutex;
 		std::unique_ptr<Subscriber> partInfoSub;

@@ -4,6 +4,18 @@ The major changes for each release tag is noted below. For minor changes see the
 ## tags 4.3.x-y ##
 Requires the tinyxml2 library which 4.2.x-y doesn't.
 
+### 4.3.4-0 ###
+* Added field validation to generated Ada and Delphi code. See [message validation](MessageValidation.md).
+* Added OPS version defines for C++ (in cmake-generated file *OPSVersion.h*), e.g.:
+```
+	#define OPS_VERSION "4.3.4"
+	#define OPS_VERSION_MAJOR 4
+	#define OPS_VERSION_MINOR 3
+	#define OPS_VERSION_PATCH 4
+	#define OPS_VERSION_NUMBER 40304
+```
+* Updated to support newer versions of the C++ Boost library (tested with version 1.90). See also [prerequisites](Prerequisites.md).
+
 ### 4.3.3-0 ###
 * Added compile-time construction of idl type-strings for C++17 and up
 * Changed C++ SerializableFactory::create parameter type to string_view for C++17 and up

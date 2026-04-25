@@ -54,6 +54,7 @@ clean_bootstrap:
 	rm -rf $(BUILD_BOOTSTRAP)
 	rm -rf Common/idl/Generated
 	rm -rf Cpp/include/OPSStringLengths.h
+	rm -rf Cpp/include/OPSVersion.h
 
 .PHONY : clean_debug
 clean_debug:

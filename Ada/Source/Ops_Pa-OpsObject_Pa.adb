@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2021 Lennart Andersson.
+-- Copyright (C) 2016-2026 Lennart Andersson.
 --  
 -- This file is part of OPS (Open Publish Subscribe).
 --  
@@ -194,6 +194,14 @@ package body Ops_Pa.OpsObject_pa is
     Dispose(Self.TypesString);
     Dispose(Self.SpareBytes);
   end Finalize;
+
+  --------------------------------------------------------------------------
+  -- Validation routine for fields
+  --------------------------------------------------------------------------
+  function IsValid( Self : OpsObject_Class ) return Boolean is
+  begin
+    return True;
+  end;
 
 end Ops_Pa.OpsObject_Pa;
 

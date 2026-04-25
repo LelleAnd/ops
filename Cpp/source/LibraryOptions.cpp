@@ -1,6 +1,6 @@
 /**
  *
- * Copyright (C) 2025 Lennart Andersson.
+ * Copyright (C) 2025-2026 Lennart Andersson.
 *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -20,11 +20,15 @@
 
 #include "OPSTypeDefs.h"
 
+#ifndef REPLACE_TRANSPORT_LAYER
+#include <boost/version.hpp>
+#endif
+
 namespace ops {
 
     std::string GetUsedBuildOptions()
     {
-        std::string res = "";
+        std::string res = "OPS Version " OPS_VERSION ", ";
 
 #if defined(OPS_C23_DETECTED)
         res += "C++23, ";
@@ -34,6 +38,9 @@ namespace ops {
         res += "C++17, ";
 #elif defined(OPS_C14_DETECTED)
         res += "C++14, ";
+#endif
+#if defined(BOOST_LIB_VERSION)
+        res += "BOOST " BOOST_LIB_VERSION ", ";
 #endif
 #ifdef OPS_ENABLE_TRACE
         res += "OPS_ENABLE_TRACE, ";

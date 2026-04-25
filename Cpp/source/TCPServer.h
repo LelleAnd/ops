@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2025 Lennart Andersson.
+* Copyright (C) 2018-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -55,7 +55,7 @@ namespace ops
 		{
 			Lockable _ownerMtx;
 			TCPServer* _owner = nullptr;
-			boost::asio::io_service* _ioService = nullptr;
+			boost::asio::io_context* _ioService = nullptr;
 			std::unique_ptr<boost::asio::ip::tcp::socket> _sock;				// The socket that handles next accept.
 			std::unique_ptr<boost::asio::ip::tcp::acceptor> _acceptor;
 			volatile bool _canceled = false;
@@ -63,7 +63,7 @@ namespace ops
 			int _outSocketBufferSize = 0;
 
 		public:
-			impl(TCPServer* owner, boost::asio::io_service* ioService) : _owner(owner), _ioService(ioService)
+			impl(TCPServer* owner, boost::asio::io_context* ioService) : _owner(owner), _ioService(ioService)
 			{
 				_sock = std::make_unique<boost::asio::ip::tcp::socket>(*_ioService);
 				// This constructor opens, sets reuse_address, binds and listens to the given endpoint.
@@ -130,7 +130,7 @@ namespace ops
 				boost::asio::ip::tcp::endpoint localEndPoint;
 				localEndPoint = _acceptor->local_endpoint(error);
 				address = localEndPoint.address().to_string().c_str();
-                addressHost = (uint32_t)localEndPoint.address().to_v4().to_ulong();
+                addressHost = (uint32_t)localEndPoint.address().to_v4().to_uint();
 				port = localEndPoint.port();
 			}
 		};
@@ -141,7 +141,7 @@ namespace ops
 			_serverPort(serverPort), _serverIP(serverIP), _outSocketBufferSize(outSocketBufferSize)
 		{
 			_ioService = BoostIOServiceImpl::get(ioServ);
-			//boost::asio::ip::address ipAddr(boost::asio::ip::address_v4::from_string(serverIP));
+			//boost::asio::ip::address ipAddr(boost::asio::ip::make_address_v4(serverIP));
 			_endpoint = std::make_unique<boost::asio::ip::tcp::endpoint>(boost::asio::ip::tcp::v4(), serverPort);
 		}
 		
@@ -206,7 +206,7 @@ namespace ops
 		Address_T _serverIP;
         int _outSocketBufferSize{ 0 };
 		std::unique_ptr<boost::asio::ip::tcp::endpoint> _endpoint;   // The local port to bind to.
-        boost::asio::io_service* _ioService{ nullptr };         // Boost io_service handles the asynchronous operations on the sockets
+        boost::asio::io_context* _ioService{ nullptr };         // Boost io_service handles the asynchronous operations on the sockets
 
 		std::shared_ptr<impl> _server;
     };

@@ -4,6 +4,11 @@ The major changes for each release tag is noted below. For minor changes see the
 ## tags 4.3.x-y ##
 Requires the tinyxml2 library which 4.2.x-y doesn't.
 
+### 4.3.5-0 ###
+* Refactored C++ metadata handling
+* Added [Shared Memory transport](OpsConfig.md#transport-mechanism-specifics) for C++ (from experimental-branch)
+* OPSListener tool: Updated presentation of metadata
+
 ### 4.3.4-0 ###
 * Added field validation to generated Ada and Delphi code. See [message validation](MessageValidation.md).
 * Added OPS version defines for C++ (in cmake-generated file *OPSVersion.h*), e.g.:

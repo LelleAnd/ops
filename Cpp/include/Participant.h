@@ -260,7 +260,8 @@ namespace ops
 		///Visible to friends only
 		std::shared_ptr<SendDataHandler> getSendDataHandler(const Topic& top);
 		void releaseSendDataHandler(const Topic& top);
-		void updateSendPartInfo(const Topic& top);
+		enum class Action {add, remove};
+		void updateSendPartInfo(const Topic& top, Action action);
 
 		///Mutex for ioService, used to shutdown safely
 		Lockable serviceMutex;

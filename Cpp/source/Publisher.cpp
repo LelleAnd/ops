@@ -161,10 +161,6 @@ namespace ops
 		
 		start();
 
-		// If we let the OS define the port, the transport info isn't available until after start()
-		sendDataHandler->updateTransportInfo(topic);
-		participant->updateSendPartInfo(topic);
-
         useInProc = (topic.getTransport() == Topic::TRANSPORT_INPROC);
 
         if (topic.getUseAck() && (!useInProc)) {
@@ -219,12 +215,17 @@ namespace ops
             sendDataHandler->addListener(this);
             sendDataHandler->addPublisher(this, topic);
             started = true;
+
+            // If we let the OS define the port, the transport info isn't available until after addPublisher()
+            sendDataHandler->updateTransportInfo(topic);
+            participant->updateSendPartInfo(topic, Participant::Action::add);
         }
 	}
 
 	void Publisher::stop()
 	{
         if (started) {
+            participant->updateSendPartInfo(topic, Participant::Action::remove);
             sendDataHandler->removeListener(this);
             sendDataHandler->removePublisher(this, topic);
             started = false;

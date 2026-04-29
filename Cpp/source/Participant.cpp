@@ -443,15 +443,19 @@ namespace ops
 		return result;
 	}
 
-	void Participant::updateSendPartInfo(const Topic& top)
+	void Participant::updateSendPartInfo(const Topic& top, Action action)
 	{
+		if (action == Action::add) {
 		metaDataHnd.addPubTopic(top);
+		}
+		else {
+			metaDataHnd.removePubTopic(top);
+		}
 	}
 
 	void Participant::releaseSendDataHandler(const Topic& top)
 	{
 		sendDataHandlerFactory->releaseSendDataHandler(top, *this);
-		metaDataHnd.removePubTopic(top);
 	}
 
 }

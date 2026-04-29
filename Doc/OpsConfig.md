@@ -57,7 +57,7 @@ Optional elements of _Domain_:
   The interface can be specified with a specific ip address for the machine, e.g. "192.168.10.72", or using a subnet specification like "192.168.10.0/24" or "192.168.10.0/255.255.255.0". Using a subnet specification instead of a specific ip address, makes it possible to have the same configuration on several nodes. Node names like "localhost" can be used instead of a numeric IP address.
   * **timeToLive**, defines the IP4 *ttl* value to use for multicast communication. This can be used to define how far the communication will reach. If this tag is omitted, a value of 1 is used.
   * **inSocketBufferSize**, sets a default underlying socket buffer size used for topics that doesn't specify its own, see *Topic* below. If this tag is omitted, the OS default is used.
-  * **outSocketBufferSize**, sets a default underlying socket buffer size used for topics that doesn't specify its own, see *Topic* below. If this tag is omitted, the OS default is used.
+  * **outSocketBufferSize**, sets a default underlying socket buffer size used for topics that doesn't specify its own, see *Topic* below. If this tag is omitted, the OS default is used. Please note that this parameter has special meaning for transport _shmem_. See the _Transport Mechanism_ description below.
   * **metaDataMcPort**, defines the multicast port used for metadata communication between participants. If this tag is omitted, the default port is 9494. If set to 0, metadata will be disabled. See the *Transport Mechanisms* section below how this effects the communication.
   * **debugMcPort**, defines the multicast port used for the debug control and monitoring of publishers and subscribers in a domain. If the tag is omitted or set to 0, the debug facilities are disabled. For more information see [debug facilities](DebugFunc.md).
   * **channels**, a list of *Channel* elements, see Channel Configuration below.
@@ -72,7 +72,7 @@ Optional elements of _Domain_:
 Optional elements of _Topic_:
   * **sampleMaxSize**, defines the maximum size of the data type when used in this topic. The value is used for reserving memory to be able to buffer data during reception. The value is also used for a buffer in each publisher for a serialized version of the data type during sending. If this tag is omitted a value of 60000-14 bytes is used. If a value < 60000-14 is specified, 60000 is still used for reception. If a value > 60000-14 is specified, this topic MUST use its own port, see also [Sending Large Messages](LargeMessages.md).
   * **inSocketBufferSize**, changes the underlying sockets buffer size if possible. If this tag is omitted, the _Domain_ value is used.
-  * **outSocketBufferSize**, changes the underlying sockets buffer size if possible. If this tag is omitted, the _Domain_ value is used.
+  * **outSocketBufferSize**, changes the underlying sockets buffer size if possible. If this tag is omitted, the _Domain_ value is used. Please note that this parameter has special meaning for transport _shmem_. See the _Transport Mechanism_ description below.
   * **transport**, configures which transport mechanism to be used for this topic. Supported values are *inprocess*, *shmem*, *multicast*, *udp* and *tcp*. If tag is omitted, *multicast* is used.
   * **address**, usage depends on the used transport mechanism, see description of *Transport Mechanisms* below. Please note that if specified for an UDP transport, it must be on the same subnet as the specified localInterface for the _Domain_.
   * **useAck**, false/true, default false. If set to true the Topic will use a Send-Acknowledge communication pattern. See _Domain_ and _Channel_ for resend parameter settings.
@@ -90,7 +90,7 @@ Elements of _Channel_ contains:
   * **localInterface**, see _Domain_ above for a description.
   * **timeToLive**, see _Domain_ above for a description.
   * **inSocketBufferSize**, changes the underlying sockets buffer size if possible. If this tag is omitted, the _Domain_ value is used.
-  * **outSocketBufferSize**, changes the underlying sockets buffer size if possible. If this tag is omitted, the _Domain_ value is used.
+  * **outSocketBufferSize**, changes the underlying sockets buffer size if possible. If this tag is omitted, the _Domain_ value is used. Please note that this parameter has special meaning for transport _shmem_. See the _Transport Mechanism_ description below.
   * **sampleMaxSize**, see _Topic_ above for a description. If this tag is specified, this value will be used instead of eventual values specified for the topics used on this _Channel_.
   * **resendNum**, see _Domain_ above for a description. If this tag is omitted, the _Domain_ value is used.
   * **resendTimeMs**, see _Domain_ above for a description. If this tag is omitted, the _Domain_ value is used.
@@ -114,9 +114,9 @@ Note that if a topic specify _sampleMaxSize_ > 60000-14, it MUST have its own _C
   With specified **address** and **port** tags, the metadata is not used and address and port specify the publishers tcp server address and port to which subscribers connect. In this case it is a _one-to-many_ transport mechanism.
   For an example see [tcp example](TcpTransport.md). A specified **address** can be a node name or a numeric IP address.
 
-  * *inprocess*: Is a _many-to-many_ transport mechanism limited to within the current process. One use case is in test code (unit/behaviour tests) to drive input to subscribers resp. catch output from publishers. This transport is currently only available for Ada and C++.
+  * *inprocess*: Is a _many-to-many_ transport mechanism limited to within the current process. One use case is in test code (unit/behaviour tests) to drive input to subscribers resp. catch output from publishers. This transport is currently only available for Ada and C++. See also [feature list](FeatureList.md). For an example see [inprocess example](InprocessTransport.md).
 
-  * *shmem*: Is a _one-to-many_ transport mechanism within a node (localhost) using shared memory between processes. Parameter **outSocketBufferSize** specifies the size of the Shared Memory Buffer. This transport is currently only available for C++.
+  * *shmem*: Is a transport mechanism within a node (localhost) using shared memory between processes. Without metadata enabled it is a _one-to-many_ transport, with metadata enabled it is a _many-to-many_ transport. Parameter **outSocketBufferSize** specifies the size of the Shared Memory Buffer. This transport is currently only available for C++. See also [feature list](FeatureList.md). For an example see [shared memory example](SharedMemoryTransport.md).
 
 ## Tools ##
 There is a tool, _VerifyOPSConfig_, that can be used to check the configuration files when they have been edited. For description see [VerifyOPSConfig](VerifyOPSConfig.md).

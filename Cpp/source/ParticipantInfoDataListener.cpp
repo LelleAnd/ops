@@ -59,7 +59,7 @@ namespace ops
             }
         }
         for (const auto& x : partInfo->publishTopics) {
-            if (x.transport == Topic::TRANSPORT_TCP) {
+            if ((x.transport == Topic::TRANSPORT_TCP) || (x.transport == Topic::TRANSPORT_SHMEM)) {
                 // Lookup topic in map. If found call handler
                 const auto result = rcvDataHandlers.find(x.name);
                 if (result != rcvDataHandlers.end()) {

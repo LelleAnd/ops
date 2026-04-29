@@ -1,6 +1,6 @@
 /**
  *
- * Copyright (C) 2025 Lennart Andersson.
+ * Copyright (C) 2025-2026 Lennart Andersson.
 *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -29,6 +29,7 @@
 #include <condition_variable>
 #include <iostream>
 #include <mutex>
+#include <string>
 #include <thread>
 
 #include "Participant.h"
@@ -55,6 +56,8 @@ namespace ops
         InternalKey_T shmem_name;
         InternalKey_T mutex_name;
         InternalKey_T condv_name;
+        Address_T sourceStr;
+        uint32_t source{ 0 };
 
         boost::interprocess::shared_memory_object shm_obj;
         boost::interprocess::mapped_region region;
@@ -64,24 +67,32 @@ namespace ops
         std::unique_ptr <boost::interprocess::named_condition> condv;
 
     public:
-        ShmemReceiver(const InternalKey_T& _name) :
+        ShmemReceiver(const InternalKey_T& _name, const Address_T& src) :
             shmem_name(_name),
             mutex_name(_name + InternalKey_T("-mtx")),
-            condv_name(_name + InternalKey_T("-cond"))
+            condv_name(_name + InternalKey_T("-cond")),
+            sourceStr(src)
         {
+            if (sourceStr != "") {
+                try {
+                    source = std::stoi(sourceStr.c_str());
+                }
+                catch (...) {
+                }
+            }
         }
 
 		// Used to get the sender IP and port for a received message
 		// Only safe to call in callback, before a new asynchWait() is called.
 		virtual void getSource(Address_T& address, uint16_t& port) override
         {
-            address = "0.0.0.0";
+            address = sourceStr;
             port = 0;
 		}
 
         virtual void getSource(uint32_t& address, uint16_t& port) override
         {
-            address = 0;
+            address = source;
             port = 0;
         }
 

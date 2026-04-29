@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2025 Lennart Andersson.
+* Copyright (C) 2025-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -21,17 +21,34 @@
 #pragma once
 
 #include "OPSTypeDefs.h"
+#include "Lockable.h"
 #include "ReceiveDataHandler.h"
+#include "TopicsCounter.h"
 
 namespace ops
 {
 
-#ifndef OPS_NO_SHMEM_TRANSPORT
+	class Participant;
+
 	class ShmemReceiveDataHandler : public ReceiveDataHandler
 	{
 	public:
-		ShmemReceiveDataHandler(Topic top, Participant& part, const InternalKey_T& name);
-	};
+		ShmemReceiveDataHandler(const Topic& top, Participant& part, const InternalKey_T& name);
+
+#ifndef OPS_NO_SHMEM_TRANSPORT
+		void AddReceiveChannel(const ObjectName_T& topicName, const Address_T& ip, int port) override;
+
+	private:
+		Topic topic;
+
+		InternalKey_T baseName;
+		TopicsCounter topics;
+		Lockable topicsLock;
+		bool usingPartInfo{ true };
+
+		// Tell derived classes which topics that are active
+		void topicUsage(const Topic& top, bool used) override;
 #endif
+	};
 
 }

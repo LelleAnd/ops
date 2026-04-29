@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include <map>
 #include <iostream>
 #include <memory>
 
@@ -54,6 +53,7 @@ namespace ops
 		ReceiveDataHandler(Participant& part, std::unique_ptr<ReceiveDataChannelBase> rdc = nullptr);
 		virtual ~ReceiveDataHandler() = default;
 
+		// Called from meta-data handler if enabled
 		virtual void AddReceiveChannel(const ObjectName_T& /*topicName*/, const Address_T& /*ip*/, int /*port*/)
 		{
 		}

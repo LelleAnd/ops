@@ -69,6 +69,7 @@ namespace ops
 		friend class Publisher;
 		friend class UDPReceiveDataHandler;
 		friend class TCPReceiveDataHandler;
+		friend class ShmemReceiveDataHandler;
 		friend class ReceiveDataHandlerFactory;
 		friend class SendDataHandlerFactory;
 		friend class ParticipantInfoDataListener;

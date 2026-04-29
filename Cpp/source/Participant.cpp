@@ -395,6 +395,17 @@ namespace ops
 			addr = GetAddrFromName(topic.getDomainAddress(), ioService.get());
 			if (addr != "") { topic.setDomainAddress(addr); }
 		}
+		else if (topic.getTransport() == Topic::TRANSPORT_SHMEM) {
+			// Update info for shared memory connect
+			if (domain->getMetaDataMcPort() == 0) {
+				// No process ID added to shared memory name (ie. One-2-Many transport)
+				topic.setDomainAddress("");
+			}
+			else {
+				// Process ID to be added to shared memory name (ie. Many-2-Many transport)
+				topic.setDomainAddress(metaDataHnd.getPid());
+			}
+		}
 
 		return topic;
 	}
@@ -446,7 +457,7 @@ namespace ops
 	void Participant::updateSendPartInfo(const Topic& top, Action action)
 	{
 		if (action == Action::add) {
-		metaDataHnd.addPubTopic(top);
+			metaDataHnd.addPubTopic(top);
 		}
 		else {
 			metaDataHnd.removePubTopic(top);

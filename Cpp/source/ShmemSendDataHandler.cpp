@@ -82,7 +82,7 @@ namespace ops
                 }
 
                 OPS_SHM_TRACE_CODE(
-                    SharedMemoryBuffer::ShmemTelemetry tm(shmem->getTelemetry());
+                SharedMemoryBuffer::ShmemTelemetry tm(shmem->getTelemetry());
                 static uint32_t prev_frsp = 0;
                 static uint32_t prev_nidx = 0;
                 if ((tm.freespace != prev_frsp) || (tm.num_indexes != prev_nidx)) {
@@ -92,10 +92,9 @@ namespace ops
                         << "\n");
                     prev_frsp = tm.freespace;
                     prev_nidx = tm.num_indexes;
-                }
-                    )
+                })
 
-                    return result;
+                return result;
             }
 
             // Get some collected telemetry from the sender
@@ -113,6 +112,7 @@ namespace ops
         };
 
         std::unique_ptr<Impl> shmem;
+        bool opened{ false };
 
         InternalKey_T name;
         uint64_t size;
@@ -128,12 +128,16 @@ namespace ops
         }
         virtual bool send(const char* buf, const int bufSize) override
         {
+            if ((shmem.get() == nullptr) || (!opened)) { return false; }
             return shmem.get()->write(buf, bufSize);
         }
         virtual bool open() override
         {
             try {
-                shmem = std::make_unique<Impl>(name, size);
+                if (shmem.get() == nullptr) {
+                    shmem = std::make_unique<Impl>(name, size);
+                }
+                opened = true;
                 return true;
             }
             catch (...) {
@@ -146,7 +150,7 @@ namespace ops
         }
         virtual void close() override
         {
-            shmem.reset();
+            opened = false;
         }
         virtual uint16_t getLocalPort() override
         {
@@ -170,7 +174,12 @@ namespace ops
 
     ShmemSendDataHandler::ShmemSendDataHandler(const InternalKey_T& name, const Topic& top)
     {
-        sender = std::make_unique<ShmemSender>(name, top.getOutSocketBufferSize());
+        InternalKey_T nameToUse(name);
+        if (top.getDomainAddress() != "") {
+            nameToUse += '-';
+            nameToUse += top.getDomainAddress();
+        }
+        sender = std::make_unique<ShmemSender>(nameToUse, top.getOutSocketBufferSize());
     }
 
     bool ShmemSendDataHandler::sendData(char* buf, int bufSize, const Topic&)

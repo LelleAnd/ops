@@ -32,12 +32,13 @@ namespace ops
     private:
         std::shared_ptr<InProcDistributor> distributor;
 
-        class DummySender : public Sender
+        struct DummySender : public Sender
         {
+            bool opened{ false };
             virtual bool sendTo(const char*, const int, const Address_T&, const uint16_t) override { return false; }
             virtual bool send(const char*, const int) override { return false; }
-            virtual bool open() override { return true; }
-            virtual void close() override { }
+            virtual bool open() override { opened = true; return true; }
+            virtual void close() override { opened = false; }
             virtual uint16_t getLocalPort() override { return 0; }
             virtual Address_T getLocalAddress() override { return "0.0.0.0"; }
             virtual uint32_t getLocalAddressHost() override { return 0; }
@@ -55,6 +56,8 @@ namespace ops
         // Used for inprocess transport
         virtual bool sendMessage(const Topic& topic, const OPSMessage& message) override
         {
+            if (sender.get() == nullptr) { return false; }
+            if (!dynamic_cast<DummySender*>(sender.get())->opened) { return false; }
             return distributor->sendMessage(topic, message);
         }
 

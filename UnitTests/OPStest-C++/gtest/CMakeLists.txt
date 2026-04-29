@@ -40,6 +40,7 @@ set(APP_SRCS
   Subscriber_test.cpp
   TCPOpsProtocol_test.cpp
   ThreadPool_test.cpp
+  TopicsCounter_test.cpp
 )
 
 set(APP2_SRCS

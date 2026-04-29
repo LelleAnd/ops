@@ -1,7 +1,6 @@
 /**
-* 
-* Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2026 Lennart Andersson.
+*
+* Copyright (C) 2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -21,32 +20,48 @@
 
 #pragma once
 
+#include <map>
+
 #include "OPSTypeDefs.h"
-#include "ReceiveDataHandler.h"
-#include "Lockable.h"
-#include "TopicsCounter.h"
-#include "Topic.h"
 
 namespace ops
 {
-	class Participant;
 
-	class TCPReceiveDataHandler : public ReceiveDataHandler
+	class TopicsCounter
 	{
 	public:
-		TCPReceiveDataHandler(const Topic& top, Participant& part);
+		using Count_t = int32_t;
+		using Container_t = std::map<ObjectName_T, Count_t>;
 
-		void AddReceiveChannel(const ObjectName_T& topicName, const Address_T& ip, int port) override;
+		explicit TopicsCounter(bool doEraseOnZero = false) : eraseOnZero(doEraseOnZero) {}
 
-	protected:
-        Topic topic;
+		Count_t update(const ObjectName_T& name, bool add)
+		{
+			Count_t count = 0;
+			const auto it = topics.find(name);
+			if (it != topics.end()) {
+				count = topics[name];
+			}
+			if (add) {
+				++count;
+			}
+			else {
+				--count;
+			}
+			if (eraseOnZero && (count == 0)) {
+				topics.erase(it);
+			}
+			else {
+				topics[name] = count;
+			}
+			return count;
+		}
 
-		TopicsCounter topics;
-		Lockable topicsLock;
-		bool usingPartInfo{ true };
+		const Container_t& peek() { return topics; }
 
-		// Tell derived classes which topics that are active
-		void topicUsage(const Topic& top, bool used) override;
+	private:
+		Container_t topics;
+		bool eraseOnZero;
 	};
-	
+
 }

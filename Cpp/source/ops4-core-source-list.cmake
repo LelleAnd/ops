@@ -159,6 +159,7 @@ set(LIB_OPS_CORE_SRCS
   ${OPS_SRC_PATH}/Thread.cpp
   ${OPS_SRC_PATH}/ThreadSupport.h
   ${OPS_SRC_PATH}/Topic.cpp
+  ${OPS_SRC_PATH}/TopicsCounter.h
   ${OPS_SRC_PATH}/Trace.cpp
   ${OPS_SRC_PATH}/Transport.cpp
   ${OPS_SRC_PATH}/UDPReceiveDataHandler.cpp

@@ -1,6 +1,6 @@
 /**
 * 
-* Copyright (C) 2024-2025 Lennart Andersson.
+* Copyright (C) 2024-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -20,11 +20,11 @@
 
 #pragma once
 
-#include <map>
-
 #include "OPSTypeDefs.h"
-#include "ReceiveDataHandler.h"
 #include "InProcDistributor.h"
+#include "Lockable.h"
+#include "ReceiveDataHandler.h"
+#include "TopicsCounter.h"
 
 namespace ops
 {
@@ -33,11 +33,11 @@ namespace ops
 	{
 	private:
 		std::shared_ptr<InProcDistributor> distributor;
-		std::map<ObjectName_T, int32_t> topics;
+		TopicsCounter topics;
 		Lockable topicsLock;
 
 	public:
-		InProcReceiveDataHandler(Topic top, Participant& part, std::shared_ptr<InProcDistributor> dist) :
+		InProcReceiveDataHandler(const Topic& top, Participant& part, std::shared_ptr<InProcDistributor> dist) :
 			ReceiveDataHandler(part, std::make_unique<ReceiveDataChannelBase>(top)), distributor(dist)
 		{
 		}
@@ -45,31 +45,20 @@ namespace ops
 		virtual void topicUsage(const Topic& topic, bool used) override
 		{
 			const SafeLock lock(topicsLock);
-			// We should only register unique topics
-			const auto it = topics.find(topic.getName());
-			int32_t count = 0;
-			if (it != topics.end()) {
-				count = topics[topic.getName()];
+			int32_t count = topics.update(topic.getName(), used);
+
+			if (used && (count == 1)) {
+				// register topic in distributor with a lambda callback
+				distributor->regInProcReceiver(topic, [=](OPSMessage* msg)
+					{
+						msg->setDataOwner(true);
+						onMessage(*rdcs[0], msg);
+					}
+				);
+			} else if (count == 0) {
+				// unregister topic in distributor
+				distributor->unregInProcReceiver(topic);
 			}
-			if (used) {
-				++count;
-				if (count == 1) {
-					// register topic in distributor with a lambda callback
-					distributor->regInProcReceiver(topic, [=](OPSMessage* msg)
-						{
-							msg->setDataOwner(true);
-							onMessage(*rdcs[0], msg);
-						}
-					);
-				}
-			} else {
-				--count;
-				if (count == 0) {
-					// unregister topic in distributor
-					distributor->unregInProcReceiver(topic);
-				}
-			}
-			topics[topic.getName()] = count;
 		}
 	};
 	

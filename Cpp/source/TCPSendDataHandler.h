@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2024 Lennart Andersson.
+ * Copyright (C) 2018-2026 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -21,8 +21,6 @@
 
 #pragma once
 
-#include <map>
-
 #include "opsidls/OPSConstants.h"
 #include "SendDataHandler.h"
 #include "Sender.h"
@@ -31,6 +29,7 @@
 #include "TCPOpsProtocol.h"
 #include "NetworkSupport.h"
 #include "TimeHelper.h"
+#include "TopicsCounter.h"
 
 namespace ops
 {
@@ -49,7 +48,7 @@ namespace ops
     class TCPSendDataHandler : public SendDataHandler, TCPServerCallbacks
     {
 		IOService* _ioService;
-		std::map<ObjectName_T, int> _topics;
+		TopicsCounter _topics;
 		int _heartbeatPeriod, _heartbeatTimeout;
 
 		struct Connection_t : TCPUserBase
@@ -64,7 +63,7 @@ namespace ops
 
 	public:
         TCPSendDataHandler(IOService* ioService, const Topic& topic) :
-			_ioService(ioService), _heartbeatPeriod(topic.getHeartbeatPeriod()), _heartbeatTimeout(topic.getHeartbeatTimeout())
+			_ioService(ioService), _topics(true), _heartbeatPeriod(topic.getHeartbeatPeriod()), _heartbeatTimeout(topic.getHeartbeatTimeout())
         {
 			sender = Sender::createTCPServer(this, ioService, topic.getDomainAddress(), topic.getPort(), topic.getOutSocketBufferSize());
         }
@@ -93,22 +92,14 @@ namespace ops
 		{
 			bool needSend = false;
 			// Keep a list of all used topics, with count
-			std::map<ObjectName_T, int>::iterator it = _topics.find(top.getName());
-			if (used) {
-				if (it == _topics.end()) {
-					_topics[top.getName()] = 1;
-					needSend = true;
-				} else {
-					it->second = it->second + 1;
-				}
-			} else {
-				if (it != _topics.end()) {
-					it->second = it->second - 1;
-					if (it->second > 0) return;
-					_topics.erase(it);
-					needSend = true;
-				}
+			int32_t count = _topics.update(top.getName(), used);
+			if (used && (count == 1)) {
+				needSend = true;
 			}
+			else if (count == 0) {
+				needSend = true;
+			}
+
 			// If a new topic is added or an old one deleted, send updates
 			if (needSend) {
 				///TODO send topic info (if version >= 2)

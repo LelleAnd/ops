@@ -26,7 +26,7 @@
 
 namespace ops
 {
-    TCPReceiveDataHandler::TCPReceiveDataHandler(Topic top, Participant& part) :
+    TCPReceiveDataHandler::TCPReceiveDataHandler(const Topic& top, Participant& part) :
 		ReceiveDataHandler(part, nullptr),
         topic(top)
     {
@@ -46,7 +46,7 @@ namespace ops
 	void TCPReceiveDataHandler::AddReceiveChannel(const ObjectName_T& topicName, const Address_T& ip, int const port)
 	{
         UNUSED(topicName);
-		OPS_PIFO_TRACE("Partinfo: name: " << topicName << ", ip: " << ip << ", port: " << port << "\n");
+		OPS_PIFO_TRACE("TCP, Partinfo: name: " << topicName << ", ip: " << ip << ", port: " << port << "\n");
 
 		if (port == 0) { return; }
 
@@ -64,7 +64,7 @@ namespace ops
 			}
 		}
 		if (!found) {
-			OPS_PIFO_TRACE("Partinfo: CREATED name: " << topicName << ", ip: " << ip << ", port: " << port << "\n");
+			OPS_PIFO_TRACE("TCP, Partinfo: CREATED name: " << topicName << ", ip: " << ip << ", port: " << port << "\n");
 			topic.setDomainAddress(ip);
 			topic.setPort(port);
 			try {
@@ -89,25 +89,15 @@ namespace ops
 	{
         if (usingPartInfo) {
             const SafeLock lock(topicsLock);
-            // We should only register unique topics
-			const auto it = topics.find(top.getName());
-			int32_t count = 0;
-			if (it != topics.end()) {
-				count = topics[top.getName()];
-			}
+			int32_t count = topics.update(top.getName(), used);
+
 			// Register topic with participant info data handler/listener to get callbacks to handler above
-			if (used) {
-				++count;
-				if (count == 1) {
-					participant.metaDataHnd.registerReceiveTopic(top, shared_from_this());
-				}
-			} else {
-				--count;
-				if (count == 0) {
-					participant.metaDataHnd.unregisterReceiveTopic(top, shared_from_this());
-				}
+			if (used && (count == 1)) {
+				participant.metaDataHnd.registerReceiveTopic(top, shared_from_this());
+
+			} else if (count == 0) {
+				participant.metaDataHnd.unregisterReceiveTopic(top, shared_from_this());
 			}
-			topics[top.getName()] = count;
 		}
 	}
 

@@ -180,6 +180,7 @@ private:
 	MyLogger logger;
 	COpsConfigHelper opsHelper;
 
+	std::vector<ops::Participant*> vParts;
 	std::vector<ops::Subscriber*> vSubs;
 	std::map<ops::Subscriber*, ops::PublicationIdChecker*> pubIdMap;
 
@@ -377,6 +378,7 @@ public:
 					std::cout << "##### Domain '" << opsHelper.vDomains[i] << "' not found. Have you forgot configuration file(s) ?" << std::endl;
 					continue;
 				}
+				vParts.push_back(part);
 				part->addTypeSupport(new AllOpsTypeFactory());
 				part->addListener(errorWriter);
 				ownPartInfoNames.push_back(part->getPartInfoName());
@@ -562,6 +564,11 @@ public:
 			delete vSubs[i];
 		}
 		vSubs.clear();
+		// Delete Participants
+		for (unsigned int i = 0; i < vParts.size(); i++) {
+			delete vParts[i];
+		}
+		vParts.clear();
 	}
 	Main(const Main& other) = delete;
 	Main& operator= (const Main& other) = delete;

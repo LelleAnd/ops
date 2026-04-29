@@ -35,7 +35,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>OPSCrossPlatformCppLib_2022</ProjectName>
+    <ProjectName>OPSCrossPlatformCppLib_2026</ProjectName>
     <ProjectGuid>{7FFF6405-D650-485A-9554-43213B28D7F5}</ProjectGuid>
     <RootNamespace>OPSCrossPlatformCppLib</RootNamespace>
     <Keyword>Win32Proj</Keyword>
@@ -46,45 +46,45 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
     <WholeProgramOptimization>false</WholeProgramOptimization>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
     <WholeProgramOptimization>false</WholeProgramOptimization>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
     <WholeProgramOptimization>false</WholeProgramOptimization>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
     <WholeProgramOptimization>false</WholeProgramOptimization>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -116,64 +116,64 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)..\..\lib-vc143-x86\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">\temp\intermediates\vc143\$(Configuration)\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)..\..\lib-vc143-x64\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">\temp\intermediates\vc143\$(Platform)\$(Configuration)\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)..\..\lib-vc143-x86\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">\temp\intermediates\vc143\$(Configuration)\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)..\..\lib-vc143-x64\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">\temp\intermediates\vc143\$(Platform)\$(Configuration)\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">$(SolutionDir)..\..\lib-vc143-x86\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">\temp\intermediates\vc143\$(Configuration)\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">$(SolutionDir)..\..\lib-vc143-x64\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">\temp\intermediates\vc143\$(Platform)\$(Configuration)\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">$(SolutionDir)..\..\lib-vc143-x86\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">\temp\intermediates\vc143\$(Configuration)\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">$(SolutionDir)..\..\lib-vc143-x64\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">\temp\intermediates\vc143\$(Platform)\$(Configuration)\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">OPSCppLib_vc143_MTd</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">OPSCppLib_vc143_MDd</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">OPSCppLib_vc143_MT</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">OPSCppLib_vc143_MD</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">OPSCppLib_vc143_x64_MTd</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">OPSCppLib_vc143_x64_MDd</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">OPSCppLib_vc143_x64_MT</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">OPSCppLib_vc143_x64_MD</TargetName>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)..\..\lib-vc145-x86\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">\temp\intermediates\vc145\$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)..\..\lib-vc145-x64\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">\temp\intermediates\vc145\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)..\..\lib-vc145-x86\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">\temp\intermediates\vc145\$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)..\..\lib-vc145-x64\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">\temp\intermediates\vc145\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">$(SolutionDir)..\..\lib-vc145-x86\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">\temp\intermediates\vc145\$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">$(SolutionDir)..\..\lib-vc145-x64\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">\temp\intermediates\vc145\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">$(SolutionDir)..\..\lib-vc145-x86\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">\temp\intermediates\vc145\$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">$(SolutionDir)..\..\lib-vc145-x64\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">\temp\intermediates\vc145\$(Platform)\$(Configuration)\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">OPSCppLib_vc145_MTd</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">OPSCppLib_vc145_MDd</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">OPSCppLib_vc145_MT</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">OPSCppLib_vc145_MD</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">OPSCppLib_vc145_x64_MTd</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">OPSCppLib_vc145_x64_MDd</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">OPSCppLib_vc145_x64_MT</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">OPSCppLib_vc145_x64_MD</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <CodeAnalysisRuleSet>OPSCrossPlatformCppLib_2022.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>OPSCrossPlatformCppLib_2026.ruleset</CodeAnalysisRuleSet>
     <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
     <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
     <ClangTidyChecks>
     </ClangTidyChecks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">
-    <CodeAnalysisRuleSet>OPSCrossPlatformCppLib_2022.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>OPSCrossPlatformCppLib_2026.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">
-    <CodeAnalysisRuleSet>OPSCrossPlatformCppLib_2022.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>OPSCrossPlatformCppLib_2026.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">
-    <CodeAnalysisRuleSet>OPSCrossPlatformCppLib_2022.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>OPSCrossPlatformCppLib_2026.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">
-    <CodeAnalysisRuleSet>OPSCrossPlatformCppLib_2022.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>OPSCrossPlatformCppLib_2026.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <CodeAnalysisRuleSet>OPSCrossPlatformCppLib_2022.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>OPSCrossPlatformCppLib_2026.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <CodeAnalysisRuleSet>OPSCrossPlatformCppLib_2022.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>OPSCrossPlatformCppLib_2026.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <CodeAnalysisRuleSet>OPSCrossPlatformCppLib_2022.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>OPSCrossPlatformCppLib_2026.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(SolutionDir)..\..\include;$(SolutionDir)..\..\..\Common\idl\Generated\Cpp;C:\Program Files (x86)\boost\boost_1_90;D:\Git-Clones\tinyxml2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>BOOST_ASIO_NO_DEPRECATED;OPS_LIBRARY_STATIC;_WIN32_WINNT=0x0501;WIN32;_SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING;_DEBUG;_LIB;_SCL_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>OPS_LIBRARY_STATIC;_WIN32_WINNT=0x0501;WIN32;_SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING;_DEBUG;_LIB;_SCL_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -388,7 +388,6 @@
     <ClInclude Include="..\..\..\include\ErrorWriter.h" />
     <ClInclude Include="..\..\..\include\fixed_string.h" />
     <ClInclude Include="..\..\..\include\fixed_string_support.h" />
-    <ClInclude Include="..\..\..\include\LibraryOptions.h" />
     <ClInclude Include="..\..\..\include\memory_pool.h" />
     <ClInclude Include="..\..\..\include\memory_pool_lock_free.h" />
     <ClInclude Include="..\..\..\include\MetaDataHandler.h" />
@@ -400,7 +399,6 @@
     <ClInclude Include="..\..\..\include\PubIdChecker.h" />
     <ClInclude Include="..\..\..\include\ReceiveDataChannel.h" />
     <ClInclude Include="..\..\..\include\SerializableInheritingTypeFactory.h" />
-    <ClInclude Include="..\..\..\include\Telemetry.h" />
     <ClInclude Include="..\..\..\include\Trace.h" />
     <ClInclude Include="..\..\..\include\TraceStream.h" />
     <ClInclude Include="..\..\..\include\Transport.h" />
@@ -509,7 +507,6 @@
     <ClCompile Include="..\..\..\source\ErrorService.cpp" />
     <ClCompile Include="..\..\..\source\IOService.cpp" />
     <ClCompile Include="..\..\..\source\KeyFilterQoSPolicy.cpp" />
-    <ClCompile Include="..\..\..\source\LibraryOptions.cpp" />
     <ClCompile Include="..\..\..\source\Lockable.cpp" />
     <ClCompile Include="..\..\..\source\MCReceiveDataHandler.cpp" />
     <ClCompile Include="..\..\..\source\memory_pool.cpp" />
@@ -556,7 +553,7 @@
     <ClCompile Include="..\..\..\source\XMLArchiverOut.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="OPSCrossPlatformCppLib_2022.ruleset" />
+    <None Include="OPSCrossPlatformCppLib_2026.ruleset" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

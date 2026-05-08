@@ -51,6 +51,8 @@
             this.checkBoxEnableTrace = new System.Windows.Forms.CheckBox();
             this.buttonGCCollect = new System.Windows.Forms.Button();
             this.groupBoxSubscriberSettings = new System.Windows.Forms.GroupBox();
+            this.buttonStopPublisher = new System.Windows.Forms.Button();
+            this.buttonStartPublisher = new System.Windows.Forms.Button();
             this.buttonSetDeadLineInterval = new System.Windows.Forms.Button();
             this.textBoxDeadLineInterval = new System.Windows.Forms.TextBox();
             this.labelDeadLineInterval = new System.Windows.Forms.Label();
@@ -286,6 +288,8 @@
             // 
             // groupBoxSubscriberSettings
             // 
+            this.groupBoxSubscriberSettings.Controls.Add(this.buttonStopPublisher);
+            this.groupBoxSubscriberSettings.Controls.Add(this.buttonStartPublisher);
             this.groupBoxSubscriberSettings.Controls.Add(this.buttonSetDeadLineInterval);
             this.groupBoxSubscriberSettings.Controls.Add(this.textBoxDeadLineInterval);
             this.groupBoxSubscriberSettings.Controls.Add(this.labelDeadLineInterval);
@@ -296,7 +300,27 @@
             this.groupBoxSubscriberSettings.Size = new System.Drawing.Size(240, 114);
             this.groupBoxSubscriberSettings.TabIndex = 13;
             this.groupBoxSubscriberSettings.TabStop = false;
-            this.groupBoxSubscriberSettings.Text = "Subscriber Settings";
+            this.groupBoxSubscriberSettings.Text = "Settings";
+            // 
+            // buttonStopPublisher
+            // 
+            this.buttonStopPublisher.Location = new System.Drawing.Point(128, 47);
+            this.buttonStopPublisher.Name = "buttonStopPublisher";
+            this.buttonStopPublisher.Size = new System.Drawing.Size(106, 23);
+            this.buttonStopPublisher.TabIndex = 16;
+            this.buttonStopPublisher.Text = "Stop Publisher";
+            this.buttonStopPublisher.UseVisualStyleBackColor = true;
+            this.buttonStopPublisher.Click += new System.EventHandler(this.buttonStopPublisher_Click);
+            // 
+            // buttonStartPublisher
+            // 
+            this.buttonStartPublisher.Location = new System.Drawing.Point(128, 19);
+            this.buttonStartPublisher.Name = "buttonStartPublisher";
+            this.buttonStartPublisher.Size = new System.Drawing.Size(106, 23);
+            this.buttonStartPublisher.TabIndex = 15;
+            this.buttonStartPublisher.Text = "Start Publisher";
+            this.buttonStartPublisher.UseVisualStyleBackColor = true;
+            this.buttonStartPublisher.Click += new System.EventHandler(this.buttonStartPublisher_Click);
             // 
             // buttonSetDeadLineInterval
             // 
@@ -485,6 +509,8 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox textBoxPizzaDataVersion;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Button buttonStopPublisher;
+        private System.Windows.Forms.Button buttonStartPublisher;
     }
 }
 

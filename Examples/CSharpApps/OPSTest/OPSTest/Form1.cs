@@ -816,6 +816,29 @@ namespace OPSTest
             buf.Write(i);
         }
 
+        private void buttonStartPublisher_Click(object sender, EventArgs e)
+        {
+            System.Collections.IEnumerator myEnumerator;
+            myEnumerator = checkedListBoxTopics.CheckedIndices.GetEnumerator();
+            while (myEnumerator.MoveNext() != false)
+            {
+                int idx = (int)myEnumerator.Current;
+                MyTopicInfo info = MyTopicInfoList[idx];
+                info.OpsHelper.StartPublisher();
+            }
+        }
+
+        private void buttonStopPublisher_Click(object sender, EventArgs e)
+        {
+            System.Collections.IEnumerator myEnumerator;
+            myEnumerator = checkedListBoxTopics.CheckedIndices.GetEnumerator();
+            while (myEnumerator.MoveNext() != false)
+            {
+                int idx = (int)myEnumerator.Current;
+                MyTopicInfo info = MyTopicInfoList[idx];
+                info.OpsHelper.StopPublisher();
+            }
+        }
     }
 
 
@@ -876,6 +899,8 @@ namespace OPSTest
         void DeletePublisher();
         void StartSubscriber(int deadLineEventInterval);
         void StopSubscriber(bool doLog = true);
+        void StartPublisher();
+        void StopPublisher();
         void SetDeadLineInterval(int deadLineEventInterval);
         void Write();
     }
@@ -1043,6 +1068,22 @@ namespace OPSTest
             else
             {
                 if (doLog) Log("Subscriber must be created first!");
+            }
+        }
+
+        public void StartPublisher()
+        {
+            if (myPub != null)
+            {
+                myPub.Start();
+            }
+        }
+
+        public void StopPublisher()
+        {
+            if (myPub != null)
+            {
+                myPub.Stop();
             }
         }
 

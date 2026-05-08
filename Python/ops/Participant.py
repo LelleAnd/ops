@@ -57,6 +57,7 @@ class Participant(object):
 		self.partInfoData.languageImplementation = "Python"
 		self.partInfoData.id = participantID
 		self.partInfoData.domain = domainID
+		self.partInfoDataUpdated = True
 		self.partInfoLock = Lock()
 
 	def __str__(self):
@@ -76,6 +77,7 @@ class Participant(object):
 		with self.partInfoLock:
 			self.partInfoData.ip = ip
 			self.partInfoData.mc_udp_port = port
+			self.partInfoDataUpdated = True
 
 	def connectUdp(self,topic,sdh):
 		# Should only be one
@@ -109,6 +111,7 @@ class Participant(object):
 			addr = (adr, addr[1])
 		with self.partInfoLock:
 			self.partInfoData.publishTopics.append(ops.ParticipantInfoData.TopicInfoData(topic,addr))
+			self.partInfoDataUpdated = True
 		return sdh
 
 	def releaseSendDataHandler(self,topic):
@@ -116,6 +119,7 @@ class Participant(object):
 			for i, ti in enumerate(self.partInfoData.publishTopics):
 				if ti.name == topic.name:
 					del self.partInfoData.publishTopics[i]
+					self.partInfoDataUpdated = True
 					break
 		ops.SendDataHandler.releaseSendDataHandler(self,topic)
 
@@ -124,6 +128,7 @@ class Participant(object):
 		rdh = ops.ReceiveDataHandler.getReceiveDataHandler(self,topic)
 		with self.partInfoLock:
 			self.partInfoData.subscribeTopics.append(ops.ParticipantInfoData.TopicInfoData(topic))
+			self.partInfoDataUpdated = True
 		if topic.transport == ops.Constants.TRANSPORT_TCP:
 			# Need to count topic instances
 			if topic.name in self.tcprdhs:
@@ -137,6 +142,7 @@ class Participant(object):
 			for i, ti in enumerate(self.partInfoData.subscribeTopics):
 				if ti.name == topic.name:
 					del self.partInfoData.subscribeTopics[i]
+					self.partInfoDataUpdated = True
 					break
 		if topic.transport == ops.Constants.TRANSPORT_TCP:
 			# Need to count topic instances
@@ -189,6 +195,9 @@ class Participant(object):
 			# periodic publish of our ParticipantInfoData
 			if partInfoPub is not None:
 				with self.partInfoLock:
+					if self.partInfoDataUpdated:
+						self.partInfoData.key = str(partInfoPub.currentPublicationID)
+						self.partInfoDataUpdated = False
 					partInfoPub.write(self.partInfoData)
 
 		if partInfoSub is not None:

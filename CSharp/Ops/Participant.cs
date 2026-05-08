@@ -30,6 +30,7 @@ namespace Ops
 
         public ParticipantInfoDataListener partInfoListener = null;
         private ParticipantInfoData partInfoData = new ParticipantInfoData();
+        private bool partInfoDataUpdated = true;
         private Publisher partInfoPub = null;
 
         private Thread thread = null;
@@ -176,8 +177,10 @@ namespace Ops
                 partInfoData.languageImplementation = "C#";
                 partInfoData.id = participantID;
                 partInfoData.domain = domainID;
-            }
-        }
+                partInfoDataUpdated = true;
+
+    }
+}
 
         public void SetUdpTransportInfo(string ip, int port)
         {
@@ -185,6 +188,7 @@ namespace Ops
             {
                 partInfoData.ip = ip;
                 partInfoData.mc_udp_port = port;
+                partInfoDataUpdated = true;
             }
         }
 
@@ -279,6 +283,7 @@ namespace Ops
                 lock (partInfoData)
                 {
                     partInfoData.subscribeTopics.Add(new TopicInfoData(topic));
+                    partInfoDataUpdated = true;
                 }
             }
             return rdh;
@@ -295,6 +300,7 @@ namespace Ops
                 {
                     if (partInfoData.subscribeTopics[i].name.Equals(topic.GetName())) {
                         partInfoData.subscribeTopics.RemoveAt(i);
+                        partInfoDataUpdated = true;
                         break;
                     }
                 }
@@ -315,6 +321,7 @@ namespace Ops
             lock (partInfoData)
             {
                 partInfoData.publishTopics.Add(new TopicInfoData(topic));
+                partInfoDataUpdated = true;
             }
         }
 
@@ -329,6 +336,7 @@ namespace Ops
                 {
                     if (partInfoData.publishTopics[i].name.Equals(topic.GetName())) {
                         partInfoData.publishTopics.RemoveAt(i);
+                        partInfoDataUpdated = true;
                         break;
                     }
                 }
@@ -372,6 +380,11 @@ namespace Ops
                 {
                     lock (partInfoData)
                     {
+                        if (partInfoDataUpdated)
+                        {
+                            partInfoPub.SetKey(partInfoPub.GetCurrentPublicationID().ToString());
+                            partInfoDataUpdated = false;
+                        }
                         partInfoPub.WriteAsOPSObject(partInfoData);
                     }
                 }

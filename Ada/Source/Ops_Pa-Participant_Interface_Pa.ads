@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2021 Lennart Andersson.
+-- Copyright (C) 2016-2026 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -36,7 +36,8 @@ package Ops_Pa.Participant_Interface_Pa is
 
   -- Should only be used by Publishers
   function getSendDataHandler( Self: in out Participant_Interface; top : Topic_Class_At) return SendDataHandler_Class_At is abstract;
-  procedure updateSendPartInfo( Self: in out Participant_Interface; top : Topic_Class_At ) is abstract;
+  type Action_T is (Add, Remove);
+  procedure updateSendPartInfo( Self: in out Participant_Interface; top : Topic_Class_At; action : Action_T ) is abstract;
   procedure releaseSendDataHandler( Self: in out Participant_Interface; top : Topic_Class_At ) is abstract;
 
   -- Should only be used by Subscribers

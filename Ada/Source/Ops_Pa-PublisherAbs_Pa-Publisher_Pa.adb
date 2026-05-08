@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2025 Lennart Andersson.
+-- Copyright (C) 2016-2026 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -17,6 +17,7 @@
 -- along with OPS (Open Publish Subscribe).  If not, see <http://www.gnu.org/licenses/>.
 
 with Ops_Pa.ArchiverInOut_Pa,
+     Ops_Pa.Participant_Interface_Pa,
      Ops_Pa.Participant_Pa;
 
 use  Ops_Pa.ArchiverInOut_Pa,
@@ -67,10 +68,21 @@ package body Ops_Pa.PublisherAbs_Pa.Publisher_Pa is
   begin
     Self.SendDataHandler.addUser( Ops_Class_At(Self.SelfAt) );
     Self.SendDataHandler.addListener( Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface_At(Self.SelfAt) );
+
+    -- We need our own copy since we update the topic
+    declare
+      top : Topic_Class_At := Topic_Class_At(Self.Topic.Clone);
+    begin
+      -- If we let the OS define the port, the transport info isn't available until after start()
+      Self.SendDataHandler.updateTransportInfo( top );
+      Self.Participant.updateSendPartInfo( top, Participant_Interface_Pa.Add );
+      Free( top );
+    end;
   end;
 
   overriding procedure Stop( Self : in out Publisher_Class ) is
   begin
+    Self.Participant.updateSendPartInfo( Self.Topic, Participant_Interface_Pa.Remove );
     Self.SendDataHandler.removeListener( Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface_At(Self.SelfAt) );
     Self.SendDataHandler.removeUser( Ops_Class_At(Self.SelfAt) );
     Self.Connected := False;
@@ -80,6 +92,11 @@ package body Ops_Pa.PublisherAbs_Pa.Publisher_Pa is
   function isConnected( Self : Publisher_Class ) return Boolean is
   begin
     return Self.Connected;
+  end;
+
+  function getPublicationID( Self : Publisher_Class ) return Int64 is
+  begin
+    return Self.CurrentPublicationID;
   end;
 
   procedure addListener( Self : in out Publisher_Class; Client : Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface_At ) is
@@ -186,16 +203,6 @@ package body Ops_Pa.PublisherAbs_Pa.Publisher_Pa is
     Self.Message.SetDataOwner( False );
 
     Start( Self );
-
-    -- We need our own copy since we update the topic
-    declare
-      top : Topic_Class_At := Topic_Class_At(t.Clone);
-    begin
-      -- If we let the OS define the port, the transport info isn't available until after start()
-      Self.SendDataHandler.updateTransportInfo( top );
-      Self.Participant.updateSendPartInfo( top );
-      Free( top );
-    end;
 
     Self.UseInProc := t.Transport = TRANSPORT_INPROC;
   end;

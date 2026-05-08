@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2025 Lennart Andersson.
+-- Copyright (C) 2016-2026 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -57,6 +57,10 @@ package Ops_Pa.PublisherAbs_Pa.Publisher_Pa is
   procedure removeListener( Self : in out Publisher_Class; Client : Transport_Pa.ConnectStatusNotifier_Pa.Listener_Interface_At );
 
   overriding procedure WriteOPSObject( Self : in out Publisher_Class; obj : OpsObject_Class_At );
+
+  -- For debug it can be handy to access the PublicationID to be able to synchronize with external tools as eg. Wireshark.
+  -- Note that the value is the ID to be used in the next message (ie. the number of sent messages, excluding ev. resends).
+  function getPublicationID( Self : Publisher_Class ) return Int64;
 
   -- Methods to store and retrieve user parameters.
   -- These are not used by OPS in any way, the usage is up to the user of OPS.

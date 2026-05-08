@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2025 Lennart Andersson.
+-- Copyright (C) 2016-2026 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -134,21 +134,21 @@ package body Ops_Pa.Participant_Pa is
     return Result;
   end;
 
-  overriding procedure updateSendPartInfo( Self: in out Participant_Class; top : Topic_Class_At ) is
+  overriding procedure updateSendPartInfo( Self: in out Participant_Class; top : Topic_Class_At; action : Action_T ) is
     S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.PartInfoDataMutex'Access);
-	begin
-    -- Need to add topic to partInfoData.publishTopics
-    addTopic(Self.PartInfoData.publishTopics, top);
-	end;
+  begin
+    -- Need to add/remove topic in partInfoData.publishTopics
+    if action = Add then
+      addTopic(Self.PartInfoData.publishTopics, top);
+    else
+      removeTopic(Self.PartInfoData.publishTopics, top);
+    end if;
+    Self.PartInfoDataUpdated := True;
+  end;
 
   overriding procedure releaseSendDataHandler( Self: in out Participant_Class; top : Topic_Class_At ) is
   begin
     Self.SendDataHandlerFactory.releaseSendDataHandler(top);
-    declare
-      S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.PartInfoDataMutex'Access);
-    begin
-      removeTopic(Self.PartInfoData.publishTopics, top);
-    end;
   end;
 
   -- Should only be used by Subscribers
@@ -162,6 +162,7 @@ package body Ops_Pa.Participant_Pa is
       begin
         -- Need to add topic to partInfoData.subscribeTopics
         addTopic(Self.PartInfoData.subscribeTopics, top);
+        Self.PartInfoDataUpdated := True;
       end;
     end if;
     return Result;
@@ -174,6 +175,7 @@ package body Ops_Pa.Participant_Pa is
       S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.PartInfoDataMutex'Access);
     begin
       removeTopic(Self.PartInfoData.subscribeTopics, top);
+      Self.PartInfoDataUpdated := True;
     end;
   end;
 
@@ -283,6 +285,11 @@ package body Ops_Pa.Participant_Pa is
           declare
             S : Ops_Pa.Mutex_Pa.Scope_Lock(Self.PartInfoDataMutex'Access);
           begin
+            if Self.PartInfoDataUpdated then
+              -- Set key to the pubID with changed data (ie. next write)
+              Self.partInfoData.Key(partInfoPub.getPublicationID'Image);
+              Self.PartInfoDataUpdated := False;
+            end if;
             partInfoPub.WriteOPSObject( Ops_Pa.OpsObject_Pa.OpsObject_Class_At(Self.PartInfoData) );
           end;
         end if;
@@ -307,6 +314,7 @@ package body Ops_Pa.Participant_Pa is
   begin
     Replace(Self.PartInfoData.ip, ipaddress);
     Self.PartInfoData.mc_udp_port := port;
+    Self.PartInfoDataUpdated := True;
   end;
 
   -- Method prototype to call when we want to register a TCP RDH for the participant info data
@@ -390,6 +398,7 @@ package body Ops_Pa.Participant_Pa is
     Self.PartInfoData.languageImplementation := Copy("Ada");
     Self.PartInfoData.id := Copy(participantID);
     Self.PartInfoData.domain := Copy(domainID);
+    Self.PartInfoDataUpdated := True;
 
     --
     Self.InProcDistributor := Create;

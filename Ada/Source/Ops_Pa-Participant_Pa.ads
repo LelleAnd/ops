@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2016-2025 Lennart Andersson.
+-- Copyright (C) 2016-2026 Lennart Andersson.
 --
 -- This file is part of OPS (Open Publish Subscribe).
 --
@@ -48,6 +48,7 @@ use Ops_Pa.Transport_Pa.SendDataHandler_Pa,
     Ops_Pa.ParticipantInfoDataListener_Pa;
 
 with Ops_Pa.Participant_Interface_Pa;
+use  Ops_Pa.Participant_Interface_Pa;
 
 package Ops_Pa.Participant_Pa is
 
@@ -88,7 +89,7 @@ package Ops_Pa.Participant_Pa is
 
   -- Should only be used by Publishers
   overriding function getSendDataHandler( Self: in out Participant_Class; top : Topic_Class_At) return SendDataHandler_Class_At;
-  overriding procedure updateSendPartInfo( Self: in out Participant_Class; top : Topic_Class_At );
+  overriding procedure updateSendPartInfo( Self: in out Participant_Class; top : Topic_Class_At; action : Action_T );
   overriding procedure releaseSendDataHandler( Self: in out Participant_Class; top : Topic_Class_At );
 
   -- Should only be used by Subscribers
@@ -158,6 +159,7 @@ private
        -- The ParticipantInfoData that partInfoPub will publish periodically
        PartInfoData : ParticipantInfoData_Class_At := null;
        PartInfoDataMutex : aliased Ops_Pa.Mutex_Pa.Mutex;
+       PartInfoDataUpdated : Boolean := False;
 
        PartInfoTopic : Topic_Class_At := null;
        PartInfoListener : ParticipantInfoDataListener_Class_At := null;

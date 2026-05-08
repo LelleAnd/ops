@@ -49,6 +49,7 @@ public class Participant
     private InProcessTransport inProcessTransport = new InProcessTransport();
 
     private final ParticipantInfoData partInfoData = new ParticipantInfoData();
+    private boolean partInfoDataUpdated = true;
     private ParticipantInfoDataListener partInfoListener = new ParticipantInfoDataListener(this);
 
     private Publisher partInfoPub = null;
@@ -175,6 +176,7 @@ public class Participant
             partInfoData.domain = domainID;
             partInfoData.ip = "";
             partInfoData.opsVersion = "";
+            partInfoDataUpdated = true;
         }
     }
 
@@ -184,6 +186,7 @@ public class Participant
         {
             partInfoData.ip = ip;
             partInfoData.mc_udp_port = port;
+            partInfoDataUpdated = true;
         }
     }
 
@@ -331,6 +334,7 @@ public class Participant
             synchronized (partInfoData)
             {
                 partInfoData.subscribeTopics.add(new TopicInfoData(top));
+                partInfoDataUpdated = true;
             }
         }
         return rdh;
@@ -346,6 +350,7 @@ public class Participant
             {
                 if (partInfoData.subscribeTopics.elementAt(i).name.equals(topic.getName())) {
                     partInfoData.subscribeTopics.remove(i);
+                    partInfoDataUpdated = true;
                     break;
                 }
             }
@@ -365,6 +370,7 @@ public class Participant
         synchronized (partInfoData)
         {
             partInfoData.publishTopics.add(new TopicInfoData(t));
+            partInfoDataUpdated = true;
         }
     }
 
@@ -378,6 +384,7 @@ public class Participant
             {
                 if (partInfoData.publishTopics.elementAt(i).name.equals(topic.getName())) {
                     partInfoData.publishTopics.remove(i);
+                    partInfoDataUpdated = true;
                     break;
                 }
             }
@@ -420,6 +427,10 @@ public class Participant
                         {
                             synchronized (partInfoData)
                             {
+                                if (partInfoDataUpdated) {
+                                    partInfoPub.setKey("" + partInfoPub.getCurrentPublicationID());
+                                    partInfoDataUpdated = false;
+                                }
                                 partInfoPub.writeAsOPSObject(partInfoData);
                             }
                         }

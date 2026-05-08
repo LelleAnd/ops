@@ -2,7 +2,7 @@ unit uOps.Participant;
 
 (**
 *
-* Copyright (C) 2016-2024 Lennart Andersson.
+* Copyright (C) 2016-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -87,7 +87,7 @@ type
 
 		// Should only be used by Publishers
 		function getSendDataHandler(top : TTopic) : TSendDataHandler;
-    procedure updateSendPartInfo(top : TTopic);
+    procedure updateSendPartInfo(top : TTopic; add : Boolean);
 		procedure releaseSendDataHandler(top : TTopic);
 
     // Should only be used by Subscribers
@@ -111,6 +111,7 @@ type
     //------------------------------------------------------------------------
     // The ParticipantInfoData that partInfoPub will publish periodically
     FPartInfoData : TParticipantInfoData;
+    FPartInfoDataUpdated : Boolean;
     FPartInfoDataMutex : TMutex;
 
     //------------------------------------------------------------------------
@@ -287,6 +288,7 @@ begin
   FPartInfoData.languageImplementation := 'Delphi';
   FPartInfoData.id := AnsiString(FParticipantID);
   FPartInfoData.domain := AnsiString(FDomainID);
+  FPartInfoDataUpdated := True;
 
   FSendDataHandlerFactory := TSendDataHandlerFactory.Create(FDomain, OnUdpConnectDisconnectProc, FErrorService);
   FReceiveDataHandlerFactory := TReceiveDataHandlerFactory.Create(OnUdpTransportInfoProc, OnTcpConnectDisconnectProc, FErrorService);
@@ -344,12 +346,17 @@ begin
   // We can't update Participant Info here, delayed until updateSendPartInfo()
 end;
 
-procedure TParticipant.updateSendPartInfo(top : TTopic);
+procedure TParticipant.updateSendPartInfo(top : TTopic; add : Boolean);
 begin
   FPartInfoDataMutex.Acquire;
   try
-    // Need to add topic to partInfoData.publishTopics
-    FPartInfoData.addTopic(FPartInfoData.publishTopics, top);
+    // Need to add/remove topic in partInfoData.publishTopics
+    if add then begin
+      FPartInfoData.addTopic(FPartInfoData.publishTopics, top);
+    end else begin
+      FPartInfoData.removeTopic(FPartInfoData.publishTopics, top);
+    end;
+    FPartInfoDataUpdated := True;
   finally
     FPartInfoDataMutex.Release;
   end;
@@ -358,14 +365,6 @@ end;
 procedure TParticipant.releaseSendDataHandler(top : TTopic);
 begin
   FSendDataHandlerFactory.releaseSendDataHandler(top);
-
-  FPartInfoDataMutex.Acquire;
-  try
-    // Remove topic from partInfoData.publishTopics
-    FPartInfoData.removeTopic(FPartInfoData.publishTopics, top);
-  finally
-    FPartInfoDataMutex.Release;
-  end;
 end;
 
 function TParticipant.getReceiveDataHandler(top : TTopic) : TReceiveDataHandler;
@@ -377,6 +376,7 @@ begin
     try
       // Need to add topic to partInfoData.subscribeTopics
       FPartInfoData.addTopic(FPartInfoData.subscribeTopics, top);
+      FPartInfoDataUpdated := True;
     finally
       FPartInfoDataMutex.Release;
     end;
@@ -391,6 +391,7 @@ begin
   try
     // Remove topic from partInfoData.subscribeTopics
     FPartInfoData.removeTopic(FPartInfoData.subscribeTopics, top);
+    FPartInfoDataUpdated := True;
   finally
     FPartInfoDataMutex.Release;
   end;
@@ -474,6 +475,7 @@ begin
   try
     FPartInfoData.ip := AnsiString(ipaddress);
     FPartInfoData.mc_udp_port := port;
+    FPartInfoDataUpdated := True;
   finally
     FPartInfoDataMutex.Release;
   end;
@@ -523,6 +525,10 @@ begin
       if Assigned(partInfoPub) then begin
         FPartInfoDataMutex.Acquire;
         try
+          if FPartInfoDataUpdated then begin
+            FPartInfoData.Key := AnsiString(IntToStr(partInfoPub.CurrentPublicationID));
+            FPartInfoDataUpdated := False;
+          end;
           partInfoPub.WriteOPSObject(FPartInfoData);
         finally
           FPartInfoDataMutex.Release;

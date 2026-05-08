@@ -87,9 +87,9 @@ begin
   FTypesString       := '';
 end;
 
-destructor TOPSObject.Destroy;
-begin
-  inherited;
+destructor TOPSObject.Destroy;
+begin
+  inherited;
 end;
 
 procedure TOPSObject.AppendType(const _type : AnsiString);

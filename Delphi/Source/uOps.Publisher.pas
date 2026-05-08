@@ -67,6 +67,8 @@ type
 
     procedure WriteOPSObject(obj : TOPSObject); override;
 
+    property CurrentPublicationID : UInt64 read FCurrentPublicationID;
+
   protected
   	procedure Write(data : TOPSObject);
   end;
@@ -78,8 +80,6 @@ uses SysUtils,
      uOps.ArchiverInOut;
 
 constructor TPublisher.Create(t : TTopic);
-var
-  top : TTopic;
 begin
   inherited Create;
   FTopic := t;
@@ -103,15 +103,6 @@ begin
   FMessage.DataOwner := False;
 
 	Start();
-
-  // We need our own copy since we update the topic
-  top := t.Clone as TTopic;
-  try
-    FSendDataHandler.updateTransportInfo(top);
-    FParticipant.updateSendPartInfo(top);
-  finally
-    FreeAndNil(top);
-  end;
 end;
 
 destructor TPublisher.Destroy;
@@ -129,17 +120,29 @@ begin
 end;
 
 procedure TPublisher.Start;
+var
+  top : TTopic;
 begin
   if not FStarted then begin
     FSendDataHandler.addListener(onConnectStatusChanged);
     FSendDataHandler.addUser(Self);
     FStarted := True;
+
+    // We need our own copy since we update the topic
+    top := FTopic.Clone as TTopic;
+    try
+      FSendDataHandler.updateTransportInfo(top);
+      FParticipant.updateSendPartInfo(top, True);
+    finally
+      FreeAndNil(top);
+    end;
   end;
 end;
 
 procedure TPublisher.Stop;
 begin
   if FStarted then begin
+    FParticipant.updateSendPartInfo(FTopic, False);
     FSendDataHandler.removeUser(Self);
     FSendDataHandler.removeListener(onConnectStatusChanged);
     FStarted := False;

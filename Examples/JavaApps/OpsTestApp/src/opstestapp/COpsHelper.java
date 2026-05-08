@@ -166,6 +166,26 @@ public class COpsHelper implements IOpsHelper
         }
     }
 
+    public void StartPublisher()
+    {
+        if (pub != null) {
+            pub.start();
+            Log("Started Publisher for topic " + pub.getTopic().getName() + "\n");
+        } else {
+            Log("Publisher must be created first!!\n");
+        }
+    }
+
+    public void StopPublisher()
+    {
+        if (pub != null) {
+            pub.stop();
+            Log("Stopped Publisher for topic " + pub.getTopic().getName() + "\n");
+        } else {
+            Log("Publisher must be created first!!\n");
+        }
+    }
+
     public void Write(OPSObject Data)
     {
         if (pub != null) {

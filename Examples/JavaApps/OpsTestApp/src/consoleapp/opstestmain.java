@@ -258,6 +258,24 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
       }
   }
 
+  public void StartPublisher() {
+      for(int i = 0; i < MyTopicInfoList.size(); i++) {
+          MyTopicInfo info = MyTopicInfoList.elementAt(i);
+          if (info.selected) {
+              info.helper.StartPublisher();
+          }
+      }
+  }
+
+  public void StopPublisher() {
+      for(int i = 0; i < MyTopicInfoList.size(); i++) {
+          MyTopicInfo info = MyTopicInfoList.elementAt(i);
+          if (info.selected) {
+              info.helper.StopPublisher();
+          }
+      }
+  }
+
   public void SetDeadLineInterval(long timeoutMs) {
     for(int i = 0; i < MyTopicInfoList.size(); i++) {
         MyTopicInfo info = MyTopicInfoList.elementAt(i);
@@ -343,8 +361,8 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
     System.out.println("");
   	System.out.println("\t PC      Create Publishers");
   	System.out.println("\t PD      Delete Publishers");
-  	//System.out.println("\t PS      Start Publishers");
-  	//System.out.println("\t PT      Stop Publishers");
+  	System.out.println("\t PS      Start Publishers");
+  	System.out.println("\t PT      Stop Publishers");
   	System.out.println("\t SC      Create Subscriber");
   	System.out.println("\t SD      Delete Subscriber");
   	System.out.println("\t SS      Start Subscriber");
@@ -421,8 +439,8 @@ public class opstestmain implements IOpsHelperListener, ops.Listener<ops.Error> 
 
 			if (input.startsWith("pc", 0)) { CreatePublisher(); }
 			if (input.startsWith("pd", 0)) { DeletePublisher(); }
-			//if (input == "ps") { app.StartPublisher(); }
-			//if (input == "pt") { app.StopPublisher(); }
+			if (input.startsWith("ps", 0)) { StartPublisher(); }
+			if (input.startsWith("pt", 0)) { StopPublisher(); }
 
 			if (input.startsWith("sc", 0)) { CreateSubscriber(); }
 			if (input.startsWith("sd", 0)) { DeleteSubscriber(); }

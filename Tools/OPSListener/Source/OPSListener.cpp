@@ -40,7 +40,7 @@
 #include "MessageDump.h"
 #include "FilterMessage.h"
 
-const char c_program_version[] = "OPSListener Version 2026-04-23";
+const char c_program_version[] = "OPSListener Version 2026-05-07";
 
 
 // =======================================================================================
@@ -564,6 +564,12 @@ public:
 			delete vSubs[i];
 		}
 		vSubs.clear();
+		// Make sure List with queued messages are empty (they are reserved and keeps RDH's in memory)
+		while (List.size() > 0) {
+			TEntry ent = List.front();
+			ent.mess->unreserve();
+			List.pop_front();
+		}
 		// Delete Participants
 		for (unsigned int i = 0; i < vParts.size(); i++) {
 			delete vParts[i];

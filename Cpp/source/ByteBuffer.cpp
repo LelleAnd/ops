@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2019-2025 Lennart Andersson.
+ * Copyright (C) 2019-2026 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -34,7 +34,7 @@ namespace ops
     }
 
 	///Resets the whole buffer to creation state
-	void ByteBuffer::Reset()
+	void ByteBuffer::Reset() noexcept
 	{
         totalSize = 0;
         index = 0;
@@ -47,7 +47,7 @@ namespace ops
         return currentSegment + 1;
     }
 
-    int ByteBuffer::getSegmentSize(int const i) const
+    int ByteBuffer::getSegmentSize(int const i) const noexcept
     {
         if (i < currentSegment)
         {
@@ -79,10 +79,6 @@ namespace ops
         }
         index = oldIndex;
         nextSegmentAt = oldNextSegmentAt;
-    }
-
-    ByteBuffer::~ByteBuffer()
-    {
     }
 
     void ByteBuffer::WriteChars(const char* const chars, const int length)
@@ -130,7 +126,7 @@ namespace ops
     {
         index = 0;
         writeProtocol();
-        const int tInt = 0;
+        constexpr int tInt = 0;
         WriteInt(tInt);
         WriteInt(currentSegment);
     }
@@ -150,17 +146,17 @@ namespace ops
     }
 
     ///Utility method for swaping byte order of basic types (int float etc.)
-    void ByteSwap(unsigned char* const b, const int n)
-    {
-        int i = 0;
-        int j = n - 1;
-        while (i < j)
-        {
-            std::swap(b[i], b[j]);
-            i++;
-            j--;
-        }
-    }
+    //static void ByteSwap(unsigned char* const b, const int n) noexcept
+    //{
+    //    int i = 0;
+    //    int j = n - 1;
+    //    while (i < j)
+    //    {
+    //        std::swap(b[i], b[j]);
+    //        i++;
+    //        j--;
+    //    }
+    //}
 
     template<typename T>
     T ByteSwap(const T in)

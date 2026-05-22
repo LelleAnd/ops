@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018-2019 Lennart Andersson.
+* Copyright (C) 2018-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -27,7 +27,7 @@ namespace ops {
 	// Pool with fixed sized data segments (OPSConstants::PACKET_MAX_SIZE)
 	class DataSegmentPool {
 	public:
-		static DataSegmentPool& Instance();
+		static DataSegmentPool& Instance() noexcept;
 
 		char* getEntry();
 		void returnEntry(char*& ptr);
@@ -43,7 +43,7 @@ namespace ops {
 
 	class DataSegmentAllocator : MemoryMapAllocator {
 	public:
-		static MemoryMapAllocator& Instance();
+		static MemoryMapAllocator& Instance() noexcept;
 
 		virtual char* Allocate(unsigned int size) override;
 		virtual void Deallocate(char*& ptr) override;

@@ -38,7 +38,6 @@
 #include "DeadlineTimer.h"
 #include "Error.h"
 #include "ErrorService.h"
-#include "SendDataHandler.h"
 #include "DebugHandler.h"
 #include "Validation.h"
 #include "MetaDataHandler.h"
@@ -49,6 +48,7 @@ namespace ops
 	class ReceiveDataHandler;
 	class UDPReceiveDataHandler;
 	class ReceiveDataHandlerFactory;
+	class SendDataHandler;
 	class SendDataHandlerFactory;
 	class Domain;
     class Publisher;

@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2025 Lennart Andersson.
+* Copyright (C) 2019-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -80,7 +80,7 @@ namespace ops
         int GetSize() const noexcept;
 
 		///Resets the whole buffer to creation state
-		void Reset();
+		void Reset() noexcept;
 
 		///Resets the internal offset pointer to 0 (zero)
 		void ResetIndex() noexcept;
@@ -89,7 +89,7 @@ namespace ops
 		int GetIndex() const noexcept;
 
 		int getNrOfSegments() const noexcept;
-		int getSegmentSize(int i) const;
+		int getSegmentSize(int i) const noexcept;
 		char* getSegment(int i) const;
 		void finish();
 
@@ -185,7 +185,7 @@ namespace ops
 		bool checkProtocol();
         
         //Destructor does not do anything buffer should be created and deleted by user of this class.
-        ~ByteBuffer();
+        ~ByteBuffer() = default;
     };
     
 }

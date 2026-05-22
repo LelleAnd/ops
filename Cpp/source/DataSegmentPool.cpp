@@ -1,6 +1,6 @@
 /**
 *
-* Copyright (C) 2018-2020 Lennart Andersson.
+* Copyright (C) 2018-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -30,7 +30,7 @@ namespace ops {
 	///TODO add an allocator as parameter 
 	static memory_pools::memory_pool_exp<OPSConstants::PACKET_MAX_SIZE> rcvPool(20);
 
-	DataSegmentPool& DataSegmentPool::Instance()
+	DataSegmentPool& DataSegmentPool::Instance() noexcept
 	{
 		static DataSegmentPool inst;
 		return inst;
@@ -47,7 +47,7 @@ namespace ops {
 	}
 
 #ifndef REPLACE_NETWORK_ALLOC
-	MemoryMapAllocator& DataSegmentAllocator::Instance()
+	MemoryMapAllocator& DataSegmentAllocator::Instance() noexcept
 	{
 		static DataSegmentAllocator inst;
 		return inst;

@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2019-2025 Lennart Andersson.
+ * Copyright (C) 2019-2026 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -42,9 +42,7 @@ namespace ops
         {
         }
 
-        ~OPSArchiverOut()
-        {
-        }
+        ~OPSArchiverOut() = default;
 
 		// Returns true if it's an output archiver
 		virtual bool isOut() noexcept override { return true; }

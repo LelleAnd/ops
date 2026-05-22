@@ -24,6 +24,7 @@
 #include "Domain.h"
 #include "OPSArchiverOut.h"
 #include "Subscriber.h"
+#include "SendDataHandler.h"
 #include "opsidls/SendAckPatternData.h"
 #include "opsidls/OPSConstants.h"
 #include "TimeHelper.h"
@@ -256,6 +257,12 @@ namespace ops
 	ObjectName_T Publisher::getName() const noexcept
     {
         return m_name;
+    }
+
+    // Get some collected telemetry from the sender
+    Telemetry Publisher::getTelemetry() const
+    {
+        return sendDataHandler->getTelemetry();
     }
 
     bool Publisher::writeOPSObject(OPSObject* const obj)

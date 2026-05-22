@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2018-2025 Lennart Andersson.
+ * Copyright (C) 2018-2026 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -28,7 +28,6 @@
 #include "ReceiverFactory.h"
 #include "CommException.h"
 #include "TCPClientBase.h"
-#include "DataSegmentPool.h"
 
 namespace ops
 {
@@ -42,7 +41,7 @@ namespace ops
 		}
     }
 
-	void ReceiveDataHandler::addListener(Listener<OPSMessage*>* const listener, Topic& top)
+	void ReceiveDataHandler::addListener(Listener<OPSMessage*>* const listener, const Topic& top)
     {
         {
             const SafeLock lock(messageLock);
@@ -56,7 +55,7 @@ namespace ops
 		topicUsage(top, true);
 	}
 
-    void ReceiveDataHandler::removeListener(Listener<OPSMessage*>* const listener, Topic& top)
+    void ReceiveDataHandler::removeListener(Listener<OPSMessage*>* const listener, const Topic& top)
     {
         topicUsage(top, false);
 

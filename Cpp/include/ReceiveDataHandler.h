@@ -64,8 +64,8 @@ namespace ops
 		void clear();
 
 		// Add/Remove listener to received messages
-		void addListener(Listener<OPSMessage*>* listener, Topic& top);
-		void removeListener(Listener<OPSMessage*>* listener, Topic& top);
+		void addListener(Listener<OPSMessage*>* listener, const Topic& top);
+		void removeListener(Listener<OPSMessage*>* listener, const Topic& top);
 
 		int numReservedMessages() const noexcept
 		{

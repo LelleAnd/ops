@@ -24,9 +24,6 @@
 #include <iostream>
 #include <fstream>
 
-#include "Receiver.h"
-#include "Sender.h"
-
 #ifndef _WIN32
 #include <sys/types.h>
 #include <unistd.h>

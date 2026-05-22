@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2018-2025 Lennart Andersson.
+* Copyright (C) 2018-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -28,18 +28,22 @@
 #include "OPSObject.h"
 #include "OPSMessage.h"
 #include "Topic.h"
-#include "SendDataHandler.h"
 #include "MemoryMap.h"
+#include "ByteBuffer.h"
 #include "Participant.h"
 #include "DebugHandler.h"
 #include "Listener.h"
 #include "ConnectStatus.h"
 #include "Lockable.h"
 #include "TimeHelper.h"
+#include "Telemetry.h"
 #include "Validation.h"
 
 namespace ops
 {
+    // Forward declaration
+    class SendDataHandler;
+
 class Publisher : protected Listener<ConnectStatus>, public Notifier<ConnectStatus>
 #ifdef OPS_ENABLE_DEBUG_HANDLER
 	, DebugNotifyInterface
@@ -91,10 +95,7 @@ public:
     void defineValidation(ValidationStrategy strat, ValidationPubCallback cb = {});
 
     // Get some collected telemetry from the sender
-    Telemetry getTelemetry()
-    {
-        return sendDataHandler->getTelemetry();
-    }
+    Telemetry getTelemetry() const;
 
 protected:
     int64_t currentPublicationID{ 0 };

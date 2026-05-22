@@ -99,10 +99,11 @@ TEST(Test_Reservable, TestRefHandler) {
 
 	MyObject* obj = new MyObject();
 	EXPECT_EQ(MyObject_Ctr, 1);
-	EXPECT_EQ(obj->getReferenceHandler(), nullptr);
+	EXPECT_FALSE(obj->hasReferenceHandler());
 
 	ref.addReservable(obj);
-	EXPECT_EQ(obj->getReferenceHandler(), &ref);
+	EXPECT_TRUE(obj->hasReferenceHandler());
+	EXPECT_TRUE(ref.isReferenced(*obj));
 	EXPECT_EQ(ref.size(), 1);
 
 	obj->reserve();
@@ -171,7 +172,7 @@ TEST(Test_Reservable, TestCopy) {
 		EXPECT_EQ(obj.getNrOfReservations(), 2);
 		EXPECT_EQ(obj2.getNrOfReservations(), 0);
 #endif
-		EXPECT_EQ(obj2.getReferenceHandler(), nullptr);
+		EXPECT_FALSE(obj2.hasReferenceHandler());
 
 		MyObject obj3;
 		obj3 = obj;
@@ -180,7 +181,7 @@ TEST(Test_Reservable, TestCopy) {
 		EXPECT_EQ(obj.getNrOfReservations(), 2);
 		EXPECT_EQ(obj3.getNrOfReservations(), 0);
 #endif
-		EXPECT_EQ(obj3.getReferenceHandler(), nullptr);
+		EXPECT_FALSE(obj3.hasReferenceHandler());
 
 #ifdef OPS_REMOVE_ASSERT
 		obj.unreserve();
@@ -199,26 +200,27 @@ TEST(Test_Reservable, TestCopy) {
 		obj->reserve();
 		EXPECT_EQ(MyObject_Ctr, 1);
 		EXPECT_EQ(obj->getNrOfReservations(), 1);
-		EXPECT_EQ(obj->getReferenceHandler(), &ref);
+		EXPECT_TRUE(ref.isReferenced(*obj));
 
 		// Copy constructor
 		MyObject* const obj2 = new MyObject(*obj);
 		EXPECT_EQ(obj2->getNrOfReservations(), 0);
-		EXPECT_EQ(obj2->getReferenceHandler(), nullptr);
+		EXPECT_FALSE(obj2->hasReferenceHandler());
 		ref.addReservable(obj2);
 		obj2->reserve();
 		EXPECT_EQ(MyObject_Ctr, 2);
 		EXPECT_EQ(obj2->getNrOfReservations(), 1);
-		EXPECT_EQ(obj2->getReferenceHandler(), &ref);
+		EXPECT_TRUE(obj2->hasReferenceHandler());
+		EXPECT_TRUE(ref.isReferenced(*obj2));
 
 		// Assignment constructor
 		MyObject mo;
 		mo = *obj2;
 		EXPECT_EQ(MyObject_Ctr, 3);
 		EXPECT_EQ(mo.getNrOfReservations(), 0);
-		EXPECT_EQ(mo.getReferenceHandler(), nullptr);
+		EXPECT_FALSE(mo.hasReferenceHandler());
 		EXPECT_EQ(obj2->getNrOfReservations(), 1);
-		EXPECT_EQ(obj2->getReferenceHandler(), &ref);
+		EXPECT_TRUE(ref.isReferenced(*obj2));
 
 		// Two pointers to same object
 		MyObject* const obj3 = obj2;

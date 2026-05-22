@@ -52,6 +52,10 @@ namespace ops
 	{
 		return referenceHandler;
 	}
+	bool Reservable::hasReferenceHandler() const noexcept
+	{
+		return referenceHandler != nullptr;
+	}
 
 	void Reservable::reserve()
 	{

@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2021 Lennart Andersson.
+* Copyright (C) 2019-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -30,6 +30,7 @@ namespace ops
 
 	class Reservable
 	{
+		friend class ReferenceHandler;
 	public:
 		Reservable() = default;
 		Reservable(const Reservable& r);
@@ -38,14 +39,18 @@ namespace ops
 		Reservable& operator =(Reservable&&) = delete;
 		virtual ~Reservable();
 
-		void setReferenceHandler(ReferenceHandler* refHandler);
-		ReferenceHandler* getReferenceHandler() const noexcept;
-
 		void reserve();
 		void unreserve();
 
 		int getNrOfReservations() const noexcept;
+
+		bool hasReferenceHandler() const noexcept;
+
 	private:
+		// Only used by ReferenceHandler class
+		ReferenceHandler* getReferenceHandler() const noexcept;
+		void setReferenceHandler(ReferenceHandler* refHandler);
+
 		std::atomic<int> nrOfReservations{ 0 };
 		ReferenceHandler* referenceHandler{ nullptr };
 	};

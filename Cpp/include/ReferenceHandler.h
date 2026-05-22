@@ -1,7 +1,7 @@
 /**
 * 
 * Copyright (C) 2006-2009 Anton Gravestam.
-* Copyright (C) 2019-2021 Lennart Andersson.
+* Copyright (C) 2019-2026 Lennart Andersson.
 *
 * This file is part of OPS (Open Publish Subscribe).
 *
@@ -40,10 +40,15 @@ namespace ops
 			res->setReferenceHandler(this);
 		}
 
-		void onNewEvent(Reservable* notifier, const ReserveInfo& reserveInfo)
+		bool isReferenced(const Reservable& res) const noexcept
+		{
+			return res.getReferenceHandler() == this;
+		}
+
+		void onNewEvent(Reservable* res, const ReserveInfo& reserveInfo)
 		{
 			if (reserveInfo.nrOfReservations == 0) {
-				removeReference(notifier);
+				removeReference(res);
 			}
 		}
 

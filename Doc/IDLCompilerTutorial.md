@@ -31,35 +31,54 @@ Compiled to C++, this is what would be generated from the SimpleData data type a
 
 namespace samples {
 
-constexpr ops::VersionMask_T SimpleData_Level_Mask   = ops::OPSObject_Level_Mask << 1;
-static_assert(SimpleData_Level_Mask <= ops::MaxVersionMask, "Inheritance hierarchy too large");
-
 class SimpleData :
 	public ops::OPSObject
 {
+protected:
+#ifdef OPS_C17_DETECTED
+    // Compile-time generated type and inheritance description strings
+    constexpr static auto _typeName = ops::strings::make_fixed_string_trunc("samples.SimpleData");
+    constexpr static auto _inheritDesc = ops::strings::make_fixed_string_trunc(_typeName, ops::OPSObject::_inheritDesc, ' ');
+#endif
+
+    // Defined to be able to ensure that all generated classes have the reworked copy constructor
+    using samples_SimpleData_new_copycons = bool;
+
 public:
-    static ops::TypeId_T getTypeName(){return ops::TypeId_T("samples.SimpleData");}
+  	static ops::TypeId_T getTypeName(){ return ops::TypeId_T("samples.SimpleData"); }
 
-    char SimpleData_version = 0;
+    static const uint8_t SimpleData_idlVersion = 0;
 
-    int i;
-    double d;
+    uint8_t SimpleData_version = SimpleData_idlVersion;
+
+    int i{ 0 };
+    double d{ 0 };
     std::string s;
 
+    ///Default constructor.
+#ifdef OPS_C17_DETECTED
+    SimpleData() : SimpleData(std::string_view(_inheritDesc)) {}
+
+protected:
+    SimpleData(std::string_view tName)
+        : ops::OPSObject(tName)
+    {
+#else
     SimpleData()
         : ops::OPSObject()
-        , i(0), d(0)
-    {
-        OPSObject::appendType(std::string("samples.SimpleData"));
-    }
-
-    ///Copy-constructor making full deep copy of a(n) SimpleData object.
-    SimpleData(const SimpleData& __c)
-        : ops::OPSObject()
-        , i(0), d(0)
     {
         OPSObject::appendType(ops::TypeId_T("samples.SimpleData"));
-        __c.fillClone(this);
+#endif
+    }
+
+#ifdef OPS_C17_DETECTED
+public:
+#endif
+    ///Copy-constructor making full deep copy of a(n) SimpleData object.
+    SimpleData(const SimpleData& _c)
+       : ops::OPSObject(_c)
+    {
+        _c.fillCloneShallow(this);
     }
 
     ///Assignment operator making full deep copy of a(n) SimpleData object.
@@ -71,13 +90,36 @@ public:
         return *this;
     }
 
+    ///Move-constructor taking other's resources
+    SimpleData(SimpleData&& other) noexcept : ops::OPSObject(std::move(other))
+    {
+        SimpleData_version = std::move(other.SimpleData_version);
+        i = std::move(other.i);
+        d = std::move(other.d);
+        s = std::move(other.s);
+    }
+
+    // Move assignment operator taking other's resources
+    SimpleData& operator= (SimpleData&& other) noexcept
+    {
+        if (this != &other) {
+            ops::OPSObject::operator=(std::move(other));
+            SimpleData_version = other.SimpleData_version;
+            i = other.i;
+            d = other.d;
+            s = std::move(other.s);
+        }
+        return *this;
+    }
+
     ///This method acceptes an ops::ArchiverInOut visitor which will serialize or deserialize an
     ///instance of this class to a format dictated by the implementation of the ArchiverInout.
-    void serialize(ops::ArchiverInOut* archive)
+    virtual void serialize(ops::ArchiverInOut* archive) override
     {
         ops::OPSObject::serialize(archive);
         if (idlVersionMask != 0) {
             archive->inout("SimpleData_version", SimpleData_version);
+            ValidateVersion("SimpleData", SimpleData_version, SimpleData_idlVersion);
         } else {
             SimpleData_version = 0;
         }
@@ -96,11 +138,28 @@ public:
 
     void fillClone(SimpleData* obj) const
     {
+        if (this == obj) { return; }
         ops::OPSObject::fillClone(obj);
+        fillCloneShallow(obj);
+    }
+
+private:
+    void fillCloneShallow(SimpleData* obj) const
+    {
         obj->SimpleData_version = SimpleData_version;
         obj->i = i;
         obj->d = d;
         obj->s = s;
+    }
+
+public:
+	///Validation routine for fields
+	virtual bool isValid() const noexcept override
+    {
+		bool _valid = true;
+		_valid = _valid && ops::OPSObject::isValid();
+        _valid = _valid && (SimpleData_version == SimpleData_idlVersion);
+		return _valid;
     }
 
     ///Destructor: Note that all aggregated data and vectors are completely deleted.
@@ -134,9 +193,4 @@ The IDL Compiler is also where you define your topics on which you will publish 
         </domains>
     </ops_config>
 </root>
-
 ```
-
-See what the OPS IDL Builder looks like and how to create a new project here:
-
-<a href='http://www.youtube.com/watch?feature=player_embedded&v=UsdjMwTUV3s' target='_blank'><img src='http://img.youtube.com/vi/UsdjMwTUV3s/0.jpg' width='425' height=344 /></a>

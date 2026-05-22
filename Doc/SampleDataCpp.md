@@ -15,31 +15,41 @@ namespace samples {
 class SampleData :
 	public ops::OPSObject
 {
-public:
-  	static ops::TypeId_T getTypeName(){return ops::TypeId_T("samples.SampleData");}
+protected:
+#ifdef OPS_C17_DETECTED
+    // Compile-time generated type and inheritance description strings
+    constexpr static auto _typeName = ops::strings::make_fixed_string_trunc("samples.SampleData");
+    constexpr static auto _inheritDesc = ops::strings::make_fixed_string_trunc(_typeName, ops::OPSObject::_inheritDesc, ' ');
+#endif
 
-  	char SampleData_version = SampleData_idlVersion;
+    // Defined to be able to ensure that all generated classes have the reworked copy constructor
+    using samples_SampleData_new_copycons = bool;
+
+public:
+  	static ops::TypeId_T getTypeName(){ return ops::TypeId_T("samples.SampleData"); }
+
+    static const uint8_t SampleData_idlVersion = 0;
+
+    uint8_t SampleData_version = SampleData_idlVersion;
 
     enum class Order {
         UNDEFINED, START, STOP
     };
 
-    static const char SampleData_idlVersion = 0;
-
     static const int max = 42;
-    bool boo;
-    char b;
-    short sh;
-    int i;
-    int64_t l;
-    float f;
-    double d;
+    bool boo{ false };
+    uint8_t b{ 0 };
+    short sh{ 0 };
+    int i{ 0 };
+    int64_t l{ 0 };
+    float f{ 0 };
+    double d{ 0 };
     std::string s;
     ops::strings::fixed_string<25> s25;
     UserData uData;
-    Order command;
+    Order command{ Order::UNDEFINED };
     std::vector<bool> boos;
-    std::vector<char> bytes;
+    std::vector<uint8_t> bytes;
     std::vector<short> shorts;
     std::vector<int> ints;
     std::vector<int64_t> longs;
@@ -51,24 +61,30 @@ public:
     int intarr[42];
 
     ///Default constructor.
+#ifdef OPS_C17_DETECTED
+    SampleData() : SampleData(std::string_view(_inheritDesc)) {}
+
+protected:
+    SampleData(std::string_view tName)
+        : ops::OPSObject(tName)
+    {
+#else
     SampleData()
         : ops::OPSObject()
-        , boo(false), b(0), sh(0), i(0), l(0), f(0), d(0), command(Order::UNDEFINED)
     {
         OPSObject::appendType(ops::TypeId_T("samples.SampleData"));
+#endif
         memset(&intarr[0], 0, sizeof(intarr));
-
     }
 
+#ifdef OPS_C17_DETECTED
+public:
+#endif
     ///Copy-constructor making full deep copy of a(n) SampleData object.
-    SampleData(const SampleData& __c)
-       : ops::OPSObject()
-        , boo(false), b(0), sh(0), i(0), l(0), f(0), d(0), command(Order::UNDEFINED)
+    SampleData(const SampleData& _c)
+       : ops::OPSObject(_c)
     {
-        OPSObject::appendType(ops::TypeId_T("samples.SampleData"));
-        memset(&intarr[0], 0, sizeof(intarr));
-
-        __c.fillClone(this);
+        _c.fillCloneShallow(this);
     }
 
     ///Assignment operator making full deep copy of a(n) SampleData object.
@@ -81,7 +97,7 @@ public:
     }
 
     ///Move-constructor taking other's resources
-    SampleData(SampleData&& other) : ops::OPSObject(std::move(other))
+    SampleData(SampleData&& other) noexcept : ops::OPSObject(std::move(other))
     {
         SampleData_version = std::move(other.SampleData_version);
         boo = std::move(other.boo);
@@ -106,11 +122,10 @@ public:
         s43vect = std::move(other.s43vect);
         uDatas = std::move(other.uDatas);
         memcpy(&intarr[0], &other.intarr[0], sizeof(intarr));
-
     }
 
     // Move assignment operator taking other's resources
-    SampleData& operator= (SampleData&& other)
+    SampleData& operator= (SampleData&& other) noexcept
     {
         if (this != &other) {
             ops::OPSObject::operator=(std::move(other));
@@ -137,7 +152,6 @@ public:
             std::swap(s43vect, other.s43vect);
             std::swap(uDatas, other.uDatas);
             memcpy(&intarr[0], &other.intarr[0], sizeof(intarr));
-
         }
         return *this;
     }
@@ -184,13 +198,18 @@ public:
         SampleData* ret = new SampleData;
         fillClone(ret);
         return ret;
-
     }
 
     void fillClone(SampleData* obj) const
     {
         if (this == obj) { return; }
         ops::OPSObject::fillClone(obj);
+        fillCloneShallow(obj);
+    }
+
+private:
+    void fillCloneShallow(SampleData* obj) const
+    {
         obj->SampleData_version = SampleData_version;
         obj->boo = boo;
         obj->b = b;
@@ -214,28 +233,27 @@ public:
         obj->s43vect = s43vect;
         obj->uDatas = uDatas;
         memcpy(&obj->intarr[0], &intarr[0], sizeof(intarr));
-
     }
 
-	///Validation routine for all fields marked with a 'range' directive
+public:
+	///Validation routine for fields
 	virtual bool isValid() const noexcept override
     {
-		bool valid = true;
-		valid = valid && ops::OPSObject::isValid();
-        valid = valid && this->uData.isValid();
+		bool _valid = true;
+		_valid = _valid && ops::OPSObject::isValid();
+        _valid = _valid && (SampleData_version == SampleData_idlVersion);
+        _valid = _valid && this->uData.isValid();
         //validate range: 0..2
-        valid = valid && (static_cast<int16_t>(this->command) >= 0) && (static_cast<int16_t>(this->command) <= 2);
-        for (size_t __i = 0; __i < this->uDatas.size(); __i++) {
-            valid = valid && this->uDatas[__i].isValid();
+        _valid = _valid && (static_cast<int16_t>(this->command) >= 0) && (static_cast<int16_t>(this->command) <= 2);
+        for (size_t _i = 0; _i < this->uDatas.size(); _i++) {
+            _valid = _valid && this->uDatas[_i].isValid();
         }
-
-		return valid;
+		return _valid;
     }
 
     ///Destructor: Note that all aggregated data and vectors are completely deleted.
     virtual ~SampleData(void)
     {
-
     }
 
 };

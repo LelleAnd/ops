@@ -43,7 +43,7 @@ The following table shows a listing of all available OPS IDL types and their cor
 | enum    | enum class | enum | enum | ( , , ) | 2 bytes          |
 | const   | static const | static final | const | const | -       |
 | boolean | bool | boolean | bool | Boolean | 1 byte              |
-| byte    | char | byte | byte | Byte | 1  byte                   |
+| byte    | uint8_t | byte | byte | Byte | 1  byte                |
 | short   | int16 | short | short | Int16 | 2 bytes               |
 | int     | int32 | int | int | Int32 | 4 bytes                   |
 | long    | int64 | long| long | Int64 | 8 bytes                  |

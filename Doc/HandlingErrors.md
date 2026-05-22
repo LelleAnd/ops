@@ -1,6 +1,6 @@
 # Handling Errors #
 It is possible to be notified if an error occurs in any of the OPS core threads.
-the `ops::Participant` class accepts `ops::Listener<ops::Error*>` interfaces which will be notified with an `ops::Error` when an error occurs. The following shows how to implement such a listener and add it to the participant. Example given in C++:
+The `ops::Participant` class accepts `ops::Listener<ops::Error*>` interfaces which will be notified with an `ops::Error` when an error occurs. The following shows how to implement such a listener and add it to the participant. Example given in C++:
 
 ```
 class MyErrorListener : public Listener<ops::Error*>
@@ -22,7 +22,7 @@ participant->addListener(&listener);
 
 ```
 
-For the purpose of only logging errors, OPS' C++ implementation comes with a predefined class called `ops::ErrorWriter` which can be used to print to any `std::ostream`. This is how you use it:
+For the purpose of only logging errors, OPS C++ implementation comes with a predefined class called `ops::ErrorWriter` which can be used to print to any `std::ostream`. This is how you use it:
 
 ```
 ops::ErrorWriter errorWriter(std::cout);

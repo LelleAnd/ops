@@ -31,7 +31,7 @@ public class SampleData extends OPSObject
     public String s = "";
     public String s25 = "";
     public UserData uData = new UserData();
-    public Order command;
+    public Order command = Order.UNDEFINED;
     public java.util.Vector<Boolean> boos = new java.util.Vector<Boolean>();
     public java.util.Vector<Byte> bytes = new java.util.Vector<Byte>();
     public java.util.Vector<Short> shorts = new java.util.Vector<Short>();
@@ -43,7 +43,6 @@ public class SampleData extends OPSObject
     public java.util.Vector<String> s43vect = new java.util.Vector<String>();
     public java.util.Vector<UserData> uDatas = new java.util.Vector<UserData>();
     public java.util.Vector<Integer> intarr = new java.util.Vector<Integer>();
-
 
     private static SerializableFactory factory = new TypeFactory();
 
@@ -58,10 +57,9 @@ public class SampleData extends OPSObject
     {
         super();
         appendType(getTypeName());
-        command = Order.UNDEFINED;
         for (int i = 0; i < 42; i++) intarr.add(0);
-
     }
+
     public void serialize(ArchiverInOut archive) throws IOException
     {
         super.serialize(archive);
@@ -96,8 +94,8 @@ public class SampleData extends OPSObject
         s43vect = (java.util.Vector<String>) archive.inoutStringList("s43vect", s43vect);
         uDatas = (java.util.Vector<UserData>) archive.inoutSerializableList("uDatas", uDatas, UserData.class);
         intarr = (java.util.Vector<Integer>) archive.inoutIntegerList("intarr", intarr);
-
     }
+
     @Override
     public Object clone()
     {
@@ -135,7 +133,6 @@ public class SampleData extends OPSObject
         cloneResult.uDatas = new java.util.Vector<UserData>();
         this.uDatas.forEach((item) -> cloneResult.uDatas.add((UserData)item.clone()));
         cloneResult.intarr = (java.util.Vector)this.intarr.clone();
-
     }
 
     private static class TypeFactory implements SerializableFactory

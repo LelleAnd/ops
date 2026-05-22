@@ -2,7 +2,7 @@
 
 To have reliability in OPS communication you can use [TCP](TcpTransport.md) as the transport.
 
-Both [UDP](UdpTransport.md) and [Multicast](MulticastTransport.md) transports can drop messages in the network stack and/or the communication equipment between nodes, without messages beeing resent or any notification given.
+Both [UDP](UdpTransport.md) and [Multicast](MulticastTransport.md) transports can drop messages in the network stack and/or the communication equipment between nodes, without messages beeing resent or any notification given. The same applies for [Shared Memory](SharedMemoryTransport.md) transport.
 
 Besides using TCP, OPS has some other features to help in cases where TCP can't be used for some reason.
 

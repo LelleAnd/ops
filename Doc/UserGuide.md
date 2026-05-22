@@ -17,6 +17,8 @@
     * [Multicast](MulticastTransport.md)
     * [TCP](TcpTransport.md)
     * [UDP](UdpTransport.md)
+    * [Shared Memory](SharedMemoryTransport.md)
+    * [In-process](InprocessTransport.md)
   * Tools
     * [IDL Builder](IDLCompilerTutorial.md)
     * [IDL Compiler](IDLCommandlineCompiler.md)
@@ -40,5 +42,6 @@
     * [Binary Protocol](Protocol.md)
     * [Threading and Event Callbacks](Threading.md)
     * [Data class slicing and spareBytes](DataSlicing.md)
+    * [Message Validation](MessageValidation.md)
   * [Remaining Issues](RemainingIssues.md)
   * [Release Notes](ReleaseNotes.md)

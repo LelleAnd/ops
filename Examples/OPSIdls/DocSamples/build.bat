@@ -1,5 +1,5 @@
 @pushd %~dp0
-@call ..\..\..\Tools\opsc\opsc.bat -g ALL -o Generated src/*.idl
+@call ..\..\..\Tools\opsc\opsc.bat -g ALL -p samples -o Generated src/*.idl
 @if errorlevel 1 goto :error
 @popd
 @goto :eof

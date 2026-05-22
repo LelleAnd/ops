@@ -180,7 +180,7 @@ namespace opsbridge {
 
 			// Create MC or UDP sender
 			if (mess.DstMcIP >= 0xE0000000) {
-				_senders[key].sender = ops::Sender::create(_ioService.get(), t.Ifc, t.ttl);
+				_senders[key].sender = ops::Sender::createMCSender(_ioService.get(), t.Ifc, t.ttl);
 			} else {
 				_senders[key].sender = ops::Sender::createUDPSender(_ioService.get());
 			}

@@ -30,7 +30,6 @@
 #define	ops_SenderH
 
 #include "OPSTypeDefs.h"
-#include "ByteBuffer.h"
 #include "IOService.h" 
 #include "Telemetry.h"
 
@@ -57,7 +56,7 @@ namespace ops
 			return Telemetry();	// Default empty
 		}
 
-        static std::unique_ptr<Sender> create(IOService* ioService, Address_T localInterface = "0.0.0.0", int ttl = 1, int64_t outSocketBufferSize = 16000000);
+        static std::unique_ptr<Sender> createMCSender(IOService* ioService, Address_T localInterface = "0.0.0.0", int ttl = 1, int64_t outSocketBufferSize = 16000000);
         static std::unique_ptr<Sender> createUDPSender(IOService* ioService, Address_T localInterface = "0.0.0.0", int ttl = 1, int64_t outSocketBufferSize = 16000000);
         static std::unique_ptr<Sender> createTCPServer(TCPServerCallbacks* client, IOService* ioService, Address_T ip, int port, int64_t outSocketBufferSize = 16000000);
 

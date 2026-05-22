@@ -4,6 +4,11 @@ The major changes for each release tag is noted below. For minor changes see the
 ## tags 4.3.x-y ##
 Requires the tinyxml2 library which 4.2.x-y doesn't.
 
+### 4.3.6-0 ###
+* Updated published metadata for all languages to be in par with C++
+* C++: Changed visibility of referenceHandler in class Reservable
+* C++: Renamed Sender::create to Sender::createMCSender
+
 ### 4.3.5-0 ###
 * Refactored C++ metadata handling
 * Added [Shared Memory transport](OpsConfig.md#transport-mechanism-specifics) for C++ (from experimental-branch)

@@ -1,7 +1,7 @@
 /**
  *
  * Copyright (C) 2006-2009 Anton Gravestam.
- * Copyright (C) 2020-2025 Lennart Andersson.
+ * Copyright (C) 2020-2026 Lennart Andersson.
  *
  * This file is part of OPS (Open Publish Subscribe).
  *
@@ -35,7 +35,7 @@
 namespace ops
 {
 
-    std::unique_ptr<Sender> Sender::create(IOService* ioService, Address_T localInterface, int ttl, int64_t outSocketBufferSize)
+    std::unique_ptr<Sender> Sender::createMCSender(IOService* ioService, Address_T localInterface, int ttl, int64_t outSocketBufferSize)
     {
         return std::make_unique<UDPSender>(ioService, localInterface, ttl, (int)outSocketBufferSize, true);
     }

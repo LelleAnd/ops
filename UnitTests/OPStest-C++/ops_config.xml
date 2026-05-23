@@ -1,86 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
- Description:
--->
 <root>
 	<ops_config type = "DefaultOPSConfigImpl">
     <domains>
-		<!-- First domain -->
 		<element type = "Domain">
         <domainID>PizzaDomain</domainID>
         <domainAddress>234.5.6.8</domainAddress>
         <localInterface>127.0.0.1</localInterface>
-		<!--optional <timeToLive>1</timeToLive>-->
-        <!--optional <inSocketBufferSize>16000000</inSocketBufferSize>-->
-        <!--optional <outSocketBufferSize>16000000</outSocketBufferSize>-->
 		<!-- metaDataMcPort is necessary for UDP transport to work -->
 		<metaDataMcPort>9494</metaDataMcPort>
 		<topics>
-
-		      <!-- Multicast topics, different ports -->
-			<element type = "Topic">
-		        <name>PizzaTopic</name>
-		        <port>6689</port>
-		        <dataType>pizza.PizzaData</dataType>
-	 		</element>
-
-		  	<element type = "Topic">
-		        <name>VessuvioTopic</name>
-		        <port>6690</port>
-		        <dataType>pizza.VessuvioData</dataType>
-		        <sampleMaxSize>2100000</sampleMaxSize>
-		        <inSocketBufferSize>16000000</inSocketBufferSize>
-		        <outSocketBufferSize>16000000</outSocketBufferSize>
-			</element>
-
-			<!--pane added -->
+			<!-- Multicast topics, different ports -->
 			<element type = "Topic">
 				<name>ExtraAlltTopic</name>
-				<port>6691</port>
+				<port>9567</port>
 				<dataType>pizza.special.ExtraAllt</dataType>
 				<sampleMaxSize>2100000</sampleMaxSize>
 			</element>
 
-			<!-- Multicast topics, same port -->
-			<element type = "Topic">
-				<name>PizzaTopic2</name>
-		        <port>6680</port>
-		        <dataType>pizza.PizzaData</dataType>
-			</element>
-
-			<element type = "Topic">
-		        <name>VessuvioTopic2</name>
-		        <port>6680</port>
-		        <dataType>pizza.VessuvioData</dataType>
-		        <sampleMaxSize>2100000</sampleMaxSize>
-		        <inSocketBufferSize>16000000</inSocketBufferSize>
-		        <outSocketBufferSize>16000000</outSocketBufferSize>
-			</element>
-
-		      <!-- TCP topics, different ports -->
-			<element type = "Topic">
-		        <name>TcpPizzaTopic</name>
-		        <port>6689</port>
-		        <dataType>pizza.PizzaData</dataType>
-				<transport>tcp</transport>
-		        <address>127.0.0.1</address>
-			</element>
-
-			<element type = "Topic">
-		        <name>TcpVessuvioTopic</name>
-		        <port>6690</port>
-		        <dataType>pizza.VessuvioData</dataType>
-		        <sampleMaxSize>2100000</sampleMaxSize>
-		        <inSocketBufferSize>16000000</inSocketBufferSize>
-		        <outSocketBufferSize>16000000</outSocketBufferSize>
-		        <transport>tcp</transport>
-		        <address>127.0.0.1</address>
-			</element>
-
-			<!--pane added -->
+			<!-- TCP topics, different ports -->
 			<element type = "Topic">
 		        <name>TcpExtraAlltTopic</name>
-		        <port>6691</port>
+		        <port>9568</port>
 		        <dataType>pizza.special.ExtraAllt</dataType>
 		        <sampleMaxSize>2100000</sampleMaxSize>
 		        <inSocketBufferSize>16000000</inSocketBufferSize>
@@ -88,66 +28,11 @@
 		        <transport>tcp</transport>
 		        <address>127.0.0.1</address>
 			</element>
-
-
-			<!-- TCP topics, same port -->
-			<element type = "Topic">
-		        <name>TcpPizzaTopic2</name>
-		        <port>6680</port>
-		        <dataType>pizza.PizzaData</dataType>
-		        <transport>tcp</transport>
-		        <address>127.0.0.1</address>
-			</element>
-
-			<element type = "Topic">
-		        <name>TcpVessuvioTopic2</name>
-		        <port>6680</port>
-		        <dataType>pizza.VessuvioData</dataType>
-		        <sampleMaxSize>2100000</sampleMaxSize>
-		        <inSocketBufferSize>16000000</inSocketBufferSize>
-		        <outSocketBufferSize>16000000</outSocketBufferSize>
-		        <transport>tcp</transport>
-		        <address>127.0.0.1</address>
-			</element>
-
-			<!--pane added -->
-			<element type = "Topic">
-		        <name>TcpExtraAlltTopic2</name>
-		        <port>6680</port>
-		        <dataType>pizza.special.ExtraAllt</dataType>
-		        <sampleMaxSize>2100000</sampleMaxSize>
-		        <inSocketBufferSize>4194304</inSocketBufferSize>
-		        <outSocketBufferSize>4194304</outSocketBufferSize>
-									 
-		        <transport>tcp</transport>
-		        <address>127.0.0.1</address>
-				<sampleMaxSize>2100000</sampleMaxSize>
-			</element>
-
-
 
 			<!-- UDP topics, different ports -->
 			<element type = "Topic">
-				<name>UdpPizzaTopic</name>
-				<port>6789</port>
-				<dataType>pizza.PiExtrazzaData</dataType>
-				<transport>udp</transport>
-			</element>
-
-			<element type = "Topic">
-				<name>UdpVessuvioTopic</name>
-				<port>6790</port>
-				<dataType>pizza.VessuvioData</dataType>
-				<transport>udp</transport>
-				<sampleMaxSize>2100000</sampleMaxSize>
-				<inSocketBufferSize>16000000</inSocketBufferSize> <!-- ändrar socket size till max -->
-				<outSocketBufferSize>16000000</outSocketBufferSize> <!-- ändrar socket size till max -->
-			</element>
-
-			<!--pane added -->
-			<element type = "Topic">
 				<name>UdpExtraAlltTopic</name>
-				<port>6791</port>
+				<port>9569</port>
 				<dataType>pizza.special.ExtraAllt</dataType>
 				<transport>udp</transport>
 				<sampleMaxSize>2100000</sampleMaxSize>
@@ -158,35 +43,6 @@
 		</topics>
 	</element>
 
-
-	<!-- Second domain -->
-	<element type = "Domain">
-		<domainID>OtherPizzaDomain</domainID>
-        <domainAddress>234.1.6.8</domainAddress>
-        <localInterface>127.0.0.1</localInterface>
-        <!--optional <timeToLive>1</timeToLive>-->
-        <!--optional <inSocketBufferSize>16000000</inSocketBufferSize>-->
-        <!--optional <outSocketBufferSize>16000000</outSocketBufferSize>-->
-        <metaDataMcPort>9494</metaDataMcPort>
-        <topics>
-			<!-- Multicast topics, different ports, but same as in other domain -->
-          	<element type = "Topic">
-            	<name>OtherPizzaTopic</name>
-            	<port>6689</port>
-            	<dataType>pizza.PizzaData</dataType>
-          	</element>
-          	
-			<element type = "Topic">
-            	<name>OtherVessuvioTopic</name>
-            	<port>6690</port>
-            	<dataType>pizza.VessuvioData</dataType>
-           		<sampleMaxSize>2100000</sampleMaxSize>
-            	<inSocketBufferSize>16000000</inSocketBufferSize>
-            	<outSocketBufferSize>16000000</outSocketBufferSize>
-          	</element>
-        </topics>
-
-      </element>
     </domains>
   </ops_config>
 </root>

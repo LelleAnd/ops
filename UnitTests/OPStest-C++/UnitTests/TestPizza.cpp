@@ -1,5 +1,4 @@
-#include "gtest/gtest.h"
-#include "Types.h"
+#include "SubscribeDataAndTest.h"
 
 namespace test {
 
@@ -98,13 +97,13 @@ void testExtraAlltNormal(pizza::special::ExtraAllt &extraAllt) {
 	EXPECT_EQ(((extraAllt.cheeses).at(0)).age, 1);
 	EXPECT_EQ(((extraAllt.cheeses).at(0)).name, "cheddar");
 	EXPECT_EQ(((extraAllt.cheeses).at(1)).age, 2);
-	EXPECT_EQ(((extraAllt.cheeses).at(1)).name, "hårdost");
+	EXPECT_EQ(((extraAllt.cheeses).at(1)).name, "hardost");
 	EXPECT_EQ(((extraAllt.cheeses).at(2)).age, 3);
-	EXPECT_EQ(((extraAllt.cheeses).at(2)).name, "mögelost");
+	EXPECT_EQ(((extraAllt.cheeses).at(2)).name, "mogelost");
 	EXPECT_EQ(((extraAllt.cheeses).at(3)).age, 4);
-	EXPECT_EQ(((extraAllt.cheeses).at(3)).name, "Färskost");
+	EXPECT_EQ(((extraAllt.cheeses).at(3)).name, "Farskost");
 	EXPECT_EQ(((extraAllt.cheeses).at(4)).age, 5);
-	EXPECT_EQ(((extraAllt.cheeses).at(4)).name, "!#¤%&/()=");
+	EXPECT_EQ(((extraAllt.cheeses).at(4)).name, "!#%&/()=?");
 	EXPECT_EQ(((extraAllt.cheeses).at(5)).age, 6);
 	EXPECT_EQ(((extraAllt.cheeses).at(5)).name, "Mesvara");
 }
@@ -116,9 +115,9 @@ void testExtraAlltNormal(pizza::special::ExtraAllt &extraAllt, SendType sendType
 	switch(sendType){
 	case NORMAL:
 		EXPECT_EQ((extraAllt.strings).at(0), std::string("ExtraAllt"));
-		EXPECT_EQ((extraAllt.strings).at(1), std::string("är"));
+		EXPECT_EQ((extraAllt.strings).at(1), std::string("ar"));
 		EXPECT_EQ((extraAllt.strings).at(2), std::string("den"));
-		EXPECT_EQ((extraAllt.strings).at(3), std::string("bästa"));
+		EXPECT_EQ((extraAllt.strings).at(3), std::string("basta"));
 		EXPECT_EQ((extraAllt.strings).at(4), std::string("pizzan"));
 		EXPECT_EQ((extraAllt.strings).at(5), std::string("!!!!!!!!!!!!!!!!!!"));
 		break;

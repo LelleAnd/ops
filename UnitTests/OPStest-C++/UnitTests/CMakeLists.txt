@@ -1,10 +1,10 @@
 
 #(UnitTests - CMakeLists.txt)
 
-add_executable(test-subscribe SubscribeDataAndTest.cpp)
-add_executable(test-subscribeTCP SubscribeTCPDataAndTest.cpp)
-add_executable(test-subscribeUDP SubscribeUDPDataAndTest.cpp)
-add_executable(test-serialize-and-deserialize TestSerializeAndDeserialize.cpp)
+add_executable(test-subscribe SubscribeDataAndTest.cpp TestPizza.cpp)
+add_executable(test-subscribeTCP SubscribeTCPDataAndTest.cpp TestPizza.cpp)
+add_executable(test-subscribeUDP SubscribeUDPDataAndTest.cpp TestPizza.cpp)
+add_executable(test-serialize-and-deserialize TestSerializeAndDeserialize.cpp TestPizza.cpp)
 
 target_link_libraries(test-subscribe                 ${Boost_LIBRARIES} ${GTEST_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ops-static)
 target_link_libraries(test-subscribeTCP              ${Boost_LIBRARIES} ${GTEST_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ops-static)

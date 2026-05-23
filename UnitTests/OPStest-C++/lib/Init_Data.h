@@ -121,9 +121,9 @@ void initExtraAlltNormal(pizza::special::ExtraAllt &extraAllt) {
 	(extraAllt.longs).push_back(int64_max);
 
 	(extraAllt.strings).push_back(string("ExtraAllt"));
-	(extraAllt.strings).push_back(string("är"));
+	(extraAllt.strings).push_back(string("ar"));
 	(extraAllt.strings).push_back(string("den"));
-	(extraAllt.strings).push_back(string("bästa"));
+	(extraAllt.strings).push_back(string("basta"));
 	(extraAllt.strings).push_back(string("pizzan"));
 	(extraAllt.strings).push_back(string("!!!!!!!!!!!!!!!!!!"));
 
@@ -141,19 +141,19 @@ void initExtraAlltNormal(pizza::special::ExtraAllt &extraAllt) {
 	(extraAllt.cheeses).push_back(testCheese);
 
 	testCheese.age = 2;
-	testCheese.name = "hårdost";
+	testCheese.name = "hardost";
 	(extraAllt.cheeses).push_back(testCheese);
 
 	testCheese.age = 3;
-	testCheese.name = "mögelost";
+	testCheese.name = "mogelost";
 	(extraAllt.cheeses).push_back(testCheese);
 
 	testCheese.age = 4;
-	testCheese.name = "Färskost";
+	testCheese.name = "Farskost";
 	(extraAllt.cheeses).push_back(testCheese);
 
 	testCheese.age = 5;
-	testCheese.name = "!#¤%&/()=";
+	testCheese.name = "!#%&/()=?";
 	(extraAllt.cheeses).push_back(testCheese);
 
 	testCheese.age = 6;

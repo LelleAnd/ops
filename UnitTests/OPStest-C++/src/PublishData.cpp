@@ -9,8 +9,6 @@
 #ifndef _WIN32
 #include <time.h>
 
-
-
 int64_t getNow()
 {
     timespec ts;
@@ -49,19 +47,6 @@ int64_t getNow()
 }
 #endif
 
-template <class DataType>
-class CHelperListener
-{
-public:
-	virtual void onData(ops::Subscriber* sub, DataType* data) = 0;
-	virtual ~CHelperListener() {}
-  CHelperListener() {}
-  CHelperListener(const CHelperListener&) = delete;
-  CHelperListener(CHelperListener&&) = delete;
-  CHelperListener& operator=(const CHelperListener&) = delete;
-  CHelperListener& operator=(CHelperListener&&) = delete;
-};
-
 class IHelper
 {
 public:
@@ -70,32 +55,27 @@ public:
 	virtual void StartPublisher() = 0;
 	virtual void StopPublisher() = 0;
 	virtual void Write() = 0;
-	virtual void SetDeadlineQos(int64_t timeoutMs) = 0;
-	virtual ~IHelper() {};
-  IHelper() {}
-  IHelper(const IHelper&) = delete;
-  IHelper(IHelper&&) = delete;
-  IHelper& operator=(const IHelper&) = delete;
-  IHelper& operator=(IHelper&&) = delete;
+	virtual ~IHelper() = default;
+	IHelper() = default;
+	IHelper(const IHelper&) = delete;
+	IHelper(IHelper&&) = delete;
+	IHelper& operator=(const IHelper&) = delete;
+	IHelper& operator=(IHelper&&) = delete;
 };
 
-template <class DataType, class DataTypePublisher, class DataTypeSubscriber>
-class CHelper : public IHelper, ops::DataListener, ops::DeadlineMissedListener
+template <class DataType, class DataTypePublisher>
+class CHelper : public IHelper
 {
 public:
 	DataType data;
 
-	CHelper(CHelperListener<DataType>* client_):
-		client(client_), pub(nullptr), sub(nullptr), expectedPubId(-1)
-	{
-	}
+	CHelper() = default;
 
 	virtual ~CHelper()
 	{
 		DeletePublisher(false);
 	}
 
-	CHelper() = delete;
 	CHelper(const CHelper& r) = delete;
 	CHelper& operator= (const CHelper& l) = delete;
 	CHelper(CHelper&&) = delete;
@@ -166,51 +146,11 @@ public:
 		}
 	}
 
-	virtual void SetDeadlineQos(int64_t timeoutMs) override
-	{
-		if (sub != nullptr) {
-			std::cout << "Setting deadlineQos to " << timeoutMs << " [ms] for topic " << sub->getTopic().getName() << std::endl;
-			sub->setDeadline(std::chrono::milliseconds(timeoutMs));
-		} else {
-			std::cout << "Subscriber must be created first!!" << std::endl;
-		}
-	}
-
-	virtual void onNewData(ops::DataNotifier* subscriber) override
-	{
-		if(subscriber == sub)
-		{
-			// Check if we have lost any messages. We use the publicationID and that works as long as
-			// it is the same publisher sending us messages.
-			ops::OPSMessage* newMess = sub->getMessage();
-
-			if (expectedPubId >= 0) {
-				if (expectedPubId != newMess->getPublicationID()) {
-					std::cout << ">>>>> Lost message for topic " << sub->getTopic().getName() <<
-						". Exp.pubid: " << expectedPubId << " got: " << newMess->getPublicationID() << std::endl;
-				}
-			}
-			expectedPubId = newMess->getPublicationID() + 1;
-			client->onData(sub, (DataType*)newMess->getData());
-		}
-	}
-
-	virtual void onDeadlineMissed(ops::DeadlineMissedEvent* evt) override
-	{
-        UNUSED(evt)
-		std::cout << "Deadline Missed for topic " << sub->getTopic().getName() << std::endl;
-	}
-
 private:
-	CHelperListener<DataType>* client;
-	ops::Publisher* pub;
-	ops::Subscriber* sub;
-	int64_t expectedPubId;
+	ops::Publisher* pub{ nullptr };
 };
 
-typedef CHelper<pizza::PizzaData, pizza::PizzaDataPublisher, pizza::PizzaDataSubscriber> TPizzaHelper;
-typedef CHelper<pizza::VessuvioData, pizza::VessuvioDataPublisher, pizza::VessuvioDataSubscriber> TVessuvioHelper;
-typedef CHelper<pizza::special::ExtraAllt, pizza::special::ExtraAlltPublisher, pizza::special::ExtraAlltSubscriber> TExtraAlltHelper;
+typedef CHelper<pizza::special::ExtraAllt, pizza::special::ExtraAlltPublisher> TExtraAlltHelper;
 
 struct ItemInfo {
 	std::string Domain;
@@ -236,32 +176,9 @@ struct ItemInfo {
 
 std::vector<ItemInfo*> ItemInfoList;
 
-
-class MyListener :
-		public CHelperListener<pizza::VessuvioData>,
-		public CHelperListener<pizza::special::ExtraAllt>
+int main(const int , const char** )
 {
-public:
-	virtual void onData(ops::Subscriber* , pizza::special::ExtraAllt* ) override
-	{
-	}
-	virtual void onData(ops::Subscriber* , pizza::VessuvioData* ) override
-	{
-	}
-	MyListener() = default;
-	virtual ~MyListener() = default;
-	MyListener(const MyListener& r) = delete;
-	MyListener& operator= (const MyListener& l) = delete;
-	MyListener(MyListener&&) = delete;
-	MyListener& operator =(MyListener&&) = delete;
-};
-
-int main(const int argc, const char**argv)
-{
-	UNUSED(argc)
-	UNUSED(argv)
 	// --------------------------------------------------------------------
-	MyListener myListener;
 
 	ItemInfoList.push_back(new ItemInfo("PizzaDomain", "ExtraAlltTopic"	  , "pizza.special.ExtraAllt"));
 	ItemInfoList.push_back(new ItemInfo("PizzaDomain", "TcpExtraAlltTopic", "pizza.special.ExtraAllt"));
@@ -272,7 +189,6 @@ int main(const int argc, const char**argv)
 	ops::Participant::getStaticErrorService()->addListener(errorWriterStatic);
 
 	// Create participants
-	// NOTE that the second parameter (participantID) must be different for the two participant instances
 	ops::Participant* const participant = ops::Participant::getInstance("PizzaDomain", "PizzaDomain", "UnitTests/OPStest-C++/ops_config.xml");
 	if (participant == nullptr) {
 	    std::cout << "Failed to create Participant. Missing ops_config.xml ??" << std::endl;
@@ -280,22 +196,9 @@ int main(const int argc, const char**argv)
 	}
 	participant->addTypeSupport(new PizzaProject::PizzaProjectTypeFactory());
 
-	ops::Participant* const otherParticipant = ops::Participant::getInstance("OtherPizzaDomain", "OtherPizzaDomain", "UnitTests/OPStest-C++/ops_config.xml");
-	if (otherParticipant == nullptr) {
-		std::cout << "Failed to create Participant. Missing ops_config.xml ??" << std::endl;
-        exit(-1);
-	}
-	otherParticipant->addTypeSupport(new PizzaProject::PizzaProjectTypeFactory());
-
 	// Add error writers to catch internal ops errors
 	ops::ErrorWriter* errorWriter = new ops::ErrorWriter(std::cout);
 	participant->getErrorService()->addListener(errorWriter);
-
-	ops::ErrorWriter* errorWriter2 = new ops::ErrorWriter(std::cout);
-	otherParticipant->getErrorService()->addListener(errorWriter2);
-
-
-
 
 	//init pizza data to be sent
 
@@ -317,25 +220,27 @@ int main(const int argc, const char**argv)
 	pizza::special::ExtraAllt extraAlltLargeUDP;
 	init::initExtraAlltLargeUDP(extraAlltLargeUDP);
 
-	TExtraAlltHelper* hlpExtra = nullptr;
-
-
 	// Finish up our ItemInfo's
 	for(unsigned int i = 0; i < ItemInfoList.size(); ++i) {
 		ItemInfo* const itemInfo = ItemInfoList[i];
-		itemInfo->helper = new TExtraAlltHelper(&myListener);
+		itemInfo->helper = new TExtraAlltHelper();
 
 		itemInfo->part = participant;
 		itemInfo->selected = true;
 
 		itemInfo->helper->CreatePublisher(itemInfo->part, itemInfo->TopicName);
 		itemInfo->helper->StartPublisher();
+	}
+
+	// Send data
+	for(unsigned int i = 0; i < ItemInfoList.size(); ++i) {
+		ItemInfo* const itemInfo = ItemInfoList[i];
 
 		if (i == 0) { std::cout << "skickar extra allt" << std::endl; }
 		else if (i == 1) { std::cout << "skickar extra allt TCP" << std::endl; }
 		else if (i == 2) { std::cout << "skickar extra allt UDP" << std::endl; }
 
-		hlpExtra = (TExtraAlltHelper*)itemInfo->helper;
+		TExtraAlltHelper* hlpExtra = (TExtraAlltHelper*)itemInfo->helper;
 		if (i == 0) { hlpExtra->data = extraAlltNormal; }
 		else if (i == 1) { hlpExtra->data = extraAlltNormalTCP; }
 		else if (i == 2) { hlpExtra->data = extraAlltNormalUDP; }
@@ -358,7 +263,6 @@ int main(const int argc, const char**argv)
 		if (i == 0) { hlpExtra->data = extraAlltNormal; }
 		else if (i == 1) { hlpExtra->data = extraAlltNormalTCP; }
 		else if (i == 2) { hlpExtra->data = extraAlltNormalUDP; }
-
 
 		std::cout << "should write 3-12 data" << std::endl;
 		for(int j = 0 ; j < 10; ++j){
@@ -389,9 +293,8 @@ int main(const int argc, const char**argv)
 	}
 
 	participant->getErrorService()->removeListener(errorWriter);
-	otherParticipant->getErrorService()->removeListener(errorWriter2);
 	delete errorWriter; errorWriter = nullptr;
-	delete errorWriter2; errorWriter2 = nullptr;
+
 	///TODO this should be done by asking Participant to delete instances??
 	delete participant;
 }

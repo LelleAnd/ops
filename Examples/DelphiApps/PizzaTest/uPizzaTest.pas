@@ -143,9 +143,14 @@ uses
   uOps.OPSConfig,
   uOps.OPSConfigRepository,
   uOps.NetworkSupport,
+  uOps.Version,
   PizzaProject.PizzaProjectTypeFactory;
 
 {$R *.dfm}
+
+{$IF OPS_VERSION_NUMBER > 40306}
+  /// test of version number
+{$ENDIF}
 
 constructor TItemInfo.Create(dom, top, typ : string);
 begin
@@ -896,6 +901,7 @@ procedure TForm1.FormShow(Sender: TObject);
 begin
   Memo1.Clear;
   UpdateListbox;
+  Memo1.Lines.Add('OPS Version: ' + uOps.Version.OPS_VERSION);
 end;
 
 procedure TForm1.WriteToAllSelected;

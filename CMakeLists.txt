@@ -378,6 +378,9 @@ add_subdirectory(Common)
 
 # common parts
 if((OPS_BOOTSTRAP_BUILD) OR (DEFINED OPS_NO_SEPARATE_BOOTSTRAP))
+  # Configure version file for Delphi
+  add_subdirectory(Delphi)
+
   # recurse into java source
   # We only build Java during the Bootstrap phase, since it is needed during
   # bootstrap and there isn't any difference between debug and opt builds

@@ -76,7 +76,8 @@ uses
   opsidls.DebugRequestResponseData in '..\..\..\Common\idl\Generated\Delphi\opsidls\opsidls.DebugRequestResponseData.pas',
   opsidls.opsidlsTypeFactory in '..\..\..\Common\idl\Generated\Delphi\opsidls\opsidls.opsidlsTypeFactory.pas',
   pizza.extra.Secret in '..\..\OPSIdls\PizzaProject\Generated\Delphi\pizza\extra\pizza.extra.Secret.pas',
-  uOps.Transport.ReceiveDataChannel in '..\..\..\Delphi\Source\Transport\uOps.Transport.ReceiveDataChannel.pas';
+  uOps.Transport.ReceiveDataChannel in '..\..\..\Delphi\Source\Transport\uOps.Transport.ReceiveDataChannel.pas',
+  uOps.Version in '..\..\..\Delphi\Source\uOps.Version.pas';
 
 {$R *.res}
 

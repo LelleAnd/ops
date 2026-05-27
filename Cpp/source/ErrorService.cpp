@@ -11,7 +11,7 @@ namespace ops
         notifyNewEvent(error);
     }
 
-    void ErrorService::report(ErrorMessage_T const className, ErrorMessage_T const methodName, ErrorMessage_T const errorMessage, Error::Severity_T const severity)
+    void ErrorService::report(const ErrorMessage_T& className, const ErrorMessage_T& methodName, const ErrorMessage_T& errorMessage, const Error::Severity_T severity)
     {
 		if (severity == Error::warning) {
 			BasicWarning error(className, methodName, errorMessage);

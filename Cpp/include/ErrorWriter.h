@@ -3,9 +3,10 @@
 
 #include <string>
 #include <ostream>
+
 #include "OPSTypeDefs.h"
 #include "Listener.h"
-#include <Error.h>
+#include "Error.h"
 #include "TimeHelper.h"
 
 namespace ops
@@ -15,7 +16,7 @@ namespace ops
 	{
 	public:
 		ErrorWriter(std::ostream& os) : oStream(os) {}
-		virtual ~ErrorWriter() {}
+		virtual ~ErrorWriter() = default;
 
 		void onNewEvent(Notifier<Error*>* notifier, Error* error) override
 		{

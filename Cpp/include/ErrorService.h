@@ -1,6 +1,8 @@
 #ifndef ops_ErrorService_h
 #define ops_ErrorService_h
 
+#include "OPSTypeDefs.h"
+
 #include "Error.h"
 #include "Notifier.h"
 
@@ -10,7 +12,7 @@ namespace ops
 	{
 	public:
 		void report(Error* error);
-		void report(ErrorMessage_T className, ErrorMessage_T methodName, ErrorMessage_T errorMessage, Error::Severity_T severity = Error::error);
+		void report(const ErrorMessage_T& className, const ErrorMessage_T& methodName, const ErrorMessage_T& errorMessage, const Error::Severity_T severity = Error::error);
 	};
 }
 #endif
